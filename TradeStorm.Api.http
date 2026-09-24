@@ -1,6 +1,51 @@
 @TradeStorm.Api_HostAddress = http://localhost:5137
 
-GET {{TradeStorm.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{TradeStorm.Api_HostAddress}}/api/categories
+Content-Type: application/json
+
+{
+  "name": "Електроніка"
+}
 
 ###
+
+POST {{TradeStorm.Api_HostAddress}}/api/categories
+Content-Type: application/json
+
+{
+  "name": "Навчальні матеріали"
+}
+
+###
+
+GET {{TradeStorm.Api_HostAddress}}/api/categories
+Accept: application/json
+
+### Створення студента
+
+POST {{TradeStorm.Api_HostAddress}}/api/users
+Content-Type: application/json
+
+{
+  "email": "zhidenko@khta.edu.ua",
+  "password": "securepassword123",
+  "group": "КН-41Ф"
+}
+
+### Створення оголошення
+
+POST {{TradeStorm.Api_HostAddress}}/api/listings
+Content-Type: application/json
+
+{
+  "title": "Синтезатор MK-2089",
+  "description": "Стан ідеальний, майже не користувався.",
+  "price": 1500.00,
+  "categoryId": 1,
+  "sellerId": 1
+}
+
+### Перегляд оголошень (з пагінацією та підтягуванням зв'язків)
+
+GET {{TradeStorm.Api_HostAddress}}/api/listings?page=1&pageSize=5
+Accept: application/json
