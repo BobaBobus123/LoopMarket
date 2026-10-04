@@ -1,0 +1,1118 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loop Market | Студентський маркетплейс</title>
+
+    <script>
+                const savedTheme = localStorage.getItem('loopTheme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+
+    <style>
+        :root {
+            --primary: #002f34;
+            --primary-light: #10b981;
+            --surface: #ffffff;
+            --bg-color: #f2f4f5;
+            --text-main: #002f34;
+            --text-muted: #707e82;
+            --border-color: #d8dfe0;
+            --trust-bg: #e8eff1;
+        }
+
+        [data-theme="dark"] {
+            --primary: #f8fafc;
+            --primary-light: #10b981;
+            --surface: #1e293b;
+            --bg-color: #0f172a;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --trust-bg: #1e293b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body, header, footer, .card, .sidebar, .search-input, .trust-banner, .category-item, .nav-pill {
+            transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* УНІВЕРСАЛЬНИЙ ХЕДЕР */
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.8rem 4%;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            justify-self: start;
+        }
+
+        .top-nav {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+            .top-nav a {
+                color: var(--text-main);
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 0.9rem;
+                padding: 7px 12px;
+                background: var(--bg-color);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                transition: 0.2s;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+                .top-nav a:hover, .top-nav a.active {
+                    border-color: var(--primary-light);
+                    color: var(--primary-light);
+                    background: rgba(16, 185, 129, 0.05);
+                }
+
+        .header-center {
+            justify-self: center;
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-self: end;
+            position: relative;
+        }
+
+        .nav-pill {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+            .nav-pill:hover {
+                border-color: var(--primary-light);
+                color: var(--primary-light);
+            }
+
+        .profile-highlight {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--primary-light);
+            color: var(--primary-light);
+            font-weight: 700;
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-logout-header {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+            .btn-logout-header:hover {
+                border-color: #ef4444;
+                color: #ef4444;
+                background: rgba(239, 68, 68, 0.05);
+            }
+
+        .btn-primary {
+            background: var(--primary-light);
+            color: white;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+            .btn-primary:hover {
+                background: #059669;
+                transform: translateY(-1px);
+            }
+
+        .theme-toggle-corner {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            font-size: 1.1rem;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            margin-left: 5px;
+        }
+
+            .theme-toggle-corner:hover {
+                border-color: var(--primary-light);
+            }
+
+        /* Выпадающее окно уведомлений */
+        .notifications-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            width: 320px;
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+            .notifications-dropdown.active {
+                display: flex;
+            }
+
+        .notif-header {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notif-body {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .notif-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-main);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            background: var(--surface);
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+            .notif-item:hover {
+                background: var(--bg-color);
+            }
+
+            .notif-item.unread {
+                background: rgba(16, 185, 129, 0.05);
+            }
+
+        /* Модальное окно выхода */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+        }
+
+            .modal-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+        .modal-box {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            transform: translateY(20px);
+            transition: 0.3s;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: translateY(0);
+        }
+
+        .modal-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .modal-text {
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            background: transparent;
+            color: var(--text-main);
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            .btn-cancel:hover {
+                background: var(--bg-color);
+            }
+
+        .btn-confirm-logout {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: #ef4444;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+            .btn-confirm-logout:hover {
+                background: #dc2626;
+                transform: translateY(-1px);
+            }
+
+        .trust-banner {
+            background: var(--trust-bg);
+            padding: 12px 5%;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-main);
+            flex-wrap: wrap;
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 360px 1fr; /* Зробили ліву колонкy ширшою */
+            gap: 30px;
+            padding: 2.5rem 2.5rem; /* Зменшили бокові відступи сторінки, щоб дати більше простору */
+            max-width: 1700px; /* Збільшили загальну максимальну ширину */
+            margin: 0 auto;
+            flex-grow: 1;
+            width: 100%;
+            align-items: start;
+        }
+
+        /* УЛУЧШЕННЫЙ И РАСШИРЕННЫЙ САЙДБАР */
+        .sidebar {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid var(--border-color);
+            position: sticky;
+            top: 90px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        }
+
+            .sidebar h3 {
+                font-size: 0.95rem;
+                margin-bottom: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+                font-weight: 800;
+                color: var(--text-muted);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+        .filter-section {
+            margin-bottom: 22px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+            .filter-section:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+                padding-bottom: 0;
+            }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 22px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            background: var(--bg-color);
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+            .search-input:focus {
+                border-color: var(--primary-light);
+                background: var(--surface);
+                box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+            }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .price-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+            .price-inputs .search-input {
+                padding: 12px 14px;
+                font-size: 0.95rem;
+            }
+
+        select.search-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+            cursor: pointer;
+        }
+
+        .category-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+            .category-list::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .category-list::-webkit-scrollbar-thumb {
+                background: var(--border-color);
+                border-radius: 4px;
+            }
+
+        .category-item {
+            padding: 11px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.2s;
+        }
+
+            .category-item:hover {
+                background: var(--bg-color);
+                color: var(--primary-light);
+                transform: translateX(3px);
+            }
+
+            .category-item.active {
+                background: var(--primary-light);
+                color: white;
+                font-weight: 700;
+                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+            }
+
+        .vip-section {
+            margin-bottom: 40px;
+        }
+
+        .vip-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .vip-badge {
+            background: #fbbf24;
+            color: #78350f;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+
+        .vip-carousel {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+        }
+
+            .vip-carousel::-webkit-scrollbar {
+                display: none;
+            }
+
+            .vip-carousel .card {
+                min-width: 280px;
+                border: 2px solid #fbbf24;
+            }
+
+        h2.section-title {
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+
+        .listings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            transition: 0.3s;
+        }
+
+            .card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+                border-color: var(--primary-light);
+            }
+
+        .card-img-wrapper {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            height: 180px;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background-color: var(--bg-color);
+            cursor: pointer;
+        }
+
+        .btn-fav {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--surface);
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .card-content {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            font-weight: 400;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            color: var(--text-main);
+        }
+
+        .card-price {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+
+        .card-footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .btn-view {
+            text-decoration: none;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+            .btn-view:hover {
+                border-color: var(--primary-light);
+                color: var(--primary-light);
+            }
+
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border-color);
+            padding: 40px 5% 20px;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+
+        .footer-col h4 {
+            margin-bottom: 15px;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .footer-col a {
+            display: block;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+            .footer-col a:hover {
+                color: var(--primary-light);
+                text-decoration: underline;
+            }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 992px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <nav class="top-nav">
+                <a href="/index.html#vip" id="navHot">🔥 Гаряче</a>
+                <a href="/profile.html#favorites" id="navFav">❤️ Обране</a>
+                <a href="/messages.html" id="navChat">💬 Чати</a>
+                <a href="/safety.html" id="navSafety">🛡️ Безпека</a>
+            </nav>
+        </div>
+
+        <div class="header-center">
+            <a href="/index.html" class="logo-link">
+                <svg width="190" height="42" viewBox="0 0 210 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M38 12C28.0589 12 20 20.0589 20 30C20 39.9411 28.0589 48 38 48C47.9411 48 56 39.9411 56 30C56 24.5 53.5 19.5 49.5 16L32.5 33" stroke="#10B981" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M22 38C12.0589 38 4 29.9411 4 20C4 10.0589 12.0589 2 22 2C31.9411 2 40 10.0589 40 20C40 25.5 37.5 30.5 33.5 34L16.5 17" stroke="#10B981" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+                    <text x="68" y="37" fill="var(--text-main)" font-family="'Segoe UI', system-ui, sans-serif" font-size="34" font-weight="800" letter-spacing="-0.8px">Market</text>
+                </svg>
+            </a>
+        </div>
+
+        <div class="header-right">
+            <div id="dynamicIcons" class="header-icons"></div>
+            <div class="header-buttons" id="headerButtons"></div>
+
+            <button class="theme-toggle-corner" id="themeToggleBtn" aria-label="Змінити тему" title="Змінити тему">
+                <span id="themeIcon">🌙</span>
+            </button>
+
+            <div class="notifications-dropdown" id="notifDropdown">
+                <div class="notif-header">
+                    <span>Сповіщення</span>
+                    <span style="font-size: 0.8rem; color: var(--primary-light); cursor: pointer;" onclick="clearNotifications()">Позначити прочитаними</span>
+                </div>
+                <div class="notif-body" id="notifList">
+                    <p style="padding: 15px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Завантаження...</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="trust-banner">
+        <div class="trust-item"><span>🛡️</span> Тільки перевірені студенти</div>
+        <div class="trust-item"><span>🤝</span> Безпечні зустрічі на кампусі</div>
+        <div class="trust-item"><span>⚡</span> Швидка модерація 24/7</div>
+    </div>
+
+    <div class="main-layout">
+        <aside class="sidebar">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Пошук оголошень...">
+            </div>
+
+            <!-- Блок фильтра цен -->
+            <div class="filter-section">
+                <h3>💵 Ціна (₴)</h3>
+                <div class="price-inputs">
+                    <input type="number" id="minPrice" class="search-input" placeholder="Від" min="0">
+                    <input type="number" id="maxPrice" class="search-input" placeholder="До" min="0">
+                </div>
+            </div>
+
+            <!-- Блок фильтра состояния -->
+            <div class="filter-section">
+                <h3>✨ Стан товару</h3>
+                <select id="conditionFilter" class="search-input">
+                    <option value="">Будь-який стан</option>
+                    <option value="Нове">Нове</option>
+                    <option value="Вживане">Вживане</option>
+                </select>
+            </div>
+
+            <!-- Блок категорий -->
+            <div class="filter-section">
+                <h3>📂 Категорії</h3>
+                <ul class="category-list" id="categoryList">
+                    <li class="category-item active" onclick="filterByCategory(null, this)">Всі оголошення</li>
+                </ul>
+            </div>
+        </aside>
+
+        <main style="padding: 0; max-width: 100%;">
+            <div class="vip-section" id="vipSection" style="display: none;">
+                <div class="vip-title">Топ-оголошення <span class="vip-badge">VIP</span></div>
+                <div class="vip-carousel" id="vipCarousel"></div>
+            </div>
+
+            <h2 class="section-title" id="gridTitle">Свіжі оголошення</h2>
+            <div class="listings-grid" id="listingsContainer">
+                <p style="grid-column: 1 / -1; text-align: center; color: var(--text-muted);">Завантаження...</p>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-col"><h4>Про Loop Market</h4><a href="/about.html">Про проєкт</a><a href="#">Як це працює</a></div>
+            <div class="footer-col"><h4>Безпека</h4><a href="/safety.html" style="color: var(--primary-light); font-weight: bold;">Правила безпеки</a><a href="/terms.html">Умови використання</a></div>
+            <div class="footer-col"><h4>Підтримка</h4><a href="#">Telegram-канал</a><a href="#">Instagram</a></div>
+        </div>
+        <div class="footer-bottom">© 2026 Loop Market. Створено для студентів.</div>
+    </footer>
+
+    <!-- Модальное окно выхода -->
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal-box">
+            <div class="modal-icon">👋</div>
+            <h3 class="modal-title">Вихід з акаунта</h3>
+            <p class="modal-text">Ви дійсно хочете вийти зі свого профілю? Вам доведеться авторизуватися знову.</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeLogoutModal()">Скасувати</button>
+                <button class="btn-confirm-logout" onclick="confirmLogoutAction()">Вийти</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+                function updateThemeButton(theme) {
+                    const iconEl = document.getElementById('themeIcon');
+                    if (iconEl) iconEl.innerText = (theme === 'dark') ? '☀️' : '🌙';
+                }
+                updateThemeButton(localStorage.getItem('loopTheme') || 'light');
+
+                document.getElementById('themeToggleBtn').addEventListener('click', () => {
+                    const currentTheme = document.documentElement.getAttribute('data-theme');
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('loopTheme', newTheme);
+                    updateThemeButton(newTheme);
+                });
+
+                function parseJwt(token) { try { return JSON.parse(decodeURIComponent(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''))); } catch (e) { return null; } }
+
+                const token = localStorage.getItem('loopToken');
+                const headerBtns = document.getElementById('headerButtons');
+                const dynamicIcons = document.getElementById('dynamicIcons');
+
+                if (token) {
+                    const user = parseJwt(token);
+                    const userName = user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "Студент";
+
+                    dynamicIcons.innerHTML = `
+                        <button class="nav-pill" id="notifBtn" onclick="toggleNotifications()">
+                            🔔 Сповіщення <span style="background: #ef4444; color: white; font-size: 0.65rem; padding: 1px 5px; border-radius: 10px; font-weight: bold; display:none;" id="globalUnreadBadge">0</span>
+                        </button>
+                    `;
+
+                    headerBtns.innerHTML = `
+                        <a href="/profile.html" class="nav-pill profile-highlight" title="Мій профіль">👤 ${userName}</a>
+                        <button class="btn-logout-header" onclick="showLogoutModal()">Вийти</button>
+                        <a href="/create.html" class="btn-primary">+ Додати оголошення</a>
+                    `;
+                } else {
+                    dynamicIcons.innerHTML = ``;
+                    headerBtns.innerHTML = `
+                        <a href="/login.html" class="nav-pill" style="text-decoration: none;">Увійти</a>
+                        <a href="/create.html" class="btn-primary">+ Додати оголошення</a>
+                    `;
+                }
+
+                function toggleNotifications() {
+                    const dropdown = document.getElementById('notifDropdown');
+                    dropdown.classList.toggle('active');
+                    if (dropdown.classList.contains('active')) {
+                        loadNotifications();
+                    }
+                }
+
+                async function loadNotifications() {
+                    if (!token) return;
+                    try {
+                        const res = await fetch('/api/notifications', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (res.ok) {
+                            const notifs = await res.json();
+                            renderNotifications(notifs);
+                        }
+                    } catch (err) {
+                        console.error("Помилка завантаження сповіщень", err);
+                    }
+                }
+
+                function renderNotifications(notifs) {
+                    const listContainer = document.getElementById('notifList');
+                    const badge = document.getElementById('globalUnreadBadge');
+
+                    if (!listContainer) return;
+
+                    const unreadCount = notifs.filter(n => !n.isRead).length;
+                    if (badge) {
+                        if (unreadCount > 0) {
+                            badge.innerText = unreadCount;
+                            badge.style.display = 'inline-block';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+
+                    if (notifs.length === 0) {
+                        listContainer.innerHTML = `<p style="padding: 15px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Нових сповіщень немає</p>`;
+                        return;
+                    }
+
+                    listContainer.innerHTML = notifs.map(n => `
+                        <a href="${n.link || '#'}" class="notif-item ${n.isRead ? '' : 'unread'}">
+                            <span>💬</span>
+                            <div>
+                                <b>${n.title}</b>
+                                <p style="font-size: 0.8rem; color: var(--text-muted);">${n.message}</p>
+                            </div>
+                        </a>
+                    `).join('');
+                }
+
+                async function clearNotifications() {
+                    if (!token) return;
+                    try {
+                        await fetch('/api/notifications/mark-read', {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        loadNotifications();
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }
+
+                window.addEventListener('click', function(e) {
+                    const dropdown = document.getElementById('notifDropdown');
+                    const btn = document.getElementById('notifBtn');
+                    if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+                        dropdown.classList.remove('active');
+                    }
+                });
+
+                function showLogoutModal() { document.getElementById('logoutModal').classList.add('active'); }
+                function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('active'); }
+                function confirmLogoutAction() {
+                    localStorage.removeItem('loopToken');
+                    window.location.reload();
+                }
+
+                if (token) {
+                    loadNotifications();
+                    setInterval(loadNotifications, 15000);
+                }
+
+                let allListings = [];
+                let selectedCategoryName = null;
+
+                function getFavorites() { return JSON.parse(localStorage.getItem('loopFavorites') || '[]'); }
+
+                window.toggleFavorite = function (id, event) {
+                    if (event) {
+                        event.stopPropagation();
+                        event.preventDefault();
+                    }
+                    let favs = getFavorites();
+                    const isFav = favs.includes(id);
+
+                    if (isFav) {
+                        favs = favs.filter(f => f !== id);
+                    } else {
+                        favs.push(id);
+                    }
+                    localStorage.setItem('loopFavorites', JSON.stringify(favs));
+
+                    if (event && event.currentTarget) {
+                        event.currentTarget.innerHTML = isFav ? '🤍' : '❤️';
+                    }
+                };
+
+                async function loadCategories() {
+                    try {
+                        const res = await fetch('/api/listings/categories');
+                        const categories = await res.json();
+                        const list = document.getElementById('categoryList');
+                        categories.forEach(c => {
+                            list.innerHTML += `<li class="category-item" onclick="filterByCategory('${c.name}', this)">${c.name}</li>`;
+                        });
+                    } catch (e) { }
+                }
+
+                function createCardHtml(item, delayIndex) {
+                    const imgUrl = item.imageUrl ? item.imageUrl : 'https://placehold.co/600x400/e2e8f0/64748b?text=Немає+фото';
+                    const locationText = item.location ? item.location.split(',')[0] : 'Кременчук';
+
+                    const isFav = getFavorites().includes(item.id);
+                    const favIcon = isFav ? '❤️' : '🤍';
+
+                    return `
+                        <div class="card" style="animation-delay: ${delayIndex * 0.05}s;">
+                            <div class="card-img-wrapper">
+                                <img src="${imgUrl}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'">
+                                <button onclick="toggleFavorite(${item.id}, event)" class="btn-fav" title="Додати в обране">${favIcon}</button>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-title">${item.title}</div>
+                                <div class="card-price">${item.price} ₴</div>
+                                <div class="card-footer">
+                                    <span>📍 ${locationText}</span>
+                                    <a href="/details.html?id=${item.id}" class="btn-view">Огляд</a>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+
+                async function loadListings() {
+                    try {
+                        const response = await fetch('/api/listings');
+                        const data = await response.json();
+                        allListings = data.listings;
+
+                        applyFilters();
+
+                        if (allListings.length > 0) {
+                            document.getElementById('vipSection').style.display = 'block';
+                            const vipCarousel = document.getElementById('vipCarousel');
+                            const vipItems = [...allListings].sort(() => 0.5 - Math.random()).slice(0, 4);
+                            vipCarousel.innerHTML = vipItems.map((item, index) => createCardHtml(item, index)).join('');
+                        }
+                    } catch (error) {
+                        document.getElementById('listingsContainer').innerHTML = '<p style="color: #ef4444; font-weight: bold;">Помилка завантаження.</p>';
+                    }
+                }
+
+                function applyFilters() {
+                    const query = document.getElementById('searchInput').value.toLowerCase().trim();
+                    const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+                    const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+                    const condition = document.getElementById('conditionFilter').value;
+
+                    const filtered = allListings.filter(item => {
+                        const matchesSearch = !query || item.title.toLowerCase().includes(query) || (item.description && item.description.toLowerCase().includes(query));
+                        const matchesCategory = !selectedCategoryName || item.categoryName === selectedCategoryName;
+                        const matchesPrice = item.price >= minPrice && item.price <= maxPrice;
+                        const matchesCondition = !condition || item.condition === condition;
+
+                        return matchesSearch && matchesCategory && matchesPrice && matchesCondition;
+                    });
+
+                    const container = document.getElementById('listingsContainer');
+                    if (filtered.length === 0) {
+                        container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted); background: var(--surface); border-radius: 8px; border: 1px solid var(--border-color);">Нічого не знайдено 😢</p>';
+                    } else {
+                        container.innerHTML = filtered.map((item, index) => createCardHtml(item, index)).join('');
+                    }
+
+                    document.getElementById('gridTitle').innerText = selectedCategoryName || (query ? `Знайдено: ${filtered.length}` : "Свіжі оголошення");
+
+                    const isAnyFilterActive = query || selectedCategoryName || document.getElementById('minPrice').value || document.getElementById('maxPrice').value || condition;
+
+                    if (!isAnyFilterActive && allListings.length > 0) {
+                        document.getElementById('vipSection').style.display = 'block';
+                        const vipCarousel = document.getElementById('vipCarousel');
+                        const vipItems = [...allListings].sort(() => 0.5 - Math.random()).slice(0, 4);
+                        vipCarousel.innerHTML = vipItems.map((item, index) => createCardHtml(item, index)).join('');
+                    } else {
+                        document.getElementById('vipSection').style.display = 'none';
+                    }
+                }
+
+                document.getElementById('searchInput').addEventListener('input', applyFilters);
+                document.getElementById('minPrice').addEventListener('input', applyFilters);
+                document.getElementById('maxPrice').addEventListener('input', applyFilters);
+                document.getElementById('conditionFilter').addEventListener('change', applyFilters);
+
+                window.filterByCategory = function (categoryName, element) {
+                    document.querySelectorAll('.category-item').forEach(el => el.classList.remove('active'));
+                    element.classList.add('active');
+                    selectedCategoryName = categoryName;
+                    applyFilters();
+                }
+
+                loadCategories();
+                loadListings();
+    </script>
+</body>
+</html>

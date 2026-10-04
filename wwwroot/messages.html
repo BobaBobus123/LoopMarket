@@ -1,0 +1,1831 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Повідомлення | Loop Market</title>
+
+    <script>
+                const savedTheme = localStorage.getItem('loopTheme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+
+    <style>
+        :root {
+            --primary: #002f34;
+            --primary-light: #10b981;
+            --surface: #ffffff;
+            --bg-color: #f2f4f5;
+            --text-main: #002f34;
+            --text-muted: #707e82;
+            --border-color: #d8dfe0;
+            --bubble-sent: #0d9488;
+            --bubble-received: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --primary: #f8fafc;
+            --primary-light: #10b981;
+            --surface: #1e293b;
+            --bg-color: #0b0f19;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --bubble-sent: #0d9488;
+            --bubble-received: #1e293b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body, header, footer, .side-card, .sidebar, .chat-window, .messages-area, .message-input-bar, .nav-pill {
+            transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            font-size: 16px;
+        }
+
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.8rem 4%;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            justify-self: start;
+        }
+
+        .top-nav {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+            .top-nav a {
+                color: var(--text-main);
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 0.9rem;
+                padding: 7px 12px;
+                background: var(--bg-color);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                transition: 0.2s;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+                .top-nav a:hover, .top-nav a.active {
+                    border-color: var(--primary-light);
+                    color: var(--primary-light);
+                    background: rgba(16, 185, 129, 0.05);
+                }
+
+        .header-center {
+            justify-self: center;
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-self: end;
+            position: relative;
+        }
+
+        .nav-pill {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+            position: relative;
+        }
+
+            .nav-pill:hover {
+                border-color: var(--primary-light);
+                color: var(--primary-light);
+            }
+
+        .profile-highlight {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--primary-light);
+            color: var(--primary-light);
+            font-weight: 700;
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-logout-header {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+            .btn-logout-header:hover {
+                border-color: #ef4444;
+                color: #ef4444;
+                background: rgba(239, 68, 68, 0.05);
+            }
+
+        .btn-primary {
+            background: var(--primary-light);
+            color: white;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+            .btn-primary:hover {
+                background: #059669;
+                transform: translateY(-1px);
+            }
+
+        .theme-toggle-corner {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            font-size: 1.1rem;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            margin-left: 5px;
+        }
+
+            .theme-toggle-corner:hover {
+                border-color: var(--primary-light);
+            }
+
+        .notifications-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            width: 320px;
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+            .notifications-dropdown.active {
+                display: flex;
+            }
+
+        .notif-header {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notif-body {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .notif-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-main);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            background: var(--surface);
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+            .notif-item:hover {
+                background: var(--bg-color);
+            }
+
+            .notif-item.unread {
+                background: rgba(16, 185, 129, 0.05);
+            }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+        }
+
+            .modal-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+        .modal-box {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            transform: translateY(20px);
+            transition: 0.3s;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: translateY(0);
+        }
+
+        .modal-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .modal-text {
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            background: transparent;
+            color: var(--text-main);
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            .btn-cancel:hover {
+                background: var(--bg-color);
+            }
+
+        .btn-confirm-logout {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: #ef4444;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+            .btn-confirm-logout:hover {
+                background: #dc2626;
+                transform: translateY(-1px);
+            }
+
+        main {
+            padding: 15px 2%;
+            max-width: 1850px;
+            margin: 0 auto;
+            flex-grow: 1;
+            width: 100%;
+            height: calc(100vh - 85px);
+            min-height: 0;
+        }
+
+        .page-container {
+            display: grid;
+            grid-template-columns: 290px 1fr 310px;
+            gap: 15px;
+            height: 100%;
+            width: 100%;
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+            .side-panel::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .side-panel::-webkit-scrollbar-thumb {
+                background: var(--border-color);
+                border-radius: 4px;
+            }
+
+        .side-card {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+            .side-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 4px;
+                height: 100%;
+                background: var(--primary-light);
+            }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .college-card {
+            background: linear-gradient(135deg, #0f172a, #004d55);
+            color: white;
+            text-align: center;
+            justify-content: center;
+        }
+
+            .college-card::before {
+                display: none;
+            }
+
+        .college-logo-img {
+            width: 55px;
+            height: 55px;
+            object-fit: contain;
+            background: white;
+            border-radius: 50%;
+            padding: 5px;
+            margin: 0 auto 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .college-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 8px;
+            background: var(--primary-light);
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+            .college-btn:hover {
+                background: #059669;
+            }
+
+        .time-card {
+            text-align: center;
+            background: var(--surface);
+            justify-content: center;
+        }
+
+        .clock-display {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--primary-light);
+            letter-spacing: 1px;
+            margin: 6px 0;
+        }
+
+        .date-display {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .quick-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .quick-link-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            transition: 0.2s;
+            width: 100%;
+        }
+
+            .quick-link-item:hover {
+                background: rgba(16, 185, 129, 0.15);
+                border-color: var(--primary-light);
+                color: var(--primary-light);
+                transform: translateX(3px);
+            }
+
+        .center-wrapper {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            background: var(--surface);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            height: 100%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            grid-column: 2;
+            min-height: 0;
+        }
+
+        .sidebar {
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            height: 100%;
+            min-height: 0;
+        }
+
+        .sidebar-header {
+            padding: 18px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+            .sidebar-header h2 {
+                font-size: 1.25rem;
+                font-weight: 700;
+                margin-bottom: 12px;
+            }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            outline: none;
+            transition: 0.2s;
+        }
+
+            .search-input:focus {
+                border-color: var(--primary-light);
+            }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 11px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .dialogs-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            height: 0;
+        }
+
+            .dialogs-list::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .dialogs-list::-webkit-scrollbar-thumb {
+                background: var(--border-color);
+                border-radius: 4px;
+            }
+
+        .dialog-item {
+            display: flex;
+            gap: 12px;
+            padding: 14px 18px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            transition: 0.2s;
+        }
+
+            .dialog-item:hover {
+                background: var(--bg-color);
+            }
+
+            .dialog-item.active {
+                background: rgba(16, 185, 129, 0.15);
+                border-left: 4px solid var(--primary-light);
+            }
+
+        .dialog-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+            .dialog-avatar img {
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+
+        .online-dot {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border: 2px solid var(--surface);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            z-index: 2;
+        }
+
+        .dialog-info {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .dialog-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+
+        .dialog-name {
+            font-weight: 700;
+            font-size: 0.98rem;
+            color: var(--text-main);
+        }
+
+        .dialog-time {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .dialog-last-msg {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-window {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-color);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 14px 20px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .chat-partner-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-partner-name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--text-main);
+        }
+
+        .chat-partner-status {
+            font-size: 0.8rem;
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .chat-partner-status::before {
+                content: '';
+                width: 7px;
+                height: 7px;
+                background: #10b981;
+                border-radius: 50%;
+                display: inline-block;
+            }
+
+        .msg-counter-badge {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-left: 8px;
+            font-weight: normal;
+        }
+
+        .chat-header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-delete-chat {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            font-weight: bold;
+            display: none;
+        }
+
+            .btn-delete-chat:hover {
+                background: #ef4444;
+                color: white;
+            }
+
+        .chat-product-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-color);
+            padding: 6px 14px 6px 6px;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+            .chat-product-badge:hover {
+                border-color: var(--primary-light);
+                transform: translateY(-1px);
+            }
+
+        .chat-product-img {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .chat-product-meta {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-product-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-main);
+            max-width: 160px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-product-cost {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--primary-light);
+        }
+
+        .messages-area {
+            flex-grow: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+            background-size: 24px 24px;
+            min-height: 0;
+        }
+
+            .messages-area::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .messages-area::-webkit-scrollbar-thumb {
+                background: var(--border-color);
+                border-radius: 4px;
+            }
+
+        @keyframes messageAppear {
+            from {
+                opacity: 0;
+                transform: translateY(8px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .msg-bubble {
+            max-width: 65%;
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 0.98rem;
+            line-height: 1.45;
+            position: relative;
+            animation: messageAppear 0.2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .msg-received {
+            background: var(--surface);
+            color: var(--text-main);
+            align-self: flex-start;
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-sent {
+            background: var(--bubble-sent);
+            color: #ffffff;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-time {
+            font-size: 0.72rem;
+            opacity: 0.75;
+        }
+
+        .msg-status {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: bold;
+        }
+
+        .msg-received .msg-status {
+            color: var(--text-muted);
+        }
+
+        .msg-photo {
+            max-width: 280px;
+            max-height: 240px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            object-fit: cover;
+            cursor: pointer;
+            display: block;
+        }
+
+        .quick-chips {
+            display: flex;
+            gap: 8px;
+            padding: 10px 18px;
+            background: var(--surface);
+            border-top: 1px solid var(--border-color);
+            overflow-x: auto;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .quick-chip {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 7px 14px;
+            border-radius: 18px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: 0.2s;
+        }
+
+            .quick-chip:hover {
+                background: var(--primary-light);
+                color: white;
+                border-color: var(--primary-light);
+            }
+
+        .message-input-bar {
+            padding: 14px 20px;
+            background: var(--surface);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .attach-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+            .attach-btn:hover {
+                background: var(--bg-color);
+                color: var(--text-main);
+            }
+
+        .msg-input {
+            flex-grow: 1;
+            padding: 13px 18px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+            min-width: 0;
+        }
+
+            .msg-input:focus {
+                border-color: var(--primary-light);
+            }
+
+        .btn-send {
+            background: var(--primary-light);
+            color: white;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        }
+
+            .btn-send:hover {
+                background: #059669;
+                transform: scale(1.05);
+            }
+
+        #photoModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+            #photoModal img {
+                max-width: 90%;
+                max-height: 90%;
+                border-radius: 10px;
+            }
+
+        .dialog-item.waiting-response {
+            background: rgba(16, 185, 129, 0.08);
+            border-left: 4px solid #10b981;
+        }
+
+        .waiting-badge {
+            background: #10b981;
+            color: white;
+            font-size: 0.65rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+            display: inline-block;
+        }
+
+        #randomAdsContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+
+        .random-ad-card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: 0.2s;
+            color: var(--text-main);
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+            .random-ad-card:hover {
+                border-color: var(--primary-light);
+                transform: translateY(-3px);
+                box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            }
+
+        .random-ad-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .random-ad-info {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .random-ad-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+
+        .random-ad-price {
+            font-size: 0.95rem;
+            font-weight: 900;
+            color: var(--primary-light);
+        }
+
+        @media (max-width: 1300px) {
+            .page-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .side-panel {
+                display: none;
+            }
+
+            .center-wrapper {
+                grid-column: span 1;
+                height: 82vh;
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <nav class="top-nav">
+                <a href="/index.html#vip" id="navHot">🔥 Гаряче</a>
+                <a href="/profile.html#favorites" id="navFav">❤️ Обране</a>
+                <a href="/messages.html" id="navChat" class="active">💬 Чати</a>
+                <a href="/safety.html" id="navSafety">🛡️ Безпека</a>
+            </nav>
+        </div>
+
+        <div class="header-center">
+            <a href="/index.html" class="logo-link">
+                <svg width="190" height="42" viewBox="0 0 210 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M38 12C28.0589 12 20 20.0589 20 30C20 39.9411 28.0589 48 38 48C47.9411 48 56 39.9411 56 30C56 24.5 53.5 19.5 49.5 16L32.5 33" stroke="#10B981" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M22 38C12.0589 38 4 29.9411 4 20C4 10.0589 12.0589 2 22 2C31.9411 2 40 10.0589 40 20C40 25.5 37.5 30.5 33.5 34L16.5 17" stroke="#10B981" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+                    <text x="68" y="37" fill="var(--text-main)" font-family="'Segoe UI', system-ui, sans-serif" font-size="34" font-weight="800" letter-spacing="-0.8px">Market</text>
+                </svg>
+            </a>
+        </div>
+
+        <div class="header-right">
+            <div id="dynamicIcons" class="header-icons"></div>
+            <div class="header-buttons" id="headerButtons"></div>
+
+            <button class="theme-toggle-corner" id="themeToggleBtn" aria-label="Змінити тему" title="Змінити тему">
+                <span id="themeIcon">🌙</span>
+            </button>
+
+            <div class="notifications-dropdown" id="notifDropdown">
+                <div class="notif-header">
+                    <span>Сповіщення</span>
+                    <span style="font-size: 0.8rem; color: var(--primary-light); cursor: pointer;" onclick="clearNotifications()">Позначити прочитаними</span>
+                </div>
+                <div class="notif-body" id="notifList">
+                    <p style="padding: 15px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Завантаження...</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="page-container">
+            <div class="side-panel">
+                <div class="side-card college-card">
+                    <img src="https://placehold.co/100x100/ffffff/004d55?text=КГТА" alt="КГТА Логотип" class="college-logo-img">
+                    <h3 style="font-size: 1.05rem; margin-bottom: 2px;">КГТА / КДТУ</h3>
+                    <p style="font-size: 0.8rem; opacity: 0.85; margin-bottom: 8px;">Офіційний партнер</p>
+                    <a href="https://kgtu.edu.ua" target="_blank" class="college-btn">Сайт коледжу</a>
+                </div>
+
+                <div class="side-card">
+                    <div class="card-title">⚡ Корисні розділи</div>
+                    <div class="quick-links">
+                        <a href="/safety.html" class="quick-link-item"><span>🛡️ Правила безпеки</span> <span>→</span></a>
+                        <a href="/terms.html" class="quick-link-item"><span>📄 Умови користування</span> <span>→</span></a>
+                        <a href="/about.html" class="quick-link-item"><span>ℹ️ Про розробників</span> <span>→</span></a>
+                    </div>
+                </div>
+
+                <div class="side-card time-card">
+                    <div class="card-title" style="justify-content: center;">⏳ Час на кампусі</div>
+                    <div class="clock-display" id="liveClock">12:00:00</div>
+                    <div class="date-display" id="liveDate">Понеділок</div>
+                </div>
+            </div>
+
+            <div class="center-wrapper">
+                <div class="sidebar">
+                    <div class="sidebar-header">
+                        <h2>Повідомлення</h2>
+                        <div class="search-box">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="searchInput" class="search-input" placeholder="Шукати діалог..." oninput="filterDialogs(this.value)">
+                        </div>
+                    </div>
+                    <div class="dialogs-list" id="dialogsContainer">
+                        <p style="padding: 20px; color: var(--text-muted); text-align: center; font-size: 0.85rem;">Завантаження...</p>
+                    </div>
+                </div>
+
+                <div class="chat-window">
+                    <div class="chat-header">
+                        <div class="chat-partner-info">
+                            <div class="dialog-avatar" id="activeChatAvatar">?</div>
+                            <div>
+                                <div class="chat-partner-name" id="activeChatName">Оберіть діалог</div>
+                                <div class="chat-partner-status" id="activeChatStatus">Онлайн <span class="msg-counter-badge" id="msgCountBadge"></span></div>
+                            </div>
+                        </div>
+
+                        <div class="chat-header-actions">
+                            <a id="productBadge" class="chat-product-badge" style="display: none;">
+                                <img id="productThumb" src="" class="chat-product-img">
+                                <div class="chat-product-meta">
+                                    <span id="productTitle" class="chat-product-title">Товар</span>
+                                    <span id="productPrice" class="chat-product-cost">0 ₴</span>
+                                </div>
+                            </a>
+                            <button id="btnDeleteChat" class="btn-delete-chat" onclick="deleteChat()">🗑️ Видалити чат</button>
+                        </div>
+                    </div>
+
+                    <div class="messages-area" id="chatArea">
+                        <div style="margin: auto; text-align: center; color: var(--text-muted);">
+                            Оберіть співрозмовника зліва, щоб розпочати живе спілкування 🚀
+                        </div>
+                    </div>
+
+                    <!-- Блок отзывов о собеседнике в чате -->
+                    <div id="chatReviewsSection" style="display: none; background: var(--surface); border-top: 1px solid var(--border-color); padding: 12px 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span id="averageRatingStars" style="color: #fbbf24;">★★★★★</span>
+                                <span id="averageRatingText" style="font-weight: 800; color: var(--text-main);">0.0</span>
+                                <span id="totalReviewsCount" style="color: var(--text-muted); font-size: 0.85rem;">(0 відгуків)</span>
+                            </div>
+                            <button id="rateUserBtn" onclick="openReviewModal()" class="btn-primary" style="padding: 5px 12px; font-size: 0.8rem; display: none;">⭐ Оцінити</button>
+                        </div>
+                        <div id="reviewsList" style="max-height: 100px; overflow-y: auto; font-size: 0.85rem; display: flex; flex-direction: column; gap: 6px;">
+                            <p style="color: var(--text-muted);">Завантаження відгуків...</p>
+                        </div>
+                    </div>
+
+                    <div class="quick-chips" id="quickChips" style="display: none;">
+                        <div class="quick-chip" onclick="sendQuickText('Вітаю! Товар ще в наявності?')">👋 Актуально?</div>
+                        <div class="quick-chip" onclick="sendQuickText('Яка остання ціна? Можна торг?')">🏷️ Можна торг?</div>
+                        <div class="quick-chip" onclick="sendQuickText('Де і коли можемо зустрітися?')">📍 Де зустрінемося?</div>
+                        <div class="quick-chip" onclick="sendQuickText('Готові відправити поштою?')">📦 Відправите поштою?</div>
+                    </div>
+
+                    <div class="message-input-bar" id="inputBar" style="display: none;">
+                        <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="handlePhotoSelect(event)">
+                        <button class="attach-btn" title="Додати фото" onclick="document.getElementById('photoInput').click()">📷</button>
+
+                        <input type="text" class="msg-input" id="messageInput" placeholder="Написати повідомлення...">
+                        <button class="btn-send" onclick="sendMessage()">➤</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side-panel">
+                <div class="side-card" style="display: flex; flex-direction: column; flex-grow: 1; padding: 16px;">
+                    <div class="card-title" style="color: #fbbf24; font-size: 1.15rem; margin-bottom: 12px; justify-content: center;">🔥 Цікаве на кампусі</div>
+                    <div id="randomAdsContainer">
+                        <p style="color: var(--text-muted); font-size: 0.8rem; text-align: center;">Завантаження...</p>
+                    </div>
+                </div>
+
+                <div class="side-card" style="flex-shrink: 0; text-align: center;">
+                    <div class="card-title" style="justify-content: center;">💡 Студентський муд</div>
+                    <div class="card-text" id="factText" style="font-style: italic; margin: 10px 0;">«Студент живе весело від сесії до сесії, а решту часу намагається вижити.»</div>
+                    <button onclick="nextFact()" style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--primary-light); color: var(--primary-light); padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; transition: 0.2s; width: 100%;">
+                        🔄 Інший факт
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="photoModal" onclick="this.style.display='none'">
+        <img id="modalImg" src="">
+    </div>
+
+    <!-- Модальное окно выхода -->
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal-box">
+            <div class="modal-icon">👋</div>
+            <h3 class="modal-title">Вихід з акаунта</h3>
+            <p class="modal-text">Ви дійсно хочете вийти зі свого профілю? Вам доведеться авторизуватися знову.</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeLogoutModal()">Скасувати</button>
+                <button class="btn-confirm-logout" onclick="confirmLogoutAction()">Вийти</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для написания отзыва -->
+    <div id="reviewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 2000;">
+        <div style="background: var(--surface); padding: 30px; border-radius: 20px; width: 90%; max-width: 420px; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+            <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 20px; color: var(--text-main);">Залишити відгук про користувача</h3>
+            <form onsubmit="submitReview(event)">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Оцінка</label>
+                    <select id="reviewRating" style="width: 100%; background: var(--bg-color); border: 2px solid var(--border-color); border-radius: 10px; padding: 12px; color: var(--text-main); font-size: 1rem; outline: none;">
+                        <option value="5">⭐⭐⭐⭐⭐ (5 - Відмінно)</option>
+                        <option value="4">⭐⭐⭐⭐ (4 - Добре)</option>
+                        <option value="3">⭐⭐⭐ (3 - Нормально)</option>
+                        <option value="2">⭐⭐ (2 - Погано)</option>
+                        <option value="1">⭐ (1 - Жахливо)</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Коментар</label>
+                    <textarea id="reviewComment" rows="3" placeholder="Розкажіть про ваш досвід угоди..." style="width: 100%; background: var(--bg-color); border: 2px solid var(--border-color); border-radius: 10px; padding: 12px; color: var(--text-main); font-size: 1rem; outline: none; resize: vertical;"></textarea>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" onclick="closeReviewModal()" class="btn-cancel" style="flex: 1; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">Скасувати</button>
+                    <button type="submit" class="btn-primary" style="flex: 1; justify-content: center; padding: 12px; border-radius: 10px; font-size: 1rem;">Надіслати</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+                function updateThemeButton(theme) {
+                    const iconEl = document.getElementById('themeIcon');
+                    if (iconEl) iconEl.innerText = (theme === 'dark') ? '☀️' : '🌙';
+                }
+                updateThemeButton(localStorage.getItem('loopTheme') || 'light');
+
+                document.getElementById('themeToggleBtn').addEventListener('click', () => {
+                    const currentTheme = document.documentElement.getAttribute('data-theme');
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('loopTheme', newTheme);
+                    updateThemeButton(newTheme);
+                });
+
+                function parseJwt(token) {
+                    try {
+                        return JSON.parse(decodeURIComponent(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+                    } catch (e) {
+                        return null;
+                    }
+                }
+
+                const token = localStorage.getItem('loopToken');
+                const headerBtns = document.getElementById('headerButtons');
+                const dynamicIcons = document.getElementById('dynamicIcons');
+
+                let currentUserId = null;
+                let activeReceiverId = null;
+                let allDialogsCache = [];
+
+                if (token) {
+                    const user = parseJwt(token);
+                    const name = user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "Користувач";
+                    currentUserId = parseInt(user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]);
+
+                    dynamicIcons.innerHTML = `
+                        <button class="nav-pill" id="notifBtn" onclick="toggleNotifications()">
+                            🔔 Сповіщення <span style="background: #ef4444; color: white; font-size: 0.65rem; padding: 1px 5px; border-radius: 10px; font-weight: bold; display:none;" id="globalUnreadBadge">0</span>
+                        </button>
+                    `;
+                    headerBtns.innerHTML = `
+                        <a href="/profile.html" class="nav-pill profile-highlight" title="Мій профіль">👤 ${name}</a>
+                        <button class="btn-logout-header" onclick="showLogoutModal()">Вийти</button>
+                        <a href="/create.html" class="btn-primary">+ Додати оголошення</a>
+                    `;
+                } else {
+                    window.location.href = '/login.html';
+                }
+
+                function toggleNotifications() {
+                    const dropdown = document.getElementById('notifDropdown');
+                    dropdown.classList.toggle('active');
+                    if (dropdown.classList.contains('active')) {
+                        loadNotifications();
+                    }
+                }
+
+                async function loadNotifications() {
+                    if (!token) return;
+                    try {
+                        const res = await fetch('/api/notifications', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (res.ok) {
+                            const notifs = await res.json();
+                            renderNotifications(notifs);
+                        }
+                    } catch (err) {
+                        console.error("Помилка завантаження сповіщень", err);
+                    }
+                }
+
+                function renderNotifications(notifs) {
+                    const listContainer = document.getElementById('notifList');
+                    const badge = document.getElementById('globalUnreadBadge');
+                    if (!listContainer) return;
+                    const unreadCount = notifs.filter(n => !n.isRead).length;
+                    if (badge) {
+                        if (unreadCount > 0) {
+                            badge.innerText = unreadCount;
+                            badge.style.display = 'inline-block';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                    if (notifs.length === 0) {
+                        listContainer.innerHTML = `<p style="padding: 15px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Нових сповіщень немає</p>`;
+                        return;
+                    }
+                    listContainer.innerHTML = notifs.map(n => `
+                        <a href="${n.link || '#'}" class="notif-item ${n.isRead ? '' : 'unread'}">
+                            <span>💬</span>
+                            <div>
+                                <b>${n.title}</b>
+                                <p style="font-size: 0.8rem; color: var(--text-muted);">${n.message}</p>
+                            </div>
+                        </a>
+                    `).join('');
+                }
+
+                async function clearNotifications() {
+                    if (!token) return;
+                    try {
+                        await fetch('/api/notifications/mark-read', {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        loadNotifications();
+                    } catch (err) { console.error(err); }
+                }
+
+                window.addEventListener('click', function(e) {
+                    const dropdown = document.getElementById('notifDropdown');
+                    const btn = document.getElementById('notifBtn');
+                    if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+                        dropdown.classList.remove('active');
+                    }
+                });
+
+                function showLogoutModal() { document.getElementById('logoutModal').classList.add('active'); }
+                function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('active'); }
+                function confirmLogoutAction() {
+                    localStorage.removeItem('loopToken');
+                    window.location.reload();
+                }
+
+                function updateClock() {
+                    const now = new Date();
+                    document.getElementById('liveClock').innerText = now.toLocaleTimeString('uk-UA');
+                    document.getElementById('liveDate').innerText = now.toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' });
+                }
+                setInterval(updateClock, 1000);
+                updateClock();
+
+                async function loadUserReviews() {
+                    if (!activeReceiverId) return;
+                    try {
+                        const response = await fetch(`/api/reviews/user/${activeReceiverId}`);
+                        const data = await response.json();
+
+                        document.getElementById('averageRatingText').innerText = data.averageRating;
+                        document.getElementById('totalReviewsCount').innerText = `(${data.totalReviews} відгуків)`;
+
+                        const stars = '★'.repeat(Math.round(data.averageRating)) + '☆'.repeat(5 - Math.round(data.averageRating));
+                        document.getElementById('averageRatingStars').innerText = stars;
+
+                        // Показываем кнопку "Оцінити" только если это НЕ свой чат
+                        if (currentUserId && currentUserId !== activeReceiverId) {
+                            document.getElementById('rateUserBtn').style.display = 'inline-flex';
+                        } else {
+                            document.getElementById('rateUserBtn').style.display = 'none';
+                        }
+
+                        document.getElementById('chatReviewsSection').style.display = 'block';
+
+                        const container = document.getElementById('reviewsList');
+                        if (data.reviews.length === 0) {
+                            container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">Поки що немає відгуків про цього користувача.</p>';
+                            return;
+                        }
+
+                        container.innerHTML = data.reviews.map(r => `
+                            <div style="background: var(--bg-color); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-color);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                                    <span style="font-weight: 600; color: var(--text-main);">${r.author ? r.author.firstName + ' ' + (r.author.lastName || '') : 'Користувач'}</span>
+                                    <span style="color: #fbbf24;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+                                </div>
+                                <p style="color: var(--text-main);">${r.comment || 'Без коментаря'}</p>
+                            </div>
+                        `).join('');
+                    } catch (err) {
+                        console.error('Помилка завантаження відгуків:', err);
+                    }
+                }
+
+                function openReviewModal() {
+                    document.getElementById('reviewModal').style.display = 'flex';
+                }
+
+                function closeReviewModal() {
+                    document.getElementById('reviewModal').style.display = 'none';
+                }
+
+                async function submitReview(event) {
+                    event.preventDefault();
+                    const rating = parseInt(document.getElementById('reviewRating').value);
+                    const comment = document.getElementById('reviewComment').value;
+
+                    if (!token) {
+                        alert('Будь ласка, увійдіть в систему, щоб залишити відгук.');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('/api/reviews', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                targetUserId: activeReceiverId,
+                                rating: rating,
+                                comment: comment
+                            })
+                        });
+
+                        if (response.ok) {
+                            closeReviewModal();
+                            loadUserReviews();
+                            document.getElementById('reviewComment').value = '';
+                            alert('Відгук успішно додано!');
+                        } else {
+                            const err = await response.json();
+                            alert(err.error || 'Помилка при додаванні відгуку');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        alert('Помилка з\'єднання з сервером');
+                    }
+                }
+
+                async function loadRandomAds() {
+                    try {
+                        const res = await fetch('/api/listings');
+                        const data = await res.json();
+                        const listings = data.listings || [];
+                        const container = document.getElementById('randomAdsContainer');
+                        if (!listings.length) {
+                            container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.8rem; text-align: center;">Немає оголошень</p>';
+                            return;
+                        }
+                        const shuffled = listings.sort(() => 0.5 - Math.random()).slice(0, 3);
+                        container.innerHTML = shuffled.map(l => `
+                            <a href="/details.html?id=${l.id}" class="random-ad-card">
+                                <img src="${l.imageUrl || 'https://placehold.co/400x300/1e293b/10b981?text=Loop'}" class="random-ad-img">
+                                <div class="random-ad-info">
+                                    <span class="random-ad-title">${l.title}</span>
+                                    <span class="random-ad-price">${l.price} ₴</span>
+                                </div>
+                            </a>
+                        `).join('');
+                    } catch (err) { console.error(err); }
+                }
+                loadRandomAds();
+
+                const facts = [
+                    "«Студент живе весело від сесії до сесії, а решту часу намагається вижити.»",
+                    "«Найкращий мотиватор перед іспитом — 5 хвилин до його початку.»",
+                    "«Якщо ти знайшов згущенку в кімнаті гуртожитку — ти король вечора.»",
+                    "«Продаж старих конспектів фінансує твою каву на наступний місяць.»"
+                ];
+                function nextFact() { document.getElementById('factText').innerText = facts[Math.floor(Math.random() * facts.length)]; }
+
+                const connection = new signalR.HubConnectionBuilder()
+                    .withUrl("/chathub")
+                    .withAutomaticReconnect()
+                    .build();
+
+                connection.on("ReceiveMessage", (senderId, receiverId, text) => {
+                    if (parseInt(senderId) === parseInt(activeReceiverId)) {
+                        appendMessage(text, 'received', new Date(), true);
+                        fetch(`/api/messages/mark-read/${activeReceiverId}`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+                    }
+                    loadDialogs();
+                    loadNotifications();
+                });
+
+                connection.on("ReceiveNotification", (notification) => {
+                    loadNotifications();
+                });
+
+                async function startSignalR() {
+                    try {
+                        await connection.start();
+                        if (currentUserId) {
+                            await connection.invoke("RegisterUser", currentUserId);
+                        }
+                    } catch (err) {
+                        setTimeout(startSignalR, 5000);
+                    }
+                }
+                startSignalR();
+
+                document.addEventListener('DOMContentLoaded', async () => {
+                    const params = new URLSearchParams(window.location.search);
+                    const seller = params.get('seller');
+                    const item = params.get('item');
+                    if (seller) activeReceiverId = parseInt(seller);
+
+                    await loadDialogs();
+                    await loadNotifications();
+                    setInterval(loadNotifications, 15000);
+
+                    if (seller) await selectDialog(activeReceiverId, item);
+                });
+
+                async function loadDialogs() {
+                    try {
+                        const res = await fetch('/api/messages/dialogs', { headers: { 'Authorization': `Bearer ${token}` } });
+                        allDialogsCache = await res.json();
+                        renderDialogs(allDialogsCache);
+                    } catch (err) { console.error(err); }
+                }
+
+                function renderAvatarContent(userObj, defaultName) {
+                    const savedAvatar = userObj && userObj.id ? localStorage.getItem(`userAvatar_${userObj.id}`) : null;
+                    if (savedAvatar) {
+                        return `<img src="${savedAvatar}" alt="Avatar">`;
+                    }
+                    if (userObj && userObj.avatarUrl) {
+                        return `<img src="${userObj.avatarUrl}" alt="Avatar">`;
+                    }
+                    return (defaultName || 'U')[0];
+                }
+
+                function renderDialogs(partners) {
+                    const container = document.getElementById('dialogsContainer');
+                    if (!partners.length) {
+                        container.innerHTML = '<p style="padding: 20px; color: var(--text-muted); text-align: center;">Немає діалогів</p>';
+                        return;
+                    }
+                    container.innerHTML = partners.map(p => `
+                        <div class="dialog-item ${p.id === activeReceiverId ? 'active' : ''} ${p.isWaiting && p.id !== activeReceiverId ? 'waiting-response' : ''}" onclick="selectDialog(${p.id})">
+                            <div class="dialog-avatar">
+                                ${renderAvatarContent(p, p.firstName)}
+                                <div class="online-dot"></div>
+                            </div>
+                            <div class="dialog-info">
+                                <div class="dialog-row">
+                                    <div class="dialog-name">
+                                        ${p.firstName} ${p.lastName || ''}
+                                        ${p.isWaiting ? '<span class="waiting-badge">Чекає відповіді</span>' : ''}
+                                    </div>
+                                    <div class="dialog-time">${p.lastMessageTime ? new Date(p.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</div>
+                                </div>
+                                <div class="dialog-last-msg">${p.lastMessage || 'Надіслати повідомлення'}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                function filterDialogs(q) {
+                    const query = q.toLowerCase();
+                    renderDialogs(allDialogsCache.filter(p => p.firstName.toLowerCase().includes(query) || (p.lastName && p.lastName.toLowerCase().includes(query))));
+                }
+
+                function updateMessageCounter() {
+                    const msgCount = document.querySelectorAll('#chatArea .msg-bubble').length;
+                    const badge = document.getElementById('msgCountBadge');
+                    if (badge && activeReceiverId) {
+                        badge.innerText = `• ${msgCount} повідомлень`;
+                    }
+                }
+
+                async function selectDialog(partnerId, itemId = null) {
+                    activeReceiverId = partnerId;
+                    document.querySelectorAll('.dialog-item').forEach(el => el.classList.remove('active'));
+                    try {
+                        await fetch(`/api/messages/mark-read/${partnerId}`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+
+                        const resListings = await fetch('/api/listings');
+                        const listingsData = await resListings.json();
+                        const listing = listingsData.listings.find(l => l.sellerId === partnerId || l.id === parseInt(itemId));
+
+                        let partnerName = "Співрозмовник";
+                        let partnerData = allDialogsCache.find(p => p.id === partnerId);
+
+                        if (listing && listing.sellerId === partnerId) {
+                            partnerName = `${listing.seller.firstName} ${listing.seller.lastName}`;
+                            if (!partnerData) partnerData = listing.seller;
+                        } else if (partnerData) {
+                            partnerName = `${partnerData.firstName} ${partnerData.lastName || ''}`.trim();
+                        }
+
+                        if (listing) {
+                            const targetItem = (itemId && listingsData.listings.find(l => l.id === parseInt(itemId))) || listing;
+                            if (targetItem) {
+                                document.getElementById('productTitle').innerText = targetItem.title;
+                                document.getElementById('productPrice').innerText = `${targetItem.price} ₴`;
+                                document.getElementById('productThumb').src = targetItem.imageUrl || 'https://placehold.co/100x100/1e293b/10b981?text=Loop';
+                                document.getElementById('productBadge').href = `/details.html?id=${targetItem.id}`;
+                                document.getElementById('productBadge').style.display = 'flex';
+                            }
+                        }
+
+                        document.getElementById('activeChatName').innerText = partnerName;
+                        document.getElementById('activeChatAvatar').innerHTML = `${renderAvatarContent(partnerData, partnerName)}<div class="online-dot"></div>`;
+                        document.getElementById('inputBar').style.display = 'flex';
+                        document.getElementById('quickChips').style.display = 'flex';
+                        document.getElementById('btnDeleteChat').style.display = 'block';
+
+                        const resHistory = await fetch(`/api/messages/history/${partnerId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                        const history = await resHistory.json();
+
+                        const chatArea = document.getElementById('chatArea');
+                        if (!history.length) {
+                            chatArea.innerHTML = `<div style="margin: auto; text-align: center; color: var(--text-muted);">Історія порожня. Напишіть перше повідомлення або оберіть підказку нижче 👇</div>`;
+                        } else {
+                            chatArea.innerHTML = '';
+                            history.forEach(m => appendMessage(m.text, m.senderId === currentUserId ? 'sent' : 'received', m.sentAt, m.isRead, false));
+                        }
+                        updateMessageCounter();
+                        loadDialogs();
+                        loadNotifications();
+                        loadUserReviews();
+                    } catch (err) { console.error(err); }
+                }
+
+                async function deleteChat() {
+                    if (!activeReceiverId) return;
+                    if (!confirm("Ви впевнені, що хочете видалити цей чат?")) return;
+                    try {
+                        await fetch(`/api/messages/dialogs/${activeReceiverId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                        document.getElementById('chatArea').innerHTML = '<div style="margin: auto; text-align: center; color: var(--text-muted);">Чат успішно видалено.</div>';
+                        document.getElementById('inputBar').style.display = 'none';
+                        document.getElementById('quickChips').style.display = 'none';
+                        document.getElementById('btnDeleteChat').style.display = 'none';
+                        document.getElementById('productBadge').style.display = 'none';
+                        document.getElementById('chatReviewsSection').style.display = 'none';
+                        document.getElementById('activeChatName').innerText = "Оберіть діалог";
+                        document.getElementById('activeChatAvatar').innerHTML = "?";
+                        document.getElementById('msgCountBadge').innerText = "";
+                        activeReceiverId = null;
+                        loadDialogs();
+                        loadNotifications();
+                    } catch (err) { console.error(err); }
+                }
+
+                function appendMessage(text, type, timeString, isRead = false, autoUpdateCount = true) {
+                    const chatArea = document.getElementById('chatArea');
+                    if (chatArea.querySelector('div')?.style.textAlign === 'center') chatArea.innerHTML = '';
+
+                    let contentHtml = text;
+                    if (text.startsWith('data:image')) {
+                        contentHtml = `<img src="${text}" class="msg-photo" onclick="openModal(this.src)">`;
+                    }
+
+                    const time = new Date(timeString).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+
+                    let statusHtml = '';
+                    if (type === 'sent') {
+                        statusHtml = `<span class="msg-status">${isRead ? '✓✓' : '✓'}</span>`;
+                    }
+
+                    chatArea.insertAdjacentHTML('beforeend', `
+                        <div class="msg-bubble msg-${type}">
+                            ${contentHtml}
+                            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; margin-top: 4px;">
+                                <span class="msg-time">${time}</span>
+                                ${statusHtml}
+                            </div>
+                        </div>
+                    `);
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                    if (autoUpdateCount) updateMessageCounter();
+                }
+
+                function handlePhotoSelect(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = new Image();
+                        img.onload = function () {
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 800;
+                            let scaleSize = 1;
+                            if (img.width > MAX_WIDTH) scaleSize = MAX_WIDTH / img.width;
+                            canvas.width = img.width * scaleSize;
+                            canvas.height = img.height * scaleSize;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+                            sendMessage(compressedBase64);
+                        }
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+
+                function sendQuickText(text) {
+                    document.getElementById('messageInput').value = text;
+                    sendMessage();
+                }
+
+                function sendMessage(customText = null) {
+                    const input = document.getElementById('messageInput');
+                    const text = customText || input.value.trim();
+                    if (!text || !activeReceiverId) return;
+
+                    connection.invoke("SendMessage", currentUserId.toString(), activeReceiverId.toString(), text)
+                        .catch(err => console.error(err));
+
+                    appendMessage(text, 'sent', new Date(), false);
+                    if (!customText) input.value = '';
+                    loadDialogs();
+                }
+
+                function openModal(src) {
+                    document.getElementById('modalImg').src = src;
+                    document.getElementById('photoModal').style.display = 'flex';
+                }
+
+                document.getElementById('messageInput').addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') sendMessage();
+                });
+    </script>
+</body>
+</html>
