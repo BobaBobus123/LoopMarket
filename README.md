@@ -14,3 +14,10 @@
 2. Виконати `dotnet restore`.
 3. Виконати `dotnet ef database update` для створення БД `loopmarket.db`.
 4. Виконати `dotnet run` та перейти за адресою `https://localhost:7274/api/health`.
+
+## Етап 2: CRUD-операції та зв'язки
+- Створено DTO для валідації вхідних даних.
+- Реалізовано повний CRUD для оголошень (ListingsController).
+- Вирішено проблему N+1 за допомогою Entity Framework `Include()`.
+- Додано пагінацію для списку оголошень (`page` та `pageSize`).
+- Налаштовано автоматичну валідацію помилок (RFC 7807).
