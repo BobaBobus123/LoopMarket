@@ -1357,6 +1357,51 @@
             } catch (e) { }
         }
 
+        
+        // ==================== ВАЛЮТНА КОНВЕРТАЦІЯ (Етап 4) ====================
+        let currentGlobalCurrency = 'UAH';
+        let cachedGlobalRates = null;
+
+        async function initGlobalCurrency() {
+            try {
+                const res = await fetch('/api/currency/rates');
+                if (res.ok) {
+                    cachedGlobalRates = await res.json();
+                    if (allListings && allListings.length > 0) {
+                        applyFilters();
+                    }
+                }
+            } catch (e) {
+                console.debug('Помилка завантаження курсів валют', e);
+            }
+        }
+        initGlobalCurrency();
+
+        function formatPrice(priceUah) {
+            if (!priceUah) return '0 ₴';
+            if (currentGlobalCurrency === 'UAH' || !cachedGlobalRates) {
+                return `${Number(priceUah).toLocaleString('uk-UA')} ₴`;
+            }
+            const item = cachedGlobalRates.find(r => r.currencyCode === currentGlobalCurrency);
+            if (!item || item.rate <= 0) return `${Number(priceUah).toLocaleString('uk-UA')} ₴`;
+            const converted = (priceUah / item.rate).toFixed(2);
+            const symbols = { 'USD': '$', 'EUR': '€', 'PLN': 'zł' };
+            return `${symbols[currentGlobalCurrency] || ''} ${converted} ${currentGlobalCurrency}`;
+        }
+
+        window.switchGlobalCurrency = function(currCode, btnEl) {
+            currentGlobalCurrency = currCode;
+            document.querySelectorAll('.curr-pill-global').forEach(b => {
+                b.style.background = 'transparent';
+                b.style.color = 'var(--text-muted)';
+            });
+            if (btnEl) {
+                btnEl.style.background = 'var(--primary-light)';
+                btnEl.style.color = 'white';
+            }
+            applyFilters();
+        };
+
         function createCardHtml(item, delayIndex = 0) {
             const imgUrl = item.imageUrl ? item.imageUrl.split(';')[0] : 'https://placehold.co/600x400/e2e8f0/64748b?text=Немає+фото';
             const locationText = item.location ? item.location.split(',')[0] : 'Кременчук';
