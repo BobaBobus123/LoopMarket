@@ -1128,7 +1128,7 @@
                     const favs = getFavorites();
 
                     container.innerHTML = listingsToRender.map(item => {
-                        const imgUrl = item.imageUrl ? item.imageUrl : 'https://placehold.co/600x400/e2e8f0/64748b?text=Немає+фото';
+                        const imgUrl = item.imageUrl ? item.imageUrl.split(';')[0] : 'https://placehold.co/600x400/e2e8f0/64748b?text=Немає+фото';
                         const locationText = item.location ? item.location.split(',')[0] : 'Кременчук';
                         const isFav = favs.includes(item.id);
                         const favIcon = isFav ? ICONS.heartFilled : ICONS.heartOutline;

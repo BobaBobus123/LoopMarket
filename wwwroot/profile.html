@@ -1306,7 +1306,7 @@
                     container.innerHTML = myListings.map(item => `
                         <div class="card">
                             <div class="card-img-wrapper">
-                                <img src="${item.imageUrl || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'">
+                                <img src="${(item.imageUrl ? item.imageUrl.split(';')[0] : '') || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'">
                             </div>
                             <div class="card-content">
                                 <div class="card-title">${item.title}</div>
@@ -1331,7 +1331,7 @@
                     container.innerHTML = favoriteItems.map(item => `
                         <div class="card">
                             <div class="card-img-wrapper">
-                                <img src="${item.imageUrl || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'">
+                                <img src="${(item.imageUrl ? item.imageUrl.split(';')[0] : '') || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'">
                                 <button onclick="toggleFavorite(${item.id}, event)" class="btn-fav" title="Видалити з обраного">${ICONS.heartFilled}</button>
                             </div>
                             <div class="card-content">
