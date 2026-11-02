@@ -1,6 +1,10 @@
 ﻿<!DOCTYPE html>
 <html lang="uk">
 <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Профіль продавця | Loop Market</title>
@@ -37,7 +41,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
         }
 
         body, header, .card, footer, .profile-sidebar, .profile-content, .nav-pill {
@@ -497,25 +501,36 @@
 
         .card {
             background: var(--surface);
-            border-radius: 8px;
+            border-radius: 16px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             border: 1px solid var(--border-color);
-            transition: 0.2s;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
         }
 
             .card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 12px 24px rgba(0,0,0,0.08);
-                border-color: var(--primary-light);
+                transform: translateY(-5px);
+                box-shadow: 0 16px 32px -4px rgba(15, 23, 42, 0.12);
+                border-color: rgba(16, 185, 129, 0.4);
             }
 
         .card-img-wrapper {
             position: relative;
             width: 100%;
-            height: 180px;
+            height: 195px;
+            overflow: hidden;
+            background: var(--bg-color);
+        }
+
+        .card-img {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card:hover .card-img {
+            transform: scale(1.05);
         }
 
         .card-img {
@@ -559,20 +574,21 @@
         .card-title {
             font-size: 1rem;
             margin-bottom: 8px;
-            font-weight: 400;
-            line-height: 1.4;
+            font-weight: 700;
+            line-height: 1.35;
             color: var(--text-main);
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            min-height: 2.7em;
         }
 
         .card-price {
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             font-weight: 800;
             color: var(--text-main);
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .card-footer {
@@ -682,10 +698,10 @@
     <header>
         <div class="header-left">
             <nav class="top-nav">
-                <a href="/index.html#vip" id="navHot">🔥 Гаряче</a>
-                <a href="/profile.html#favorites" id="navFav">❤️ Обране</a>
-                <a href="/messages.html" id="navChat">💬 Чати</a>
-                <a href="/safety.html" id="navSafety">🛡️ Безпека</a>
+                <a href="/index.html#vip" id="navHot"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Топ-оголошення</a>
+                <a href="/profile.html#favorites" id="navFav"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> Обране</a>
+                <a href="/messages.html" id="navChat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Чати</a>
+                <a href="/safety.html" id="navSafety"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Безпека</a>
             </nav>
         </div>
 
@@ -704,7 +720,7 @@
             <div class="header-buttons" id="headerButtons"></div>
 
             <button class="theme-toggle-corner" id="themeToggleBtn" aria-label="Змінити тему" title="Змінити тему">
-                <span id="themeIcon">🌙</span>
+                <span id="themeIcon"></span>
             </button>
 
             <div class="notifications-dropdown" id="notifDropdown">
@@ -722,17 +738,17 @@
     <main>
         <aside class="profile-sidebar">
             <div class="avatar-wrapper">
-                <div class="avatar" id="sellerAvatar">👤</div>
+                <div class="avatar" id="sellerAvatar"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
             </div>
             <div class="profile-info">
                 <h1 id="sellerName">Завантаження...</h1>
-                <p class="role">✓ Перевірений студент</p>
+                <p class="role"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Перевірений студент</p>
 
                 <!-- РЕЙТИНГ ПРОДАВЦА -->
                 <div class="sidebar-rating-box">
                     <div>
                         <div class="sidebar-rating-num" id="sellerAvgRating">0.0</div>
-                        <div style="color: #fbbf24; font-size: 0.85rem;" id="sellerStars">★★★★★</div>
+                        <div id="sellerStars" style="display:inline-flex;align-items:center;gap:2px;"></div>
                     </div>
                     <div style="text-align: left; font-size: 0.8rem; color: var(--text-muted);">
                         <b id="sellerTotalReviews" style="color: var(--text-main);">0</b> відгуків
@@ -742,7 +758,7 @@
 
             <div id="sellerContactBtn"></div>
             <div id="sellerChatBtn"></div>
-            <button id="rateSellerBtn" onclick="openReviewModal()" class="btn-primary" style="width: 100%; margin-top: 8px; justify-content: center; display: none;">⭐ Оцінити продавця</button>
+            <button id="rateSellerBtn" onclick="openReviewModal()" class="btn-primary" style="width: 100%; margin-top: 8px; justify-content: center; display: none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5" style="vertical-align:-2px;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Оцінити продавця</button>
         </aside>
 
         <div class="profile-content">
@@ -769,11 +785,11 @@
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Оцінка</label>
                     <select id="reviewRating" style="width: 100%; background: var(--bg-color); border: 2px solid var(--border-color); border-radius: 10px; padding: 12px; color: var(--text-main); font-size: 1rem; outline: none;">
-                        <option value="5">⭐⭐⭐⭐⭐ (5 - Відмінно)</option>
-                        <option value="4">⭐⭐⭐⭐ (4 - Добре)</option>
-                        <option value="3">⭐⭐⭐ (3 - Нормально)</option>
-                        <option value="2">⭐⭐ (2 - Погано)</option>
-                        <option value="1">⭐ (1 - Жахливо)</option>
+                        <option value="5">5 / 5 (Відмінно)</option>
+                        <option value="4">4 / 5 (Добре)</option>
+                        <option value="3">3 / 5 (Нормально)</option>
+                        <option value="2">2 / 5 (Погано)</option>
+                        <option value="1">1 / 5 (Жахливо)</option>
                     </select>
                 </div>
                 <div style="margin-bottom: 25px;">
@@ -800,7 +816,7 @@
     <!-- Модальное окно выхода -->
     <div class="modal-overlay" id="logoutModal">
         <div class="modal-box">
-            <div class="modal-icon">👋</div>
+            <div class="modal-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></div>
             <h3 class="modal-title">Вихід з акаунта</h3>
             <p class="modal-text">Ви дійсно хочете вийти зі свого профілю? Вам доведеться авторизуватися знову.</p>
             <div class="modal-actions">
@@ -811,9 +827,35 @@
     </div>
 
     <script>
-                function updateThemeButton(theme) {
+                
+        const ICONS = {
+            sun: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+            moon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
+            bell: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
+            user: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+            chat: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+            phone: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:8px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+            chatBtn: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:8px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+            starFilled: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+            starEmpty: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+            heartFilled: '<svg width="18" height="18" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+            heartOutline: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+            pin: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+            package: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>'
+        };
+
+        function renderStars(rating) {
+            const count = Math.round(rating) || 0;
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                html += (i <= count) ? ICONS.starFilled : ICONS.starEmpty;
+            }
+            return html;
+        }
+
+        function updateThemeButton(theme) {
                     const iconEl = document.getElementById('themeIcon');
-                    if (iconEl) iconEl.innerText = (theme === 'dark') ? '☀️' : '🌙';
+                    if (iconEl) iconEl.innerHTML = (theme === 'dark') ? ICONS.sun : ICONS.moon;
                 }
                 updateThemeButton(localStorage.getItem('loopTheme') || 'light');
 
@@ -839,12 +881,12 @@
 
                     dynamicIcons.innerHTML = `
                         <button class="nav-pill" id="notifBtn" onclick="toggleNotifications()">
-                            🔔 Сповіщення <span style="background: #ef4444; color: white; font-size: 0.65rem; padding: 1px 5px; border-radius: 10px; font-weight: bold; display:none;" id="globalUnreadBadge">0</span>
+                            ${ICONS.bell} Сповіщення <span style="background: #ef4444; color: white; font-size: 0.65rem; padding: 1px 5px; border-radius: 10px; font-weight: bold; display:none;" id="globalUnreadBadge">0</span>
                         </button>
                     `;
 
                     headerBtns.innerHTML = `
-                        <a href="/profile.html" class="nav-pill profile-highlight" title="Мій профіль">👤 ${userName}</a>
+                        <a href="/profile.html" class="nav-pill profile-highlight" title="Мій профіль">${ICONS.user} ${userName}</a>
                         <button class="btn-logout-header" onclick="showLogoutModal()">Вийти</button>
                         <a href="/create.html" class="btn-primary">+ Додати оголошення</a>
                     `;
@@ -896,7 +938,7 @@
                     }
                     listContainer.innerHTML = notifs.map(n => `
                         <a href="${n.link || '#'}" class="notif-item ${n.isRead ? '' : 'unread'}">
-                            <span>💬</span>
+                            <span>${ICONS.chat}</span>
                             <div>
                                 <b>${n.title}</b>
                                 <p style="font-size: 0.8rem; color: var(--text-muted);">${n.message}</p>
@@ -943,7 +985,7 @@
                     localStorage.setItem('loopFavorites', JSON.stringify(favs));
 
                     if(event && event.currentTarget) {
-                        event.currentTarget.innerHTML = isFav ? '🤍' : '❤️';
+                        event.currentTarget.innerHTML = isFav ? ICONS.heartOutline : ICONS.heartFilled;
                     }
                 };
 
@@ -966,9 +1008,9 @@
                     }
 
                     try {
-                        const response = await fetch('/api/listings');
+                        const response = await fetch(`/api/listings?sellerId=${targetSellerId}`);
                         const data = await response.json();
-                        const sellerListings = data.listings.filter(l => l.sellerId === targetSellerId);
+                        const sellerListings = data.listings || [];
 
                         if (sellerListings.length > 0) {
                             const sellerInfo = sellerListings[0].seller;
@@ -983,9 +1025,9 @@
                             }
 
                             if (sellerInfo.phoneNumber) {
-                                document.getElementById('sellerContactBtn').innerHTML = `<a href="tel:+${sellerInfo.phoneNumber}" class="contact-btn">📞 Зателефонувати</a>`;
+                                document.getElementById('sellerContactBtn').innerHTML = `<a href="tel:+${sellerInfo.phoneNumber}" class="contact-btn">${ICONS.phone} Зателефонувати</a>`;
                             }
-                            document.getElementById('sellerChatBtn').innerHTML = `<a href="/messages.html?seller=${targetSellerId}" class="chat-btn">💬 Написати у чат</a>`;
+                            document.getElementById('sellerChatBtn').innerHTML = `<a href="/messages.html?seller=${targetSellerId}" class="chat-btn">${ICONS.chatBtn} Написати у чат</a>`;
 
                             if (token) {
                                 document.getElementById('rateSellerBtn').style.display = 'inline-flex';
@@ -1010,7 +1052,7 @@
 
                         document.getElementById('sellerAvgRating').innerText = data.averageRating;
                         document.getElementById('sellerTotalReviews').innerText = data.totalReviews;
-                        document.getElementById('sellerStars').innerText = '★'.repeat(Math.round(data.averageRating)) + '☆'.repeat(5 - Math.round(data.averageRating));
+                        document.getElementById('sellerStars').innerHTML = renderStars(data.averageRating);
 
                         const container = document.getElementById('sellerReviewsList');
                         if (!data.reviews.length) {
@@ -1022,14 +1064,14 @@
                             <div class="review-card">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center;">
                                     <b style="font-size: 0.95rem;">${r.author ? r.author.firstName + ' ' + (r.author.lastName || '') : 'Користувач'}</b>
-                                    <span style="color: #fbbf24; font-size: 0.9rem;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+                                    <span style="display:inline-flex;align-items:center;gap:2px;">${renderStars(r.rating)}</span>
                                 </div>
                                 <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 8px;">${r.comment || 'Без коментаря'}</p>
 
                                 ${r.listing ? `
                                     <a href="/details.html?id=${r.listing.id}" style="display: flex; align-items: center; gap: 10px; background: var(--surface); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color); text-decoration: none; margin-top: 8px;">
                                         <img src="${r.listing.imageUrl || 'https://placehold.co/50x50'}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover;">
-                                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📦 ${r.listing.title}</span>
+                                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ICONS.package} ${r.listing.title}</span>
                                     </a>
                                 ` : ''}
 
@@ -1089,7 +1131,7 @@
                         const imgUrl = item.imageUrl ? item.imageUrl : 'https://placehold.co/600x400/e2e8f0/64748b?text=Немає+фото';
                         const locationText = item.location ? item.location.split(',')[0] : 'Кременчук';
                         const isFav = favs.includes(item.id);
-                        const favIcon = isFav ? '❤️' : '🤍';
+                        const favIcon = isFav ? ICONS.heartFilled : ICONS.heartOutline;
 
                         return `
                             <div class="card">
@@ -1101,7 +1143,7 @@
                                     <div class="card-title">${item.title}</div>
                                     <div class="card-price">${item.price} ₴</div>
                                     <div class="card-footer">
-                                        <span>📍 ${locationText}</span>
+                                        <span>${ICONS.pin} ${locationText}</span>
                                         <a href="/details.html?id=${item.id}" class="btn-view">Огляд</a>
                                     </div>
                                 </div>

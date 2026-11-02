@@ -1,20 +1,28 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace TradeStorm.Api.DTOs;
 
 public class CreateListingDto
 {
-    [Required(ErrorMessage = "Назва є обов'язковою")]
+    [Required(ErrorMessage = "Назва оголошення є обов'язковою")]
     [MaxLength(100, ErrorMessage = "Назва не може перевищувати 100 символів")]
     public string Title { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Опис є обов'язковим")]
+    [Required(ErrorMessage = "Опис оголошення є обов'язковим")]
     public string Description { get; set; } = string.Empty;
 
-    [Range(0.01, 100000, ErrorMessage = "Ціна має бути більшою за нуль")]
+    [Range(0.00, 1000000, ErrorMessage = "Ціна має бути невід'ємною")]
     public decimal Price { get; set; }
 
-    public string? ImageUrl { get; set; }
-
+    [Required(ErrorMessage = "Категорія є обов'язковою")]
     public int CategoryId { get; set; }
+
+    public List<string>? ImageUrls { get; set; }
+
+    public string? Condition { get; set; }
+
+    public string? Location { get; set; }
+
+    public bool IsShippingAvailable { get; set; }
 }

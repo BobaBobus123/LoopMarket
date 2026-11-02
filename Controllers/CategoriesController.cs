@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TradeStorm.Api.Data;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using TradeStorm.Api.DTOs;
-using TradeStorm.Api.Models;
+using TradeStorm.Api.Services;
 
 namespace TradeStorm.Api.Controllers;
 
@@ -10,17 +9,17 @@ namespace TradeStorm.Api.Controllers;
 [Route("api/[controller]")]
 public class CategoriesController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly ICategoryService _categoryService;
 
-    public CategoriesController(AppDbContext context)
+    public CategoriesController(ICategoryService categoryService)
     {
-        _context = context;
+        _categoryService = categoryService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetCategories()
     {
-        var categories = await _context.Categories.ToListAsync();
+        var categories = await _categoryService.GetAllCategoriesAsync();
         return Ok(categories);
     }
 
@@ -29,11 +28,7 @@ public class CategoriesController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var category = new Category { Name = dto.Name };
-
-        _context.Categories.Add(category);
-        await _context.SaveChangesAsync();
-
+        var category = await _categoryService.CreateCategoryAsync(dto);
         return CreatedAtAction(nameof(GetCategories), new { id = category.Id }, category);
     }
 }

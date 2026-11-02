@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TradeStorm.Api.Models;
 
 namespace TradeStorm.Api.Data;
@@ -13,4 +13,28 @@ public class AppDbContext : DbContext
     public DbSet<Message> Messages { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<Favorite> Favorites { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // Унікальний індекс для обраного: користувач не може двічі додати один товар в обране
+        modelBuilder.Entity<Favorite>()
+            .HasIndex(f => new { f.UserId, f.ListingId })
+            .IsUnique();
+
+        // Індекси для прискорення фільтрації та пошуку (Етап 2 та 4)
+        modelBuilder.Entity<Listing>()
+            .HasIndex(l => l.CategoryId);
+
+        modelBuilder.Entity<Listing>()
+            .HasIndex(l => l.Price);
+
+        modelBuilder.Entity<Listing>()
+            .HasIndex(l => l.CreatedAt);
+
+        modelBuilder.Entity<Listing>()
+            .HasIndex(l => l.Status);
+    }
 }

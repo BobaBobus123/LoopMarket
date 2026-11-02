@@ -1,6 +1,10 @@
 ﻿<!DOCTYPE html>
 <html lang="uk">
 <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Профіль продавця | Loop Market</title>
@@ -37,7 +41,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
         }
 
         body, header, .card, footer, .profile-sidebar, .profile-content, .nav-pill {
@@ -628,10 +632,10 @@
     <header>
         <div class="header-left">
             <nav class="top-nav">
-                <a href="/index.html#vip" id="navHot">🔥 Гаряче</a>
-                <a href="/profile.html#favorites" id="navFav">❤️ Обране</a>
-                <a href="/messages.html" id="navChat">💬 Чати</a>
-                <a href="/safety.html" id="navSafety">🛡️ Безпека</a>
+                <a href="/index.html#vip" id="navHot"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Топ-оголошення</a>
+                <a href="/profile.html#favorites" id="navFav"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> Обране</a>
+                <a href="/messages.html" id="navChat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Чати</a>
+                <a href="/safety.html" id="navSafety"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Безпека</a>
             </nav>
         </div>
 
@@ -650,7 +654,7 @@
             <div class="header-buttons" id="headerButtons"></div>
 
             <button class="theme-toggle-corner" id="themeToggleBtn" aria-label="Змінити тему" title="Змінити тему">
-                <span id="themeIcon">🌙</span>
+                <span id="themeIcon"></span>
             </button>
 
             <div class="notifications-dropdown" id="notifDropdown">
@@ -660,7 +664,7 @@
                 </div>
                 <div class="notif-body" id="notifList">
                     <a href="/messages.html" class="notif-item unread">
-                        <span>💬</span>
+                        <span>${ICONS.chat}</span>
                         <div>
                             <b>Нове повідомлення</b>
                             <p style="font-size: 0.8rem; color: var(--text-muted);">Вам написали щодо вашого оголошення.</p>
@@ -674,11 +678,11 @@
     <main>
         <aside class="profile-sidebar">
             <div class="avatar-wrapper">
-                <div class="avatar" id="sellerAvatar">👤</div>
+                <div class="avatar" id="sellerAvatar"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
             </div>
             <div class="profile-info">
                 <h1 id="sellerName">Завантаження...</h1>
-                <p class="role">✓ Перевірений студент</p>
+                <p class="role"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Перевірений студент</p>
             </div>
             <div id="sellerContactBtn"></div>
         </aside>
@@ -703,7 +707,7 @@
     <!-- Модальное окно выхода -->
     <div class="modal-overlay" id="logoutModal">
         <div class="modal-box">
-            <div class="modal-icon">👋</div>
+            <div class="modal-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></div>
             <h3 class="modal-title">Вихід з акаунта</h3>
             <p class="modal-text">Ви дійсно хочете вийти зі свого профілю? Вам доведеться авторизуватися знову.</p>
             <div class="modal-actions">
@@ -714,9 +718,22 @@
     </div>
 
     <script>
-                        function updateThemeButton(theme) {
+                        
+        const ICONS = {
+            sun: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+            moon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
+            bell: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
+            user: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+            chat: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+            phone: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:8px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+            heartFilled: '<svg width="18" height="18" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+            heartOutline: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+            pin: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>'
+        };
+
+        function updateThemeButton(theme) {
                             const iconEl = document.getElementById('themeIcon');
-                            if (iconEl) iconEl.innerText = (theme === 'dark') ? '☀️' : '🌙';
+                            if (iconEl) iconEl.innerHTML = (theme === 'dark') ? ICONS.sun : ICONS.moon;
                         }
                         updateThemeButton(localStorage.getItem('loopTheme') || 'light');
 
@@ -741,12 +758,12 @@
 
                                 dynamicIcons.innerHTML = `
                                     <button class="nav-pill" id="notifBtn" onclick="toggleNotifications()">
-                                        🔔 Сповіщення <span style="background: #ef4444; color: white; font-size: 0.65rem; padding: 1px 5px; border-radius: 10px; font-weight: bold; display:none;" id="globalUnreadBadge">0</span>
+                                        ${ICONS.bell} Сповіщення <span style="background: #ef4444; color: white; font-size: 0.65rem; padding: 1px 5px; border-radius: 10px; font-weight: bold; display:none;" id="globalUnreadBadge">0</span>
                                     </button>
                                 `;
 
                                 headerBtns.innerHTML = `
-                                    <a href="/profile.html" class="nav-pill profile-highlight" title="Мій профіль">👤 ${userName}</a>
+                                    <a href="/profile.html" class="nav-pill profile-highlight" title="Мій профіль">${ICONS.user} ${userName}</a>
                                     <button class="btn-logout-header" onclick="showLogoutModal()">Вийти</button>
                                     <a href="/create.html" class="btn-primary">+ Додати оголошення</a>
                                 `;
@@ -829,7 +846,7 @@
                             localStorage.setItem('loopFavorites', JSON.stringify(favs));
 
                             if(event && event.currentTarget) {
-                                event.currentTarget.innerHTML = isFav ? '🤍' : '❤️';
+                                event.currentTarget.innerHTML = isFav ? ICONS.heartOutline : ICONS.heartFilled;
                             }
                         };
 
@@ -868,7 +885,7 @@
                                     }
 
                                     if (sellerInfo.phoneNumber) {
-                                        document.getElementById('sellerContactBtn').innerHTML = `<a href="tel:+${sellerInfo.phoneNumber}" class="contact-btn">📞 Зателефонувати</a>`;
+                                        document.getElementById('sellerContactBtn').innerHTML = `<a href="tel:+${sellerInfo.phoneNumber}" class="contact-btn">${ICONS.phone} Зателефонувати</a>`;
                                     }
                                 } else {
                                     document.getElementById('sellerName').innerText = "Користувач";
@@ -895,7 +912,7 @@
                                 const imgUrl = item.imageUrl ? item.imageUrl : 'https://placehold.co/600x400/e2e8f0/64748b?text=Немає+фото';
                                 const locationText = item.location ? item.location.split(',')[0] : 'Кременчук';
                                 const isFav = favs.includes(item.id);
-                                const favIcon = isFav ? '❤️' : '🤍';
+                                const favIcon = isFav ? ICONS.heartFilled : ICONS.heartOutline;
 
                                 return `
                                     <div class="card">
@@ -907,7 +924,7 @@
                                             <div class="card-title">${item.title}</div>
                                             <div class="card-price">${item.price} ₴</div>
                                             <div class="card-footer">
-                                                <span>📍 ${locationText}</span>
+                                                <span>${ICONS.pin} ${locationText}</span>
                                                 <a href="/details.html?id=${item.id}" class="btn-view">Огляд</a>
                                             </div>
                                         </div>

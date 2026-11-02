@@ -1,28 +1,46 @@
-﻿using Telegram.Bot;
+using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using Microsoft.EntityFrameworkCore;
 using TradeStorm.Api.Data;
 
 namespace TradeStorm.Api.Services;
 
 public class TelegramBotService : BackgroundService
 {
-    private readonly TelegramBotClient _botClient;
+    private readonly TelegramBotClient? _botClient;
     private readonly IServiceScopeFactory _scopeFactory;
 
     public TelegramBotService(IConfiguration config, IServiceScopeFactory scopeFactory)
     {
-        _botClient = new TelegramBotClient(config["Telegram:BotToken"]!);
         _scopeFactory = scopeFactory;
+        var token = config["Telegram:BotToken"] ?? config["TelegramBot:Token"];
+        if (!string.IsNullOrWhiteSpace(token) && token != "YOUR_BOT_TOKEN_HERE")
+        {
+            try
+            {
+                _botClient = new TelegramBotClient(token);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Telegram Warning] Не вдалося ініціалізувати бота: {ex.Message}");
+            }
+        }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        if (_botClient == null)
+        {
+            Console.WriteLine("[Telegram Info] Telegram токен не налаштовано або не вказано. Сервіс бота не запущено.");
+            return;
+        }
+
         try
         {
-            // Сбрасываем старый вебхук для корректной работы Polling
+            // Скидаємо старий вебхук для коректної роботи Polling
             await _botClient.DeleteWebhook(cancellationToken: stoppingToken);
         }
         catch (Exception ex)
@@ -32,7 +50,7 @@ public class TelegramBotService : BackgroundService
 
         var receiverOptions = new ReceiverOptions
         {
-            AllowedUpdates = Array.Empty<UpdateType>() // Слушаем все обновления
+            AllowedUpdates = Array.Empty<UpdateType>() // Слухаємо всі оновлення
         };
 
         _botClient.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOptions, stoppingToken);
@@ -44,6 +62,8 @@ public class TelegramBotService : BackgroundService
 
     public async Task SendNotificationAsync(long telegramChatId, string message)
     {
+        if (_botClient == null) return;
+
         try
         {
             await _botClient.SendMessage(
@@ -59,7 +79,6 @@ public class TelegramBotService : BackgroundService
 
     private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
-        // Логируем любое входящее событие в консоль для диагностики
         Console.WriteLine($"[Telegram Update] Отримано оновлення типу: {update.Type}");
 
         if (update.Message is not { } message) return;
@@ -67,9 +86,8 @@ public class TelegramBotService : BackgroundService
         Console.WriteLine($"[Telegram Message] Повідомлення від {message.Chat.Id}: {message.Text ?? message.Type.ToString()}");
 
         // 1. Коли користувач пише /start або будь-яке повідомлення у чат
-        if (message.Text != null && message.Text.StartsWith("/start") || (message.Text != null && message.Type == MessageType.Text))
+        if ((message.Text != null && message.Text.StartsWith("/start")) || (message.Text != null && message.Type == MessageType.Text))
         {
-            // Создаем клавиатуру с кнопкой запроса контакта
             var replyKeyboardMarkup = new ReplyKeyboardMarkup(new[]
             {
                 KeyboardButton.WithRequestContact("📱 Надіслати мій номер")
@@ -81,11 +99,10 @@ public class TelegramBotService : BackgroundService
 
             await botClient.SendMessage(
                 chatId: message.Chat.Id,
-                text: "Вітаємо в Loop Market! Для підтвердження та прив'язки акаунту натисніть кнопку нижче під полем введення повідомлення («📱 Надіслати мій номер»).",
+                text: "Вітаємо в Loop Market! Для підтвердження та прив'язки акаунту натисніть кнопку нижче («📱 Надіслати мій номер»).",
                 replyMarkup: replyKeyboardMarkup,
                 cancellationToken: cancellationToken);
         }
-
         // 2. Коли користувач натиснув кнопку "Надіслати мій номер"
         else if (message.Type == MessageType.Contact && message.Contact != null)
         {
@@ -101,24 +118,30 @@ public class TelegramBotService : BackgroundService
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
             var cleanTelegramPhone = new string(phone.Where(char.IsDigit).ToArray());
-            var allUsers = db.Users.ToList();
 
-            var user = allUsers
-                .Where(u => u.PhoneNumber != null && new string(u.PhoneNumber.Where(char.IsDigit).ToArray()) == cleanTelegramPhone)
+            // Спершу шукаємо прямим запитом у БД
+            var user = await db.Users
+                .Where(u => u.PhoneNumber == cleanTelegramPhone || u.PhoneNumber == phone)
                 .OrderByDescending(u => u.Id)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync(cancellationToken);
+
+            // Якщо не знайшли (через форматування в БД), перевіряємо
+            if (user == null)
+            {
+                var candidates = await db.Users.Where(u => u.PhoneNumber != null).ToListAsync(cancellationToken);
+                user = candidates.FirstOrDefault(u => new string(u.PhoneNumber!.Where(char.IsDigit).ToArray()) == cleanTelegramPhone);
+            }
 
             if (user != null)
             {
                 user.IsPhoneVerified = true;
                 user.TelegramChatId = message.Chat.Id;
-                user.ReceiveTelegramNotifications = true; // Автоматически включаем уведомления
+                user.ReceiveTelegramNotifications = true;
                 await db.SaveChangesAsync(cancellationToken);
 
-                // Убираем клавиатуру и пишем об успехе
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
-                    text: "✅ Ваш номер успішно підтверджено та акаунт прив'язано до Loop Market! Тепер ви отримуватимете сюди офлайн-сповіщення.",
+                    text: "✅ Ваш номер успішно підтверджено та акаунт прив'язано до Loop Market! Тепер ви отримуватимете сюди сповіщення.",
                     replyMarkup: new ReplyKeyboardRemove(),
                     cancellationToken: cancellationToken);
 

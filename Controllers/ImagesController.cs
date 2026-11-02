@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TradeStorm.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ImagesController : ControllerBase
 {
     private readonly IWebHostEnvironment _environment;
@@ -28,7 +30,8 @@ public class ImagesController : ControllerBase
         if (file.Length > 5 * 1024 * 1024)
             return BadRequest(new { error = "Розмір файлу не має перевищувати 5 МБ" });
 
-        var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
+        var webRoot = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        var uploadsFolder = Path.Combine(webRoot, "uploads");
         if (!Directory.Exists(uploadsFolder))
             Directory.CreateDirectory(uploadsFolder);
 

@@ -32,6 +32,31 @@ namespace TradeStorm.Api.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("TradeStorm.Api.Models.Favorite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ListingId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ListingId");
+
+                    b.HasIndex("UserId", "ListingId")
+                        .IsUnique();
+
+                    b.ToTable("Favorites");
+                });
+
             modelBuilder.Entity("TradeStorm.Api.Models.Listing", b =>
                 {
                     b.Property<int>("Id")
@@ -66,6 +91,10 @@ namespace TradeStorm.Api.Migrations
                     b.Property<int>("SellerId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -75,7 +104,13 @@ namespace TradeStorm.Api.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("Price");
+
                     b.HasIndex("SellerId");
+
+                    b.HasIndex("Status");
 
                     b.ToTable("Listings");
                 });
@@ -154,6 +189,9 @@ namespace TradeStorm.Api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("ListingId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Rating")
                         .HasColumnType("INTEGER");
 
@@ -163,6 +201,8 @@ namespace TradeStorm.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
+
+                    b.HasIndex("ListingId");
 
                     b.HasIndex("TargetUserId");
 
@@ -218,6 +258,25 @@ namespace TradeStorm.Api.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("TradeStorm.Api.Models.Favorite", b =>
+                {
+                    b.HasOne("TradeStorm.Api.Models.Listing", "Listing")
+                        .WithMany()
+                        .HasForeignKey("ListingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TradeStorm.Api.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Listing");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TradeStorm.Api.Models.Listing", b =>
                 {
                     b.HasOne("TradeStorm.Api.Models.Category", "Category")
@@ -245,6 +304,10 @@ namespace TradeStorm.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TradeStorm.Api.Models.Listing", "Listing")
+                        .WithMany()
+                        .HasForeignKey("ListingId");
+
                     b.HasOne("TradeStorm.Api.Models.User", "TargetUser")
                         .WithMany()
                         .HasForeignKey("TargetUserId")
@@ -252,6 +315,8 @@ namespace TradeStorm.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Author");
+
+                    b.Navigation("Listing");
 
                     b.Navigation("TargetUser");
                 });

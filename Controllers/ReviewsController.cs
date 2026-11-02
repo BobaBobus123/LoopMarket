@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -27,33 +27,37 @@ public class ReviewsController : ControllerBase
             var reviews = await _context.Reviews
                 .Where(r => r.TargetUserId == userId)
                 .OrderByDescending(r => r.CreatedAt)
-                .ToListAsync();
-
-            double averageRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0;
-
-            var resultList = new List<object>();
-
-            foreach (var r in reviews)
-            {
-                var author = await _context.Users.FindAsync(r.AuthorId);
-                var listing = r.ListingId.HasValue ? await _context.Listings.FindAsync(r.ListingId.Value) : null;
-
-                resultList.Add(new
+                .Include(r => r.Author)
+                .Include(r => r.Listing)
+                .Select(r => new
                 {
                     id = r.Id,
                     rating = r.Rating,
                     comment = r.Comment,
                     createdAt = r.CreatedAt,
-                    author = author != null ? new { id = author.Id, firstName = author.FirstName, lastName = author.LastName, avatarUrl = author.AvatarUrl } : null,
-                    listing = listing != null ? new { id = listing.Id, title = listing.Title, imageUrl = listing.ImageUrl } : null
-                });
-            }
+                    author = r.Author != null ? new
+                    {
+                        id = r.Author.Id,
+                        firstName = r.Author.FirstName,
+                        lastName = r.Author.LastName,
+                        avatarUrl = r.Author.AvatarUrl
+                    } : null,
+                    listing = r.Listing != null ? new
+                    {
+                        id = r.Listing.Id,
+                        title = r.Listing.Title,
+                        imageUrl = r.Listing.ImageUrl
+                    } : null
+                })
+                .ToListAsync();
+
+            double averageRating = reviews.Any() ? reviews.Average(r => r.rating) : 0;
 
             return Ok(new
             {
                 averageRating = Math.Round(averageRating, 1),
                 totalReviews = reviews.Count,
-                reviews = resultList
+                reviews
             });
         }
         catch (Exception ex)
@@ -81,6 +85,15 @@ public class ReviewsController : ControllerBase
             if (targetUser == null)
             {
                 return NotFound(new { error = "Користувача не знайдено" });
+            }
+
+            if (dto.ListingId.HasValue)
+            {
+                var listingExists = await _context.Listings.AnyAsync(l => l.Id == dto.ListingId.Value);
+                if (!listingExists)
+                {
+                    return BadRequest(new { error = "Оголошення не знайдено" });
+                }
             }
 
             var review = new Review

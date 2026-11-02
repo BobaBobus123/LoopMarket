@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace TradeStorm.Api.Models;
 
@@ -17,7 +17,6 @@ public class Listing
 
     public string? ImageUrl { get; set; }
 
-    // 🔥 Новое поле для хранения даты и времени создания объявления
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public int CategoryId { get; set; }
@@ -28,4 +27,5 @@ public class Listing
     public string? Condition { get; set; }
     public string? Location { get; set; }
     public bool IsShippingAvailable { get; set; }
+    public string Status { get; set; } = "Active"; // Active, Sold, Reserved
 }
