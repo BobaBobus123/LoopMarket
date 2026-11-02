@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Favorite> Favorites { get; set; }
+    public DbSet<Order> Orders { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -36,5 +37,33 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Listing>()
             .HasIndex(l => l.Status);
+
+        // Налаштування зв'язків замовлень
+        modelBuilder.Entity<Order>()
+            .HasOne(o => o.Buyer)
+            .WithMany()
+            .HasForeignKey(o => o.BuyerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Order>()
+            .HasOne(o => o.Seller)
+            .WithMany()
+            .HasForeignKey(o => o.SellerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Order>()
+            .HasOne(o => o.Listing)
+            .WithMany()
+            .HasForeignKey(o => o.ListingId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Order>()
+            .HasIndex(o => o.BuyerId);
+
+        modelBuilder.Entity<Order>()
+            .HasIndex(o => o.SellerId);
+
+        modelBuilder.Entity<Order>()
+            .HasIndex(o => o.Status);
     }
 }

@@ -562,6 +562,8 @@
 
                         if (res.ok) {
                             localStorage.setItem('loopToken', data.token);
+                            if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
+                            if (data.role) localStorage.setItem('loopUserRole', data.role);
                             window.location.href = '/index.html';
                         } else {
                             errorDiv.innerText = data.error || 'Помилка входу';
@@ -619,6 +621,8 @@
                         if (res.ok) {
                             if (data.isPhoneVerified) {
                                 localStorage.setItem('loopToken', data.token);
+                                if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
+                                if (data.role) localStorage.setItem('loopUserRole', data.role);
                                 window.location.href = '/index.html';
                             } else {
                                 errorDiv.style.color = "#ef4444";

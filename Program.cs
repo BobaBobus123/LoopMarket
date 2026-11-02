@@ -25,10 +25,41 @@ builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
 builder.Services.AddScoped<IListingService, ListingService>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IOrderService, OrderService>(); // Сервіс JWT та Refresh Tokens (Етап 5)
+
+// Кешування в пам'яті (Етап 4)
+builder.Services.AddMemoryCache();
+
+// HTTP-клієнт із тайм-аутом для виклику зовнішніх REST-сервісів (Етап 4)
+builder.Services.AddHttpClient("NbuApiClient", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
+builder.Services.AddScoped<ICurrencyService, CurrencyService>();
+
+// Фонова черга задач без зовнішнього брокера (Етап 4)
+builder.Services.AddSingleton<IBackgroundTaskQueue>(new BackgroundTaskQueue(100));
+builder.Services.AddHostedService<QueuedHostedService>();
+
+// Зовнішня автентифікація OAuth 2.0 (Етап 7)
+builder.Services.AddScoped<IExternalAuthService, ExternalAuthService>();
 
 // Стандартний ASP.NET Core Health Check (Етап 1)
 builder.Services.AddHealthChecks()
     .AddCheck<DbHealthCheck>("database");
+
+// Політика CORS для клієнта (Етап 6)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowClientApps", policy =>
+    {
+        policy.AllowAnyHeader()
+              .AllowAnyMethod()
+              .SetIsOriginAllowed(origin => true) // Підтримка веб-клієнта на будь-якому порту/хості
+              .AllowCredentials();
+    });
+});
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -61,7 +92,8 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "LoopMarketApi",
         ValidAudience = builder.Configuration["Jwt:Audience"] ?? "LoopMarketUsers",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+        ClockSkew = TimeSpan.Zero
     };
 
     // Підтримка передачі JWT через WebSocket Query String для SignalR
@@ -80,11 +112,31 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Рольова авторизація RBAC (Етап 6)
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole(TradeStorm.Api.Models.UserRoles.Admin));
+    options.AddPolicy("RequireSellerRole", policy => policy.RequireRole(TradeStorm.Api.Models.UserRoles.Seller, TradeStorm.Api.Models.UserRoles.Admin));
+});
+
 var app = builder.Build();
 
 // RFC 7807 Exception Handler
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+
+// Заголовки безпеки (OWASP Security Headers) (Етап 6)
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+    await next();
+});
+
+// Застосування політики CORS (Етап 6)
+app.UseCors("AllowClientApps");
 
 if (app.Environment.IsDevelopment())
 {
@@ -104,7 +156,7 @@ app.MapControllers();
 // SignalR Hub
 app.MapHub<ChatHub>("/chathub");
 
-// Автоматичне наповнення початковими категоріями, якщо база порожня
+// Автоматичне наповнення початковими категоріями та адміністратором за замовчуванням
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -125,6 +177,22 @@ using (var scope = app.Services.CreateScope())
         db.SaveChanges();
         Console.WriteLine("✅ Початкові категорії успішно додані в базу!");
     }
+
+    // Переконуємось, що є хоча б один Admin для перевірки RBAC
+    var adminUser = db.Users.FirstOrDefault(u => u.Role == TradeStorm.Api.Models.UserRoles.Admin);
+    if (adminUser == null)
+    {
+        var firstUser = db.Users.FirstOrDefault();
+        if (firstUser != null)
+        {
+            firstUser.Role = TradeStorm.Api.Models.UserRoles.Admin;
+            db.SaveChanges();
+            Console.WriteLine($"👑 Користувачу {firstUser.Email} надано роль Admin для захисту лабораторних робіт!");
+        }
+    }
 }
 
 app.Run();
+
+// Робимо клас Program публічним для інтеграційних тестів WebApplicationFactory (Етап 3)
+public partial class Program { }

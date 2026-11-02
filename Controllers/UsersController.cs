@@ -1,14 +1,15 @@
-using System.IdentityModel.Tokens.Jwt;
+using System;
+using System.Linq;
 using System.Security.Claims;
-using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using TradeStorm.Api.Data;
 using TradeStorm.Api.DTOs;
 using TradeStorm.Api.Models;
+using TradeStorm.Api.Services;
 
 namespace TradeStorm.Api.Controllers;
 
@@ -17,17 +18,17 @@ namespace TradeStorm.Api.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly AppDbContext _context;
-    private readonly IConfiguration _config;
+    private readonly ITokenService _tokenService;
     private readonly PasswordHasher<User> _passwordHasher = new();
 
-    public UsersController(AppDbContext context, IConfiguration config)
+    public UsersController(AppDbContext context, ITokenService tokenService)
     {
         _context = context;
-        _config = config;
+        _tokenService = tokenService;
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateUser(CreateUserDto dto)
+    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto)
     {
         if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
             return BadRequest(new { error = "Email вже використовується" });
@@ -44,7 +45,7 @@ public class UsersController : ControllerBase
             LastName = dto.LastName,
             Email = dto.Email,
             PhoneNumber = cleanPhone,
-            Role = "User"
+            Role = UserRoles.Buyer // За замовчуванням новий користувач - Покупець (Buyer)
         };
         user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
 
@@ -63,7 +64,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginDto dto)
+    public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
         if (user == null) return Unauthorized(new { error = "Невірний email або пароль" });
@@ -79,10 +80,9 @@ public class UsersController : ControllerBase
         }
         catch
         {
-            // У разі якщо в БД старий пароль у відкритому вигляді
+            // Зворотна сумісність для старих відкритих паролів
         }
 
-        // Зворотна сумісність: якщо пароль збігається як відкритий текст, мігруємо на безпечний хеш
         if (!isPasswordValid && user.PasswordHash == dto.Password)
         {
             user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
@@ -92,30 +92,127 @@ public class UsersController : ControllerBase
 
         if (!isPasswordValid) return Unauthorized(new { error = "Невірний email або пароль" });
 
-        var jwtKey = _config["Jwt:Key"] ?? "DefaultSecretKeyForDevelopmentOnly123456!";
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        // Генерація пари токенів (Access + Refresh Token)
+        var accessToken = _tokenService.GenerateAccessToken(user);
+        var refreshToken = _tokenService.GenerateRefreshToken();
 
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
-            new Claim(ClaimTypes.Role, user.Role)
-        };
-
-        var token = new JwtSecurityToken(
-            issuer: _config["Jwt:Issuer"],
-            audience: _config["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddDays(7),
-            signingCredentials: credentials);
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7); // Refresh token дійсний 7 днів
+        await _context.SaveChangesAsync();
 
         return Ok(new
         {
-            token = new JwtSecurityTokenHandler().WriteToken(token),
-            isPhoneVerified = user.IsPhoneVerified
+            token = accessToken,
+            refreshToken = refreshToken,
+            isPhoneVerified = user.IsPhoneVerified,
+            role = user.Role
         });
+    }
+
+    /// <summary>
+    /// Оновлення Access Token за допомогою валідного Refresh Token (Етап 5)
+    /// </summary>
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshToken([FromBody] TokenRefreshDto dto)
+    {
+        var principal = _tokenService.GetPrincipalFromExpiredToken(dto.AccessToken);
+        if (principal == null)
+        {
+            return BadRequest(new { error = "Недійсний Access Token або сигнатура" });
+        }
+
+        var userIdString = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId))
+        {
+            return BadRequest(new { error = "Невірний токен" });
+        }
+
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null || user.RefreshToken != dto.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+        {
+            return Unauthorized(new { error = "Недійсний або прострочений Refresh Token. Необхідно авторизуватися знову." });
+        }
+
+        // Ротація токенів
+        var newAccessToken = _tokenService.GenerateAccessToken(user);
+        var newRefreshToken = _tokenService.GenerateRefreshToken();
+
+        user.RefreshToken = newRefreshToken;
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            token = newAccessToken,
+            refreshToken = newRefreshToken
+        });
+    }
+
+    /// <summary>
+    /// Завершення сеансу та відкликання Refresh Token (Logout / Revocation) (Етап 5)
+    /// </summary>
+    [HttpPost("revoke")]
+    [Authorize]
+    public async Task<IActionResult> Revoke()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
+
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return NotFound();
+
+        user.RefreshToken = null;
+        user.RefreshTokenExpiryTime = null;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Сесію успішно завершено. Токен оновлення відкликано." });
+    }
+
+    /// <summary>
+    /// Адміністрування: перегляд усіх користувачів системи з ролями (Етап 6 RBAC)
+    /// </summary>
+    [HttpGet("admin/all")]
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> GetAllUsersForAdmin()
+    {
+        var users = await _context.Users
+            .OrderBy(u => u.Id)
+            .Select(u => new
+            {
+                u.Id,
+                u.FirstName,
+                u.LastName,
+                u.Email,
+                u.PhoneNumber,
+                u.Role,
+                u.IsPhoneVerified,
+                u.TelegramChatId
+            })
+            .ToListAsync();
+
+        return Ok(users);
+    }
+
+    /// <summary>
+    /// Адміністрування: зміна ролі користувача (Admin, Seller, Buyer) (Етап 6 RBAC)
+    /// </summary>
+    [HttpPatch("admin/{id}/role")]
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> ChangeUserRole(int id, [FromBody] ChangeRoleDto dto)
+    {
+        var validRoles = new[] { UserRoles.Admin, UserRoles.Seller, UserRoles.Buyer };
+        if (!validRoles.Contains(dto.Role))
+        {
+            return BadRequest(new { error = "Невідома роль. Допустимі: Admin, Seller, Buyer" });
+        }
+
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return NotFound(new { error = "Користувача не знайдено" });
+
+        user.Role = dto.Role;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = $"Роль користувача {user.Email} змінено на {user.Role}" });
     }
 
     [HttpGet("telegram-status/{userId}")]
@@ -169,6 +266,7 @@ public class UsersController : ControllerBase
             firstName = user.FirstName,
             lastName = user.LastName,
             email = user.Email,
+            role = user.Role,
             avatarUrl = user.AvatarUrl,
             bio = user.Bio,
             telegramChatId = user.TelegramChatId,
@@ -209,6 +307,7 @@ public class UsersController : ControllerBase
             id = user.Id,
             firstName = user.FirstName,
             lastName = user.LastName,
+            role = user.Role,
             avatarUrl = user.AvatarUrl,
             bio = user.Bio,
             isPhoneVerified = user.IsPhoneVerified
@@ -228,6 +327,7 @@ public class UsersController : ControllerBase
             firstName = user.FirstName,
             lastName = user.LastName,
             email = user.Email,
+            role = user.Role,
             avatarUrl = user.AvatarUrl,
             bio = user.Bio,
             telegramChatId = user.TelegramChatId,

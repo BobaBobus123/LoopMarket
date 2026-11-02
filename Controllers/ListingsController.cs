@@ -171,6 +171,23 @@ public class ListingsController : ControllerBase
         return Ok(new { message = "Оголошення успішно видалено" });
     }
 
+    /// <summary>
+    /// Адміністрування: модераційне видалення будь-якого оголошення (Етап 6 RBAC)
+    /// </summary>
+    [HttpDelete("admin/{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AdminDeleteListing(int id)
+    {
+        var listing = await _listingService.GetListingByIdAsync(id);
+        if (listing == null)
+        {
+            return NotFound(new { error = "Оголошення не знайдено" });
+        }
+
+        await _listingService.DeleteListingAsync(id, listing.SellerId);
+        return Ok(new { message = "Оголошення успішно видалено адміністратором платформи" });
+    }
+
     [HttpGet("categories")]
     [AllowAnonymous]
     public async Task<IActionResult> GetCategories()

@@ -913,6 +913,7 @@
         <div class="profile-content">
             <div class="tabs">
                 <div class="tab active" id="tabMyListings" onclick="switchTab('myListings')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg> Мої оголошення</div>
+                <div class="tab" id="tabOrders" onclick="switchTab('orders')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> Замовлення</div>
                 <div class="tab" id="tabFavorites" onclick="switchTab('favorites')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> Обране</div>
                 <div class="tab" id="tabReviews" onclick="switchTab('reviews')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Відгуки</div>
                 <div class="tab" id="tabSettings" onclick="switchTab('settings')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg> Налаштування</div>
@@ -920,6 +921,16 @@
 
             <div class="listings-grid" id="myListingsContainer">
                 <p style="color: var(--text-muted);">Завантаження...</p>
+            </div>
+
+            <div id="ordersContainer" style="display: none; margin-top: 10px;">
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <button type="button" id="btnOrderPurchases" onclick="switchOrderSubTab('purchases')" style="padding: 8px 18px; border-radius: 20px; border: none; background: var(--primary-light); color: white; font-weight: 700; cursor: pointer; transition: 0.2s;">Мої покупки</button>
+                    <button type="button" id="btnOrderSales" onclick="switchOrderSubTab('sales')" style="padding: 8px 18px; border-radius: 20px; border: 1px solid var(--border-color); background: transparent; color: var(--text-muted); font-weight: 700; cursor: pointer; transition: 0.2s;">Продажі товарів</button>
+                </div>
+                <div id="ordersList">
+                    <p style="color: var(--text-muted);">Завантаження замовлень...</p>
+                </div>
             </div>
 
             <div class="listings-grid" id="favoritesContainer" style="display: none;">
@@ -1057,7 +1068,20 @@
                 function showLogoutModal() { document.getElementById('logoutModal').classList.add('active'); }
                 function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('active'); }
                 function confirmLogoutAction() {
+                    const refreshToken = localStorage.getItem('loopRefreshToken');
+                    if (token && refreshToken) {
+                        fetch('/api/users/revoke', {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + token 
+                            },
+                            body: JSON.stringify({ refreshToken })
+                        }).catch(() => {});
+                    }
                     localStorage.removeItem('loopToken');
+                    localStorage.removeItem('loopRefreshToken');
+                    localStorage.removeItem('loopUserRole');
                     window.location.reload();
                 }
 
@@ -1118,6 +1142,18 @@
                     });
 
                     loadUserReviewsForProfile(currentUserId);
+                    fetch('/api/favorites/ids', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    })
+                    .then(res => res.ok ? res.json() : [])
+                    .then(ids => {
+                        if (Array.isArray(ids)) {
+                            localStorage.setItem('loopFavorites', JSON.stringify(ids));
+                            const widgetFav = document.getElementById('statFavCount');
+                            if (widgetFav) widgetFav.innerText = ids.length;
+                        }
+                    })
+                    .catch(() => {});
                     await loadAllListings();
 
                     if (window.location.hash === '#favorites') switchTab('favorites');
@@ -1199,6 +1235,7 @@
                     document.getElementById('favoritesContainer').style.display = 'none';
                     document.getElementById('reviewsContainerTab').style.display = 'none';
                     document.getElementById('settingsContainer').style.display = 'none';
+                    if (document.getElementById('ordersContainer')) document.getElementById('ordersContainer').style.display = 'none';
 
                     if (tabName === 'myListings') {
                         document.getElementById('tabMyListings').classList.add('active');
@@ -1207,6 +1244,10 @@
                         document.getElementById('tabFavorites').classList.add('active');
                         document.getElementById('favoritesContainer').style.display = 'grid';
                         renderFavorites();
+                    } else if (tabName === 'orders') {
+                        document.getElementById('tabOrders').classList.add('active');
+                        document.getElementById('ordersContainer').style.display = 'block';
+                        loadUserOrders('purchases');
                     } else if (tabName === 'reviews') {
                         document.getElementById('tabReviews').classList.add('active');
                         document.getElementById('reviewsContainerTab').style.display = 'block';
@@ -1246,6 +1287,13 @@
                     if (widgetFav) widgetFav.innerText = favs.length;
 
                     if (document.getElementById('tabFavorites').classList.contains('active')) renderFavorites();
+
+                    if (token) {
+                        fetch('/api/favorites/' + id, {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + token }
+                        }).catch(() => {});
+                    }
                 };
 
                 function renderMyListings() {

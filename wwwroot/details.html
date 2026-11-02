@@ -803,7 +803,21 @@
                     <button id="detailFavBtn" class="btn-fav-large" onclick="toggleDetailFavorite()" title="Додати в обране"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button>
                 </div>
 
-                <div class="price" id="itemPrice">0 грн</div>
+                <div class="price-container" style="margin-bottom: 20px;">
+                    <div style="display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;">
+                        <div class="price" id="itemPrice" style="margin-bottom: 0;">0 грн</div>
+                        <div class="currency-pills" style="display: inline-flex; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 20px; padding: 3px; gap: 4px;">
+                            <button type="button" class="curr-pill active" onclick="switchCurrency('UAH', this)" style="border: none; background: var(--primary-light); color: white; border-radius: 16px; padding: 4px 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s;">UAH ₴</button>
+                            <button type="button" class="curr-pill" onclick="switchCurrency('USD', this)" style="border: none; background: transparent; color: var(--text-muted); border-radius: 16px; padding: 4px 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s;">USD $</button>
+                            <button type="button" class="curr-pill" onclick="switchCurrency('EUR', this)" style="border: none; background: transparent; color: var(--text-muted); border-radius: 16px; padding: 4px 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s;">EUR €</button>
+                            <button type="button" class="curr-pill" onclick="switchCurrency('PLN', this)" style="border: none; background: transparent; color: var(--text-muted); border-radius: 16px; padding: 4px 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s;">PLN zł</button>
+                        </div>
+                    </div>
+                    <div id="currencyHint" style="font-size: 0.82rem; color: var(--text-muted); margin-top: 6px; display: flex; align-items: center; gap: 5px;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span id="currencyHintText">Синхронізація з офіційним курсом НБУ...</span>
+                    </div>
+                </div>
 
                 <div class="specs-box">
                     <div class="spec-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><strong id="itemLocation"></strong></div>
@@ -848,6 +862,88 @@
                 </div>
             </div>
         </div>
+    
+    <!-- Модальне вікно оформлення замовлення (Етап замовлень) -->
+    <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 2000;">
+        <div style="background: var(--surface); padding: 30px; border-radius: 20px; width: 90%; max-width: 520px; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                    Оформлення замовлення
+                </h3>
+                <button type="button" onclick="closeOrderModal()" style="background: transparent; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer; padding: 4px;">✕</button>
+            </div>
+
+            <div style="display: flex; gap: 14px; align-items: center; padding: 12px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 18px;">
+                <img id="orderItemImg" src="" style="width: 64px; height: 64px; border-radius: 8px; object-fit: cover;">
+                <div style="flex: 1; overflow: hidden;">
+                    <h4 id="orderItemTitle" style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></h4>
+                    <p id="orderItemPrice" style="font-weight: 800; color: var(--primary-light); font-size: 1.15rem;"></p>
+                </div>
+            </div>
+
+            <form onsubmit="submitOrder(event)" id="orderForm">
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">ПІБ отримувача *</label>
+                    <input type="text" id="orderBuyerName" required placeholder="Наприклад, Шевченко Тарас Григорович" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 14px; color: var(--text-main); font-size: 0.95rem;">
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Номер телефону для зв'язку *</label>
+                    <input type="tel" id="orderBuyerPhone" required placeholder="+380991234567" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 14px; color: var(--text-main); font-size: 0.95rem;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Місто доставки *</label>
+                        <input type="text" id="orderDeliveryCity" required placeholder="Кременчук" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 14px; color: var(--text-main); font-size: 0.95rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Відділення пошти *</label>
+                        <input type="text" id="orderDeliveryBranch" required placeholder="Відділення № 5" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 14px; color: var(--text-main); font-size: 0.95rem;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Спосіб оплати</label>
+                    <select id="orderPaymentMethod" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 14px; color: var(--text-main); font-size: 0.95rem;">
+                        <option value="Накладений платіж (при отриманні)">Накладений платіж (при отриманні)</option>
+                        <option value="Оплата карткою (онлайн)">Оплата карткою (онлайн)</option>
+                        <option value="Готівкою при зустрічі">Готівкою при зустрічі</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Коментар (необов'язково)</label>
+                    <input type="text" id="orderComment" placeholder="Зручний час для дзвінка чи уточнення" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 14px; color: var(--text-main); font-size: 0.95rem;">
+                </div>
+
+                <div id="orderErrorMsg" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 14px; display: none; font-weight: 600;"></div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" onclick="closeOrderModal()" style="flex: 1; padding: 12px; background: transparent; border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-weight: 600; cursor: pointer;">Скасувати</button>
+                    <button type="submit" id="orderSubmitBtn" style="flex: 1.6; padding: 12px; background: var(--primary-light); border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer;">Підтвердити замовлення</button>
+                </div>
+            </form>
+
+            <div id="orderSuccessScreen" style="display: none; text-align: center; padding: 20px 0;">
+                <div style="color: var(--primary-light); margin-bottom: 12px;">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                </div>
+                <h3 style="font-size: 1.4rem; color: var(--text-main); margin-bottom: 8px;">Замовлення успішно створено!</h3>
+                <p id="orderSuccessText" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; line-height: 1.5;"></p>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <button type="button" id="btnGoToChatAfterOrder" style="padding: 12px 18px; background: transparent; border: 2px solid var(--primary-light); color: var(--primary-light); border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        💬 Написати продавцю
+                    </button>
+                    <button type="button" onclick="window.location.href='/profile.html#orders'" style="padding: 12px 24px; background: var(--primary-light); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">
+                        📦 Мої замовлення
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     </main>
 
     <!-- Модальное окно для написания отзыва -->
@@ -1014,6 +1110,9 @@
                         document.getElementById('itemTitle').innerText = item.title;
                         document.getElementById('breadTitle').innerText = item.title;
                         document.getElementById('itemPrice').innerText = `${item.price} ₴`;
+                        window.currentListingData = item;
+                        window.currentBasePriceUah = item.price;
+                        loadCurrencyRates();
                         document.getElementById('itemDesc').innerText = item.description;
                         document.getElementById('breadCategory').innerText = item.categoryName || "Інше";
 
@@ -1070,6 +1169,11 @@
                             `;
                         } else {
                             let buttonsHtml = '';
+                            if (item.status === 'Sold') {
+                                buttonsHtml += `<div style="padding: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 10px; color: #ef4444; font-weight: 700; text-align: center; margin-bottom: 12px;">Цей товар вже продано</div>`;
+                            } else {
+                                buttonsHtml += `<button type="button" onclick="openOrderModal()" class="btn-buy-now" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 12px; font-weight: 800; font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); transition: 0.2s;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> Купити з доставкою</button>`;
+                            }
                             if (item.seller.phoneNumber) {
                                 buttonsHtml += `<a href="tel:+${item.seller.phoneNumber}" class="btn-contact">${ICONS.phone} Зателефонувати (+${item.seller.phoneNumber})</a>`;
                             }
@@ -1194,6 +1298,156 @@
                         }
                     } catch (err) { alert("Помилка з'єднання з сервером."); }
                 }
+    
+        // ==================== ВАЛЮТНА КОНВЕРТАЦІЯ (Етап 4) ====================
+        let cachedCurrencyRates = null;
+        async function loadCurrencyRates() {
+            try {
+                const res = await fetch('/api/currency/rates');
+                if (res.ok) {
+                    cachedCurrencyRates = await res.json();
+                    updateCurrencyHint();
+                }
+            } catch (err) {
+                console.debug('Помилка завантаження курсів валют', err);
+            }
+        }
+
+        function updateCurrencyHint() {
+            if (!cachedCurrencyRates || !window.currentBasePriceUah) return;
+            const usd = cachedCurrencyRates.find(r => r.currencyCode === 'USD');
+            const eur = cachedCurrencyRates.find(r => r.currencyCode === 'EUR');
+            const hintEl = document.getElementById('currencyHintText');
+            if (hintEl && usd && eur) {
+                const usdVal = (window.currentBasePriceUah / usd.rate).toFixed(2);
+                const eurVal = (window.currentBasePriceUah / eur.rate).toFixed(2);
+                hintEl.innerText = `≈ $${usdVal} | €${eurVal} (за офіційним курсом НБУ)`;
+            }
+        }
+
+        window.switchCurrency = function(currCode, btnEl) {
+            document.querySelectorAll('.curr-pill').forEach(b => {
+                b.style.background = 'transparent';
+                b.style.color = 'var(--text-muted)';
+            });
+            if (btnEl) {
+                btnEl.style.background = 'var(--primary-light)';
+                btnEl.style.color = 'white';
+            }
+
+            const priceEl = document.getElementById('itemPrice');
+            if (!window.currentBasePriceUah) return;
+
+            if (currCode === 'UAH') {
+                priceEl.innerText = `${window.currentBasePriceUah} ₴`;
+                return;
+            }
+
+            if (cachedCurrencyRates) {
+                const item = cachedCurrencyRates.find(r => r.currencyCode === currCode);
+                if (item && item.rate > 0) {
+                    const converted = (window.currentBasePriceUah / item.rate).toFixed(2);
+                    const symbols = { 'USD': '$', 'EUR': '€', 'PLN': 'zł' };
+                    priceEl.innerText = `${symbols[currCode] || ''} ${converted} ${currCode}`;
+                }
+            }
+        };
+
+        // ==================== ОФОРМЛЕННЯ ЗАМОВЛЕННЯ (Етап 2 & 4) ====================
+        window.openOrderModal = function() {
+            const token = localStorage.getItem('loopToken');
+            if (!token) {
+                alert('Щоб оформити замовлення, увійдіть у свій акаунт.');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const modal = document.getElementById('orderModal');
+            if (modal && window.currentListingData) {
+                document.getElementById('orderItemTitle').innerText = window.currentListingData.title;
+                document.getElementById('orderItemPrice').innerText = `${window.currentListingData.price} ₴`;
+                
+                let img = 'https://placehold.co/600x400/e2e8f0/64748b?text=Loop+Market';
+                if (window.currentListingData.imageUrls && window.currentListingData.imageUrls.length > 0) {
+                    img = window.currentListingData.imageUrls[0];
+                }
+                document.getElementById('orderItemImg').src = img;
+
+                // Автоматичне підставлення імені з токена
+                try {
+                    const user = parseJwt(token);
+                    if (user && user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]) {
+                        const nameInput = document.getElementById('orderBuyerName');
+                        if (!nameInput.value) {
+                            nameInput.value = user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+                        }
+                    }
+                } catch(e) {}
+
+                modal.style.display = 'flex';
+            }
+        };
+
+        window.closeOrderModal = function() {
+            document.getElementById('orderModal').style.display = 'none';
+        };
+
+        window.submitOrder = async function(e) {
+            e.preventDefault();
+            const token = localStorage.getItem('loopToken');
+            const btn = document.getElementById('orderSubmitBtn');
+            const errDiv = document.getElementById('orderErrorMsg');
+            errDiv.style.display = 'none';
+
+            btn.disabled = true;
+            btn.innerText = 'Оформлення...';
+
+            const payload = {
+                listingId: currentListingId,
+                buyerName: document.getElementById('orderBuyerName').value,
+                buyerPhone: document.getElementById('orderBuyerPhone').value,
+                deliveryCity: document.getElementById('orderDeliveryCity').value,
+                deliveryBranch: document.getElementById('orderDeliveryBranch').value,
+                paymentMethod: document.getElementById('orderPaymentMethod').value,
+                comment: document.getElementById('orderComment').value
+            };
+
+            try {
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById('orderForm').style.display = 'none';
+                    document.getElementById('orderSuccessScreen').style.display = 'block';
+                    document.getElementById('orderSuccessText').innerText = 
+                        `Замовлення #${data.id} на суму ${data.totalPrice} ₴ успішно зареєстровано! Продавця (${data.sellerName || 'продавця'}) повідомлено. Ви можете відстежувати його у розділі "Замовлення" або перейти до діалогу.`;
+                    
+                    const chatBtn = document.getElementById('btnGoToChatAfterOrder');
+                    if (chatBtn) {
+                        chatBtn.onclick = () => {
+                            window.location.href = `/messages.html?seller=${data.sellerId}&item=${data.listingId}`;
+                        };
+                    }
+                } else {
+                    errDiv.innerText = data.error || data.title || 'Помилка оформлення замовлення';
+                    errDiv.style.display = 'block';
+                }
+            } catch (err) {
+                errDiv.innerText = "Помилка з'єднання з сервером";
+                errDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Підтвердити замовлення';
+            }
+        };
+
     </script>
 </body>
 </html>

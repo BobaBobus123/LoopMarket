@@ -1271,13 +1271,36 @@
         function showLogoutModal() { document.getElementById('logoutModal').classList.add('active'); }
         function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('active'); }
         function confirmLogoutAction() {
+            const refreshToken = localStorage.getItem('loopRefreshToken');
+            if (token && refreshToken) {
+                fetch('/api/users/revoke', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token 
+                    },
+                    body: JSON.stringify({ refreshToken })
+                }).catch(() => {});
+            }
             localStorage.removeItem('loopToken');
+            localStorage.removeItem('loopRefreshToken');
+            localStorage.removeItem('loopUserRole');
             window.location.reload();
         }
 
         if (token) {
             loadNotifications();
             setInterval(loadNotifications, 15000);
+            fetch('/api/favorites/ids', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(res => res.ok ? res.json() : [])
+            .then(ids => {
+                if (Array.isArray(ids)) {
+                    localStorage.setItem('loopFavorites', JSON.stringify(ids));
+                }
+            })
+            .catch(() => {});
         }
 
         let allListings = [];
@@ -1302,6 +1325,13 @@
 
             if (event && event.currentTarget) {
                 event.currentTarget.innerHTML = isFav ? ICONS.heartOutline : ICONS.heartFilled;
+            }
+
+            if (token) {
+                fetch('/api/favorites/' + id, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                }).catch(() => {});
             }
         };
 
