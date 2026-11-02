@@ -31,9 +31,8 @@ public class OrderService : IOrderService
         if (listing == null)
             throw new KeyNotFoundException("Оголошення не знайдено");
 
-        // Примітка: для зручності тестування та демонстрації на захисті дозволено тестове замовлення
-        // if (listing.SellerId == buyerId)
-        //     throw new InvalidOperationException("Ви не можете купити власний товар");
+        if (listing.SellerId == buyerId)
+            throw new InvalidOperationException("Ви не можете купити власний товар");
 
         if (listing.Status == "Sold")
             throw new InvalidOperationException("Цей товар вже продано");

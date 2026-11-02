@@ -38,6 +38,13 @@ builder.Services.AddHttpClient("NbuApiClient", client =>
 });
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 
+// HTTP-клієнт для інтеграції з API Нової Пошти (Етап 2 та 4)
+builder.Services.AddHttpClient("NovaPoshtaClient", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
+builder.Services.AddScoped<INovaPoshtaService, NovaPoshtaService>();
+
 // Фонова черга задач без зовнішнього брокера (Етап 4)
 builder.Services.AddSingleton<IBackgroundTaskQueue>(new BackgroundTaskQueue(100));
 builder.Services.AddHostedService<QueuedHostedService>();
