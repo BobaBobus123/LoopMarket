@@ -732,30 +732,58 @@
             }
         }
     
+        /* СТИЛІ РОЗШИРЕНОГО МОДАЛЬНОГО ВІКНА ЗАМОВЛЕННЯ */
+        .order-modal-container {
+            background: var(--surface);
+            padding: 30px 36px;
+            border-radius: 24px;
+            width: 95%;
+            max-width: 960px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+            max-height: 92vh;
+            overflow-y: auto;
+        }
+        .order-modal-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 28px;
+            align-items: start;
+        }
+        @media (max-width: 860px) {
+            .order-modal-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .order-modal-container {
+                padding: 20px;
+                width: 96%;
+            }
+        }
         .carrier-card {
             background: var(--bg-color);
             border: 2px solid var(--border-color);
             border-radius: 12px;
-            padding: 10px 12px;
+            padding: 12px 14px;
             cursor: pointer;
             transition: all 0.2s ease;
         }
         .carrier-card:hover {
             border-color: var(--primary-light);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
         }
         .carrier-card.active {
             border-color: var(--primary-light);
             background: rgba(16, 185, 129, 0.08);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
         }
         .city-pill-btn {
             border: 1px solid var(--border-color);
             background: var(--surface);
             color: var(--text-main);
-            border-radius: 12px;
-            padding: 3px 8px;
-            font-size: 0.74rem;
+            border-radius: 14px;
+            padding: 3px 10px;
+            font-size: 0.76rem;
             font-weight: 600;
             cursor: pointer;
             transition: 0.15s;
@@ -766,10 +794,10 @@
             background: rgba(16, 185, 129, 0.08);
         }
         .city-suggest-item {
-            padding: 8px 12px;
+            padding: 10px 14px;
             cursor: pointer;
             border-bottom: 1px solid var(--border-color);
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             color: var(--text-main);
             transition: 0.15s;
         }
@@ -777,7 +805,6 @@
             background: rgba(16, 185, 129, 0.12);
             color: var(--primary-light);
         }
-
     </style>
 </head>
 <body>
@@ -916,201 +943,225 @@
             </div>
         </div>
 
-    <!-- Модальне вікно оформлення замовлення з API Нової Пошти та Укрпошти -->
-    <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); justify-content: center; align-items: center; z-index: 2000;">
-        <div style="background: var(--surface); padding: 26px 30px; border-radius: 20px; width: 92%; max-width: 640px; border: 1px solid var(--border-color); box-shadow: 0 25px 50px rgba(0,0,0,0.35); max-height: 92vh; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 38px; height: 38px; background: rgba(16, 185, 129, 0.12); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--primary-light);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+    <!-- Модальне вікно оформлення замовлення (Широкий та зручний інтерфейс) -->
+    <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.72); backdrop-filter: blur(6px); justify-content: center; align-items: center; z-index: 2000;">
+        <div class="order-modal-container">
+            <!-- Заголовок модального вікна -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 42px; height: 42px; background: rgba(16, 185, 129, 0.12); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary-light); flex-shrink: 0;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
                     </div>
                     <div>
-                        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0;">Оформлення замовлення</h3>
-                        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 2px 0 0 0;">Безпечна покупка з перевіркою товару</p>
+                        <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin: 0;">Оформлення замовлення</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 2px 0 0 0;">Безпечна покупка з доставкою по Україні та оглядом товару</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeOrderModal()" style="background: var(--bg-color); border: 1px solid var(--border-color); width: 34px; height: 34px; border-radius: 8px; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+                <button type="button" onclick="closeOrderModal()" style="background: var(--bg-color); border: 1px solid var(--border-color); width: 36px; height: 36px; border-radius: 10px; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;">✕</button>
             </div>
 
-            <!-- Компактний блок товару -->
-            <div style="display: flex; gap: 12px; align-items: center; padding: 12px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 16px;">
-                <img id="orderItemImg" src="" style="width: 58px; height: 58px; border-radius: 8px; object-fit: cover; flex-shrink: 0;">
-                <div style="flex: 1; min-width: 0;">
-                    <h4 id="orderItemTitle" style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></h4>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span id="orderItemPrice" style="font-weight: 800; color: var(--primary-light); font-size: 1.15rem;"></span>
-                        <span id="orderSellerBadge" style="font-size: 0.75rem; background: var(--surface); padding: 2px 8px; border-radius: 6px; border: 1px solid var(--border-color); color: var(--text-muted);"></span>
-                    </div>
-                </div>
-            </div>
-
+            <!-- Форма замовлення у 2 широких колонки -->
             <form onsubmit="submitOrder(event)" id="orderForm">
-                <!-- 1. Дані отримувача -->
-                <div style="margin-bottom: 16px;">
-                    <div style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 1. Отримувач
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="order-modal-grid">
+                    <!-- ЛІВА КОЛОНКА: Отримувач, Доставка (Нова Пошта/Укрпошта), Оплата -->
+                    <div>
+                        <!-- 1. Дані отримувача -->
+                        <div style="margin-bottom: 20px;">
+                            <div style="font-size: 0.88rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                1. Дані отримувача
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div>
+                                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 5px;">ПІБ отримувача *</label>
+                                    <input type="text" id="orderBuyerName" required placeholder="Шевченко Тарас" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 11px 14px; color: var(--text-main); font-size: 0.92rem; outline: none;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 5px;">Номер телефону *</label>
+                                    <input type="tel" id="orderBuyerPhone" required placeholder="+380991234567" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 11px 14px; color: var(--text-main); font-size: 0.92rem; outline: none;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Спосіб доставки -->
+                        <div style="margin-bottom: 20px;">
+                            <div style="font-size: 0.88rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="16" height="13" x="4" y="5" rx="2"/><path d="m4 9 8 5 8-5"/></svg>
+                                2. Спосіб доставки
+                            </div>
+                            <!-- Вибір перевізника -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+                                <div class="carrier-card active" id="carrierCard_np_branch" onclick="selectCarrier('novaposhta_branch')">
+                                    <div style="font-weight: 800; font-size: 0.92rem; color: #ef4444; display: flex; align-items: center; gap: 6px;">
+                                        🔴 Нова Пошта
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">У відділення (1–2 дні)</div>
+                                    <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-main); margin-top: 4px;">~80 ₴</div>
+                                </div>
+                                <div class="carrier-card" id="carrierCard_np_postomat" onclick="selectCarrier('novaposhta_postomat')">
+                                    <div style="font-weight: 800; font-size: 0.92rem; color: #ef4444; display: flex; align-items: center; gap: 6px;">
+                                        🔴 Нова Пошта
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">У поштомат (1–2 дні)</div>
+                                    <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-main); margin-top: 4px;">~70 ₴</div>
+                                </div>
+                                <div class="carrier-card" id="carrierCard_ukrposhta" onclick="selectCarrier('ukrposhta_standard')">
+                                    <div style="font-weight: 800; font-size: 0.92rem; color: #f59e0b; display: flex; align-items: center; gap: 6px;">
+                                        🟡 Укрпошта
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Відділення (2–4 дні)</div>
+                                    <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-main); margin-top: 4px;">~45 ₴</div>
+                                </div>
+                                <div class="carrier-card" id="carrierCard_pickup" onclick="selectCarrier('pickup')">
+                                    <div style="font-weight: 800; font-size: 0.92rem; color: var(--primary-light); display: flex; align-items: center; gap: 6px;">
+                                        🤝 Самовивіз
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Особиста зустріч</div>
+                                    <div style="font-size: 0.85rem; font-weight: 800; color: var(--primary-light); margin-top: 4px;">Безкоштовно</div>
+                                </div>
+                            </div>
+
+                            <!-- Поля доставки Новою Поштою або Укрпоштою -->
+                            <div id="deliveryFieldsPostal" style="background: var(--bg-color); padding: 16px; border-radius: 14px; border: 1px solid var(--border-color);">
+                                <div style="margin-bottom: 12px; position: relative;">
+                                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 5px;">
+                                        Населений пункт (живий пошук через API Нової Пошти) *
+                                    </label>
+                                    <input type="text" id="orderDeliveryCity" required autocomplete="off" placeholder="Введіть місто (наприклад, Кременчук, Київ...)" oninput="onCityInput(this.value)" style="width: 100%; box-sizing: border-box; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 11px 14px; color: var(--text-main); font-size: 0.92rem; outline: none;">
+                                    <div id="citySuggestionsDropdown" style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 10px; box-shadow: 0 12px 30px rgba(0,0,0,0.25); max-height: 200px; overflow-y: auto; z-index: 100;"></div>
+                                    
+                                    <!-- Швидкі міста -->
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center;">
+                                        <span style="font-size: 0.74rem; color: var(--text-muted);">Швидкий вибір:</span>
+                                        <button type="button" class="city-pill-btn" onclick="quickSelectCity('Кременчук')">Кременчук</button>
+                                        <button type="button" class="city-pill-btn" onclick="quickSelectCity('Київ')">Київ</button>
+                                        <button type="button" class="city-pill-btn" onclick="quickSelectCity('Полтава')">Полтава</button>
+                                        <button type="button" class="city-pill-btn" onclick="quickSelectCity('Харків')">Харків</button>
+                                        <button type="button" class="city-pill-btn" onclick="quickSelectCity('Дніпро')">Дніпро</button>
+                                        <button type="button" class="city-pill-btn" onclick="quickSelectCity('Одеса')">Одеса</button>
+                                        <button type="button" class="city-pill-btn" onclick="quickSelectCity('Львів')">Львів</button>
+                                    </div>
+                                </div>
+
+                                <!-- Відділення або Поштомат Нової Пошти -->
+                                <div id="npWarehouseContainer">
+                                    <label id="npWarehouseLabel" style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 5px;">
+                                        Відділення Нової Пошти *
+                                    </label>
+                                    <select id="orderDeliveryBranchSelect" onchange="onBranchSelected(this)" style="width: 100%; box-sizing: border-box; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 11px 14px; color: var(--text-main); font-size: 0.9rem; outline: none; height: 46px;">
+                                        <option value="">Завантаження відділень з API Нової Пошти...</option>
+                                    </select>
+                                    <input type="hidden" id="orderDeliveryBranch" required>
+                                </div>
+
+                                <!-- Ручне поле для Укрпошти -->
+                                <div id="ukrposhtaBranchContainer" style="display: none;">
+                                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 5px;">
+                                        Номер відділення або поштовий індекс Укрпошти *
+                                    </label>
+                                    <input type="text" id="orderUkrposhtaBranchInput" placeholder="Відділення 39600 (вул. Соборна, 28) або індекс" style="width: 100%; box-sizing: border-box; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 11px 14px; color: var(--text-main); font-size: 0.92rem; outline: none;">
+                                </div>
+                            </div>
+
+                            <!-- Самовивіз інформаційний блок -->
+                            <div id="deliveryFieldsPickup" style="display: none; background: rgba(16, 185, 129, 0.08); padding: 16px; border-radius: 14px; border: 1.5px dashed var(--primary-light);">
+                                <div style="font-weight: 800; font-size: 0.95rem; color: var(--primary-light); display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    📍 Локація продавця: <span id="pickupLocationText" style="color: var(--text-main);">Кременчук</span>
+                                </div>
+                                <p style="font-size: 0.84rem; color: var(--text-muted); margin: 0; line-height: 1.4;">
+                                    Ви домовитеся з продавцем про зручний час та місце зустрічі в чаті або телефоном після підтвердження замовлення. Доставка безкоштовна.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 3. Спосіб оплати -->
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-size: 0.88rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                                3. Спосіб оплати
+                            </div>
+                            <select id="orderPaymentMethod" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 11px 14px; color: var(--text-main); font-size: 0.92rem; outline: none;">
+                                <option value="Накладений платіж (при отриманні)">📦 Післяплата (оплата при отриманні та огляді посилки)</option>
+                                <option value="Оплата карткою (онлайн)">💳 Безпечна онлайн-оплата карткою (Visa / MasterCard / Apple Pay)</option>
+                                <option value="Готівкою при зустрічі">💵 Готівкою або переказом при зустрічі (для самовивозу)</option>
+                            </select>
+                        </div>
+
+                        <!-- 4. Коментар -->
                         <div>
-                            <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">ПІБ (Прізвище, Ім'я) *</label>
-                            <input type="text" id="orderBuyerName" required placeholder="Шевченко Тарас" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 8px; padding: 9px 12px; color: var(--text-main); font-size: 0.9rem;">
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Номер телефону *</label>
-                            <input type="tel" id="orderBuyerPhone" required placeholder="+380991234567" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 8px; padding: 9px 12px; color: var(--text-main); font-size: 0.9rem;">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. Вибір служби доставки -->
-                <div style="margin-bottom: 16px;">
-                    <div style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="16" height="13" x="4" y="5" rx="2"/><path d="m4 9 8 5 8-5"/></svg> 2. Спосіб доставки
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
-                        <div class="carrier-card active" id="carrierCard_np_branch" onclick="selectCarrier('novaposhta_branch')">
-                            <div style="font-weight: 700; font-size: 0.88rem; color: #ef4444; display: flex; align-items: center; gap: 6px;">
-                                🔴 Нова Пошта
-                            </div>
-                            <div style="font-size: 0.78rem; color: var(--text-muted);">Відділення (1-2 дні)</div>
-                            <div style="font-size: 0.8rem; font-weight: 800; color: var(--text-main); margin-top: 2px;">~80 ₴</div>
-                        </div>
-                        <div class="carrier-card" id="carrierCard_np_postomat" onclick="selectCarrier('novaposhta_postomat')">
-                            <div style="font-weight: 700; font-size: 0.88rem; color: #ef4444; display: flex; align-items: center; gap: 6px;">
-                                🔴 Нова Пошта
-                            </div>
-                            <div style="font-size: 0.78rem; color: var(--text-muted);">Поштомат (1-2 дні)</div>
-                            <div style="font-size: 0.8rem; font-weight: 800; color: var(--text-main); margin-top: 2px;">~70 ₴</div>
-                        </div>
-                        <div class="carrier-card" id="carrierCard_ukrposhta" onclick="selectCarrier('ukrposhta_standard')">
-                            <div style="font-weight: 700; font-size: 0.88rem; color: #f59e0b; display: flex; align-items: center; gap: 6px;">
-                                🟡 Укрпошта
-                            </div>
-                            <div style="font-size: 0.78rem; color: var(--text-muted);">Відділення (2-4 дні)</div>
-                            <div style="font-size: 0.8rem; font-weight: 800; color: var(--text-main); margin-top: 2px;">~45 ₴</div>
-                        </div>
-                        <div class="carrier-card" id="carrierCard_pickup" onclick="selectCarrier('pickup')">
-                            <div style="font-weight: 700; font-size: 0.88rem; color: var(--primary-light); display: flex; align-items: center; gap: 6px;">
-                                🤝 Самовивіз
-                            </div>
-                            <div style="font-size: 0.78rem; color: var(--text-muted);">Особиста зустріч</div>
-                            <div style="font-size: 0.8rem; font-weight: 800; color: var(--primary-light); margin-top: 2px;">Безкоштовно</div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Коментар до замовлення (необов'язково)</label>
+                            <input type="text" id="orderComment" placeholder="Уточнення або зручний час для дзвінка" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 14px; color: var(--text-main); font-size: 0.9rem; outline: none;">
                         </div>
                     </div>
 
-                    <!-- Секція введення міста та вибору відділення з API Нової Пошти -->
-                    <div id="deliveryFieldsPostal" style="background: var(--bg-color); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color);">
-                        <div style="margin-bottom: 10px; position: relative;">
-                            <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">
-                                Населений пункт (пошук через API Нової Пошти) *
-                            </label>
-                            <input type="text" id="orderDeliveryCity" required autocomplete="off" placeholder="Введіть місто (наприклад, Кременчук, Київ...)" oninput="onCityInput(this.value)" style="width: 100%; box-sizing: border-box; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 8px; padding: 9px 12px; color: var(--text-main); font-size: 0.9rem;">
-                            <div id="citySuggestionsDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); max-height: 180px; overflow-y: auto; z-index: 100;"></div>
-                            <!-- Швидкі міста -->
-                            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
-                                <span style="font-size: 0.72rem; color: var(--text-muted); align-self: center;">Швидкий вибір:</span>
-                                <button type="button" class="city-pill-btn" onclick="quickSelectCity('Кременчук')">Кременчук</button>
-                                <button type="button" class="city-pill-btn" onclick="quickSelectCity('Київ')">Київ</button>
-                                <button type="button" class="city-pill-btn" onclick="quickSelectCity('Полтава')">Полтава</button>
-                                <button type="button" class="city-pill-btn" onclick="quickSelectCity('Харків')">Харків</button>
-                                <button type="button" class="city-pill-btn" onclick="quickSelectCity('Дніпро')">Дніпро</button>
+                    <!-- ПРАВА КОЛОНКА: Товар, Розрахунок вартості, Захист, Кнопка підтвердження -->
+                    <div style="position: sticky; top: 0;">
+                        <!-- Картка товару -->
+                        <div style="display: flex; gap: 14px; align-items: center; padding: 16px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 16px; margin-bottom: 16px;">
+                            <img id="orderItemImg" src="" style="width: 74px; height: 74px; border-radius: 12px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border-color);">
+                            <div style="flex: 1; min-width: 0;">
+                                <h4 id="orderItemTitle" style="font-size: 1rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></h4>
+                                <div id="orderItemPrice" style="font-weight: 800; color: var(--primary-light); font-size: 1.3rem; margin-bottom: 4px;"></div>
+                                <div id="orderSellerBadge" style="font-size: 0.78rem; color: var(--text-muted);"></div>
                             </div>
                         </div>
 
-                        <!-- Відділення або Поштомат Нової Пошти -->
-                        <div id="npWarehouseContainer">
-                            <label id="npWarehouseLabel" style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">
-                                Відділення Нової Пошти *
-                            </label>
-                            <div style="display: flex; gap: 8px; align-items: center;">
-                                <select id="orderDeliveryBranchSelect" onchange="onBranchSelected(this)" style="flex: 1; box-sizing: border-box; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 8px; padding: 9px 12px; color: var(--text-main); font-size: 0.88rem; outline: none;">
-                                    <option value="">Завантаження відділень...</option>
-                                </select>
+                        <!-- Розрахунок вартості -->
+                        <div style="background: var(--bg-color); padding: 18px 20px; border-radius: 16px; border: 1.5px solid var(--border-color); margin-bottom: 16px;">
+                            <div style="font-size: 0.92rem; font-weight: 800; color: var(--text-main); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color);">
+                                Підсумок замовлення
                             </div>
-                            <input type="hidden" id="orderDeliveryBranch" required>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.92rem; color: var(--text-muted); margin-bottom: 8px;">
+                                <span>Вартість товару:</span>
+                                <span id="summaryItemPrice" style="font-weight: 700; color: var(--text-main);">0 ₴</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.92rem; color: var(--text-muted); margin-bottom: 12px;">
+                                <span>Орієнтовна доставка:</span>
+                                <span id="summaryDeliveryCost" style="font-weight: 700; color: var(--text-main);">~80 ₴</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 1.25rem; font-weight: 800; color: var(--text-main); padding-top: 12px; border-top: 1px dashed var(--border-color);">
+                                <span>Разом до сплати:</span>
+                                <span id="summaryTotalCost" style="color: var(--primary-light); font-size: 1.45rem;">0 ₴</span>
+                            </div>
                         </div>
 
-                        <!-- Ручне поле для Укрпошти -->
-                        <div id="ukrposhtaBranchContainer" style="display: none;">
-                            <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">
-                                Номер відділення або поштовий індекс Укрпошти *
-                            </label>
-                            <input type="text" id="orderUkrposhtaBranchInput" placeholder="Відділення 39600 (вул. Соборна, 28) або індекс" style="width: 100%; box-sizing: border-box; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 8px; padding: 9px 12px; color: var(--text-main); font-size: 0.9rem;">
+                        <!-- Бейдж захисту покупця -->
+                        <div style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 18px; padding: 12px 14px; background: rgba(16, 185, 129, 0.08); border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2.2" style="flex-shrink: 0; margin-top: 1px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                            <div>
+                                <b style="color: var(--text-main);">Захист покупця Loop Market:</b><br>
+                                Кошти застраховані. Ви оглядаєте посилку перед сплатою.
+                            </div>
+                        </div>
+
+                        <!-- Повідомлення про помилки -->
+                        <div id="orderErrorMsg" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 14px; display: none; font-weight: 700; padding: 12px 14px; background: rgba(239,68,68,0.1); border-radius: 12px; border: 1.5px solid #ef4444; line-height: 1.4;"></div>
+
+                        <!-- Кнопки дій -->
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button type="submit" id="orderSubmitBtn" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4); transition: transform 0.2s;">
+                                Підтвердити замовлення
+                            </button>
+                            <button type="button" onclick="closeOrderModal()" style="width: 100%; padding: 11px; background: transparent; border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-muted); font-weight: 700; font-size: 0.9rem; cursor: pointer;">
+                                Скасувати
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Самовивіз інформаційний блок -->
-                    <div id="deliveryFieldsPickup" style="display: none; background: rgba(16, 185, 129, 0.08); padding: 14px; border-radius: 10px; border: 1.5px dashed var(--primary-light);">
-                        <div style="font-weight: 700; font-size: 0.9rem; color: var(--primary-light); display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-                            📍 Локація продавця: <span id="pickupLocationText" style="color: var(--text-main);">Кременчук</span>
-                        </div>
-                        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.4;">
-                            Ви домовитеся з продавцем про точний час та місце зустрічі в чаті або телефоном після підтвердження замовлення. Доставка безкоштовна.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- 3. Оплата -->
-                <div style="margin-bottom: 16px;">
-                    <div style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg> 3. Спосіб оплати
-                    </div>
-                    <select id="orderPaymentMethod" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: var(--text-main); font-size: 0.9rem; outline: none;">
-                        <option value="Накладений платіж (при отриманні)">📦 Післяплата (оплата при отриманні та огляді посилки)</option>
-                        <option value="Оплата карткою (онлайн)">💳 Безпечна онлайн-оплата карткою (Visa / MasterCard / Apple Pay)</option>
-                        <option value="Готівкою при зустрічі">💵 Готівкою або переказом при зустрічі (для самовивозу)</option>
-                    </select>
-                </div>
-
-                <!-- 4. Коментар -->
-                <div style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Коментар до замовлення (необов'язково)</label>
-                    <input type="text" id="orderComment" placeholder="Уточнення або зручний час для дзвінка" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 8px; padding: 9px 12px; color: var(--text-main); font-size: 0.9rem;">
-                </div>
-
-                <!-- Підсумок вартості -->
-                <div style="background: var(--bg-color); padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 16px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--text-muted); margin-bottom: 4px;">
-                        <span>Вартість товару:</span>
-                        <span id="summaryItemPrice" style="font-weight: 700; color: var(--text-main);">0 ₴</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--text-muted); margin-bottom: 6px;">
-                        <span>Орієнтовна доставка:</span>
-                        <span id="summaryDeliveryCost" style="font-weight: 700; color: var(--text-main);">~80 ₴</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 800; color: var(--text-main); padding-top: 8px; border-top: 1px dashed var(--border-color);">
-                        <span>Разом до сплати:</span>
-                        <span id="summaryTotalCost" style="color: var(--primary-light);">0 ₴</span>
-                    </div>
-                </div>
-
-                <!-- Бейдж безпеки -->
-                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2.2" style="flex-shrink: 0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-                    <span><b>Захист покупця Loop Market:</b> огляньте товар при отриманні перед фінальною сплатою.</span>
-                </div>
-
-                <div id="orderErrorMsg" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 14px; display: none; font-weight: 700; padding: 10px; background: rgba(239,68,68,0.1); border-radius: 8px; border: 1px solid #ef4444;"></div>
-
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" onclick="closeOrderModal()" style="flex: 1; padding: 12px; background: transparent; border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-weight: 700; cursor: pointer;">Скасувати</button>
-                    <button type="submit" id="orderSubmitBtn" style="flex: 1.8; padding: 13px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; border-radius: 10px; color: white; font-weight: 800; font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
-                        Підтвердити замовлення
-                    </button>
                 </div>
             </form>
 
-            <div id="orderSuccessScreen" style="display: none; text-align: center; padding: 20px 0;">
-                <div style="width: 72px; height: 72px; background: rgba(16, 185, 129, 0.12); color: var(--primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 13 4 4L19 7"/></svg>
+            <!-- Екран успіху -->
+            <div id="orderSuccessScreen" style="display: none; text-align: center; padding: 30px 10px;">
+                <div style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.12); color: var(--primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px auto;">
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 13 4 4L19 7"/></svg>
                 </div>
-                <h3 style="font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 8px;">Замовлення успішно створено!</h3>
-                <p id="orderSuccessText" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; line-height: 1.5;"></p>
-                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                    <button type="button" id="btnGoToChatAfterOrder" style="padding: 12px 18px; background: transparent; border: 2px solid var(--primary-light); color: var(--primary-light); border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                <h3 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin-bottom: 8px;">Замовлення успішно створено!</h3>
+                <p id="orderSuccessText" style="color: var(--text-muted); font-size: 0.98rem; max-width: 580px; margin: 0 auto 24px auto; line-height: 1.6;"></p>
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <button type="button" id="btnGoToChatAfterOrder" style="padding: 13px 22px; background: transparent; border: 2px solid var(--primary-light); color: var(--primary-light); border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                         💬 Написати продавцю
                     </button>
-                    <button type="button" onclick="window.location.href='/profile.html#orders'" style="padding: 12px 24px; background: var(--primary-light); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">
+                    <button type="button" onclick="window.location.href='/profile.html#orders'" style="padding: 13px 26px; background: var(--primary-light); color: white; border: none; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer;">
                         📦 Мої замовлення
                     </button>
                 </div>
@@ -1684,7 +1735,7 @@
                         if (cities.length > 0) {
                             dropdown.innerHTML = cities.map(c => `
                                 <div class="city-suggest-item" onclick="chooseCity('${c.name.replace(/'/g, "\\'")}', '${c.ref}')">
-                                    <strong>${c.name}</strong> <span style="font-size: 0.75rem; color: var(--text-muted);">(${c.fullName})</span>
+                                    <strong>${c.name}</strong> <span style="font-size: 0.78rem; color: var(--text-muted);">(${c.fullName})</span>
                                 </div>
                             `).join('');
                             dropdown.style.display = 'block';
@@ -1746,7 +1797,7 @@
         };
 
         window.openOrderModal = function() {
-            const token = localStorage.getItem('loopToken');
+            let token = localStorage.getItem('loopToken');
             if (!token) {
                 alert('Щоб оформити замовлення, увійдіть у свій акаунт.');
                 window.location.href = '/login.html';
@@ -1804,6 +1855,9 @@
                     }
                 } catch(e) {}
 
+                // Скидання помилки
+                document.getElementById('orderErrorMsg').style.display = 'none';
+
                 // Скидання на Нову Пошту Відділення
                 selectCarrier('novaposhta_branch');
                 loadWarehousesForCity(cityInput.value, 'Branch');
@@ -1817,9 +1871,36 @@
             document.getElementById('citySuggestionsDropdown').style.display = 'none';
         };
 
+        // Автоматична спроба оновлення токена (Refresh Token Rotation - Етап 5)
+        async function attemptTokenRefresh() {
+            const token = localStorage.getItem('loopToken');
+            const refreshToken = localStorage.getItem('loopRefreshToken');
+            if (!token || !refreshToken) return null;
+
+            try {
+                const res = await fetch('/api/users/refresh', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, refreshToken })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.token) {
+                        localStorage.setItem('loopToken', data.token);
+                        if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
+                        return data.token;
+                    }
+                }
+            } catch(e) {
+                console.debug('Token refresh failed', e);
+            }
+            return null;
+        }
+
         window.submitOrder = async function(e) {
             e.preventDefault();
-            const token = localStorage.getItem('loopToken');
+            let token = localStorage.getItem('loopToken');
             const btn = document.getElementById('orderSubmitBtn');
             const errDiv = document.getElementById('orderErrorMsg');
             errDiv.style.display = 'none';
@@ -1845,7 +1926,7 @@
             }
 
             if (!branch) {
-                errDiv.innerText = 'Будь ласка, вкажіть відділення або поштомат';
+                errDiv.innerText = 'Будь ласка, оберіть відділення або поштомат';
                 errDiv.style.display = 'block';
                 return;
             }
@@ -1871,7 +1952,7 @@
             };
 
             try {
-                const res = await fetch('/api/orders', {
+                let res = await fetch('/api/orders', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1880,12 +1961,37 @@
                     body: JSON.stringify(payload)
                 });
 
+                // Якщо 401 Unauthorized — пробуємо оновити токен за допомогою Refresh Token!
+                if (res.status === 401) {
+                    const refreshedToken = await attemptTokenRefresh();
+                    if (refreshedToken) {
+                        token = refreshedToken;
+                        res = await fetch('/api/orders', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify(payload)
+                        });
+                    }
+                }
+
+                if (res.status === 401) {
+                    errDiv.innerHTML = `
+                        <div style="margin-bottom: 6px;">⚠️ Сесія закінчилася або ви не авторизовані.</div>
+                        <a href="/login.html" style="display: inline-block; background: #ef4444; color: white; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: bold; margin-top: 4px;">Увійти в акаунт →</a>
+                    `;
+                    errDiv.style.display = 'block';
+                    return;
+                }
+
                 const data = await res.json();
                 if (res.ok) {
                     document.getElementById('orderForm').style.display = 'none';
                     document.getElementById('orderSuccessScreen').style.display = 'block';
                     document.getElementById('orderSuccessText').innerText = 
-                        `Замовлення #${data.id} на суму ${data.totalPrice} ₴ успішно зареєстровано! Доставка: ${carrierNameMap[currentSelectedCarrier]}, ${branch}. Продавця сповіщено у системі та Telegram. Ви можете відстежувати статус замовлення у профілі.`;
+                        `Замовлення #${data.id} на суму ${data.totalPrice} ₴ успішно зареєстровано! Доставка: ${carrierNameMap[currentSelectedCarrier]}, ${branch}. Продавця сповіщено в системі та Telegram. Ви можете відстежувати статус замовлення у профілі.`;
                     
                     const chatBtn = document.getElementById('btnGoToChatAfterOrder');
                     if (chatBtn) {
@@ -1898,6 +2004,7 @@
                     errDiv.style.display = 'block';
                 }
             } catch (err) {
+                console.error(err);
                 errDiv.innerText = "Помилка з'єднання з сервером";
                 errDiv.style.display = 'block';
             } finally {
@@ -1905,7 +2012,6 @@
                 btn.innerText = 'Підтвердити замовлення';
             }
         };
-
     </script>
 </body>
 </html>
