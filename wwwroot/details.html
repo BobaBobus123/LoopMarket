@@ -803,65 +803,27 @@
                     <button id="detailFavBtn" class="btn-fav-large" onclick="toggleDetailFavorite()" title="Додати в обране"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button>
                 </div>
 
-                <div class="price-container" style="margin-bottom: 20px;">
-                    <div style="display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;">
-                        <div class="price" id="itemPrice" style="margin-bottom: 0;">0 грн</div>
-                        <div class="currency-pills" style="display: inline-flex; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 20px; padding: 3px; gap: 4px;">
-                            <button type="button" class="curr-pill active" onclick="switchCurrency('UAH', this)" style="border: none; background: var(--primary-light); color: white; border-radius: 16px; padding: 4px 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s;">UAH ₴</button>
-                            <button type="button" class="curr-pill" onclick="switchCurrency('USD', this)" style="border: none; background: transparent; color: var(--text-muted); border-radius: 16px; padding: 4px 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s;">USD $</button>
-                            <button type="button" class="curr-pill" onclick="switchCurrency('EUR', this)" style="border: none; background: transparent; color: var(--text-muted); border-radius: 16px; padding: 4px 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s;">EUR €</button>
-                            <button type="button" class="curr-pill" onclick="switchCurrency('PLN', this)" style="border: none; background: transparent; color: var(--text-muted); border-radius: 16px; padding: 4px 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s;">PLN zł</button>
+                <div class="price-container" style="margin-bottom: 22px; padding: 18px; background: var(--surface); border: 2px solid var(--border-color); border-radius: 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                        <div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Вартість товару</div>
+                            <div class="price" id="itemPrice" style="margin-bottom: 0; font-size: 2.6rem; font-weight: 800; color: var(--text-main);">0 грн</div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700;">Конвертер валют (НБУ):</div>
+                            <div class="currency-pills" style="display: inline-flex; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 20px; padding: 3px; gap: 4px;">
+                                <button type="button" class="curr-pill active" onclick="switchCurrency('UAH', this)" style="border: none; background: var(--primary-light); color: white; border-radius: 16px; padding: 5px 12px; font-size: 0.82rem; font-weight: 800; cursor: pointer; transition: 0.2s;">₴ UAH</button>
+                                <button type="button" class="curr-pill" onclick="switchCurrency('USD', this)" style="border: none; background: transparent; color: var(--text-muted); border-radius: 16px; padding: 5px 12px; font-size: 0.82rem; font-weight: 800; cursor: pointer; transition: 0.2s;">$ USD</button>
+                                <button type="button" class="curr-pill" onclick="switchCurrency('EUR', this)" style="border: none; background: transparent; color: var(--text-muted); border-radius: 16px; padding: 5px 12px; font-size: 0.82rem; font-weight: 800; cursor: pointer; transition: 0.2s;">€ EUR</button>
+                                <button type="button" class="curr-pill" onclick="switchCurrency('PLN', this)" style="border: none; background: transparent; color: var(--text-muted); border-radius: 16px; padding: 5px 12px; font-size: 0.82rem; font-weight: 800; cursor: pointer; transition: 0.2s;">zł PLN</button>
+                            </div>
                         </div>
                     </div>
-                    <div id="currencyHint" style="font-size: 0.82rem; color: var(--text-muted); margin-top: 6px; display: flex; align-items: center; gap: 5px;">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        <span id="currencyHintText">Синхронізація з офіційним курсом НБУ...</span>
+                    <div id="currencyHint" style="font-size: 0.85rem; color: var(--primary-light); font-weight: 600; margin-top: 12px; display: flex; align-items: center; gap: 6px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span id="currencyHintText">Синхронізація з курсом НБУ...</span>
                     </div>
                 </div>
-
-                <div class="specs-box">
-                    <div class="spec-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><strong id="itemLocation"></strong></div>
-                    <div class="spec-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg><span id="itemCondition"></span></div>
-                    <div class="spec-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg><span id="itemShipping"></span></div>
-                    <div class="spec-item" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="itemDate"></span>
-                    </div>
-                </div>
-
-                <div class="seller-card" id="sellerCardWrapper" title="Перейти в профіль продавця">
-                    <div class="seller-avatar" id="avatarBox"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-                    <div>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 3px;">Продавець</p>
-                        <h4 id="sellerName" style="font-size: 1.2rem; color: var(--text-main);">Ім'я</h4>
-                        <p style="font-size: 0.85rem; color: var(--primary-light); font-weight: bold; margin-top: 3px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Перевірений студент</p>
-                    </div>
-                </div>
-
-                <!-- БЛОК ОТЗЫВОВ И РЕЙТИНГА ПРОДАВЦА -->
-                <div class="reviews-box-modern">
-                    <div class="reviews-top-row">
-                        <div class="reviews-score-info">
-                            <span id="sellerAvgStars" style="display:inline-flex;align-items:center;gap:2px;"></span>
-                            <span id="sellerAvgRating" style="font-weight: 800; font-size: 1.1rem; color: var(--text-main);">0.0</span>
-                            <span id="sellerTotalReviews" style="color: var(--text-muted); font-size: 0.85rem;">(0 відгуків)</span>
-                        </div>
-                        <button id="rateSellerBtn" onclick="openReviewModal()" class="btn-rate-modern" style="display: none;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5" style="vertical-align:-2px;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Оцінити
-                        </button>
-                    </div>
-                    <div id="sellerReviewsList" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; padding-right: 4px;">
-                        <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 10px;">Завантаження відгуків...</p>
-                    </div>
-                </div>
-
-                <div id="actionButtons"></div>
-
-                <div class="safety-box">
-                    <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Правила безпеки</h4>
-                    Ніколи не переказуйте гроші наперед. Користуйтеся післяплатою або зустрічайтеся особисто.
-                </div>
-            </div>
-        </div>
     
     <!-- Модальне вікно оформлення замовлення (Етап замовлень) -->
     <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 2000;">
@@ -1162,24 +1124,34 @@
                         };
 
                         const actionButtons = document.getElementById('actionButtons');
+                        let buttonsHtml = '';
+
+                        // Кнопка замовлення показується завжди (якщо товар не продано)
+                        if (item.status === 'Sold') {
+                            buttonsHtml += `<div style="padding: 14px; background: rgba(239, 68, 68, 0.1); border: 1.5px solid #ef4444; border-radius: 12px; color: #ef4444; font-weight: 800; text-align: center; margin-bottom: 12px;">Цей товар вже продано</div>`;
+                        } else {
+                            buttonsHtml += `
+                                <button type="button" onclick="openOrderModal()" class="btn-buy-now" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 12px; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); transition: transform 0.2s;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                                    Купити з доставкою
+                                </button>
+                            `;
+                        }
+
                         if (currentUserId === item.sellerId) {
-                            actionButtons.innerHTML = `
-                                <button class="btn-edit" onclick="window.location.href='/edit.html?id=${item.id}'">${ICONS.edit} Редагувати</button>
-                                <button class="btn-delete" onclick="deleteListing(${item.id})">${ICONS.trash} Видалити оголошення</button>
+                            buttonsHtml += `
+                                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                                    <button class="btn-edit" style="flex: 1; padding: 12px;" onclick="window.location.href='/edit.html?id=${item.id}'">${ICONS.edit} Редагувати</button>
+                                    <button class="btn-delete" style="flex: 1; padding: 12px;" onclick="deleteListing(${item.id})">${ICONS.trash} Видалити</button>
+                                </div>
                             `;
                         } else {
-                            let buttonsHtml = '';
-                            if (item.status === 'Sold') {
-                                buttonsHtml += `<div style="padding: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 10px; color: #ef4444; font-weight: 700; text-align: center; margin-bottom: 12px;">Цей товар вже продано</div>`;
-                            } else {
-                                buttonsHtml += `<button type="button" onclick="openOrderModal()" class="btn-buy-now" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 12px; font-weight: 800; font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); transition: 0.2s;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> Купити з доставкою</button>`;
-                            }
                             if (item.seller.phoneNumber) {
                                 buttonsHtml += `<a href="tel:+${item.seller.phoneNumber}" class="btn-contact">${ICONS.phone} Зателефонувати (+${item.seller.phoneNumber})</a>`;
                             }
                             buttonsHtml += `<a href="/messages.html?seller=${item.sellerId}&item=${item.id}" class="btn-chat">${ICONS.chatBtn} Написати продавцю</a>`;
-                            actionButtons.innerHTML = buttonsHtml;
                         }
+                        actionButtons.innerHTML = buttonsHtml;
 
                         document.getElementById('productContent').style.display = 'grid';
                     } catch (error) { console.error(error); }
