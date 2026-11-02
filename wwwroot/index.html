@@ -1091,13 +1091,24 @@
                     <h2 class="catalog-title" id="gridTitle">Свіжі оголошення</h2>
                     <span class="catalog-counter" id="catalogCount"></span>
                 </div>
-                <div class="catalog-sort">
-                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Сортувати:</span>
-                    <select id="sortFilter" onchange="applyFilters()">
-                        <option value="newest">Найновіші</option>
-                        <option value="price_asc">Від дешевих</option>
-                        <option value="price_desc">Від дорогих</option>
-                    </select>
+                <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 700;">Валюта:</span>
+                        <div class="currency-pills" style="display: inline-flex; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 20px; padding: 2px; gap: 2px;">
+                            <button type="button" class="curr-pill-global active" onclick="switchGlobalCurrency('UAH', this)" style="border: none; background: var(--primary-light); color: white; border-radius: 14px; padding: 4px 9px; font-size: 0.78rem; font-weight: 800; cursor: pointer; transition: 0.2s;">₴ UAH</button>
+                            <button type="button" class="curr-pill-global" onclick="switchGlobalCurrency('USD', this)" style="border: none; background: transparent; color: var(--text-muted); border-radius: 14px; padding: 4px 9px; font-size: 0.78rem; font-weight: 800; cursor: pointer; transition: 0.2s;">$ USD</button>
+                            <button type="button" class="curr-pill-global" onclick="switchGlobalCurrency('EUR', this)" style="border: none; background: transparent; color: var(--text-muted); border-radius: 14px; padding: 4px 9px; font-size: 0.78rem; font-weight: 800; cursor: pointer; transition: 0.2s;">€ EUR</button>
+                            <button type="button" class="curr-pill-global" onclick="switchGlobalCurrency('PLN', this)" style="border: none; background: transparent; color: var(--text-muted); border-radius: 14px; padding: 4px 9px; font-size: 0.78rem; font-weight: 800; cursor: pointer; transition: 0.2s;">zł PLN</button>
+                        </div>
+                    </div>
+                    <div class="catalog-sort">
+                        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Сортувати:</span>
+                        <select id="sortFilter" onchange="applyFilters()">
+                            <option value="newest">Найновіші</option>
+                            <option value="price_asc">Від дешевих</option>
+                            <option value="price_desc">Від дорогих</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -1365,12 +1376,12 @@
                         <div class="card-category">${item.categoryName || 'Товар'}</div>
                         <div class="card-title" title="${item.title}" onclick="window.location.href='/details.html?id=${item.id}'">${item.title}</div>
                         <div class="card-price-row">
-                            <div class="card-price">${Number(item.price).toLocaleString('uk-UA')} ₴</div>
+                            <div class="card-price">${formatPrice(item.price)}</div>
                             ${item.isShippingAvailable ? '<span class="shipping-tag" title="Можлива доставка">' + ICONS.package + ' Доставка</span>' : ''}
                         </div>
                         <div class="card-footer">
                             <span class="card-location">${ICONS.pin} ${locationText}</span>
-                            <a href="/details.html?id=${item.id}" class="btn-view">Огляд →</a>
+                            <a href="/details.html?id=${item.id}" class="btn-view" style="font-weight: 700; color: var(--primary-light);">Купити / Деталі →</a>
                         </div>
                     </div>
                 </div>`;
