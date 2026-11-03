@@ -1,0 +1,35 @@
+function setupQuickChips(isService, item) {
+            const wrap = document.getElementById('quickChips');
+            wrap.style.display = 'flex';
+
+            let chips = [];
+            if (isService) {
+                chips = [
+                    '🛠 Вітаю! Хочу замовити вашу послугу',
+                    '📅 Коли у вас є вільний час для виконання?',
+                    '📍 Чи можливий виїзд за моєю адресою?',
+                    '🤝 Яка остання ціна? Можливий торг?'
+                ];
+            } else {
+                chips = [
+                    '📦 Вітаю! Оголошення ще актуальне?',
+                    '🤝 Яка остання ціна? Чи можливий торг?',
+                    '📍 Де і коли зручно зустрітися?',
+                    '🚚 Чи відправляєте поштою?'
+                ];
+            }
+
+            wrap.innerHTML = chips.map(c => `
+                <button type="button" class="quick-chip-btn" onclick="sendQuickText('${c.replace(/'/g, "\'")}')">${c}</button>
+            `).join('');
+        }
+
+        // ЗАВАНТАЖЕННЯ ІСТОРІЇ
+        async function loadChatHistory(partnerId, partnerName) {
+            const chatArea = document.getElementById('chatArea');
+            chatArea.innerHTML = '<div style="margin: auto; text-align: center; color: var(--text-muted); font-size: 0.88rem;">Завантаження листування...</div>';
+
+            try {
+                const res = await fetch(`/api/messages/history/${partnerId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+     
