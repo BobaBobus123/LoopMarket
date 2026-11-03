@@ -1,0 +1,1403 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Loop Market REST API & Real-Time Specifications",
+    "description": "Повна офіційна документація та специфікація API платформи Loop Market для електронної комерції, студентських послуг, безпечної оплати (Loop Захист) та SignalR чату в реальному часі.",
+    "version": "2.4.0",
+    "contact": {
+      "name": "Loop Market Support & Dev Team",
+      "url": "https://t.me"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:65083",
+      "description": "Локальний сервер перегляду LoopMarket"
+    },
+    {
+      "url": "https://localhost:7001",
+      "description": "ASP.NET Core API (.NET 10 Kestrel)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Автентифікація, реєстрація, JWT токени та OAuth"
+    },
+    {
+      "name": "Users",
+      "description": "Профілі користувачів, статистика майстрів та налаштування"
+    },
+    {
+      "name": "Listings",
+      "description": "Оголошення товарів та послуг, фільтрація, створення та оновлення"
+    },
+    {
+      "name": "Orders",
+      "description": "Замовлення товарів та послуг з холдуванням коштів (Loop Захист)"
+    },
+    {
+      "name": "Messages",
+      "description": "Діалоги, історія листування, непрочитані та SignalR вебсокети"
+    },
+    {
+      "name": "Reviews",
+      "description": "Відгуки та рейтинг виконавців і продавців"
+    },
+    {
+      "name": "Favorites",
+      "description": "Обрані оголошення та збережені товари"
+    },
+    {
+      "name": "Delivery",
+      "description": "Інтеграція Нової Пошти: пошук міст, відділень та поштоматів"
+    },
+    {
+      "name": "Currency",
+      "description": "Курси валют НБУ (UAH, USD, EUR, PLN) та конвертація"
+    },
+    {
+      "name": "Notifications",
+      "description": "Системні сповіщення користувача"
+    },
+    {
+      "name": "Health",
+      "description": "Моніторинг стану системи та бази даних"
+    }
+  ],
+  "paths": {
+    "/api/users/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Авторизація користувача (Email & Пароль)",
+        "description": "Перевіряє облікові дані користувача та повертає JWT access token для подальших авторизованих запитів.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "nikitazhidenko@gmail.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "Password123!"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успішний вхід",
+            "content": {
+              "application/json": {
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "user": {
+                    "id": 1,
+                    "firstName": "Нікіта",
+                    "lastName": "Жиденко",
+                    "email": "nikitazhidenko@gmail.com",
+                    "role": "Admin"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Невірний email або пароль"
+          }
+        }
+      }
+    },
+    "/api/users/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Реєстрація нового користувача",
+        "description": "Створює новий обліковий запис у Loop Market.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "firstName",
+                  "lastName",
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "example": "Олександр"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "example": "Коваленко"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "olexandr@loopmarket.ua"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "SecurePass123!"
+                  },
+                  "phoneNumber": {
+                    "type": "string",
+                    "example": "+380501234567"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "Buyer",
+                      "Seller",
+                      "Master"
+                    ],
+                    "example": "Buyer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Користувача успішно зареєстровано"
+          },
+          "400": {
+            "description": "Користувач з таким email вже існує"
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Отримати профіль поточного користувача",
+        "description": "Повертає повну інформацію про авторизованого користувача на основі Bearer токена.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Дані профілю",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": 1,
+                  "firstName": "Нікіта",
+                  "lastName": "Жиденко",
+                  "email": "nikitazhidenko@gmail.com",
+                  "phoneNumber": "+380951112233",
+                  "role": "Admin",
+                  "avatarUrl": "https://placehold.co/150x150/10b981/ffffff?text=N",
+                  "telegramChatId": 8990313504,
+                  "balance": 14500.0,
+                  "rating": 4.9
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неавторизовано"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Оновити особисті дані профілю",
+        "description": "Змінює ім'я, прізвище, телефон або налаштування сповіщень поточного користувача.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "example": "Нікіта"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "example": "Жиденко"
+                  },
+                  "phoneNumber": {
+                    "type": "string",
+                    "example": "+380951112233"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Профіль успішно оновлено"
+          },
+          "401": {
+            "description": "Неавторизовано"
+          }
+        }
+      }
+    },
+    "/api/users/public/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Публічна інформація про продавця/майстра",
+        "description": "Повертає публічні дані користувача для відображення в картці продавця або майстра.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Публічний профіль",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": 2,
+                  "firstName": "Вова",
+                  "lastName": "Вакуленко",
+                  "role": "Seller",
+                  "phoneNumber": "+380671234567",
+                  "avatarUrl": "https://placehold.co/150x150/2563eb/ffffff?text=V",
+                  "rating": 4.9,
+                  "reviewsCount": 18,
+                  "activeListingsCount": 4
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Користувача не знайдено"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/services-stats": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Статистика виконаних робіт майстра",
+        "description": "Повертає агреговані показники виконання послуг, рейтинг, кількість успішних угод Loop Захист та відсоток задоволених клієнтів.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Статистика майстра",
+            "content": {
+              "application/json": {
+                "example": {
+                  "userId": 1,
+                  "rating": 4.9,
+                  "totalReviews": 34,
+                  "completedJobs": 28,
+                  "activeOrders": 2,
+                  "onTimeCompletionRate": 99.2,
+                  "safeDealVerified": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/listings": {
+      "get": {
+        "tags": [
+          "Listings"
+        ],
+        "summary": "Отримати каталог оголошень та послуг",
+        "description": "Повертає список активних оголошень з підтримкою пагінації, повнотекстового пошуку, фільтрації за категорією, продавцем та типом (товар/послуга).",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID категорії (8 - Послуги)"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "product",
+                "service"
+              ]
+            },
+            "description": "Тип: товар або послуга"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Пошуковий запит"
+          },
+          {
+            "name": "sellerId",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Фільтр за ID продавця"
+          },
+          {
+            "name": "minPrice",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Мінімальна ціна"
+          },
+          {
+            "name": "maxPrice",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Максимальна ціна"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список оголошень",
+            "content": {
+              "application/json": {
+                "example": {
+                  "totalCount": 2,
+                  "listings": [
+                    {
+                      "id": 8,
+                      "title": "Ноутбук Apple MacBook Neo A18 Pro 8GB 256GB",
+                      "description": "Ідеальний робочий стан, акумулятор 98%",
+                      "price": 10000.0,
+                      "imageUrl": "https://placehold.co/600x400/2563eb/ffffff?text=MacBook",
+                      "categoryId": 1,
+                      "categoryName": "Електроніка",
+                      "sellerId": 2,
+                      "sellerName": "Вова Вакуленко",
+                      "isService": false,
+                      "createdAt": "2026-11-01T10:00:00Z"
+                    },
+                    {
+                      "id": 9,
+                      "title": "Прибирання квартири / генеральний клінінг",
+                      "description": "Якісне професійне прибирання житла. Всі миючі засоби включено.",
+                      "price": 800.0,
+                      "imageUrl": "https://placehold.co/600x400/10b981/ffffff?text=Cleaning",
+                      "categoryId": 8,
+                      "categoryName": "Послуги",
+                      "sellerId": 1,
+                      "sellerName": "Нікіта Жиденко",
+                      "isService": true,
+                      "createdAt": "2026-11-02T14:30:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Listings"
+        ],
+        "summary": "Створити нове оголошення або послугу",
+        "description": "Публікує новий товар або послугу в каталозі Loop Market.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "description",
+                  "price",
+                  "categoryId"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Ремонт комп'ютерів та налаштування Windows"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Діагностика, чистка від пилу, заміна термопасти."
+                  },
+                  "price": {
+                    "type": "number",
+                    "example": 450.0
+                  },
+                  "categoryId": {
+                    "type": "integer",
+                    "example": 8
+                  },
+                  "imageUrl": {
+                    "type": "string",
+                    "example": "https://placehold.co/600x400/10b981/white?text=PC+Repair"
+                  },
+                  "condition": {
+                    "type": "string",
+                    "example": "Новий"
+                  },
+                  "location": {
+                    "type": "string",
+                    "example": "Київ"
+                  },
+                  "isShippingAvailable": {
+                    "type": "boolean",
+                    "example": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Оголошення успішно створено"
+          },
+          "400": {
+            "description": "Помилка валідації полів"
+          },
+          "401": {
+            "description": "Неавторизовано"
+          }
+        }
+      }
+    },
+    "/api/listings/{id}": {
+      "get": {
+        "tags": [
+          "Listings"
+        ],
+        "summary": "Отримати деталі конкретного оголошення",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 9
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Деталі оголошення"
+          },
+          "404": {
+            "description": "Оголошення не знайдено"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Listings"
+        ],
+        "summary": "Видалити оголошення",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 9
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Оголошення успішно видалено"
+          },
+          "403": {
+            "description": "Недостатньо прав для видалення"
+          }
+        }
+      }
+    },
+    "/api/listings/categories": {
+      "get": {
+        "tags": [
+          "Listings"
+        ],
+        "summary": "Отримати список всіх категорій",
+        "responses": {
+          "200": {
+            "description": "Список категорій",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": 1,
+                    "name": "Електроніка"
+                  },
+                  {
+                    "id": 2,
+                    "name": "Одяг та взуття"
+                  },
+                  {
+                    "id": 3,
+                    "name": "Книги та навчання"
+                  },
+                  {
+                    "id": 4,
+                    "name": "Меблі та інтер'єр"
+                  },
+                  {
+                    "id": 8,
+                    "name": "Послуги"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Створити замовлення товару з доставкою Новою Поштою",
+        "description": "Оформлює замовлення фізичного товару з резервацією коштів або накладеним платежем.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "listingId",
+                  "buyerName",
+                  "buyerPhone",
+                  "deliveryCity",
+                  "deliveryBranch"
+                ],
+                "properties": {
+                  "listingId": {
+                    "type": "integer",
+                    "example": 8
+                  },
+                  "buyerName": {
+                    "type": "string",
+                    "example": "Олександр Коваленко"
+                  },
+                  "buyerPhone": {
+                    "type": "string",
+                    "example": "+380501234567"
+                  },
+                  "deliveryCity": {
+                    "type": "string",
+                    "example": "Київ"
+                  },
+                  "deliveryBranch": {
+                    "type": "string",
+                    "example": "Відділення №1: вул. Пирогівський шлях, 135"
+                  },
+                  "paymentMethod": {
+                    "type": "string",
+                    "example": "Loop Захист (Онлайн)"
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Будь ласка, надійно упакуйте"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Замовлення оформлено"
+          },
+          "400": {
+            "description": "Помилка валідації"
+          }
+        }
+      }
+    },
+    "/api/orders/create-service": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Оформити бронювання послуги (Loop Захист)",
+        "description": "Створює захищене замовлення послуги з холдуванням коштів, визначенням дати, точного часу, параметрів та адреси виконання.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "listingId",
+                  "buyerName",
+                  "buyerPhone",
+                  "executionDate",
+                  "executionTime",
+                  "address",
+                  "totalPrice"
+                ],
+                "properties": {
+                  "listingId": {
+                    "type": "integer",
+                    "example": 9
+                  },
+                  "buyerName": {
+                    "type": "string",
+                    "example": "Олександр Коваленко"
+                  },
+                  "buyerPhone": {
+                    "type": "string",
+                    "example": "+380501234567"
+                  },
+                  "executionDate": {
+                    "type": "string",
+                    "example": "04.11.2026"
+                  },
+                  "executionTime": {
+                    "type": "string",
+                    "example": "10:00"
+                  },
+                  "address": {
+                    "type": "string",
+                    "example": "вул. Хрещатик, 24, кв. 12"
+                  },
+                  "specifications": {
+                    "type": "string",
+                    "example": "Генеральне прибирання після ремонту, 2 кімнати"
+                  },
+                  "totalPrice": {
+                    "type": "number",
+                    "example": 800.0
+                  },
+                  "paymentMethod": {
+                    "type": "string",
+                    "example": "Loop Захист (Безпечна оплата)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Замовлення успішно створено, кошти заморожено на платформі",
+            "content": {
+              "application/json": {
+                "example": {
+                  "orderId": 42,
+                  "status": "Confirmed",
+                  "totalPrice": 800.0,
+                  "message": "Кошти за послугу успішно заморожені на платформі Loop Захист!"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/my-purchases": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Мої покупки та замовлені послуги",
+        "description": "Повертає всі замовлення, де поточний авторизований користувач виступає покупцем/замовником.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список моїх замовлень"
+          }
+        }
+      }
+    },
+    "/api/orders/my-sales": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Мої продажі та замовлення на послуги",
+        "description": "Повертає замовлення, які надійшли поточному користувачу як продавцю або майстру.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список вхідних замовлень"
+          }
+        }
+      }
+    },
+    "/api/orders/{id}/status": {
+      "patch": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Оновити статус замовлення",
+        "description": "Змінює статус замовлення: Confirmed -> Shipped / InDelivery -> Completed (виплата коштів).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 42
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Confirmed",
+                      "Shipped",
+                      "Completed",
+                      "Cancelled"
+                    ],
+                    "example": "Completed"
+                  },
+                  "trackingNumber": {
+                    "type": "string",
+                    "example": "20450912345678"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Статус успішно змінено"
+          }
+        }
+      }
+    },
+    "/api/messages/dialogs": {
+      "get": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Список активних діалогів",
+        "description": "Повертає список співрозмовників з останнім повідомленням, кількістю непрочитаних та статусом онлайн.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список діалогів",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "partnerId": 2,
+                    "partnerName": "Вова Вакуленко",
+                    "role": "Seller",
+                    "avatarUrl": "https://placehold.co/150x150/2563eb/white?text=V",
+                    "lastMessage": "Яка остання ціна? Можна торг?",
+                    "lastMessageTime": "2026-11-03T11:45:00Z",
+                    "unreadCount": 1
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/messages/history/{partnerId}": {
+      "get": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Історія листування з конкретним користувачем",
+        "description": "Повертає впорядкований хронологічний список повідомлень між авторизованим користувачем та партнером.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partnerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Масив повідомлень діалогу"
+          }
+        }
+      }
+    },
+    "/api/messages/send": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Надіслати повідомлення (REST fallback)",
+        "description": "Відправляє повідомлення співрозмовнику через REST API (дублює дію SignalR ChatHub).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "receiverId",
+                  "text"
+                ],
+                "properties": {
+                  "receiverId": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "text": {
+                    "type": "string",
+                    "example": "Вітаю! Чи актуальне ще ваше оголошення?"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Повідомлення збережено та надіслано"
+          }
+        }
+      }
+    },
+    "/api/messages/unread-count": {
+      "get": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Кількість непрочитаних повідомлень",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Кількість непрочитаних",
+            "content": {
+              "application/json": {
+                "example": {
+                  "count": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reviews/user/{id}": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Отримати відгуки та рейтинг користувача",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Відгуки та рейтинг",
+            "content": {
+              "application/json": {
+                "example": {
+                  "averageRating": 4.9,
+                  "totalReviews": 12,
+                  "reviews": [
+                    {
+                      "id": 1,
+                      "authorName": "Олена П.",
+                      "rating": 5,
+                      "comment": "Дуже якісно та швидко прибрали квартиру! Дякую!",
+                      "createdAt": "2026-10-28T14:00:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reviews": {
+      "post": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Залишити відгук про виконавця чи продавця",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "targetUserId",
+                  "rating",
+                  "comment"
+                ],
+                "properties": {
+                  "targetUserId": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5,
+                    "example": 5
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Роботу виконано на вищому рівні. Рекомендую!"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Відгук збережено"
+          }
+        }
+      }
+    },
+    "/api/favorites": {
+      "get": {
+        "tags": [
+          "Favorites"
+        ],
+        "summary": "Список обраних оголошень",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список збережених товарів та послуг"
+          }
+        }
+      }
+    },
+    "/api/favorites/ids": {
+      "get": {
+        "tags": [
+          "Favorites"
+        ],
+        "summary": "Список ID обраних оголошень",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Масив ID для підсвічування сердечок",
+            "content": {
+              "application/json": {
+                "example": [
+                  8,
+                  9
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/favorites/toggle/{listingId}": {
+      "post": {
+        "tags": [
+          "Favorites"
+        ],
+        "summary": "Додати або видалити з обраного (Toggle)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "listingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 9
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Стан обраного оновлено"
+          }
+        }
+      }
+    },
+    "/api/delivery/carriers": {
+      "get": {
+        "tags": [
+          "Delivery"
+        ],
+        "summary": "Доступні поштові оператори",
+        "responses": {
+          "200": {
+            "description": "Список перевізників",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": "novaposhta",
+                    "name": "Нова Пошта",
+                    "enabled": true
+                  },
+                  {
+                    "id": "ukrposhta",
+                    "name": "Укрпошта",
+                    "enabled": false
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/delivery/novaposhta/cities": {
+      "get": {
+        "tags": [
+          "Delivery"
+        ],
+        "summary": "Пошук міст через API Нової Пошти",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Київ"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список знайдених міст"
+          }
+        }
+      }
+    },
+    "/api/delivery/novaposhta/warehouses": {
+      "get": {
+        "tags": [
+          "Delivery"
+        ],
+        "summary": "Пошук відділень та поштоматів Нової Пошти",
+        "parameters": [
+          {
+            "name": "cityRef",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "8d5a980d-391c-11dd-90d9-001a92567626"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список відділень"
+          }
+        }
+      }
+    },
+    "/api/currency/rates": {
+      "get": {
+        "tags": [
+          "Currency"
+        ],
+        "summary": "Офіційні курси валют НБУ",
+        "responses": {
+          "200": {
+            "description": "Курси валют",
+            "content": {
+              "application/json": {
+                "example": {
+                  "rates": {
+                    "USD": 41.5,
+                    "EUR": 45.2,
+                    "PLN": 10.4
+                  },
+                  "baseCurrency": "UAH",
+                  "lastUpdated": "2026-11-03T12:00:00Z"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/currency/convert": {
+      "get": {
+        "tags": [
+          "Currency"
+        ],
+        "summary": "Конвертація суми між валютами",
+        "parameters": [
+          {
+            "name": "amount",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            },
+            "example": 1000
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "UAH"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "USD"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Результат конвертації",
+            "content": {
+              "application/json": {
+                "example": {
+                  "amount": 1000,
+                  "from": "UAH",
+                  "to": "USD",
+                  "result": 24.1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notifications": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Отримати системні сповіщення користувача",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список останніх сповіщень"
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Статус працездатності сервера",
+        "responses": {
+          "200": {
+            "description": "Сервер працює штатно",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "Healthy",
+                  "version": "2.4.0",
+                  "database": "SQLite / TradeStorm.Api",
+                  "signalr": "ChatHub Online"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chathub/negotiate": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "SignalR Handshake (Negotiate Endpoint)",
+        "description": "Ініціалізує WebSocket або Long Polling з'єднання для SignalR ChatHub.",
+        "responses": {
+          "200": {
+            "description": "Параметри підключення SignalR",
+            "content": {
+              "application/json": {
+                "example": {
+                  "negotiateVersion": 0,
+                  "connectionId": "preview-signalr-conn-id",
+                  "availableTransports": []
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Введіть JWT токен, отриманий при авторизації (/api/users/login)."
+      }
+    }
+  }
+}

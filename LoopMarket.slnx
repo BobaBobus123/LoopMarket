@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="TradeStorm.Api.Tests/TradeStorm.Api.Tests.csproj" />
+  <Project Path="TradeStorm.Api/TradeStorm.Api.csproj" />
+</Solution>

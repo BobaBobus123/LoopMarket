@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Створити оголошення | Loop Market</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Leaflet Карта -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Миттєве застосування теми -->
+    <script>
+        const savedTheme = localStorage.getItem('loopTheme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+
+    <style>
+        :root {
+            --primary: #002f34;
+            --primary-light: #10b981;
+            --primary-hover: #059669;
+            --primary-soft: rgba(16, 185, 129, 0.1);
+            --surface: #ffffff;
+            --surface-hover: #f8fafc;
+            --bg-color: #f1f5f9;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --border-focus: #10b981;
+            --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+            --card-shadow-hover: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --primary: #f8fafc;
+            --primary-light: #10b981;
+            --primary-hover: #34d399;
+            --primary-soft: rgba(16, 185, 129, 0.15);
+            --surface: #1e293b;
+            --surface-hover: #334155;
+            --bg-color: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --border-focus: #10b981;
+            --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+            --card-shadow-hover: 0 10px 25px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: #0b0f19;
+            background-image: 
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37, 99, 235, 0.07), transparent 60%),
+                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(16, 185, 129, 0.04), transparent 50%),
+                url('/images/bg_tech_constellation.svg');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* HEADER */
+        header {
+            background: rgba(11, 15, 25, 0.94) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            border-bottom: 1px solid var(--border-color) !important;
+            padding: 0 24px !important;
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 1000 !important;
+            height: 68px !important;
+            display: flex !important;
+            align-items: center !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+        }
+
+        .header-content {
+            width: 100%;
+            max-width: 1540px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.5px;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+        }
+
+        .logo-circle {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #10b981 0%, #2563eb 100%);
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            flex-shrink: 0;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--text-main);
+            background: rgba(37, 99, 235, 0.06);
+        }
+
+        .nav-link.active {
+            color: #2563eb;
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-create-top {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 9px 18px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.88rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-create-top:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-icon {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            border-color: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid var(--surface);
+        }
+
+        /* NOTIFICATIONS DROPDOWN */
+        .notif-dropdown {
+            position: absolute;
+            top: 72px;
+            right: 80px;
+            width: 360px;
+            background: var(--surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1500;
+        }
+
+        .notif-dropdown.active {
+            display: flex !important;
+        }
+
+        .notif-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 800;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notif-body {
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        /* MAIN CONTAINER */
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 32px 20px 60px;
+        }
+
+        .creation-container {
+            width: 100%;
+            max-width: 860px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* HERO STEPPER HEADER */
+        .page-header-box {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 26px 32px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(180deg, #10b981 0%, #2563eb 100%);
+        }
+
+        .page-title {
+            font-size: 1.7rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        .page-subtitle {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* TYPE SWITCHER TABS */
+        .type-selector-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .type-option-card {
+            background: var(--surface);
+            border: 2px solid var(--border-color);
+            border-radius: 18px;
+            padding: 20px 22px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            position: relative;
+            box-shadow: var(--card-shadow);
+            user-select: none;
+        }
+
+        .type-option-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(37, 99, 235, 0.4);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .type-option-card.active-product {
+            border-color: #10b981;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        .type-option-card.active-service {
+            border-color: #2563eb;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(37, 99, 235, 0.02) 100%);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .type-icon-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            transition: 0.2s;
+        }
+
+        .active-product .type-icon-circle {
+            background: rgba(16, 185, 129, 0.18);
+            color: #10b981;
+        }
+
+        .active-service .type-icon-circle {
+            background: rgba(37, 99, 235, 0.18);
+            color: #2563eb;
+        }
+
+        .type-card-meta h3 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .type-card-meta p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .type-radio-check {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 900;
+            color: white;
+            transition: 0.2s;
+        }
+
+        .active-product .type-radio-check {
+            border-color: #10b981;
+            background: #10b981;
+        }
+
+        .active-service .type-radio-check {
+            border-color: #2563eb;
+            background: #2563eb;
+        }
+
+        /* FORM SECTION CARD */
+        .form-section-card {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 28px 32px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .section-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            padding-bottom: 14px;
+            border-bottom: 1.5px solid var(--border-color);
+        }
+
+        .section-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-badge-num {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #10b981 0%, #2563eb 100%);
+            color: white;
+            font-weight: 800;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+        }
+
+        .form-label {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .char-counter {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .char-counter.valid {
+            color: #10b981;
+        }
+
+        .char-counter.warn {
+            color: #f59e0b;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .modern-input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 0.96rem;
+            outline: none;
+            background: var(--bg-color);
+            color: var(--text-main);
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modern-input:focus {
+            border-color: var(--border-focus);
+            background: var(--surface);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+        }
+
+        .two-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .three-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 14px;
+        }
+
+        /* PRICE INPUT WRAPPER */
+        .price-input-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .price-input-box .modern-input {
+            padding-right: 56px;
+            font-size: 1.18rem;
+            font-weight: 800;
+        }
+
+        .currency-tag {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        /* CONDITION CHIPS */
+        .chips-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chip-option {
+            flex: 1;
+            padding: 12px;
+            border: 1.5px solid var(--border-color);
+            background: var(--bg-color);
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text-main);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .chip-option:hover {
+            border-color: var(--border-focus);
+            background: var(--surface);
+        }
+
+        .chip-option.active {
+            border-color: var(--border-focus);
+            background: var(--primary-soft);
+            color: var(--primary-light);
+            font-weight: 800;
+        }
+
+        /* PHOTO UPLOADER (DRAG & DROP) */
+        .photo-dropzone {
+            border: 2px dashed var(--border-color);
+            border-radius: 16px;
+            padding: 34px 20px;
+            text-align: center;
+            background: var(--bg-color);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .photo-dropzone:hover,
+        .photo-dropzone.dragover {
+            border-color: #10b981;
+            background: var(--primary-soft);
+            transform: scale(1.006);
+        }
+
+        .photo-dropzone.dragover {
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+        }
+
+        .dropzone-icon-box {
+            width: 58px;
+            height: 58px;
+            border-radius: 18px;
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            font-size: 1.7rem;
+            transition: transform 0.2s;
+        }
+
+        .photo-dropzone:hover .dropzone-icon-box {
+            transform: scale(1.08);
+        }
+
+        .dropzone-text-main {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .dropzone-text-sub {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .photo-previews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .photo-thumb-card {
+            position: relative;
+            width: 100%;
+            height: 125px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            background: var(--surface);
+            transition: all 0.2s;
+        }
+
+        .photo-thumb-card:hover {
+            border-color: var(--border-focus);
+            transform: translateY(-2px);
+        }
+
+        .photo-thumb-card.is-main {
+            border-color: #f59e0b;
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
+        }
+
+        .photo-thumb-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-main-badge {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: #f59e0b;
+            color: white;
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+
+        .btn-remove-photo {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .btn-remove-photo:hover {
+            background: #dc2626;
+            transform: scale(1.15);
+        }
+
+        /* MAP STYLES */
+        #mapWrapper {
+            margin-top: 10px;
+        }
+
+        #map {
+            height: 260px;
+            border-radius: 14px;
+            border: 2px solid var(--border-color);
+            margin-bottom: 10px;
+            z-index: 1;
+        }
+
+        .map-search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-map-action {
+            background: var(--surface);
+            border: 1.5px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0 16px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.88rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .btn-map-action:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+            background: rgba(37,99,235,0.06);
+        }
+
+        /* CHECKBOX TILES */
+        .checkbox-tile {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            background: var(--bg-color);
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .checkbox-tile:hover {
+            border-color: var(--border-focus);
+            background: var(--surface);
+        }
+
+        .checkbox-tile input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-light);
+            cursor: pointer;
+        }
+
+        .checkbox-tile-meta h4 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 2px;
+        }
+
+        .checkbox-tile-meta p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* SUBMIT BUTTON & FEEDBACK */
+        .publish-card {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 24px 32px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .btn-publish-main {
+            width: 100%;
+            padding: 17px 24px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #10b981 0%, #2563eb 100%);
+            color: white;
+            font-size: 1.15rem;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 6px 22px rgba(16, 185, 129, 0.35);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-publish-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(16, 185, 129, 0.45);
+        }
+
+        .btn-publish-main:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .terms-note {
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+
+        .terms-note a {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        /* TOAST NOTIFICATION */
+        #statusToast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 2500;
+            background: var(--surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px 22px;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+            display: none;
+            align-items: center;
+            gap: 14px;
+            max-width: 440px;
+            transform: translateY(40px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-box {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            transform: translateY(20px);
+            transition: 0.3s;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: translateY(0);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-modal-cancel {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            background: transparent;
+            color: var(--text-main);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-modal-confirm {
+            flex: 1.2;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: #ef4444;
+            color: white;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border-color);
+            padding: 40px 5% 24px;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1540px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+
+        .footer-col h4 {
+            margin-bottom: 12px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .footer-col a {
+            display: block;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 8px;
+            font-size: 0.88rem;
+            transition: 0.2s;
+        }
+
+        .footer-col a:hover {
+            color: var(--primary-light);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.84rem;
+        }
+
+        @media (max-width: 768px) {
+            .type-selector-grid, .two-cols, .three-cols {
+                grid-template-columns: 1fr;
+            }
+            .form-section-card, .page-header-box, .publish-card {
+                padding: 20px;
+            }
+            .page-title {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="/index.html" class="logo">
+                <div class="logo-circle">L</div>
+                <span>Loop<span style="color: #10b981;">Market</span></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="/index.html" class="nav-link" id="navHome">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                    Головна
+                </a>
+                <a href="/index.html#services" class="nav-link" id="navServices">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    Послуги
+                </a>
+                <a href="/messages.html" class="nav-link" id="navChat">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Чат
+                </a>
+                <a href="/safety.html" class="nav-link" id="navSafety">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Безпека
+                </a>
+                <a href="/about.html" class="nav-link" id="navAbout">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>
+                    Про нас
+                </a>
+                <a href="/profile.html" class="nav-link" id="navProfileLink">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span id="navProfileText">Профіль</span>
+                </a>
+
+                <button class="btn-icon" id="notifBtn" onclick="toggleNotifications()" title="Сповіщення">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                    <span class="notif-badge" id="notifBadge" style="display: none;"></span>
+                </button>
+
+                <button class="btn-icon" id="themeToggleBtn" onclick="toggleTheme()" title="Змінити тему">🌙</button>
+
+                <button class="btn-icon" id="btnLogoutHeader" onclick="showLogoutModal()" title="Вийти з акаунта" style="color: #ef4444; display: none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+                <span>Сповіщення</span>
+                <span style="font-size: 0.8rem; color: #2563eb; cursor: pointer; font-weight: 700;" onclick="clearNotifications()">Позначити прочитаними</span>
+            </div>
+            <div class="notif-body" id="notifList">
+                <p style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Завантаження...</p>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="creation-container">
+            <!-- HERO HEADER -->
+            <div class="page-header-box">
+                <h1 class="page-title" id="pageHeading">Створення нового оголошення</h1>
+                <p class="page-subtitle" id="pageSubHeading">
+                    Опублікуйте свій товар або запропонуйте послугу іншим студентам та користувачам платформи LoopMarket.
+                </p>
+            </div>
+
+            <!-- STEP 1: TYPE SELECTOR -->
+            <div class="type-selector-grid">
+                <div class="type-option-card active-product" id="cardTypeProduct" onclick="setListingType('product')">
+                    <div class="type-icon-circle">📦</div>
+                    <div class="type-card-meta">
+                        <h3>Фізичний товар</h3>
+                        <p>Ноутбуки, книги, техніка, конспекти, одяг чи аксесуари</p>
+                    </div>
+                    <div class="type-radio-check">✓</div>
+                </div>
+
+                <div class="type-option-card" id="cardTypeService" onclick="setListingType('service')">
+                    <div class="type-icon-circle">🛠</div>
+                    <div class="type-card-meta">
+                        <h3>Студентська послуга</h3>
+                        <p>Репетиторство, ремонт, вантажні роботи, курсові, веб-дизайн</p>
+                    </div>
+                    <div class="type-radio-check">✓</div>
+                </div>
+            </div>
+
+            <!-- MAIN FORM -->
+            <form id="createListingForm">
+                <!-- SECTION 1: BASIC INFO -->
+                <div class="form-section-card">
+                    <div class="section-header-row">
+                        <div class="section-title-wrap">
+                            <div class="section-badge-num">1</div>
+                            <h2 class="section-title">Основна інформація</h2>
+                        </div>
+                    </div>
+
+                    <!-- TITLE -->
+                    <div class="form-group">
+                        <div class="form-label-row">
+                            <label for="titleInput" class="form-label" id="titleLabel">
+                                🏷 Назва оголошення
+                            </label>
+                            <span class="char-counter" id="titleCounter">0 / 70</span>
+                        </div>
+                        <input type="text" id="titleInput" class="modern-input" maxlength="70" required placeholder="Наприклад: Ноутбук Apple MacBook Air M1 8/256GB" oninput="onTitleInput(this.value)">
+                        <div id="titleTip" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 5px;">
+                            💡 Чітка та конкретна назва значно підвищує шанси на швидкий продаж чи замовлення.
+                        </div>
+                    </div>
+
+                    <!-- CATEGORY & PRICE -->
+                    <div class="two-cols">
+                        <div class="form-group">
+                            <div class="form-label-row">
+                                <label for="categorySelect" class="form-label">
+                                    📂 Категорія
+                                </label>
+                            </div>
+                            <select id="categorySelect" class="modern-input" required onchange="onCategoryChanged()">
+                                <option value="" disabled selected>Завантаження категорій...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-label-row">
+                                <label for="priceInput" class="form-label" id="priceLabel">
+                                    💰 Ціна (грн)
+                                </label>
+                                <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700;">Безпечна оплата</span>
+                            </div>
+                            <div class="price-input-box">
+                                <input type="number" id="priceInput" class="modern-input" min="0" step="1" required placeholder="0" oninput="if(this.value<0)this.value=0;">
+                                <span class="currency-tag" id="currencyTag">₴ UAH</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SERVICE SPECIFIC TARIFFS & FORMATS -->
+                    <div id="serviceParamsBox" style="display: none; margin-top: 18px; padding-top: 18px; border-top: 1.5px dashed var(--border-color);">
+                        <div class="two-cols">
+                            <div class="form-group">
+                                <label class="form-label">⏱ Формат тарифу послуги</label>
+                                <select id="serviceTariffType" class="modern-input" onchange="onTariffTypeChanged()">
+                                    <option value="hourly" selected>⏱ Погодинна оплата (грн / год)</option>
+                                    <option value="fixed">🏷 Фіксована вартість за всю роботу (грн)</option>
+                                    <option value="negotiated">🤝 За домовленістю / від базової суми</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">🚗 Формат надання</label>
+                                <select id="serviceFormatType" class="modern-input" onchange="onFormatTypeChanged()">
+                                    <option value="visit" selected>🚗 З виїздом за адресою клієнта</option>
+                                    <option value="on_site">📍 У майстерні / на локації виконавця</option>
+                                    <option value="online">🌐 Онлайн / Дистанційно (по всій Україні)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- ONLINE ONLY TOGGLE -->
+                        <div class="checkbox-tile" style="margin-top: 10px; border-color: rgba(37,99,235,0.3); background: rgba(37,99,235,0.05);" onclick="toggleOnlineCheckbox(event)">
+                            <input type="checkbox" id="chkOnlineOnly" onchange="onOnlineOnlyChanged(this.checked)">
+                            <div class="checkbox-tile-meta">
+                                <h4 style="color: #2563eb;">🌐 Надавати послугу виключно онлайн</h4>
+                                <p>Підійде для репетиторства, програмування, дизайну та консультацій. Клієнти зможуть замовляти з будь-якого міста України.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PRODUCT CONDITION & SHIPPING -->
+                    <div id="productParamsBox" style="margin-top: 18px; padding-top: 18px; border-top: 1.5px dashed var(--border-color);">
+                        <div class="two-cols">
+                            <div class="form-group">
+                                <label class="form-label">✨ Стан товару</label>
+                                <div class="chips-selector">
+                                    <div class="chip-option" id="chipUsed" onclick="selectCondition('Вживане')">🔄 Вживане</div>
+                                    <div class="chip-option active" id="chipNew" onclick="selectCondition('Нове')">✨ Нове</div>
+                                </div>
+                                <input type="hidden" id="conditionValue" value="Нове">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">🚚 Способи передачі</label>
+                                <label class="checkbox-tile" style="padding: 11px 14px; margin-top: 2px;">
+                                    <input type="checkbox" id="chkShipping" checked>
+                                    <div class="checkbox-tile-meta">
+                                        <h4>Доставка поштою</h4>
+                                        <p>Нова Пошта або Укрпошта з Loop Захистом</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: PHOTOS (DRAG & DROP) -->
+                <div class="form-section-card" style="margin-top: 24px;">
+                    <div class="section-header-row">
+                        <div class="section-title-wrap">
+                            <div class="section-badge-num">2</div>
+                            <h2 class="section-title">Фотографії товару чи робіт</h2>
+                        </div>
+                        <span id="photoCountBadge" style="font-size: 0.82rem; font-weight: 800; color: var(--text-muted); background: var(--bg-color); padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            0 / 5 фото
+                        </span>
+                    </div>
+
+                    <!-- DROPZONE -->
+                    <div class="photo-dropzone" id="photoDropzone" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" accept="image/*" multiple style="display: none;" onchange="handleFileSelect(this.files)">
+                        <div class="dropzone-icon-box">📸</div>
+                        <div class="dropzone-text-main">Перетягніть фотографії сюди або натисніть для вибору</div>
+                        <div class="dropzone-text-sub">Підтримуються JPG, PNG, WEBP (до 5 файлів). Перше фото стане обкладинкою оголошення.</div>
+                    </div>
+
+                    <!-- PREVIEWS GRID -->
+                    <div class="photo-previews-grid" id="previewsGrid"></div>
+                </div>
+
+                <!-- SECTION 3: DESCRIPTION -->
+                <div class="form-section-card" style="margin-top: 24px;">
+                    <div class="section-header-row">
+                        <div class="section-title-wrap">
+                            <div class="section-badge-num">3</div>
+                            <h2 class="section-title">Детальний опис</h2>
+                        </div>
+                        <span class="char-counter" id="descCounter">0 / 2000</span>
+                    </div>
+
+                    <div class="form-group">
+                        <textarea id="descriptionInput" class="modern-input" rows="5" maxlength="2000" required placeholder="Опишіть характеристики, реальний стан, причину продажу або подробиці виконання послуги..." oninput="onDescInput(this.value)" style="resize: vertical; min-height: 120px; line-height: 1.5;"></textarea>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">
+                            💡 Оголошення з детальним і чесним описом отримують у 3 рази більше повідомлень від зацікавлених покупців.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 4: LOCATION & MAP -->
+                <div class="form-section-card" style="margin-top: 24px;" id="locationSectionCard">
+                    <div class="section-header-row">
+                        <div class="section-title-wrap">
+                            <div class="section-badge-num">4</div>
+                            <h2 class="section-title" id="locationSectionTitle">Локація та адреса</h2>
+                        </div>
+                        <span id="locationBadge" style="font-size: 0.8rem; color: var(--primary-light); font-weight: 800;">📍 OpenStreetMap</span>
+                    </div>
+
+                    <!-- ONLINE NOTICE (Visible when online service is selected) -->
+                    <div id="onlineNoticeCard" style="display: none; padding: 16px 20px; background: rgba(37,99,235,0.08); border: 1.5px dashed #2563eb; border-radius: 14px; margin-bottom: 14px;">
+                        <div style="display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 0.95rem; color: #1d4ed8; margin-bottom: 4px;">
+                            🌐 Дистанційна послуга (Вся Україна)
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">
+                            Фізична адреса для цього оголошення прихована. Замовники зможуть легко зв'язатися з вами в чаті та отримати послугу онлайн.
+                        </div>
+                    </div>
+
+                    <!-- MAP WRAPPER -->
+                    <div id="mapContainerWrap">
+                        <div class="map-search-bar">
+                            <input type="text" id="mapSearchInput" class="modern-input" placeholder="🔍 Введіть вулицю та місто (наприклад: Соборна 15, Кременчук)" onkeydown="if(event.key==='Enter'){event.preventDefault();searchMapAddress();}">
+                            <button type="button" class="btn-map-action" onclick="searchMapAddress()">Знайти</button>
+                            <button type="button" class="btn-map-action" onclick="locateUserPosition()" title="Визначити моє місцезнаходження">📍 Я тут</button>
+                        </div>
+
+                        <div id="map"></div>
+                    </div>
+
+                    <!-- ADDRESS TEXT INPUT -->
+                    <div class="form-group" style="margin-top: 12px;">
+                        <label for="addressInput" class="form-label">Місцезнаходження (місто, район або вулиця)</label>
+                        <input type="text" id="addressInput" class="modern-input" required value="Кременчук" placeholder="Вкажіть місто або точну адресу">
+                        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+                            💡 Перетягуйте мітку на карті або введіть назву вулиці та номер будинку вручну.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBMIT CARD -->
+                <div class="publish-card" style="margin-top: 24px;">
+                    <button type="submit" id="btnPublish" class="btn-publish-main">
+                        🚀 Опублікувати оголошення
+                    </button>
+                    <p class="terms-note">
+                        Публікуючи оголошення, ви погоджуєтесь з <a href="/terms.html">Правилами платформи LoopMarket</a> та гарантуєте чесність наданих даних.
+                    </p>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- FLOATING STATUS TOAST -->
+    <div id="statusToast">
+        <div id="statusToastIcon" style="font-size: 1.6rem; flex-shrink: 0;">✨</div>
+        <div>
+            <div id="statusToastTitle" style="font-weight: 800; font-size: 0.95rem; color: var(--text-main); margin-bottom: 2px;">Успішно</div>
+            <div id="statusToastMsg" style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.4;">Оголошення збережено!</div>
+        </div>
+    </div>
+
+    <!-- LOGOUT MODAL -->
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal-box">
+            <div style="font-size: 2.5rem; margin-bottom: 12px;">🚪</div>
+            <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">Вихід з акаунта</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.45;">Ви дійсно бажаєте вийти зі свого облікового запису LoopMarket?</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-cancel" onclick="closeLogoutModal()">Скасувати</button>
+                <button type="button" class="btn-modal-confirm" onclick="confirmLogout()">Вийти</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-col">
+                <h4>Про Loop Market</h4>
+                <a href="/about.html">Про проєкт</a>
+                <a href="/index.html#services">Студентські послуги</a>
+            </div>
+            <div class="footer-col">
+                <h4>Безпека</h4>
+                <a href="/safety.html">Правила безпеки</a>
+                <a href="/terms.html">Умови використання</a>
+            </div>
+            <div class="footer-col">
+                <h4>Підтримка</h4>
+                <a href="#">Telegram підтримка</a>
+                <a href="/docs.html">Документація API</a>
+            </div>
+        </div>
+        <div class="footer-bottom">© 2026 Loop Market. Створено для студентів та безпечних угод.</div>
+    </footer>
+
+    <script>
+        // ==================== СТАН ТА ЗМІННІ ====================
+        let currentListingType = 'product'; // 'product' or 'service'
+        let selectedFiles = []; // Array of File objects
+        let leafletMap = null;
+        let leafletMarker = null;
+        const token = localStorage.getItem('loopToken');
+
+        // ==================== СИСТЕМНІ ПОВІДОМЛЕННЯ (TOAST) ====================
+        function showToast(title, message, icon = '✨', isError = false) {
+            const toast = document.getElementById('statusToast');
+            if (!toast) return;
+            document.getElementById('statusToastTitle').innerText = title;
+            document.getElementById('statusToastMsg').innerText = message;
+            document.getElementById('statusToastIcon').innerText = icon;
+            toast.style.borderColor = isError ? '#ef4444' : 'var(--border-color)';
+            toast.style.display = 'flex';
+            requestAnimationFrame(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            });
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(40px)';
+                setTimeout(() => { toast.style.display = 'none'; }, 300);
+            }, 4500);
+        }
+
+        // ==================== ПЕРЕМИКАЧ: ТОВАР / ПОСЛУГА ====================
+        function setListingType(type) {
+            currentListingType = type;
+            const cardProd = document.getElementById('cardTypeProduct');
+            const cardServ = document.getElementById('cardTypeService');
+            const prodBox = document.getElementById('productParamsBox');
+            const servBox = document.getElementById('serviceParamsBox');
+            const heading = document.getElementById('pageHeading');
+            const subHeading = document.getElementById('pageSubHeading');
+            const titleLabel = document.getElementById('titleLabel');
+            const titleInput = document.getElementById('titleInput');
+            const priceLabel = document.getElementById('priceLabel');
+            const descInput = document.getElementById('descriptionInput');
+            const catSelect = document.getElementById('categorySelect');
+
+            if (type === 'service') {
+                cardServ.className = 'type-option-card active-service';
+                cardProd.className = 'type-option-card';
+                servBox.style.display = 'block';
+                prodBox.style.display = 'none';
+
+                heading.innerText = 'Створення оголошення послуги';
+                subHeading.innerText = 'Опишіть ваші вміння, графік, тариф та умови співпраці з замовниками.';
+                titleLabel.innerHTML = '🛠 Назва послуги або вакансії';
+                titleInput.placeholder = 'Наприклад: Репетитор з математики / Вантажні роботи / Ремонт ПК';
+                descInput.placeholder = 'Опишіть ваш досвід, кваліфікацію, інструменти, що саме входить у вартість...';
+
+                // Select Service category in dropdown if present
+                if (catSelect && catSelect.options) {
+                    for (let opt of catSelect.options) {
+                        if (opt.value === '8' || opt.text.toLowerCase().includes('послуг')) {
+                            catSelect.value = opt.value;
+                            break;
+                        }
+                    }
+                }
+
+                onTariffTypeChanged();
+                onFormatTypeChanged();
+            } else {
+                cardProd.className = 'type-option-card active-product';
+                cardServ.className = 'type-option-card';
+                servBox.style.display = 'none';
+                prodBox.style.display = 'block';
+
+                heading.innerText = 'Створення нового товару';
+                subHeading.innerText = 'Вкажіть точні характеристики предмета, стан та завантажте чіткі фотографії.';
+                titleLabel.innerHTML = '🏷 Назва товару';
+                titleInput.placeholder = 'Наприклад: Ноутбук Apple MacBook Air M1 8/256GB';
+                priceLabel.innerHTML = '💰 Ціна товару (грн)';
+                descInput.placeholder = 'Опишіть характеристики, стан, комплектацію, чому продаєте...';
+
+                // Select first product category if currently category 8
+                if (catSelect && catSelect.value === '8') {
+                    catSelect.value = '1';
+                }
+
+                setOnlineView(false);
+            }
+
+            if (leafletMap) {
+                setTimeout(() => { leafletMap.invalidateSize(); }, 200);
+            }
+        }
+        window.setListingType = setListingType;
+
+        // ==================== СТАН ТОВАРУ (CHIPS) ====================
+        function selectCondition(val) {
+            document.getElementById('conditionValue').value = val;
+            const chipNew = document.getElementById('chipNew');
+            const chipUsed = document.getElementById('chipUsed');
+            if (val === 'Нове') {
+                chipNew.classList.add('active');
+                chipUsed.classList.remove('active');
+            } else {
+                chipUsed.classList.add('active');
+                chipNew.classList.remove('active');
+            }
+        }
+        window.selectCondition = selectCondition;
+
+        // ==================== ТАРИФИ ТА ФОРМАТИ ПОСЛУГ ====================
+        function onTariffTypeChanged() {
+            const val = document.getElementById('serviceTariffType')?.value || 'hourly';
+            const priceLabel = document.getElementById('priceLabel');
+            const priceInput = document.getElementById('priceInput');
+            if (!priceLabel || !priceInput) return;
+
+            if (val === 'hourly') {
+                priceLabel.innerHTML = '⏱ Погодинний тариф (грн / год)';
+                priceInput.placeholder = '150';
+            } else if (val === 'fixed') {
+                priceLabel.innerHTML = '🏷 Фіксована вартість (грн)';
+                priceInput.placeholder = '500';
+            } else {
+                priceLabel.innerHTML = '🤝 Орієнтовна вартість від (грн)';
+                priceInput.placeholder = '200';
+            }
+        }
+        window.onTariffTypeChanged = onTariffTypeChanged;
+
+        function onFormatTypeChanged() {
+            const format = document.getElementById('serviceFormatType')?.value || 'visit';
+            const isOnline = (format === 'online');
+            const chk = document.getElementById('chkOnlineOnly');
+            if (chk) chk.checked = isOnline;
+            setOnlineView(isOnline);
+        }
+        window.onFormatTypeChanged = onFormatTypeChanged;
+
+        function toggleOnlineCheckbox(e) {
+            if (e.target.tagName !== 'INPUT') {
+                const chk = document.getElementById('chkOnlineOnly');
+                chk.checked = !chk.checked;
+                onOnlineOnlyChanged(chk.checked);
+            }
+        }
+        window.toggleOnlineCheckbox = toggleOnlineCheckbox;
+
+        function onOnlineOnlyChanged(isOnline) {
+            const formatSelect = document.getElementById('serviceFormatType');
+            if (isOnline && formatSelect) {
+                formatSelect.value = 'online';
+            } else if (!isOnline && formatSelect && formatSelect.value === 'online') {
+                formatSelect.value = 'visit';
+            }
+            setOnlineView(isOnline);
+        }
+        window.onOnlineOnlyChanged = onOnlineOnlyChanged;
+
+        function setOnlineView(isOnline) {
+            const mapWrap = document.getElementById('mapContainerWrap');
+            const notice = document.getElementById('onlineNoticeCard');
+            const addrInput = document.getElementById('addressInput');
+            const locBadge = document.getElementById('locationBadge');
+
+            if (isOnline) {
+                if (mapWrap) mapWrap.style.display = 'none';
+                if (notice) notice.style.display = 'block';
+                if (addrInput) addrInput.value = 'Онлайн (дистанційно)';
+                if (locBadge) locBadge.innerText = '🌐 Вся Україна';
+            } else {
+                if (mapWrap) mapWrap.style.display = 'block';
+                if (notice) notice.style.display = 'none';
+                if (addrInput && addrInput.value === 'Онлайн (дистанційно)') addrInput.value = 'Кременчук';
+                if (locBadge) locBadge.innerText = '📍 OpenStreetMap';
+                if (leafletMap) setTimeout(() => { leafletMap.invalidateSize(); }, 200);
+            }
+        }
+
+        // ==================== ЛІЧИЛЬНИКИ СИМВОЛІВ ====================
+        function onTitleInput(val) {
+            const counter = document.getElementById('titleCounter');
+            counter.innerText = `${val.length} / 70`;
+            if (val.length >= 10) {
+                counter.className = 'char-counter valid';
+            } else if (val.length > 0) {
+                counter.className = 'char-counter warn';
+            } else {
+                counter.className = 'char-counter';
+            }
+        }
+        window.onTitleInput = onTitleInput;
+
+        function onDescInput(val) {
+            const counter = document.getElementById('descCounter');
+            counter.innerText = `${val.length} / 2000`;
+            if (val.length >= 30) {
+                counter.className = 'char-counter valid';
+            } else if (val.length > 0) {
+                counter.className = 'char-counter warn';
+            } else {
+                counter.className = 'char-counter';
+            }
+        }
+        window.onDescInput = onDescInput;
+
+        // ==================== DRAG & DROP PHOTO UPLOAD ====================
+        const dropzone = document.getElementById('photoDropzone');
+        if (dropzone) {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.remove('dragover');
+                }, false);
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                if (dt && dt.files && dt.files.length) {
+                    handleFileSelect(dt.files);
+                }
+            }, false);
+        }
+
+        function handleFileSelect(files) {
+            const arr = Array.from(files);
+            for (let f of arr) {
+                if (selectedFiles.length >= 5) {
+                    showToast('Ліміт фото', 'Максимально можна завантажити до 5 фотографій', '📸', true);
+                    break;
+                }
+                if (f.type.startsWith('image/')) {
+                    selectedFiles.push(f);
+                }
+            }
+            renderPreviews();
+        }
+        window.handleFileSelect = handleFileSelect;
+
+        function renderPreviews() {
+            const grid = document.getElementById('previewsGrid');
+            const badge = document.getElementById('photoCountBadge');
+            if (badge) badge.innerText = `${selectedFiles.length} / 5 фото`;
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            selectedFiles.forEach((file, idx) => {
+                const card = document.createElement('div');
+                card.className = `photo-thumb-card ${idx === 0 ? 'is-main' : ''}`;
+                
+                const img = document.createElement('img');
+                img.className = 'photo-thumb-img';
+                img.alt = `Фото ${idx + 1}`;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => { img.src = e.target.result; };
+                reader.readAsDataURL(file);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn-remove-photo';
+                removeBtn.innerHTML = '✕';
+                removeBtn.title = 'Видалити фото';
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    removePhoto(idx);
+                };
+
+                card.appendChild(img);
+                if (idx === 0) {
+                    const mainBadge = document.createElement('span');
+                    mainBadge.className = 'photo-main-badge';
+                    mainBadge.innerText = '★ Головне';
+                    card.appendChild(mainBadge);
+                }
+                card.appendChild(removeBtn);
+                grid.appendChild(card);
+            });
+        }
+
+        function removePhoto(idx) {
+            selectedFiles.splice(idx, 1);
+            renderPreviews();
+        }
+        window.removePhoto = removePhoto;
+
+        // ==================== КАТЕГОРІЇ З БЕКЕНДУ ====================
+        async function loadCategories() {
+            try {
+                const res = await fetch('/api/listings/categories');
+                if (res.ok) {
+                    const list = await res.json();
+                    const select = document.getElementById('categorySelect');
+                    if (select) {
+                        select.innerHTML = '<option value="" disabled selected>Оберіть категорію зі списку...</option>';
+                        list.forEach(c => {
+                            select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+                        });
+
+                        // Default selection if requested via URL param ?type=service
+                        const urlParams = new URLSearchParams(window.location.search);
+                        if (urlParams.get('type') === 'service') {
+                            setListingType('service');
+                        }
+                    }
+                }
+            } catch(e) {
+                console.warn("Failed to load categories:", e);
+            }
+        }
+
+        function onCategoryChanged() {
+            const select = document.getElementById('categorySelect');
+            if (!select) return;
+            const text = select.options[select.selectedIndex]?.text.toLowerCase() || '';
+            if (select.value === '8' || text.includes('послуг')) {
+                if (currentListingType !== 'service') setListingType('service');
+            } else {
+                if (currentListingType === 'service') setListingType('product');
+            }
+        }
+        window.onCategoryChanged = onCategoryChanged;
+
+        // ==================== LEAFLET КАРТА ТА ГЕОКОДУВАННЯ ====================
+        async function reverseGeocode(lat, lng) {
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=uk`);
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data && data.address) {
+                    const a = data.address;
+                    const city = a.city || a.town || a.village || a.county || "Кременчук";
+                    const road = a.road || a.pedestrian || a.street || "";
+                    const house = a.house_number || "";
+                    const suburb = a.suburb || a.neighbourhood || "";
+                    let full = "";
+                    if (road) {
+                        full = road + (house ? ` ${house}` : '');
+                        if (suburb && !road.includes(suburb)) full += ` (${suburb})`;
+                        full += `, ${city}`;
+                    } else {
+                        full = suburb ? `${suburb}, ${city}` : city;
+                    }
+                    document.getElementById('addressInput').value = full;
+                    document.getElementById('mapSearchInput').value = full;
+                }
+            } catch(e) {}
+        }
+
+        window.searchMapAddress = async function() {
+            const q = (document.getElementById('mapSearchInput')?.value || document.getElementById('addressInput')?.value || '').trim();
+            if (!q) {
+                showToast('Пошук на карті', 'Введіть назву вулиці та місто', '📍', true);
+                return;
+            }
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1&accept-language=uk`);
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+                    if (leafletMap) leafletMap.setView([lat, lon], 16);
+                    if (leafletMarker) leafletMarker.setLatLng([lat, lon]);
+                    else if (leafletMap) leafletMarker = L.marker([lat, lon], { draggable: true }).addTo(leafletMap);
+                    
+                    const cleanName = data[0].display_name.split(',').slice(0, 3).join(',').trim();
+                    document.getElementById('addressInput').value = cleanName || q;
+                    showToast('Адресу знайдено', cleanName, '✅');
+                } else {
+                    showToast('Не знайдено', 'Спробуйте уточнити місто або назву вулиці', '⚠️', true);
+                }
+            } catch(e) {
+                showToast('Помилка', "Не вдалося з'єднатися з картографічним сервісом", '❌', true);
+            }
+        };
+
+        window.locateUserPosition = function() {
+            if (!navigator.geolocation) {
+                showToast('Геолокація', 'Браузер не підтримує геолокацію', '⚠️', true);
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(pos => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                if (leafletMap) leafletMap.setView([lat, lon], 16);
+                if (leafletMarker) leafletMarker.setLatLng([lat, lon]);
+                reverseGeocode(lat, lon);
+                showToast('Координати визначено', 'Мітку встановлено на вашій поточній точці', '📍');
+            }, () => {
+                showToast('Геолокація', 'Доступ до локації вимкнено або заборонено', '⚠️', true);
+            });
+        };
+
+        function initMap() {
+            try {
+                if (typeof L !== 'undefined' && document.getElementById('map')) {
+                    const startLat = 49.0629;
+                    const startLng = 33.4042;
+                    leafletMap = L.map('map').setView([startLat, startLng], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap'
+                    }).addTo(leafletMap);
+
+                    leafletMarker = L.marker([startLat, startLng], { draggable: true }).addTo(leafletMap);
+
+                    leafletMap.on('click', function(e) {
+                        const lat = e.latlng.lat;
+                        const lng = e.latlng.lng;
+                        leafletMarker.setLatLng([lat, lng]);
+                        reverseGeocode(lat, lng);
+                    });
+
+                    leafletMarker.on('dragend', function(e) {
+                        const pos = leafletMarker.getLatLng();
+                        reverseGeocode(pos.lat, pos.lng);
+                    });
+                }
+            } catch(e) {
+                console.warn("Leaflet init error:", e);
+            }
+        }
+
+        // ==================== ВІДПРАВКА ФОРМИ СТВОРЕННЯ ====================
+        const form = document.getElementById('createListingForm');
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('btnPublish');
+                const titleVal = (document.getElementById('titleInput')?.value || '').trim();
+                const priceVal = parseFloat(document.getElementById('priceInput')?.value || '0');
+                const catVal = parseInt(document.getElementById('categorySelect')?.value || '0');
+                const descVal = (document.getElementById('descriptionInput')?.value || '').trim();
+                let locVal = (document.getElementById('addressInput')?.value || '').trim();
+
+                if (!titleVal || titleVal.length < 3) {
+                    showToast('Помилка', 'Введіть назву оголошення (мінімум 3 символи)', '⚠️', true);
+                    document.getElementById('titleInput').focus();
+                    return;
+                }
+
+                if (!catVal) {
+                    showToast('Помилка', 'Будь ласка, оберіть категорію', '⚠️', true);
+                    document.getElementById('categorySelect').focus();
+                    return;
+                }
+
+                if (isNaN(priceVal) || priceVal < 0) {
+                    showToast('Помилка', 'Вкажіть коректну вартість (від 0 грн)', '⚠️', true);
+                    document.getElementById('priceInput').focus();
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.innerHTML = '⏳ Публікація...';
+
+                try {
+                    // 1. Завантажуємо фотографії якщо обрано
+                    let finalImageUrls = [];
+                    if (selectedFiles.length > 0) {
+                        const formData = new FormData();
+                        selectedFiles.forEach(f => formData.append('files', f));
+                        const uploadRes = await fetch('/api/listings/upload-multiple', {
+                            method: 'POST',
+                            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                            body: formData
+                        });
+                        if (uploadRes.ok) {
+                            const upData = await uploadRes.json();
+                            finalImageUrls = upData.imageUrls || [];
+                        } else {
+                            throw new Error("Не вдалося завантажити фотографії");
+                        }
+                    }
+
+                    // 2. Формуємо стан та доставку
+                    let conditionVal = document.getElementById('conditionValue')?.value || 'Нове';
+                    let isShipping = document.getElementById('chkShipping')?.checked || false;
+
+                    if (currentListingType === 'service') {
+                        const tariffSelect = document.getElementById('serviceTariffType');
+                        const formatSelect = document.getElementById('serviceFormatType');
+                        const isOnline = document.getElementById('chkOnlineOnly')?.checked || (formatSelect?.value === 'online');
+
+                        const tariffText = tariffSelect?.options[tariffSelect.selectedIndex]?.text.split('(')[0].trim() || 'Погодинно';
+                        const formatText = isOnline ? 'Онлайн' : (formatSelect?.options[formatSelect.selectedIndex]?.text.split('(')[0].trim() || 'Виїзд');
+
+                        conditionVal = `${tariffText} • ${formatText}`;
+                        isShipping = !isOnline;
+                        if (isOnline) {
+                            locVal = 'Онлайн (дистанційно)';
+                        }
+                    }
+
+                    // 3. Відправляємо на бекенд
+                    const payload = {
+                        title: titleVal,
+                        description: descVal,
+                        price: priceVal,
+                        categoryId: catVal,
+                        imageUrls: finalImageUrls,
+                        condition: conditionVal,
+                        location: locVal || 'Кременчук',
+                        isShippingAvailable: isShipping
+                    };
+
+                    const response = await fetch('/api/listings', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        const resData = await response.json();
+                        showToast('🎉 Опубліковано!', 'Оголошення успішно розміщено на платформі!', '🚀');
+                        setTimeout(() => {
+                            if (resData && resData.id) {
+                                window.location.href = `/details.html?id=${resData.id}`;
+                            } else {
+                                window.location.href = '/index.html';
+                            }
+                        }, 1200);
+                    } else {
+                        const err = await response.json();
+                        throw new Error(err.error || "Не вдалося зберегти оголошення");
+                    }
+                } catch(err) {
+                    showToast('Помилка публікації', err.message || "Помилка сервера", '❌', true);
+                    btn.disabled = false;
+                    btn.innerHTML = '🚀 Опублікувати оголошення';
+                }
+            });
+        }
+
+        // ==================== АВТОРИЗАЦІЯ ТА ШАПКА ====================
+        (function initHeaderUser() {
+            if (token) {
+                try {
+                    const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+                    const u = JSON.parse(decodeURIComponent(atob(b64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+                    const nm = u["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "Профіль";
+                    const pText = document.getElementById('navProfileText');
+                    if (pText) pText.innerText = nm.split(' ')[0] || "Профіль";
+                    const btnLo = document.getElementById('btnLogoutHeader');
+                    if (btnLo) btnLo.style.display = 'inline-flex';
+                } catch(e) {}
+                loadNotifications();
+                setInterval(loadNotifications, 15000);
+            } else {
+                const pLink = document.getElementById('navProfileLink');
+                if (pLink) pLink.href = '/login.html';
+                const pText = document.getElementById('navProfileText');
+                if (pText) pText.innerText = 'Увійти';
+                const btnLo = document.getElementById('btnLogoutHeader');
+                if (btnLo) btnLo.style.display = 'none';
+            }
+        })();
+
+        // ТЕМА
+        function toggleTheme() {
+            const cur = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = cur === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('loopTheme', next);
+            const btn = document.getElementById('themeToggleBtn');
+            if (btn) btn.innerText = next === 'dark' ? '☀️' : '🌙';
+        }
+        window.toggleTheme = toggleTheme;
+
+        // СПОВІЩЕННЯ
+        function toggleNotifications() {
+            const dd = document.getElementById('notifDropdown');
+            if (dd) dd.classList.toggle('active');
+        }
+        window.toggleNotifications = toggleNotifications;
+
+        async function loadNotifications() {
+            if (!token) return;
+            try {
+                const res = await fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) {
+                    const list = await res.json();
+                    const container = document.getElementById('notifList');
+                    const badge = document.getElementById('notifBadge');
+                    const unread = list.filter(n => !n.isRead);
+                    if (badge) {
+                        badge.style.display = unread.length > 0 ? 'block' : 'none';
+                    }
+                    if (container) {
+                        if (!list.length) {
+                            container.innerHTML = '<p style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Нових сповіщень немає</p>';
+                        } else {
+                            container.innerHTML = list.map(n => `
+                                <a href="${n.link || '#'}" style="padding: 12px 16px; border-bottom: 1px solid var(--border-color); text-decoration: none; color: var(--text-main); display: block; background: ${n.isRead ? 'transparent' : 'rgba(37,99,235,0.06)'};">
+                                    <div style="font-weight: 800; font-size: 0.88rem; margin-bottom: 2px;">${n.title}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.35;">${n.message}</div>
+                                </a>
+                            `).join('');
+                        }
+                    }
+                }
+            } catch(e) {}
+        }
+
+        function clearNotifications() {
+            if (!token) return;
+            fetch('/api/notifications/mark-read', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } })
+                .then(() => loadNotifications());
+        }
+        window.clearNotifications = clearNotifications;
+
+        // МОДАЛЬНЕ ВІКНО ВИХОДУ
+        function showLogoutModal() { document.getElementById('logoutModal')?.classList.add('active'); }
+        function closeLogoutModal() { document.getElementById('logoutModal')?.classList.remove('active'); }
+        function confirmLogout() {
+            localStorage.removeItem('loopToken');
+            window.location.href = '/index.html';
+        }
+        window.showLogoutModal = showLogoutModal;
+        window.closeLogoutModal = closeLogoutModal;
+        window.confirmLogout = confirmLogout;
+
+        // ЗАКРИТТЯ СПОВІЩЕНЬ ПО КЛІКУ ПОЗА НИМИ
+        window.addEventListener('click', (e) => {
+            const dd = document.getElementById('notifDropdown');
+            const btn = document.getElementById('notifBtn');
+            if (dd && btn && !dd.contains(e.target) && !btn.contains(e.target)) {
+                dd.classList.remove('active');
+            }
+        });
+
+        // СТАРТ ПРИ ЗАВАНТАЖЕННІ DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCategories();
+            initMap();
+            const btn = document.getElementById('themeToggleBtn');
+            if (btn) btn.innerText = (localStorage.getItem('loopTheme') === 'dark') ? '☀️' : '🌙';
+        });
+    </script>
+    <!-- Realtime In-App Push Notifications -->
+    <script src="/js/push-notifications.js"></script>
+</body>
+</html>

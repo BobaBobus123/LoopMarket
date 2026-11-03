@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Про нас | Loop Market</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #10b981;
+            --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            --accent-green: #10b981;
+            --accent-green-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --surface: #ffffff;
+            --surface-hover: #f8fafc;
+            --bg-color: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --border-focus: #3b82f6;
+            --badge-bg: rgba(37, 99, 235, 0.1);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+            --shadow-lg: 0 16px 36px rgba(15, 23, 42, 0.12);
+        }
+
+        [data-theme="dark"] {
+            --primary: #f8fafc;
+            --primary-light: #10b981;
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --accent-green: #10b981;
+            --accent-green-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --surface: #1e293b;
+            --surface-hover: #27354a;
+            --bg-color: #0b0f19;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --border-focus: #60a5fa;
+            --badge-bg: rgba(59, 130, 246, 0.15);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.25);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+            --shadow-lg: 0 16px 36px rgba(0,0,0,0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-content {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-circle {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #10b981 0%, #2563eb 100%);
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            flex-shrink: 0;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--text-main);
+            background: var(--surface-hover);
+        }
+
+        .nav-link.active {
+            color: #2563eb;
+            background: var(--badge-bg);
+        }
+
+        .btn-create-top {
+            background: var(--accent-green-grad);
+            color: white;
+            padding: 9px 18px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.88rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-create-top:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-icon {
+            background: var(--surface-hover);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            border-color: var(--border-focus);
+            transform: translateY(-1px);
+        }
+
+        /* HERO SECTION */
+        .hero-banner {
+            padding: 60px 24px 50px;
+            text-align: center;
+            background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.1) 0%, transparent 60%), radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: rgba(37, 99, 235, 0.12);
+            color: #2563eb;
+            font-weight: 800;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 18px;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: var(--text-main);
+            margin-bottom: 14px;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 720px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+            width: 100%;
+        }
+
+        /* STATS COUNTER GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 18px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-num {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #2563eb;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .stat-num.green {
+            color: #10b981;
+        }
+
+        .stat-label {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        /* VALUES GRID */
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 50px;
+        }
+
+        .value-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px 26px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+        }
+
+        .value-card:hover {
+            transform: translateY(-4px);
+            border-color: #2563eb;
+            box-shadow: var(--shadow-md);
+        }
+
+        .value-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 18px;
+        }
+
+        .value-card h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .value-card p {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        /* 3-STEP WALKTHROUGH */
+        .steps-box {
+            background: var(--surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px 32px;
+            margin-bottom: 50px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .steps-box h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--text-main);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 20px 16px;
+            background: var(--bg-color);
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+        }
+
+        .step-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 900;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 14px rgba(37,99,235,0.35);
+        }
+
+        .step-item h4 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .step-item p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* CTA */
+        .about-cta {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 44px 32px;
+            text-align: center;
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.35);
+        }
+
+        .about-cta h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .about-cta p {
+            font-size: 1.05rem;
+            opacity: 0.95;
+            max-width: 640px;
+            margin: 0 auto 24px;
+            line-height: 1.55;
+        }
+
+        .btn-cta-create {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            color: #059669;
+            padding: 14px 32px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 1rem;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
+        }
+
+        .btn-cta-create:hover {
+            transform: scale(1.03);
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border-color);
+            padding: 40px 24px 24px;
+            margin-top: auto;
+        }
+
+        .footer-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-col h4 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            margin-bottom: 14px;
+            color: var(--text-main);
+        }
+
+        .footer-col a {
+            display: block;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            margin-bottom: 8px;
+            transition: color 0.15s;
+        }
+
+        .footer-col a:hover {
+            color: #2563eb;
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== HEADER ==================== -->
+    <header>
+        <div class="header-content">
+            <a href="/index.html" class="logo">
+                <div class="logo-circle">L</div>
+                <span>Loop<span style="color: #10b981;">Market</span></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="/index.html" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                    Головна
+                </a>
+                <a href="/index.html?type=service" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    Послуги
+                </a>
+                <a href="/messages.html" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Чат
+                </a>
+                <a href="/safety.html" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Безпека
+                </a>
+                <a href="/about.html" class="nav-link active">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>
+                    Про нас
+                </a>
+                <a href="/profile.html" class="nav-link" id="navProfileLink">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span id="navProfileText">Профіль</span>
+                </a>
+
+                <button class="btn-icon" onclick="toggleNotifications()" title="Сповіщення">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                    <span class="notif-badge" id="notifBadge" style="display: none;"></span>
+                </button>
+
+                <button class="btn-icon" id="themeToggle" onclick="toggleTheme()" title="Змінити тему">🌙</button>
+
+                <a href="/create.html" class="btn-create-top">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Створити
+                </a>
+
+                <button class="btn-icon" id="btnLogout" onclick="showLogoutModal()" title="Вийти з акаунта" style="color: #ef4444; display: none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== HERO ==================== -->
+    <section class="hero-banner">
+        <div class="hero-badge">🚀 Екосистема Loop Market</div>
+        <h1 class="hero-title">Платформа для розумних угод та якісних послуг</h1>
+        <p class="hero-subtitle">Ми об'єднуємо людей в одному місті та спільноті, щоб зробити купівлю потрібних речей, продаж зайвого та замовлення корисних послуг простим, швидким і безпечним.</p>
+    </section>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="container">
+
+        <!-- СТАТИСТИКА -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-num green">100%</div>
+                <div class="stat-label">Верифіковані користувачі</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num">0%</div>
+                <div class="stat-label">Комісій для базових угод</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num green">24/7</div>
+                <div class="stat-label">Telegram-сповіщення та захист</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num">10+</div>
+                <div class="stat-label">Категорій товарів і робіт</div>
+            </div>
+        </div>
+
+        <!-- НАШІ ЦІННОСТІ ТА ПЕРЕВАГИ -->
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">🛠</div>
+                <h3>Маркетплейс послуг</h3>
+                <p>Репетиторство, допомога з навчанням, переїзди, вантажні роботи, дрібний ремонт або графічний дизайн. Знаходьте перевірених виконавців поруч з прозорою фіксованою або погодинною оплатою.</p>
+            </div>
+
+            <div class="value-card">
+                <div class="value-icon" style="background: rgba(37, 99, 235, 0.12); color: #2563eb;">📦</div>
+                <h3>Друге життя речам</h3>
+                <p>Підручники, конспекти, електроніка, одяг та побут. Продавайте те, чим більше не користуєтеся, та заощаджуйте кошти на купівлі потрібного у своїх однодумців.</p>
+            </div>
+
+            <div class="value-card">
+                <div class="value-icon" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">🗺</div>
+                <h3>Інтерактивна геолокація</h3>
+                <p>Пошук на сучасній інтерактивній карті OpenStreetMap дозволяє легко обрати точну адресу зустрічі чи надання робіт прямо у вашому районі без зайвих роз'їздів.</p>
+            </div>
+        </div>
+
+        <!-- 3 ПРОСТІ КРОКИ -->
+        <div class="steps-box">
+            <h2>Як працює Loop Market</h2>
+            <div class="steps-grid">
+                <div class="step-item">
+                    <div class="step-circle">1</div>
+                    <h4>Публікація за 1 хвилину</h4>
+                    <p>Оберіть формат (фізичний товар чи послуга), додайте кілька фотографій, вкажіть ціну та виберіть локацію на карті.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle">2</div>
+                    <h4>Прямий зв'язок у чаті</h4>
+                    <p>Спілкуйтеся у захищеному месенджері платформи. Миттєве сповіщення надходить майстру чи продавцю у Telegram-бот.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle">3</div>
+                    <h4>Безпечна угода</h4>
+                    <p>Замовляйте з Loop Захистом, перевіряйте якість робіт, підтверджуйте виконання в кабінеті та отримуйте реальні відгуки.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA ЗАКЛИК ДО ДІЇ -->
+        <div class="about-cta">
+            <h2>Приєднуйтесь до спільноти Loop Market вже сьогодні!</h2>
+            <p>Опублікуйте своє перше оголошення або замовте потрібну послугу за лічені хвилини.</p>
+            <a href="/create.html" class="btn-cta-create">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                Опублікувати оголошення
+            </a>
+        </div>
+
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="logo" style="margin-bottom: 12px;">
+                    <div class="logo-circle">L</div>
+                    <span>Loop<span style="color: #10b981;">Market</span></span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">Локальна студентська платформа товарів та якісних послуг.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Навігація</h4>
+                <a href="/index.html">Головна</a>
+                <a href="/index.html?type=service">Послуги</a>
+                <a href="/create.html">Створити оголошення</a>
+                <a href="/messages.html">Повідомлення</a>
+            </div>
+            <div class="footer-col">
+                <h4>Безпека та правила</h4>
+                <a href="/safety.html">Правила безпеки</a>
+                <a href="/terms.html">Умови використання</a>
+                <a href="/about.html">Про платформу</a>
+            </div>
+            <div class="footer-col">
+                <h4>Контакти</h4>
+                <a href="https://t.me/LoopMarket_Verify_bot?start=start" target="_blank">Офіційний Telegram-бот</a>
+                <a href="mailto:support@loopmarket.ua">support@loopmarket.ua</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2026 Loop Market. Усі права захищено. Безпечні студентські угоди.
+        </div>
+    </footer>
+
+    <!-- ==================== SCRIPT ==================== -->
+    <script>
+        const token = localStorage.getItem('loopToken');
+        if (token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                const user = JSON.parse(jsonPayload);
+                const name = user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "Профіль";
+                document.getElementById('navProfileText').innerText = name.split(' ')[0] || "Профіль";
+                document.getElementById('btnLogout').style.display = 'inline-flex';
+            } catch(e) {}
+        } else {
+            const pLink = document.getElementById('navProfileLink');
+            if (pLink) pLink.href = '/login.html';
+            document.getElementById('navProfileText').innerText = 'Увійти';
+            document.getElementById('btnLogout').style.display = 'none';
+        }
+
+        function toggleTheme() {
+            const cur = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = cur === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('loopTheme', next);
+            document.getElementById('themeToggle').innerText = next === 'dark' ? '☀️' : '🌙';
+        }
+        const savedTheme = localStorage.getItem('loopTheme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeToggle').innerText = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        function showLogoutModal() {
+            if (confirm("Ви дійсно бажаєте вийти з облікового запису?")) {
+                localStorage.removeItem('loopToken');
+                localStorage.removeItem('loopRefreshToken');
+                localStorage.removeItem('loopUserRole');
+                window.location.href = '/login.html';
+            }
+        }
+        function toggleNotifications() {
+            window.location.href = '/profile.html#orders';
+        }
+    </script>
+</body>
+</html>

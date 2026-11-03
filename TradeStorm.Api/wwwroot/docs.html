@@ -1,0 +1,3807 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Документація розробника & REST API | LoopMarket</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><polyline points='16 18 22 12 16 6'/><polyline points='8 6 2 12 8 18'/></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #070b14;
+            --bg-surface: #0e1526;
+            --bg-card: #131d33;
+            --border-color: #1e2c4a;
+            --border-focus: #3b82f6;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --primary: #10b981;
+            --primary-blue: #2563eb;
+            --primary-gradient: linear-gradient(135deg, #10b981 0%, #2563eb 100%);
+            --code-bg: #090e1a;
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* HEADER */
+        header {
+            background-color: rgba(14, 21, 38, 0.92);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            padding: 0 28px;
+        }
+
+        .header-container {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-badge-icon {
+            width: 38px;
+            height: 38px;
+            background: var(--primary-gradient);
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+        }
+
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            color: var(--primary);
+        }
+
+        .pill-tag {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: rgba(37, 99, 235, 0.16);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            color: #60a5fa;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            font-weight: 700;
+            padding: 8px 14px;
+            border-radius: 9px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-link:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .btn-download-spec {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1.5px solid rgba(16, 185, 129, 0.35);
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 800;
+            padding: 8px 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-download-spec:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+        }
+
+        /* HERO INTRO */
+        .docs-hero {
+            padding: 36px 28px 24px;
+            background: radial-gradient(circle at 85% 15%, rgba(37, 99, 235, 0.18) 0%, transparent 60%),
+                        radial-gradient(circle at 15% 85%, rgba(16, 185, 129, 0.12) 0%, transparent 60%);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero-inner {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        .hero-headline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .hero-title {
+            font-size: 2.1rem;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: -0.6px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .version-badge {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+
+        .hero-desc {
+            font-size: 1.02rem;
+            color: var(--text-muted);
+            max-width: 900px;
+            line-height: 1.6;
+            margin-bottom: 22px;
+        }
+
+        .hero-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            max-width: 1100px;
+        }
+
+        .stat-card {
+            background: rgba(19, 29, 51, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-card-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card-val {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* TABS NAV */
+        .tabs-sticky-nav {
+            background: rgba(14, 21, 38, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 68px;
+            z-index: 990;
+            padding: 0 28px;
+        }
+
+        .tabs-nav-container {
+            max-width: 1500px;
+            margin: 0 auto;
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .nav-tab-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 800;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .nav-tab-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-tab-btn.active {
+            background: var(--primary-gradient);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+        }
+
+        /* AUTH PRESET TOOLBAR */
+        .auth-preset-bar {
+            background: #090e1a;
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 28px;
+        }
+
+        .auth-bar-inner {
+            max-width: 1500px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .auth-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .auth-label {
+            font-size: 0.84rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .auth-chip {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.18s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .auth-chip:hover {
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .auth-chip.active {
+            background: rgba(37, 99, 235, 0.25);
+            border-color: #3b82f6;
+            color: #93c5fd;
+        }
+
+        .token-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            max-width: 480px;
+        }
+
+        .token-input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: #a7f3d0;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .token-input:focus {
+            border-color: var(--primary);
+        }
+
+        /* MAIN CONTAINER */
+        main {
+            max-width: 1500px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 28px;
+            flex: 1;
+        }
+
+        .tab-section {
+            display: none;
+        }
+
+        .tab-section.active {
+            display: block;
+        }
+
+        /* TAB 1: REST API EXPLORER */
+        .api-controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .api-search-box {
+            position: relative;
+            flex: 1;
+            min-width: 280px;
+            max-width: 500px;
+        }
+
+        .api-search-input {
+            width: 100%;
+            background: var(--bg-surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 18px 12px 42px;
+            color: white;
+            font-size: 0.92rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .api-search-input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 16px rgba(59, 130, 246, 0.25);
+        }
+
+        .api-search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+        }
+
+        .cat-chips-scroll {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .cat-chip {
+            background: var(--bg-surface);
+            border: 1.5px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-weight: 800;
+            padding: 8px 14px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+
+        .cat-chip:hover {
+            color: white;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .cat-chip.active {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+
+        /* ENDPOINT CARD */
+        .endpoint-card {
+            background: var(--bg-surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            margin-bottom: 14px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .endpoint-card:hover {
+            border-color: rgba(59, 130, 246, 0.45);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .endpoint-header {
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            cursor: pointer;
+            user-select: none;
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        .endpoint-header:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .endpoint-main-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .badge-method {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            font-size: 0.78rem;
+            padding: 5px 11px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        .badge-get { background: rgba(16, 185, 129, 0.16); color: #10b981; border: 1.5px solid rgba(16, 185, 129, 0.35); }
+        .badge-post { background: rgba(59, 130, 246, 0.16); color: #60a5fa; border: 1.5px solid rgba(59, 130, 246, 0.35); }
+        .badge-put { background: rgba(245, 158, 11, 0.16); color: #f59e0b; border: 1.5px solid rgba(245, 158, 11, 0.35); }
+        .badge-patch { background: rgba(139, 92, 246, 0.16); color: #c084fc; border: 1.5px solid rgba(139, 92, 246, 0.35); }
+        .badge-delete { background: rgba(244, 63, 94, 0.16); color: #fb7185; border: 1.5px solid rgba(244, 63, 94, 0.35); }
+
+        .endpoint-path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.94rem;
+            font-weight: 700;
+            color: #ffffff;
+            white-space: nowrap;
+        }
+
+        .endpoint-summary {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .endpoint-badges-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .tag-pill {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-muted);
+        }
+
+        .auth-indicator {
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .auth-lock { color: #f59e0b; }
+        .auth-globe { color: #10b981; }
+
+        .chevron-toggle {
+            transition: transform 0.2s;
+            color: var(--text-dim);
+        }
+
+        .endpoint-card.open .chevron-toggle {
+            transform: rotate(180deg);
+        }
+
+        /* ENDPOINT BODY DETAILS */
+        .endpoint-details {
+            display: none;
+            padding: 22px 24px;
+            background: var(--code-bg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .endpoint-card.open .endpoint-details {
+            display: block;
+        }
+
+        .details-desc {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .section-subhead {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: #60a5fa;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* PARAMS TABLE */
+        .params-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+        }
+
+        .params-table th {
+            text-align: left;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-dim);
+            font-weight: 800;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .params-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+        }
+
+        .param-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: #93c5fd;
+        }
+
+        .param-in {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .param-req {
+            color: #f43f5e;
+            font-weight: 800;
+            font-size: 0.75rem;
+        }
+
+        .param-opt {
+            color: var(--text-dim);
+            font-size: 0.75rem;
+        }
+
+        /* LIVE TESTER BOX */
+        .tester-box {
+            background: #060911;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 18px;
+        }
+
+        .tester-row-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .body-editor {
+            width: 100%;
+            height: 120px;
+            background: #020408;
+            border: 1px solid #1e2c4a;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: #6ee7b7;
+            resize: vertical;
+            outline: none;
+            margin-bottom: 12px;
+        }
+
+        .body-editor:focus {
+            border-color: #3b82f6;
+        }
+
+        .btn-run-request {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            font-weight: 800;
+            font-size: 0.88rem;
+            padding: 9px 18px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.18s;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-run-request:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+        }
+
+        .btn-run-request:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .live-response-output {
+            display: none;
+            margin-top: 14px;
+            background: #020408;
+            border: 1px solid #10b981;
+            border-radius: 10px;
+            padding: 14px 18px;
+        }
+
+        .live-response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.82rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .res-status-badge {
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .res-status-200 { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .res-status-err { background: rgba(244, 63, 94, 0.2); color: #fb7185; }
+
+        .res-time {
+            color: var(--text-dim);
+        }
+
+        .res-json-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: #6ee7b7;
+            max-height: 280px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        /* TAB 2, 3, 4, 5, 6 */
+        .info-card-box {
+            background: var(--bg-surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .info-card-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-card-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.65;
+            margin-bottom: 20px;
+        }
+
+        .grid-two-cols {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .code-snippet-box {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px;
+            position: relative;
+        }
+
+        .snippet-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .snippet-lang {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #60a5fa;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn-copy-code {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-copy-code:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .code-pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .stepper-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .flow-step-item {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px 24px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .flow-step-item:hover {
+            border-color: var(--primary);
+        }
+
+        .step-num-badge {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 900;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+        }
+
+        .step-content-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 6px;
+        }
+
+        .step-content-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 20px;
+        }
+
+        .model-card {
+            background: var(--bg-surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .model-card-header {
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .model-card-name {
+            font-size: 1rem;
+            font-weight: 800;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .model-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        .model-table th {
+            text-align: left;
+            padding: 8px 14px;
+            color: var(--text-dim);
+            font-weight: 800;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .model-table td {
+            padding: 8px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .model-field-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: #93c5fd;
+        }
+
+        .model-field-type {
+            font-family: 'JetBrains Mono', monospace;
+            color: #34d399;
+            font-size: 0.78rem;
+        }
+
+        .status-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+        }
+
+        .status-table th {
+            text-align: left;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 800;
+            color: var(--text-dim);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+        }
+
+        .status-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.88rem;
+        }
+
+        .code-pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        /* FOOTER */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 32px 28px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            margin-top: auto;
+            background: var(--bg-surface);
+        }
+
+        @media (max-width: 900px) {
+            .grid-two-cols { grid-template-columns: 1fr; }
+            .header-nav { display: none; }
+            .hero-title { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== HEADER ==================== -->
+    <header>
+        <div class="header-container">
+            <a href="/index.html" class="logo-group">
+                <div class="logo-badge-icon">L</div>
+                <div class="logo-text">Loop<span>Market</span></div>
+                <span class="pill-tag">API Docs 2.4</span>
+            </a>
+
+            <div class="header-nav">
+                <a href="/index.html" class="header-link">Головна</a>
+                <a href="/index.html?type=service" class="header-link">Послуги</a>
+                <a href="/messages.html" class="header-link">Чат & Діалоги</a>
+                <a href="/safety.html" class="header-link">Безпека</a>
+                <a href="/openapi/v1.json" target="_blank" class="btn-download-spec" title="Завантажити JSON специфікацію OpenAPI 3.0.3">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span>OpenAPI v1.json</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== HERO SECTION ==================== -->
+    <div class="docs-hero">
+        <div class="hero-inner">
+            <div class="hero-headline">
+                <h1 class="hero-title">
+                    <span>⚡ Документація платформи LoopMarket</span>
+                    <span class="version-badge">v2.4.0 REST & SignalR</span>
+                </h1>
+            </div>
+            <p class="hero-desc">
+                Повний технічний довідник для розробників: каталог товарів, безпечне холдування коштів для студентських послуг (Loop Захист), двосторонній SignalR чат у реальному часі, інтеграція Нової Пошти та автентифікація через JWT токени.
+            </p>
+            <div class="hero-stats-grid">
+                <div class="stat-card">
+                    <span class="stat-card-label">Сервер API</span>
+                    <span class="stat-card-val">http://localhost:65083</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-card-label">Специфікація</span>
+                    <span class="stat-card-val">OpenAPI 3.0.3</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-card-label">Автентифікація</span>
+                    <span class="stat-card-val">Bearer JWT HS256</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-card-label">Real-time Hub</span>
+                    <span class="stat-card-val">SignalR WebSocket</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== STICKY TABS NAVIGATION ==================== -->
+    <div class="tabs-sticky-nav">
+        <div class="tabs-nav-container">
+            <button class="nav-tab-btn active" onclick="switchDocTab('tab-api', this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                <span>REST API Ендпоінти (33)</span>
+            </button>
+            <button class="nav-tab-btn" onclick="switchDocTab('tab-signalr', this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>SignalR (Чат наживо)</span>
+            </button>
+            <button class="nav-tab-btn" onclick="switchDocTab('tab-escrow', this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>Loop Захист (Безпечна угода)</span>
+            </button>
+            <button class="nav-tab-btn" onclick="switchDocTab('tab-models', this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                <span>Моделі даних (Схеми)</span>
+            </button>
+            <button class="nav-tab-btn" onclick="switchDocTab('tab-quickstart', this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                <span>Швидкий старт (SDK)</span>
+            </button>
+            <button class="nav-tab-btn" onclick="switchDocTab('tab-errors', this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Коди помилок</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== AUTH PRESET TOOLBAR ==================== -->
+    <div class="auth-preset-bar">
+        <div class="auth-bar-inner">
+            <div class="auth-left">
+                <span class="auth-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Тестовий користувач:
+                </span>
+                <button class="auth-chip active" onclick="setAuthPreset('nikita', this)">
+                    👑 Нікіта (Admin / ID 1)
+                </button>
+                <button class="auth-chip" onclick="setAuthPreset('vova', this)">
+                    💼 Вова (Продавець / ID 2)
+                </button>
+                <button class="auth-chip" onclick="setAuthPreset('buyer', this)">
+                    🛒 Покупець (ID 3)
+                </button>
+            </div>
+            <div class="token-input-wrap">
+                <input type="text" id="activeJwtTokenInput" class="token-input" placeholder="Bearer JWT Token..." oninput="updateActiveToken(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN CONTENT TABS ==================== -->
+    <main>
+
+        <!-- ==================== TAB 1: REST API EXPLORER ==================== -->
+        <section id="tab-api" class="tab-section active">
+            <div class="api-controls-row">
+                <div class="api-search-box">
+                    <svg class="api-search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" id="apiSearchInput" class="api-search-input" placeholder="Пошук ендпоінтів (наприклад: listings, orders, login)..." oninput="filterClientEndpoints(this.value)">
+                </div>
+                <div class="cat-chips-scroll" id="catFilterChips">
+                    <button class="cat-chip active" onclick="filterByTag('all', this)">Всі (33)</button>
+                    <button class="cat-chip" onclick="filterByTag('Auth', this)">Auth</button>
+                    <button class="cat-chip" onclick="filterByTag('Users', this)">Users</button>
+                    <button class="cat-chip" onclick="filterByTag('Listings', this)">Listings</button>
+                    <button class="cat-chip" onclick="filterByTag('Orders', this)">Orders (Loop Захист)</button>
+                    <button class="cat-chip" onclick="filterByTag('Messages', this)">Messages</button>
+                    <button class="cat-chip" onclick="filterByTag('Reviews', this)">Reviews</button>
+                    <button class="cat-chip" onclick="filterByTag('Favorites', this)">Favorites</button>
+                    <button class="cat-chip" onclick="filterByTag('Delivery', this)">Delivery</button>
+                    <button class="cat-chip" onclick="filterByTag('Currency', this)">Currency</button>
+                    <button class="cat-chip" onclick="filterByTag('Health', this)">Health</button>
+                </div>
+            </div>
+
+            <!-- ВЖЕ СТАТИЧНО ВБУДОВАНИЙ СПИСОК КАРТОК (МИТТЄВЕ ЗАВАНТАЖЕННЯ БЕЗ ЗАТРИМКИ) -->
+            <div id="endpointsContainer">
+
+    <div class="endpoint-card" id="ep-card-0" data-tags="Auth" data-search="post /api/users/login авторизація користувача (email &amp; пароль) перевіряє облікові дані користувача та повертає jwt access token для подальших авторизованих запитів. auth">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-0')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-post">POST</span>
+                <span class="endpoint-path">/api/users/login</span>
+                <span class="endpoint-summary">Авторизація користувача (Email &amp; Пароль)</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Auth</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Перевіряє облікові дані користувача та повертає JWT access token для подальших авторизованих запитів.</p>
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+    <div style="margin: 10px 0 4px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Тіло запиту (Request Body JSON):</div>
+    <textarea id="body-ep-card-0" class="body-editor">{
+  &quot;email&quot;: &quot;nikitazhidenko@gmail.com&quot;,
+  &quot;password&quot;: &quot;Password123!&quot;
+}</textarea>
+    
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-0" onclick="executeApiTest('ep-card-0', 'POST', '/api/users/login', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-0" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-0">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-0" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-0" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-0">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-1" data-tags="Auth" data-search="post /api/users/register реєстрація нового користувача створює новий обліковий запис у loop market. auth">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-1')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-post">POST</span>
+                <span class="endpoint-path">/api/users/register</span>
+                <span class="endpoint-summary">Реєстрація нового користувача</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Auth</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Створює новий обліковий запис у Loop Market.</p>
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+    <div style="margin: 10px 0 4px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Тіло запиту (Request Body JSON):</div>
+    <textarea id="body-ep-card-1" class="body-editor">{
+  &quot;firstName&quot;: &quot;Олександр&quot;,
+  &quot;lastName&quot;: &quot;Коваленко&quot;,
+  &quot;email&quot;: &quot;olexandr@loopmarket.ua&quot;,
+  &quot;password&quot;: &quot;SecurePass123!&quot;,
+  &quot;phoneNumber&quot;: &quot;+380501234567&quot;,
+  &quot;role&quot;: &quot;Buyer&quot;
+}</textarea>
+    
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-1" onclick="executeApiTest('ep-card-1', 'POST', '/api/users/register', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-1" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-1">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-1" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-1" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-1">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-2" data-tags="Users" data-search="get /api/users/me отримати профіль поточного користувача повертає повну інформацію про авторизованого користувача на основі bearer токена. users">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-2')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/users/me</span>
+                <span class="endpoint-summary">Отримати профіль поточного користувача</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Users</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Повертає повну інформацію про авторизованого користувача на основі Bearer токена.</p>
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-2" onclick="executeApiTest('ep-card-2', 'GET', '/api/users/me', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-2" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-2">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-2" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-2" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-2">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-3" data-tags="Users" data-search="put /api/users/me оновити особисті дані профілю змінює ім&#x27;я, прізвище, телефон або налаштування сповіщень поточного користувача. users">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-3')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-put">PUT</span>
+                <span class="endpoint-path">/api/users/me</span>
+                <span class="endpoint-summary">Оновити особисті дані профілю</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Users</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Змінює ім&#x27;я, прізвище, телефон або налаштування сповіщень поточного користувача.</p>
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+    <div style="margin: 10px 0 4px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Тіло запиту (Request Body JSON):</div>
+    <textarea id="body-ep-card-3" class="body-editor">{
+  &quot;firstName&quot;: &quot;Нікіта&quot;,
+  &quot;lastName&quot;: &quot;Жиденко&quot;,
+  &quot;phoneNumber&quot;: &quot;+380951112233&quot;
+}</textarea>
+    
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-3" onclick="executeApiTest('ep-card-3', 'PUT', '/api/users/me', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-3" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-3">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-3" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-3" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-3">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-4" data-tags="Users" data-search="get /api/users/public/{id} публічна інформація про продавця/майстра повертає публічні дані користувача для відображення в картці продавця або майстра. users">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-4')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/users/public/{id}</span>
+                <span class="endpoint-summary">Публічна інформація про продавця/майстра</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Users</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Повертає публічні дані користувача для відображення в картці продавця або майстра.</p>
+            
+    <div class="section-subhead">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+        Параметри запиту
+    </div>
+    <table class="params-table">
+        <thead><tr><th>Параметр</th><th>Де</th><th>Тип</th><th>Обов'язковий</th><th>Опис</th></tr></thead>
+        <tbody>
+        <tr>
+            <td><span class="param-name">id</span></td>
+            <td><span class="param-in">path</span></td>
+            <td><code style="color: #6ee7b7;">integer</code></td>
+            <td><span class="param-req">Так</span></td>
+            <td><span style="color: var(--text-muted);"></span></td>
+        </tr>
+        </tbody>
+    </table>
+    
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-4" onclick="executeApiTest('ep-card-4', 'GET', '/api/users/public/{id}', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-4" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-4">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-4" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-4" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-4">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-5" data-tags="Users" data-search="get /api/users/{id}/services-stats статистика виконаних робіт майстра повертає агреговані показники виконання послуг, рейтинг, кількість успішних угод loop захист та відсоток задоволених клієнтів. users">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-5')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/users/{id}/services-stats</span>
+                <span class="endpoint-summary">Статистика виконаних робіт майстра</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Users</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Повертає агреговані показники виконання послуг, рейтинг, кількість успішних угод Loop Захист та відсоток задоволених клієнтів.</p>
+            
+    <div class="section-subhead">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+        Параметри запиту
+    </div>
+    <table class="params-table">
+        <thead><tr><th>Параметр</th><th>Де</th><th>Тип</th><th>Обов'язковий</th><th>Опис</th></tr></thead>
+        <tbody>
+        <tr>
+            <td><span class="param-name">id</span></td>
+            <td><span class="param-in">path</span></td>
+            <td><code style="color: #6ee7b7;">integer</code></td>
+            <td><span class="param-req">Так</span></td>
+            <td><span style="color: var(--text-muted);"></span></td>
+        </tr>
+        </tbody>
+    </table>
+    
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-5" onclick="executeApiTest('ep-card-5', 'GET', '/api/users/{id}/services-stats', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-5" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-5">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-5" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-5" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-5">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-6" data-tags="Listings" data-search="get /api/listings отримати каталог оголошень та послуг повертає список активних оголошень з підтримкою пагінації, повнотекстового пошуку, фільтрації за категорією, продавцем та типом (товар/послуга). listings">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-6')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/listings</span>
+                <span class="endpoint-summary">Отримати каталог оголошень та послуг</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Listings</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Повертає список активних оголошень з підтримкою пагінації, повнотекстового пошуку, фільтрації за категорією, продавцем та типом (товар/послуга).</p>
+            
+    <div class="section-subhead">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+        Параметри запиту
+    </div>
+    <table class="params-table">
+        <thead><tr><th>Параметр</th><th>Де</th><th>Тип</th><th>Обов'язковий</th><th>Опис</th></tr></thead>
+        <tbody>
+        <tr>
+            <td><span class="param-name">categoryId</span></td>
+            <td><span class="param-in">query</span></td>
+            <td><code style="color: #6ee7b7;">integer</code></td>
+            <td><span class="param-opt">Ні</span></td>
+            <td><span style="color: var(--text-muted);">ID категорії (8 - Послуги)</span></td>
+        </tr>
+        
+        <tr>
+            <td><span class="param-name">type</span></td>
+            <td><span class="param-in">query</span></td>
+            <td><code style="color: #6ee7b7;">string</code></td>
+            <td><span class="param-opt">Ні</span></td>
+            <td><span style="color: var(--text-muted);">Тип: товар або послуга</span></td>
+        </tr>
+        
+        <tr>
+            <td><span class="param-name">search</span></td>
+            <td><span class="param-in">query</span></td>
+            <td><code style="color: #6ee7b7;">string</code></td>
+            <td><span class="param-opt">Ні</span></td>
+            <td><span style="color: var(--text-muted);">Пошуковий запит</span></td>
+        </tr>
+        
+        <tr>
+            <td><span class="param-name">sellerId</span></td>
+            <td><span class="param-in">query</span></td>
+            <td><code style="color: #6ee7b7;">integer</code></td>
+            <td><span class="param-opt">Ні</span></td>
+            <td><span style="color: var(--text-muted);">Фільтр за ID продавця</span></td>
+        </tr>
+        
+        <tr>
+            <td><span class="param-name">minPrice</span></td>
+            <td><span class="param-in">query</span></td>
+            <td><code style="color: #6ee7b7;">number</code></td>
+            <td><span class="param-opt">Ні</span></td>
+            <td><span style="color: var(--text-muted);">Мінімальна ціна</span></td>
+        </tr>
+        
+        <tr>
+            <td><span class="param-name">maxPrice</span></td>
+            <td><span class="param-in">query</span></td>
+            <td><code style="color: #6ee7b7;">number</code></td>
+            <td><span class="param-opt">Ні</span></td>
+            <td><span style="color: var(--text-muted);">Максимальна ціна</span></td>
+        </tr>
+        </tbody>
+    </table>
+    
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-6" onclick="executeApiTest('ep-card-6', 'GET', '/api/listings', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-6" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-6">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-6" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-6" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-6">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-7" data-tags="Listings" data-search="post /api/listings створити нове оголошення або послугу публікує новий товар або послугу в каталозі loop market. listings">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-7')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-post">POST</span>
+                <span class="endpoint-path">/api/listings</span>
+                <span class="endpoint-summary">Створити нове оголошення або послугу</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Listings</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Публікує новий товар або послугу в каталозі Loop Market.</p>
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+    <div style="margin: 10px 0 4px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Тіло запиту (Request Body JSON):</div>
+    <textarea id="body-ep-card-7" class="body-editor">{
+  &quot;title&quot;: &quot;Ремонт комп&#x27;ютерів та налаштування Windows&quot;,
+  &quot;description&quot;: &quot;Діагностика, чистка від пилу, заміна термопасти.&quot;,
+  &quot;price&quot;: 450.0,
+  &quot;categoryId&quot;: 8,
+  &quot;imageUrl&quot;: &quot;https://placehold.co/600x400/10b981/white?text=PC+Repair&quot;,
+  &quot;condition&quot;: &quot;Новий&quot;,
+  &quot;location&quot;: &quot;Київ&quot;,
+  &quot;isShippingAvailable&quot;: false
+}</textarea>
+    
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-7" onclick="executeApiTest('ep-card-7', 'POST', '/api/listings', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-7" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-7">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-7" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-7" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-7">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-8" data-tags="Listings" data-search="get /api/listings/{id} отримати деталі конкретного оголошення  listings">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-8')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/listings/{id}</span>
+                <span class="endpoint-summary">Отримати деталі конкретного оголошення</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Listings</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+    <div class="section-subhead">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+        Параметри запиту
+    </div>
+    <table class="params-table">
+        <thead><tr><th>Параметр</th><th>Де</th><th>Тип</th><th>Обов'язковий</th><th>Опис</th></tr></thead>
+        <tbody>
+        <tr>
+            <td><span class="param-name">id</span></td>
+            <td><span class="param-in">path</span></td>
+            <td><code style="color: #6ee7b7;">integer</code></td>
+            <td><span class="param-req">Так</span></td>
+            <td><span style="color: var(--text-muted);"></span></td>
+        </tr>
+        </tbody>
+    </table>
+    
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-8" onclick="executeApiTest('ep-card-8', 'GET', '/api/listings/{id}', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-8" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-8">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-8" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-8" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-8">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-9" data-tags="Listings" data-search="delete /api/listings/{id} видалити оголошення  listings">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-9')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-delete">DELETE</span>
+                <span class="endpoint-path">/api/listings/{id}</span>
+                <span class="endpoint-summary">Видалити оголошення</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Listings</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+    <div class="section-subhead">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+        Параметри запиту
+    </div>
+    <table class="params-table">
+        <thead><tr><th>Параметр</th><th>Де</th><th>Тип</th><th>Обов'язковий</th><th>Опис</th></tr></thead>
+        <tbody>
+        <tr>
+            <td><span class="param-name">id</span></td>
+            <td><span class="param-in">path</span></td>
+            <td><code style="color: #6ee7b7;">integer</code></td>
+            <td><span class="param-req">Так</span></td>
+            <td><span style="color: var(--text-muted);"></span></td>
+        </tr>
+        </tbody>
+    </table>
+    
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-9" onclick="executeApiTest('ep-card-9', 'DELETE', '/api/listings/{id}', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-9" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-9">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-9" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-9" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-9">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-10" data-tags="Listings" data-search="get /api/listings/categories отримати список всіх категорій  listings">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-10')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/listings/categories</span>
+                <span class="endpoint-summary">Отримати список всіх категорій</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Listings</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-10" onclick="executeApiTest('ep-card-10', 'GET', '/api/listings/categories', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-10" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-10">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-10" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-10" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-10">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-11" data-tags="Orders" data-search="post /api/orders створити замовлення товару з доставкою новою поштою оформлює замовлення фізичного товару з резервацією коштів або накладеним платежем. orders">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-11')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-post">POST</span>
+                <span class="endpoint-path">/api/orders</span>
+                <span class="endpoint-summary">Створити замовлення товару з доставкою Новою Поштою</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Orders</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Оформлює замовлення фізичного товару з резервацією коштів або накладеним платежем.</p>
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+    <div style="margin: 10px 0 4px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Тіло запиту (Request Body JSON):</div>
+    <textarea id="body-ep-card-11" class="body-editor">{
+  &quot;listingId&quot;: 8,
+  &quot;buyerName&quot;: &quot;Олександр Коваленко&quot;,
+  &quot;buyerPhone&quot;: &quot;+380501234567&quot;,
+  &quot;deliveryCity&quot;: &quot;Київ&quot;,
+  &quot;deliveryBranch&quot;: &quot;Відділення №1: вул. Пирогівський шлях, 135&quot;,
+  &quot;paymentMethod&quot;: &quot;Loop Захист (Онлайн)&quot;,
+  &quot;comment&quot;: &quot;Будь ласка, надійно упакуйте&quot;
+}</textarea>
+    
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-11" onclick="executeApiTest('ep-card-11', 'POST', '/api/orders', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-11" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-11">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-11" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-11" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-11">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-12" data-tags="Orders" data-search="post /api/orders/create-service оформити бронювання послуги (loop захист) створює захищене замовлення послуги з холдуванням коштів, визначенням дати, точного часу, параметрів та адреси виконання. orders">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-12')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-post">POST</span>
+                <span class="endpoint-path">/api/orders/create-service</span>
+                <span class="endpoint-summary">Оформити бронювання послуги (Loop Захист)</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Orders</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Створює захищене замовлення послуги з холдуванням коштів, визначенням дати, точного часу, параметрів та адреси виконання.</p>
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+    <div style="margin: 10px 0 4px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Тіло запиту (Request Body JSON):</div>
+    <textarea id="body-ep-card-12" class="body-editor">{
+  &quot;listingId&quot;: 9,
+  &quot;buyerName&quot;: &quot;Олександр Коваленко&quot;,
+  &quot;buyerPhone&quot;: &quot;+380501234567&quot;,
+  &quot;executionDate&quot;: &quot;04.11.2026&quot;,
+  &quot;executionTime&quot;: &quot;10:00&quot;,
+  &quot;address&quot;: &quot;вул. Хрещатик, 24, кв. 12&quot;,
+  &quot;specifications&quot;: &quot;Генеральне прибирання після ремонту, 2 кімнати&quot;,
+  &quot;totalPrice&quot;: 800.0,
+  &quot;paymentMethod&quot;: &quot;Loop Захист (Безпечна оплата)&quot;
+}</textarea>
+    
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-12" onclick="executeApiTest('ep-card-12', 'POST', '/api/orders/create-service', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-12" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-12">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-12" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-12" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-12">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-13" data-tags="Orders" data-search="get /api/orders/my-purchases мої покупки та замовлені послуги повертає всі замовлення, де поточний авторизований користувач виступає покупцем/замовником. orders">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-13')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/orders/my-purchases</span>
+                <span class="endpoint-summary">Мої покупки та замовлені послуги</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Orders</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Повертає всі замовлення, де поточний авторизований користувач виступає покупцем/замовником.</p>
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-13" onclick="executeApiTest('ep-card-13', 'GET', '/api/orders/my-purchases', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-13" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-13">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-13" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-13" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-13">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-14" data-tags="Orders" data-search="get /api/orders/my-sales мої продажі та замовлення на послуги повертає замовлення, які надійшли поточному користувачу як продавцю або майстру. orders">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-14')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/orders/my-sales</span>
+                <span class="endpoint-summary">Мої продажі та замовлення на послуги</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Orders</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Повертає замовлення, які надійшли поточному користувачу як продавцю або майстру.</p>
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-14" onclick="executeApiTest('ep-card-14', 'GET', '/api/orders/my-sales', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-14" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-14">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-14" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-14" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-14">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-15" data-tags="Orders" data-search="patch /api/orders/{id}/status оновити статус замовлення змінює статус замовлення: confirmed -&gt; shipped / indelivery -&gt; completed (виплата коштів). orders">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-15')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-patch">PATCH</span>
+                <span class="endpoint-path">/api/orders/{id}/status</span>
+                <span class="endpoint-summary">Оновити статус замовлення</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Orders</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Змінює статус замовлення: Confirmed -&gt; Shipped / InDelivery -&gt; Completed (виплата коштів).</p>
+            
+    <div class="section-subhead">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+        Параметри запиту
+    </div>
+    <table class="params-table">
+        <thead><tr><th>Параметр</th><th>Де</th><th>Тип</th><th>Обов'язковий</th><th>Опис</th></tr></thead>
+        <tbody>
+        <tr>
+            <td><span class="param-name">id</span></td>
+            <td><span class="param-in">path</span></td>
+            <td><code style="color: #6ee7b7;">integer</code></td>
+            <td><span class="param-req">Так</span></td>
+            <td><span style="color: var(--text-muted);"></span></td>
+        </tr>
+        </tbody>
+    </table>
+    
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+    <div style="margin: 10px 0 4px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Тіло запиту (Request Body JSON):</div>
+    <textarea id="body-ep-card-15" class="body-editor">{
+  &quot;status&quot;: &quot;Completed&quot;,
+  &quot;trackingNumber&quot;: &quot;20450912345678&quot;
+}</textarea>
+    
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-15" onclick="executeApiTest('ep-card-15', 'PATCH', '/api/orders/{id}/status', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-15" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-15">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-15" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-15" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-15">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-16" data-tags="Messages" data-search="get /api/messages/dialogs список активних діалогів повертає список співрозмовників з останнім повідомленням, кількістю непрочитаних та статусом онлайн. messages">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-16')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/messages/dialogs</span>
+                <span class="endpoint-summary">Список активних діалогів</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Messages</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Повертає список співрозмовників з останнім повідомленням, кількістю непрочитаних та статусом онлайн.</p>
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-16" onclick="executeApiTest('ep-card-16', 'GET', '/api/messages/dialogs', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-16" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-16">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-16" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-16" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-16">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-17" data-tags="Messages" data-search="get /api/messages/history/{partnerid} історія листування з конкретним користувачем повертає впорядкований хронологічний список повідомлень між авторизованим користувачем та партнером. messages">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-17')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/messages/history/{partnerId}</span>
+                <span class="endpoint-summary">Історія листування з конкретним користувачем</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Messages</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Повертає впорядкований хронологічний список повідомлень між авторизованим користувачем та партнером.</p>
+            
+    <div class="section-subhead">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+        Параметри запиту
+    </div>
+    <table class="params-table">
+        <thead><tr><th>Параметр</th><th>Де</th><th>Тип</th><th>Обов'язковий</th><th>Опис</th></tr></thead>
+        <tbody>
+        <tr>
+            <td><span class="param-name">partnerId</span></td>
+            <td><span class="param-in">path</span></td>
+            <td><code style="color: #6ee7b7;">integer</code></td>
+            <td><span class="param-req">Так</span></td>
+            <td><span style="color: var(--text-muted);"></span></td>
+        </tr>
+        </tbody>
+    </table>
+    
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-17" onclick="executeApiTest('ep-card-17', 'GET', '/api/messages/history/{partnerId}', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-17" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-17">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-17" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-17" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-17">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-18" data-tags="Messages" data-search="post /api/messages/send надіслати повідомлення (rest fallback) відправляє повідомлення співрозмовнику через rest api (дублює дію signalr chathub). messages">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-18')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-post">POST</span>
+                <span class="endpoint-path">/api/messages/send</span>
+                <span class="endpoint-summary">Надіслати повідомлення (REST fallback)</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Messages</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Відправляє повідомлення співрозмовнику через REST API (дублює дію SignalR ChatHub).</p>
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+    <div style="margin: 10px 0 4px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Тіло запиту (Request Body JSON):</div>
+    <textarea id="body-ep-card-18" class="body-editor">{
+  &quot;receiverId&quot;: 2,
+  &quot;text&quot;: &quot;Вітаю! Чи актуальне ще ваше оголошення?&quot;
+}</textarea>
+    
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-18" onclick="executeApiTest('ep-card-18', 'POST', '/api/messages/send', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-18" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-18">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-18" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-18" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-18">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-19" data-tags="Messages" data-search="get /api/messages/unread-count кількість непрочитаних повідомлень  messages">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-19')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/messages/unread-count</span>
+                <span class="endpoint-summary">Кількість непрочитаних повідомлень</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Messages</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-19" onclick="executeApiTest('ep-card-19', 'GET', '/api/messages/unread-count', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-19" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-19">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-19" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-19" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-19">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-20" data-tags="Reviews" data-search="get /api/reviews/user/{id} отримати відгуки та рейтинг користувача  reviews">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-20')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/reviews/user/{id}</span>
+                <span class="endpoint-summary">Отримати відгуки та рейтинг користувача</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Reviews</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+    <div class="section-subhead">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+        Параметри запиту
+    </div>
+    <table class="params-table">
+        <thead><tr><th>Параметр</th><th>Де</th><th>Тип</th><th>Обов'язковий</th><th>Опис</th></tr></thead>
+        <tbody>
+        <tr>
+            <td><span class="param-name">id</span></td>
+            <td><span class="param-in">path</span></td>
+            <td><code style="color: #6ee7b7;">integer</code></td>
+            <td><span class="param-req">Так</span></td>
+            <td><span style="color: var(--text-muted);"></span></td>
+        </tr>
+        </tbody>
+    </table>
+    
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-20" onclick="executeApiTest('ep-card-20', 'GET', '/api/reviews/user/{id}', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-20" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-20">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-20" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-20" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-20">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-21" data-tags="Reviews" data-search="post /api/reviews залишити відгук про виконавця чи продавця  reviews">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-21')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-post">POST</span>
+                <span class="endpoint-path">/api/reviews</span>
+                <span class="endpoint-summary">Залишити відгук про виконавця чи продавця</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Reviews</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+    <div style="margin: 10px 0 4px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Тіло запиту (Request Body JSON):</div>
+    <textarea id="body-ep-card-21" class="body-editor">{
+  &quot;targetUserId&quot;: 1,
+  &quot;rating&quot;: 5,
+  &quot;comment&quot;: &quot;Роботу виконано на вищому рівні. Рекомендую!&quot;
+}</textarea>
+    
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-21" onclick="executeApiTest('ep-card-21', 'POST', '/api/reviews', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-21" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-21">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-21" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-21" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-21">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-22" data-tags="Favorites" data-search="get /api/favorites список обраних оголошень  favorites">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-22')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/favorites</span>
+                <span class="endpoint-summary">Список обраних оголошень</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Favorites</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-22" onclick="executeApiTest('ep-card-22', 'GET', '/api/favorites', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-22" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-22">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-22" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-22" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-22">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-23" data-tags="Favorites" data-search="get /api/favorites/ids список id обраних оголошень  favorites">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-23')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/favorites/ids</span>
+                <span class="endpoint-summary">Список ID обраних оголошень</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Favorites</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-23" onclick="executeApiTest('ep-card-23', 'GET', '/api/favorites/ids', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-23" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-23">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-23" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-23" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-23">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-24" data-tags="Favorites" data-search="post /api/favorites/toggle/{listingid} додати або видалити з обраного (toggle)  favorites">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-24')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-post">POST</span>
+                <span class="endpoint-path">/api/favorites/toggle/{listingId}</span>
+                <span class="endpoint-summary">Додати або видалити з обраного (Toggle)</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Favorites</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+    <div class="section-subhead">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+        Параметри запиту
+    </div>
+    <table class="params-table">
+        <thead><tr><th>Параметр</th><th>Де</th><th>Тип</th><th>Обов'язковий</th><th>Опис</th></tr></thead>
+        <tbody>
+        <tr>
+            <td><span class="param-name">listingId</span></td>
+            <td><span class="param-in">path</span></td>
+            <td><code style="color: #6ee7b7;">integer</code></td>
+            <td><span class="param-req">Так</span></td>
+            <td><span style="color: var(--text-muted);"></span></td>
+        </tr>
+        </tbody>
+    </table>
+    
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-24" onclick="executeApiTest('ep-card-24', 'POST', '/api/favorites/toggle/{listingId}', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-24" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-24">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-24" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-24" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-24">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-25" data-tags="Delivery" data-search="get /api/delivery/carriers доступні поштові оператори  delivery">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-25')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/delivery/carriers</span>
+                <span class="endpoint-summary">Доступні поштові оператори</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Delivery</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-25" onclick="executeApiTest('ep-card-25', 'GET', '/api/delivery/carriers', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-25" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-25">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-25" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-25" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-25">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-26" data-tags="Delivery" data-search="get /api/delivery/novaposhta/cities пошук міст через api нової пошти  delivery">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-26')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/delivery/novaposhta/cities</span>
+                <span class="endpoint-summary">Пошук міст через API Нової Пошти</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Delivery</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+    <div class="section-subhead">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+        Параметри запиту
+    </div>
+    <table class="params-table">
+        <thead><tr><th>Параметр</th><th>Де</th><th>Тип</th><th>Обов'язковий</th><th>Опис</th></tr></thead>
+        <tbody>
+        <tr>
+            <td><span class="param-name">search</span></td>
+            <td><span class="param-in">query</span></td>
+            <td><code style="color: #6ee7b7;">string</code></td>
+            <td><span class="param-opt">Ні</span></td>
+            <td><span style="color: var(--text-muted);"></span></td>
+        </tr>
+        </tbody>
+    </table>
+    
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-26" onclick="executeApiTest('ep-card-26', 'GET', '/api/delivery/novaposhta/cities', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-26" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-26">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-26" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-26" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-26">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-27" data-tags="Delivery" data-search="get /api/delivery/novaposhta/warehouses пошук відділень та поштоматів нової пошти  delivery">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-27')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/delivery/novaposhta/warehouses</span>
+                <span class="endpoint-summary">Пошук відділень та поштоматів Нової Пошти</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Delivery</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+    <div class="section-subhead">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+        Параметри запиту
+    </div>
+    <table class="params-table">
+        <thead><tr><th>Параметр</th><th>Де</th><th>Тип</th><th>Обов'язковий</th><th>Опис</th></tr></thead>
+        <tbody>
+        <tr>
+            <td><span class="param-name">cityRef</span></td>
+            <td><span class="param-in">query</span></td>
+            <td><code style="color: #6ee7b7;">string</code></td>
+            <td><span class="param-opt">Ні</span></td>
+            <td><span style="color: var(--text-muted);"></span></td>
+        </tr>
+        
+        <tr>
+            <td><span class="param-name">search</span></td>
+            <td><span class="param-in">query</span></td>
+            <td><code style="color: #6ee7b7;">string</code></td>
+            <td><span class="param-opt">Ні</span></td>
+            <td><span style="color: var(--text-muted);"></span></td>
+        </tr>
+        </tbody>
+    </table>
+    
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-27" onclick="executeApiTest('ep-card-27', 'GET', '/api/delivery/novaposhta/warehouses', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-27" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-27">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-27" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-27" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-27">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-28" data-tags="Currency" data-search="get /api/currency/rates офіційні курси валют нбу  currency">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-28')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/currency/rates</span>
+                <span class="endpoint-summary">Офіційні курси валют НБУ</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Currency</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-28" onclick="executeApiTest('ep-card-28', 'GET', '/api/currency/rates', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-28" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-28">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-28" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-28" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-28">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-29" data-tags="Currency" data-search="get /api/currency/convert конвертація суми між валютами  currency">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-29')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/currency/convert</span>
+                <span class="endpoint-summary">Конвертація суми між валютами</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Currency</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+    <div class="section-subhead">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+        Параметри запиту
+    </div>
+    <table class="params-table">
+        <thead><tr><th>Параметр</th><th>Де</th><th>Тип</th><th>Обов'язковий</th><th>Опис</th></tr></thead>
+        <tbody>
+        <tr>
+            <td><span class="param-name">amount</span></td>
+            <td><span class="param-in">query</span></td>
+            <td><code style="color: #6ee7b7;">number</code></td>
+            <td><span class="param-opt">Ні</span></td>
+            <td><span style="color: var(--text-muted);"></span></td>
+        </tr>
+        
+        <tr>
+            <td><span class="param-name">from</span></td>
+            <td><span class="param-in">query</span></td>
+            <td><code style="color: #6ee7b7;">string</code></td>
+            <td><span class="param-opt">Ні</span></td>
+            <td><span style="color: var(--text-muted);"></span></td>
+        </tr>
+        
+        <tr>
+            <td><span class="param-name">to</span></td>
+            <td><span class="param-in">query</span></td>
+            <td><code style="color: #6ee7b7;">string</code></td>
+            <td><span class="param-opt">Ні</span></td>
+            <td><span style="color: var(--text-muted);"></span></td>
+        </tr>
+        </tbody>
+    </table>
+    
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-29" onclick="executeApiTest('ep-card-29', 'GET', '/api/currency/convert', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-29" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-29">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-29" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-29" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-29">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-30" data-tags="Notifications" data-search="get /api/notifications отримати системні сповіщення користувача  notifications">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-30')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/notifications</span>
+                <span class="endpoint-summary">Отримати системні сповіщення користувача</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Notifications</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Використовує токен активного користувача
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-30" onclick="executeApiTest('ep-card-30', 'GET', '/api/notifications', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-30" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-30">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-30" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-30" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-30">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-31" data-tags="Health" data-search="get /api/health статус працездатності сервера  health">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-31')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/health</span>
+                <span class="endpoint-summary">Статус працездатності сервера</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Health</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-31" onclick="executeApiTest('ep-card-31', 'GET', '/api/health', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-31" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-31">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-31" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-31" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-31">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="endpoint-card" id="ep-card-32" data-tags="Messages" data-search="post /chathub/negotiate signalr handshake (negotiate endpoint) ініціалізує websocket або long polling з&#x27;єднання для signalr chathub. messages">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-32')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-post">POST</span>
+                <span class="endpoint-path">/chathub/negotiate</span>
+                <span class="endpoint-summary">SignalR Handshake (Negotiate Endpoint)</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Messages</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Ініціалізує WebSocket або Long Polling з&#x27;єднання для SignalR ChatHub.</p>
+            
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-32" onclick="executeApiTest('ep-card-32', 'POST', '/chathub/negotiate', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-32" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-32">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-32" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-32" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-32">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+            </div>
+        </section>
+
+        <!-- ==================== TAB 2: SIGNALR REALTIME ==================== -->
+        <section id="tab-signalr" class="tab-section">
+            <div class="info-card-box">
+                <h2 class="info-card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    SignalR ChatHub (Двосторонній WebSocket чат)
+                </h2>
+                <p class="info-card-desc">
+                    LoopMarket використовує SignalR хаб (<b>/chathub</b>) для миттєвої доставки повідомлень, передачі статусів набору тексту («друкує...»), відстеження присутності в мережі та спливаючих сповіщень про нові угоди Loop Захист.
+                </p>
+
+                <div class="grid-two-cols">
+                    <div class="code-snippet-box">
+                        <div class="snippet-top">
+                            <span class="snippet-lang">JavaScript / TypeScript Client</span>
+                            <button class="btn-copy-code" onclick="copySnippetText('jsSignalrSnippet')">Копіювати</button>
+                        </div>
+                        <pre class="code-pre" id="jsSignalrSnippet">// npm i @microsoft/signalr
+import * as signalR from "@microsoft/signalr";
+
+const token = localStorage.getItem("token");
+
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/chathub", {
+        accessTokenFactory: () => token
+    })
+    .withAutomaticReconnect([0, 2000, 5000, 10000])
+    .build();
+
+// Слухаємо нові вхідні повідомлення
+connection.on("ReceiveMessage", (senderId, receiverId, text) => {
+    console.log(`💬 Повідомлення від ${senderId}: ${text}`);
+    renderMessageInChat(senderId, text);
+});
+
+// Слухаємо набір тексту
+connection.on("UserIsTyping", (senderId) => {
+    showTypingIndicator(senderId);
+});
+
+// Підключення
+async function start() {
+    await connection.start();
+    await connection.invoke("RegisterUser", 1);
+    console.log("✅ SignalR ChatHub підключено!");
+}
+start();
+
+// Відправка повідомлення
+async function sendChatMessage(partnerId, text) {
+    await connection.invoke("SendMessage", "1", partnerId.toString(), text);
+}</pre>
+                    </div>
+
+                    <div class="code-snippet-box">
+                        <div class="snippet-top">
+                            <span class="snippet-lang">C# (.NET 10 Client)</span>
+                            <button class="btn-copy-code" onclick="copySnippetText('csSignalrSnippet')">Копіювати</button>
+                        </div>
+                        <pre class="code-pre" id="csSignalrSnippet">using Microsoft.AspNetCore.SignalR.Client;
+
+var hubConnection = new HubConnectionBuilder()
+    .WithUrl("http://localhost:65083/chathub", options =>
+    {
+        options.AccessTokenProvider = () => Task.FromResult(jwtToken);
+    })
+    .WithAutomaticReconnect()
+    .Build();
+
+// Обробник отримання повідомлення
+hubConnection.On&lt;string, string, string&gt;("ReceiveMessage", (senderId, receiverId, text) =&gt;
+{
+    Console.WriteLine($"[Чат] {senderId} -&gt; {receiverId}: {text}");
+});
+
+await hubConnection.StartAsync();
+await hubConnection.InvokeAsync("RegisterUser", 1);
+
+// Відправка
+await hubConnection.InvokeAsync("SendMessage", "1", "2", "Вітаю!");</pre>
+                    </div>
+                </div>
+
+                <h3 style="color: white; font-size: 1.05rem; font-weight: 800; margin: 24px 0 12px;">Специфікація методів ChatHub</h3>
+                <table class="params-table">
+                    <thead>
+                        <tr>
+                            <th>Напрямок</th>
+                            <th>Метод / Подія</th>
+                            <th>Параметри</th>
+                            <th>Опис</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge-method badge-post" style="padding: 2px 6px; font-size: 0.7rem;">Клієнт -> Сервер</span></td>
+                            <td><code class="param-name">RegisterUser(userId)</code></td>
+                            <td><code class="param-in">int userId</code></td>
+                            <td>Прив'язує SignalR ConnectionId до ID користувача в пам'яті сервера.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge-method badge-post" style="padding: 2px 6px; font-size: 0.7rem;">Клієнт -> Сервер</span></td>
+                            <td><code class="param-name">SendMessage(senderId, receiverId, text)</code></td>
+                            <td><code class="param-in">string, string, string</code></td>
+                            <td>Зберігає повідомлення в БД, відправляє в Telegram та викликає <code>ReceiveMessage</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge-method badge-post" style="padding: 2px 6px; font-size: 0.7rem;">Клієнт -> Сервер</span></td>
+                            <td><code class="param-name">SendTyping(senderId, receiverId)</code></td>
+                            <td><code class="param-in">string, string</code></td>
+                            <td>Оповіщає отримувача, що співрозмовник набирає текст у полі вводу.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge-method badge-get" style="padding: 2px 6px; font-size: 0.7rem;">Сервер -> Клієнт</span></td>
+                            <td><code class="param-name">ReceiveMessage</code></td>
+                            <td><code class="param-in">senderId, receiverId, text</code></td>
+                            <td>Спрацьовує в браузері отримувача при надходженні нового повідомлення.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge-method badge-get" style="padding: 2px 6px; font-size: 0.7rem;">Сервер -> Клієнт</span></td>
+                            <td><code class="param-name">ReceiveNotification</code></td>
+                            <td><code class="param-in">NotificationDto notification</code></td>
+                            <td>Миттєве сповіщення про нове замовлення або зміну статусу безпечної угоди.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 3: LOOP ЗАХИСТ WORKFLOW ==================== -->
+        <section id="tab-escrow" class="tab-section">
+            <div class="info-card-box">
+                <h2 class="info-card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Архітектура та Життєвий Цикл «Loop Захист» (Escrow)
+                </h2>
+                <p class="info-card-desc">
+                    «Loop Захист» — сервіс безпечних угод для товарів та послуг, що гарантує фінансову безпеку обом сторонам. Кошти заморожуються на платформі й перераховуються виконавцю лише після перевірки та підтвердження завершення робіт клієнтом.
+                </p>
+
+                <div class="stepper-flow">
+                    <div class="flow-step-item">
+                        <div class="step-num-badge">1</div>
+                        <div>
+                            <div class="step-content-title">Оформлення замовлення (POST /api/orders/create-service)</div>
+                            <div class="step-content-desc">
+                                Замовник заповнює параметри послуги: точну дату, час, адресу виконання та технічний опис. Замовленню присвоюється статус <b>Confirmed</b> (кошти заморожено на рахунку Loop Захист).
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step-item">
+                        <div class="step-num-badge">2</div>
+                        <div>
+                            <div class="step-content-title">Миттєве сповіщення виконавця</div>
+                            <div class="step-content-desc">
+                                Майстер або продавець отримує сповіщення через SignalR у реальному часі та дублююче push-повідомлення в офіційний Telegram-бот. Замовлення з'являється у вкладці «Мої продажі / замовлення».
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step-item">
+                        <div class="step-num-badge">3</div>
+                        <div>
+                            <div class="step-content-title">Виконання робіт або доставка (Статус: Shipped / InDelivery)</div>
+                            <div class="step-content-desc">
+                                При відправці товару продавець додає номер ТТН Нової Пошти через <code>PATCH /api/orders/{id}/status</code>. Для послуг майстер прибуває за адресою у визначений час та виконує заявлений обсяг робіт.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step-item">
+                        <div class="step-num-badge">4</div>
+                        <div>
+                            <div class="step-content-title">Прийом робіт замовником та виплата коштів (Статус: Completed)</div>
+                            <div class="step-content-desc">
+                                Замовник перевіряє якість та тисне «Підтвердити виконання». Платформа автоматично виплачує кошти на картку/баланс виконавця за вирахуванням сервісної комісії <b>5%</b>.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step-item" style="border-left: 4px solid #f43f5e;">
+                        <div class="step-num-badge" style="background: linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%);">⚖️</div>
+                        <div>
+                            <div class="step-content-title">Арбітраж та Спірні ситуації (Статус: Disputed)</div>
+                            <div class="step-content-desc">
+                                Якщо виконавець не з'явився, або товар виявився неналежної якості, замовник може відкрити диспут. Кошти залишаються заблокованими до винесення рішення модератором або повертаються замовнику в 100% обсязі.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 4: DATABASE SCHEMAS ==================== -->
+        <section id="tab-models" class="tab-section">
+            <div class="info-card-box">
+                <h2 class="info-card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2.3"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                    Моделі Даних & Схеми Таблиць Бази Даних (Entity Framework Core)
+                </h2>
+                <p class="info-card-desc">
+                    Основні сутності платформи LoopMarket. Всі моделі строго типізовані, мають валідаційні атрибути та зовнішні ключі (Foreign Keys) зв'язків один-до-багатьох.
+                </p>
+
+                <div class="models-grid">
+                    <div class="model-card">
+                        <div class="model-card-header">
+                            <span class="model-card-name">👤 User (Користувач)</span>
+                            <span class="tag-pill">Таблиця: Users</span>
+                        </div>
+                        <table class="model-table">
+                            <thead><tr><th>Поле</th><th>Тип</th><th>Опис</th></tr></thead>
+                            <tbody>
+                                <tr><td><span class="model-field-name">Id</span></td><td><span class="model-field-type">int (PK)</span></td><td>Унікальний ID користувача</td></tr>
+                                <tr><td><span class="model-field-name">FirstName</span></td><td><span class="model-field-type">string(50)</span></td><td>Ім'я</td></tr>
+                                <tr><td><span class="model-field-name">LastName</span></td><td><span class="model-field-type">string(50)</span></td><td>Прізвище</td></tr>
+                                <tr><td><span class="model-field-name">Email</span></td><td><span class="model-field-type">string(100)</span></td><td>Унікальна ел. пошта</td></tr>
+                                <tr><td><span class="model-field-name">Role</span></td><td><span class="model-field-type">string</span></td><td>Buyer, Seller, Master, Admin</td></tr>
+                                <tr><td><span class="model-field-name">PhoneNumber</span></td><td><span class="model-field-type">string(30)</span></td><td>Контактний номер</td></tr>
+                                <tr><td><span class="model-field-name">AvatarUrl</span></td><td><span class="model-field-type">string</span></td><td>Посилання на фото</td></tr>
+                                <tr><td><span class="model-field-name">TelegramChatId</span></td><td><span class="model-field-type">long</span></td><td>ID для сповіщень у боті</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="model-card">
+                        <div class="model-card-header">
+                            <span class="model-card-name">📦 Listing (Оголошення / Послуга)</span>
+                            <span class="tag-pill">Таблиця: Listings</span>
+                        </div>
+                        <table class="model-table">
+                            <thead><tr><th>Поле</th><th>Тип</th><th>Опис</th></tr></thead>
+                            <tbody>
+                                <tr><td><span class="model-field-name">Id</span></td><td><span class="model-field-type">int (PK)</span></td><td>ID оголошення</td></tr>
+                                <tr><td><span class="model-field-name">Title</span></td><td><span class="model-field-type">string(100)</span></td><td>Заголовок товару/послуги</td></tr>
+                                <tr><td><span class="model-field-name">Description</span></td><td><span class="model-field-type">string</span></td><td>Повний детальний опис</td></tr>
+                                <tr><td><span class="model-field-name">Price</span></td><td><span class="model-field-type">decimal</span></td><td>Ціна у гривнях (₴)</td></tr>
+                                <tr><td><span class="model-field-name">ImageUrl</span></td><td><span class="model-field-type">string</span></td><td>URL або список фото через ";"</td></tr>
+                                <tr><td><span class="model-field-name">CategoryId</span></td><td><span class="model-field-type">int (FK)</span></td><td>8 = Спеціальна категорія послуг</td></tr>
+                                <tr><td><span class="model-field-name">SellerId</span></td><td><span class="model-field-type">int (FK)</span></td><td>ID автора оголошення</td></tr>
+                                <tr><td><span class="model-field-name">Status</span></td><td><span class="model-field-type">string</span></td><td>Active, Sold, Reserved</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="model-card">
+                        <div class="model-card-header">
+                            <span class="model-card-name">🛡️ Order (Замовлення Loop Захист)</span>
+                            <span class="tag-pill">Таблиця: Orders</span>
+                        </div>
+                        <table class="model-table">
+                            <thead><tr><th>Поле</th><th>Тип</th><th>Опис</th></tr></thead>
+                            <tbody>
+                                <tr><td><span class="model-field-name">Id</span></td><td><span class="model-field-type">int (PK)</span></td><td>Номер угоди</td></tr>
+                                <tr><td><span class="model-field-name">ListingId</span></td><td><span class="model-field-type">int (FK)</span></td><td>ID товару чи послуги</td></tr>
+                                <tr><td><span class="model-field-name">BuyerId</span></td><td><span class="model-field-type">int (FK)</span></td><td>ID замовника</td></tr>
+                                <tr><td><span class="model-field-name">SellerId</span></td><td><span class="model-field-type">int (FK)</span></td><td>ID майстра або продавця</td></tr>
+                                <tr><td><span class="model-field-name">TotalPrice</span></td><td><span class="model-field-type">decimal</span></td><td>Заморожена сума угоди</td></tr>
+                                <tr><td><span class="model-field-name">Status</span></td><td><span class="model-field-type">string</span></td><td>Pending, Confirmed, Shipped, Completed</td></tr>
+                                <tr><td><span class="model-field-name">TrackingNumber</span></td><td><span class="model-field-type">string(50)</span></td><td>ТТН Нової Пошти</td></tr>
+                                <tr><td><span class="model-field-name">Comment</span></td><td><span class="model-field-type">string(500)</span></td><td>Дата, час або побажання</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="model-card">
+                        <div class="model-card-header">
+                            <span class="model-card-name">💬 Message (Повідомлення)</span>
+                            <span class="tag-pill">Таблиця: Messages</span>
+                        </div>
+                        <table class="model-table">
+                            <thead><tr><th>Поле</th><th>Тип</th><th>Опис</th></tr></thead>
+                            <tbody>
+                                <tr><td><span class="model-field-name">Id</span></td><td><span class="model-field-type">int (PK)</span></td><td>ID повідомлення</td></tr>
+                                <tr><td><span class="model-field-name">SenderId</span></td><td><span class="model-field-type">int (FK)</span></td><td>ID відправника</td></tr>
+                                <tr><td><span class="model-field-name">ReceiverId</span></td><td><span class="model-field-type">int (FK)</span></td><td>ID отримувача</td></tr>
+                                <tr><td><span class="model-field-name">Text</span></td><td><span class="model-field-type">string</span></td><td>Текст повідомлення</td></tr>
+                                <tr><td><span class="model-field-name">SentAt</span></td><td><span class="model-field-type">DateTime</span></td><td>Час відправки (UTC)</td></tr>
+                                <tr><td><span class="model-field-name">IsRead</span></td><td><span class="model-field-type">bool</span></td><td>Статус прочитання</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 5: QUICKSTART SDK ==================== -->
+        <section id="tab-quickstart" class="tab-section">
+            <div class="info-card-box">
+                <h2 class="info-card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.3"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    Швидкий старт & Приклади Коду
+                </h2>
+                <p class="info-card-desc">
+                    Приклади типових операцій (авторизація, створення оголошення та замовлення послуги через Loop Захист) на чотирьох мовах програмування.
+                </p>
+
+                <div class="grid-two-cols">
+                    <div class="code-snippet-box">
+                        <div class="snippet-top">
+                            <span class="snippet-lang">cURL</span>
+                            <button class="btn-copy-code" onclick="copySnippetText('curlQuickstart')">Копіювати</button>
+                        </div>
+                        <pre class="code-pre" id="curlQuickstart"># 1. Авторизація
+curl -X POST "http://localhost:65083/api/users/login" \
+     -H "Content-Type: application/json" \
+     -d '{"email":"nikitazhidenko@gmail.com","password":"Password123!"}'
+
+# 2. Отримання каталогу послуг
+curl "http://localhost:65083/api/listings?type=service"
+
+# 3. Створення замовлення Loop Захист
+curl -X POST "http://localhost:65083/api/orders/create-service" \
+     -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "listingId": 9,
+       "buyerName": "Олександр",
+       "buyerPhone": "+380501234567",
+       "executionDate": "04.11.2026",
+       "executionTime": "10:00",
+       "address": "вул. Хрещатик, 24",
+       "totalPrice": 800.0
+     }'</pre>
+                    </div>
+
+                    <div class="code-snippet-box">
+                        <div class="snippet-top">
+                            <span class="snippet-lang">JavaScript (Fetch API)</span>
+                            <button class="btn-copy-code" onclick="copySnippetText('jsQuickstart')">Копіювати</button>
+                        </div>
+                        <pre class="code-pre" id="jsQuickstart">// 1. Вхід в систему
+async function login(email, password) {
+    const res = await fetch('/api/users/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    localStorage.setItem('token', data.token);
+    return data;
+}
+
+// 2. Бронювання послуги
+async function bookService(orderPayload) {
+    const token = localStorage.getItem('token');
+    const res = await fetch('/api/orders/create-service', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderPayload)
+    });
+    return await res.json();
+}</pre>
+                    </div>
+
+                    <div class="code-snippet-box">
+                        <div class="snippet-top">
+                            <span class="snippet-lang">C# (.NET HttpClient)</span>
+                            <button class="btn-copy-code" onclick="copySnippetText('csQuickstart')">Копіювати</button>
+                        </div>
+                        <pre class="code-pre" id="csQuickstart">using System.Net.Http.Json;
+using System.Net.Http.Headers;
+
+var client = new HttpClient { BaseAddress = new Uri("http://localhost:65083") };
+
+// Вхід
+var loginResp = await client.PostAsJsonAsync("/api/users/login", new {
+    email = "nikitazhidenko@gmail.com",
+    password = "Password123!"
+});
+var loginResult = await loginResp.Content.ReadFromJsonAsync&lt;LoginResponse&gt;();
+
+client.DefaultRequestHeaders.Authorization = 
+    new AuthenticationHeaderValue("Bearer", loginResult.Token);
+
+var myOrders = await client.GetFromJsonAsync&lt;List&lt;OrderDto&gt;&gt;("/api/orders/my-sales");</pre>
+                    </div>
+
+                    <div class="code-snippet-box">
+                        <div class="snippet-top">
+                            <span class="snippet-lang">Python (requests)</span>
+                            <button class="btn-copy-code" onclick="copySnippetText('pyQuickstart')">Копіювати</button>
+                        </div>
+                        <pre class="code-pre" id="pyQuickstart">import requests
+
+BASE_URL = "http://localhost:65083"
+
+# Авторизація
+resp = requests.post(f"{BASE_URL}/api/users/login", json={
+    "email": "nikitazhidenko@gmail.com",
+    "password": "Password123!"
+})
+token = resp.json()["token"]
+
+# Отримання оголошень
+headers = {"Authorization": f"Bearer {token}"}
+listings = requests.get(f"{BASE_URL}/api/listings?type=service", headers=headers).json()
+print(f"Знайдено послуг: {len(listings['listings'])}")</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 6: STATUS CODES & ERRORS ==================== -->
+        <section id="tab-errors" class="tab-section">
+            <div class="info-card-box">
+                <h2 class="info-card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Коди Відповідей HTTP & Обробка Помилок
+                </h2>
+                <p class="info-card-desc">
+                    Всі відповіді сервера повертаються у стандартному форматі JSON. При помилках тіло містить поле <code>error</code> або <code>message</code> з чітким описом причини.
+                </p>
+
+                <table class="status-table">
+                    <thead>
+                        <tr>
+                            <th>Код</th>
+                            <th>Статус</th>
+                            <th>Опис & Причина виникнення</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="code-pill res-status-200">200 OK</span></td>
+                            <td><b>Успішно</b></td>
+                            <td>Запит виконано успішно. Тіло містить запитані дані.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-pill res-status-200">201 Created</span></td>
+                            <td><b>Створено</b></td>
+                            <td>Нове оголошення, замовлення або відгук успішно створені в системі.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-pill res-status-err">400 Bad Request</span></td>
+                            <td><b>Некоректний запит</b></td>
+                            <td>Помилка валідації полів форми, невірний формат номера телефону чи пароля.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-pill res-status-err">401 Unauthorized</span></td>
+                            <td><b>Неавторизовано</b></td>
+                            <td>Заголовок <code>Authorization: Bearer &lt;token&gt;</code> відсутній або токен закінчився.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-pill res-status-err">403 Forbidden</span></td>
+                            <td><b>Доступ заборонено</b></td>
+                            <td>Користувач не має прав на виконання цієї дії (наприклад, редагування чужого оголошення).</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-pill res-status-err">404 Not Found</span></td>
+                            <td><b>Не знайдено</b></td>
+                            <td>Оголошення, замовлення чи профіль за вказаним ID не існує.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-pill res-status-err">500 Server Error</span></td>
+                            <td><b>Внутрішня помилка</b></td>
+                            <td>Непередбачена помилка на сервері або тимчасова недоступність БД.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer>
+        <div style="max-width: 1500px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+            <div>
+                © 2026 <b>LoopMarket Platform</b>. Всі права захищено.
+            </div>
+            <div style="display: flex; gap: 16px;">
+                <a href="/openapi/v1.json" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 700;">OpenAPI 3.0.3 Spec</a>
+                <a href="/safety.html" style="color: var(--text-muted); text-decoration: none;">Безпека & Escrow</a>
+                <a href="/messages.html" style="color: var(--text-muted); text-decoration: none;">Месенджер</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== CLIENT INTERACTIVE SCRIPT ==================== -->
+    <script>
+        const PRESETS = {
+            nikita: {
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZWlkIjoiMSIsIm5hbWUiOiLRndGW0LrRltGC0LAg0JbQuNC00LXQvdC60L4iLCJyb2xlIjoiQWRtaW4iLCJlbWFpbCI6Im5pa2l0YXpoaWRlbmtvQGdtYWlsLmNvbSIsImV4cCI6MTk5OTk5OTk5OX0.mock_secret_signature"
+            },
+            vova: {
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZWlkIjoiMiIsIm5hbWUiOiLQktC-0LLQsCDQktCw0LrRg9C70LXQvdC60L4iLCJyb2xlIjoiU2VsbGVyIiwiZW1haWwiOiJ2b3ZhQGdtYWlsLmNvbSIsImV4cCI6MTk5OTk5OTk5OX0.mock_secret_signature"
+            },
+            buyer: {
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwibmFtZWlkIjoiMyIsIm5hbWUiOiLQn9C-0LrRg9C_0LXRhiIsInJvbGUiOiJCdXllciIsImVtYWlsIjoiYnV5ZXJAbWFpbC5jb20iLCJleHAiOjE5OTk5OTk5OTl9.mock_secret_signature"
+            }
+        };
+
+        let currentActiveToken = PRESETS.nikita.token;
+        let activeTag = 'all';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const tokenInput = document.getElementById("activeJwtTokenInput");
+            if (tokenInput) tokenInput.value = currentActiveToken;
+        });
+
+        function setAuthPreset(presetKey, btnElem) {
+            document.querySelectorAll(".auth-chip").forEach(b => b.classList.remove("active"));
+            if (btnElem) btnElem.classList.add("active");
+
+            if (PRESETS[presetKey]) {
+                currentActiveToken = PRESETS[presetKey].token;
+                const tokenInput = document.getElementById("activeJwtTokenInput");
+                if (tokenInput) tokenInput.value = currentActiveToken;
+            }
+        }
+
+        function updateActiveToken(val) {
+            currentActiveToken = val.trim();
+        }
+
+        function switchDocTab(tabId, btnElem) {
+            document.querySelectorAll(".nav-tab-btn").forEach(b => b.classList.remove("active"));
+            if (btnElem) btnElem.classList.add("active");
+
+            document.querySelectorAll(".tab-section").forEach(sec => sec.classList.remove("active"));
+            const targetSec = document.getElementById(tabId);
+            if (targetSec) targetSec.classList.add("active");
+        }
+
+        function toggleEndpointCard(cardId) {
+            const card = document.getElementById(cardId);
+            if (card) card.classList.toggle('open');
+        }
+
+        function filterByTag(tag, btnElem) {
+            activeTag = tag;
+            document.querySelectorAll(".cat-chip").forEach(b => b.classList.remove("active"));
+            if (btnElem) btnElem.classList.add("active");
+            applyCardFilters();
+        }
+
+        function filterClientEndpoints(query) {
+            applyCardFilters(query.trim().toLowerCase());
+        }
+
+        function applyCardFilters(searchQuery = '') {
+            const cards = document.querySelectorAll(".endpoint-card");
+            cards.forEach(card => {
+                const cardTags = card.dataset.tags || '';
+                const cardSearch = card.dataset.search || '';
+
+                const matchesTag = activeTag === 'all' || cardTags.includes(activeTag);
+                const matchesQuery = !searchQuery || cardSearch.includes(searchQuery);
+
+                card.style.display = (matchesTag && matchesQuery) ? 'block' : 'none';
+            });
+        }
+
+        async function executeApiTest(cardId, method, pathPattern, isAuthRequired) {
+            const btn = document.getElementById(`btn-run-${cardId}`);
+            const spinner = document.getElementById(`spinner-${cardId}`);
+            const resBox = document.getElementById(`res-box-${cardId}`);
+            const resStatus = document.getElementById(`res-status-${cardId}`);
+            const resTime = document.getElementById(`res-time-${cardId}`);
+            const resBody = document.getElementById(`res-body-${cardId}`);
+
+            if (btn) btn.disabled = true;
+            if (spinner) spinner.style.display = 'inline-block';
+
+            let finalUrl = pathPattern;
+            finalUrl = finalUrl.replace('{id}', '9')
+                               .replace('{partnerId}', '2')
+                               .replace('{userId}', '1')
+                               .replace('{listingId}', '9');
+
+            const headers = { 'Accept': 'application/json' };
+            if (isAuthRequired && currentActiveToken) {
+                headers['Authorization'] = `Bearer ${currentActiveToken}`;
+            }
+
+            let requestOptions = {
+                method: method,
+                headers: headers
+            };
+
+            const bodyEditor = document.getElementById(`body-${cardId}`);
+            if (bodyEditor && ['POST', 'PUT', 'PATCH'].includes(method)) {
+                headers['Content-Type'] = 'application/json';
+                requestOptions.body = bodyEditor.value;
+            }
+
+            const startTime = performance.now();
+
+            try {
+                const response = await fetch(finalUrl, requestOptions);
+                const duration = Math.round(performance.now() - startTime);
+
+                let data;
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    data = await response.text();
+                }
+
+                if (resBox) resBox.style.display = 'block';
+                if (resTime) resTime.textContent = `${duration} ms`;
+
+                if (resStatus) {
+                    resStatus.textContent = `${response.status} ${response.statusText || (response.ok ? 'OK' : 'Error')}`;
+                    resStatus.className = `res-status-badge ${response.ok ? 'res-status-200' : 'res-status-err'}`;
+                }
+
+                if (resBody) {
+                    resBody.textContent = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+                }
+            } catch (err) {
+                const duration = Math.round(performance.now() - startTime);
+                if (resBox) resBox.style.display = 'block';
+                if (resTime) resTime.textContent = `${duration} ms`;
+                if (resStatus) {
+                    resStatus.textContent = 'Помилка мережі';
+                    resStatus.className = 'res-status-badge res-status-err';
+                }
+                if (resBody) {
+                    resBody.textContent = `Помилка: ${err.message}\nПеревірте доступність сервера на порту 65083.`;
+                }
+            } finally {
+                if (btn) btn.disabled = false;
+                if (spinner) spinner.style.display = 'none';
+            }
+        }
+
+        function copySnippetText(elemId) {
+            const elem = document.getElementById(elemId);
+            if (!elem) return;
+            navigator.clipboard.writeText(elem.textContent).then(() => {
+                alert("Код скопійовано в буфер обміну!");
+            }).catch(e => console.error(e));
+        }
+    </script>
+</body>
+</html>

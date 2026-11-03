@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Центр безпеки | Loop Market</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #10b981;
+            --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            --accent-green: #10b981;
+            --accent-green-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --surface: #ffffff;
+            --surface-hover: #f8fafc;
+            --bg-color: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --border-focus: #3b82f6;
+            --badge-bg: rgba(37, 99, 235, 0.1);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+            --shadow-lg: 0 16px 36px rgba(15, 23, 42, 0.12);
+        }
+
+        [data-theme="dark"] {
+            --primary: #f8fafc;
+            --primary-light: #10b981;
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --accent-green: #10b981;
+            --accent-green-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --surface: #1e293b;
+            --surface-hover: #27354a;
+            --bg-color: #0b0f19;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --border-focus: #60a5fa;
+            --badge-bg: rgba(59, 130, 246, 0.15);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.25);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+            --shadow-lg: 0 16px 36px rgba(0,0,0,0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-content {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-circle {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #10b981 0%, #2563eb 100%);
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            flex-shrink: 0;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--text-main);
+            background: var(--surface-hover);
+        }
+
+        .nav-link.active {
+            color: #2563eb;
+            background: var(--badge-bg);
+        }
+
+        .btn-create-top {
+            background: var(--accent-green-grad);
+            color: white;
+            padding: 9px 18px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.88rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-create-top:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-icon {
+            background: var(--surface-hover);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            border-color: var(--border-focus);
+            transform: translateY(-1px);
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid var(--surface);
+        }
+
+        .notif-dropdown {
+            position: absolute;
+            top: 72px;
+            right: 80px;
+            width: 360px;
+            background: var(--surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1500;
+        }
+
+        .notif-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 800;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notif-body {
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        /* HERO SECTION */
+        .hero-banner {
+            padding: 60px 24px 50px;
+            text-align: center;
+            background: radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 60%), radial-gradient(circle at 80% 80%, rgba(37, 99, 235, 0.08) 0%, transparent 50%);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.12);
+            color: #10b981;
+            font-weight: 800;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 18px;
+        }
+
+        .hero-title {
+            font-size: 2.6rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: var(--text-main);
+            margin-bottom: 14px;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.12rem;
+            color: var(--text-muted);
+            max-width: 680px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* CONTENT CONTAINER */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+            width: 100%;
+        }
+
+        /* 4 PILLARS GRID */
+        .pillars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .pillar-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 18px;
+            padding: 26px 22px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+        }
+
+        .pillar-card:hover {
+            transform: translateY(-3px);
+            border-color: #2563eb;
+            box-shadow: var(--shadow-md);
+        }
+
+        .pillar-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+        }
+
+        .pillar-card h3 {
+            font-size: 1.18rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .pillar-card p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        /* SECTION BOX */
+        .section-box {
+            background: var(--surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 20px;
+            padding: 36px 32px;
+            margin-bottom: 36px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-box h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-main);
+        }
+
+        .rules-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .rule-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px 18px;
+            border-radius: 14px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .rule-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .rule-badge.warn {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .rule-content h4 {
+            font-size: 1rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+
+        .rule-content p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* RED FLAGS */
+        .red-flag-box {
+            background: rgba(239, 68, 68, 0.04);
+            border: 1.5px solid rgba(239, 68, 68, 0.25);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 40px;
+        }
+
+        .red-flag-box h2 {
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        /* SUPPORT CTA */
+        .support-cta {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 40px 32px;
+            text-align: center;
+            box-shadow: 0 12px 32px rgba(37, 99, 235, 0.35);
+        }
+
+        .support-cta h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .support-cta p {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 24px;
+            line-height: 1.55;
+        }
+
+        .btn-tg-support {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            color: #2563eb;
+            padding: 13px 28px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 1rem;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
+        }
+
+        .btn-tg-support:hover {
+            transform: scale(1.03);
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border-color);
+            padding: 40px 24px 24px;
+            margin-top: auto;
+        }
+
+        .footer-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-col h4 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            margin-bottom: 14px;
+            color: var(--text-main);
+        }
+
+        .footer-col a {
+            display: block;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            margin-bottom: 8px;
+            transition: color 0.15s;
+        }
+
+        .footer-col a:hover {
+            color: #2563eb;
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== HEADER ==================== -->
+    <header>
+        <div class="header-content">
+            <a href="/index.html" class="logo">
+                <div class="logo-circle">L</div>
+                <span>Loop<span style="color: #10b981;">Market</span></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="/index.html" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                    Головна
+                </a>
+                <a href="/index.html?type=service" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    Послуги
+                </a>
+                <a href="/messages.html" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Чат
+                </a>
+                <a href="/safety.html" class="nav-link active">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Безпека
+                </a>
+                <a href="/about.html" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>
+                    Про нас
+                </a>
+                <a href="/profile.html" class="nav-link" id="navProfileLink">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span id="navProfileText">Профіль</span>
+                </a>
+
+                <button class="btn-icon" onclick="toggleNotifications()" title="Сповіщення">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                    <span class="notif-badge" id="notifBadge" style="display: none;"></span>
+                </button>
+
+                <button class="btn-icon" id="themeToggle" onclick="toggleTheme()" title="Змінити тему">🌙</button>
+
+                <a href="/create.html" class="btn-create-top">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Створити
+                </a>
+
+                <button class="btn-icon" id="btnLogout" onclick="showLogoutModal()" title="Вийти з акаунта" style="color: #ef4444; display: none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== HERO ==================== -->
+    <section class="hero-banner">
+        <div class="hero-badge">🛡 Центр безпеки платформи</div>
+        <h1 class="hero-title">Ваша безпека — наш пріоритет</h1>
+        <p class="hero-subtitle">Дізнайтеся, як влаштований захист на Loop Market, як безпечно замовляти послуги, купувати речі та захистити свої гроші від шахраїв.</p>
+    </section>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="container">
+
+        <!-- 4 КЛЮЧОВІ РІВНІ ЗАХИСТУ -->
+        <div class="pillars-grid">
+            <div class="pillar-card">
+                <div class="pillar-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">💳</div>
+                <h3>Loop Захист (Ескроу)</h3>
+                <p>При замовленні послуг або товарів з онлайн-оплатою гроші заморожуються на платформі. Виконавець отримує виплату лише після того, як ви підтвердите якісне надання послуги.</p>
+            </div>
+
+            <div class="pillar-card">
+                <div class="pillar-icon" style="background: rgba(37, 99, 235, 0.12); color: #2563eb;">👤</div>
+                <h3>Верифіковані автори</h3>
+                <p>Усі користувачі підтверджують контактні номери та підключають офіційний Telegram-бот. Прозорий рейтинг та реальні відгуки захищають від недобросовісних виконавців.</p>
+            </div>
+
+            <div class="pillar-card">
+                <div class="pillar-icon" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">📍</div>
+                <h3>Інтерактивна карта</h3>
+                <p>Адреси та локації виконання обираються на інтерактивній карті міста OpenStreetMap. Для фізичних зустрічей обирайте публічні та людні місця.</p>
+            </div>
+
+            <div class="pillar-card">
+                <div class="pillar-icon" style="background: rgba(147, 51, 234, 0.12); color: #9333ea;">💬</div>
+                <h3>Захищений чат</h3>
+                <p>Спілкуйтеся у вбудованому месенджері Loop Market. Миттєві повідомлення та дублювання в Telegram усувають потребу передавати свої особисті дані підозрілим особам.</p>
+            </div>
+        </div>
+
+        <!-- ПОРАДИ ДЛЯ ЗАМОВНИКІВ ПОСЛУГ ТА ПОКУПЦІВ -->
+        <div class="section-box">
+            <h2>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                Золоті правила безпечних угод
+            </h2>
+            <div class="rules-list">
+                <div class="rule-item">
+                    <div class="rule-badge">1</div>
+                    <div class="rule-content">
+                        <h4>Не переказуйте передоплату на приватні картки</h4>
+                        <p>Якщо продавець або майстер вимагає повну передоплату на невідому картку до виконання замовлення — це привід насторожитися. Використовуйте безпечну оплату Loop Захист або платіть готівкою/переказом після перевірки виконаної роботи.</p>
+                    </div>
+                </div>
+
+                <div class="rule-item">
+                    <div class="rule-badge">2</div>
+                    <div class="rule-content">
+                        <h4>Обговорюйте деталі замовлення у внутрішньому чаті</h4>
+                        <p>Уся історія листування на сайті зберігається. У разі виникнення непорозумінь наша служба модерації зможе швидко перевірити домовленості та вирішити спір на вашу користь.</p>
+                    </div>
+                </div>
+
+                <div class="rule-item">
+                    <div class="rule-badge">3</div>
+                    <div class="rule-content">
+                        <h4>Перевіряйте профіль виконавця та відгуки</h4>
+                        <p>Перейдіть на сторінку майстра чи продавця, перегляньте його рейтинг, історію виконаних замовлень та відгуки інших користувачів.</p>
+                    </div>
+                </div>
+
+                <div class="rule-item">
+                    <div class="rule-badge">4</div>
+                    <div class="rule-content">
+                        <h4>Підтверджуйте виконання в кабінеті лише після перевірки</h4>
+                        <p>Коли майстер виконав замовлення, натискайте кнопку «Підтвердити виконання» тільки тоді, коли ви особисто переконалися в якості роботи.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ЧЕРВОНІ ПРАПОРЦІ / ОБЕРЕЖНО, ШАХРАЇ -->
+        <div class="red-flag-box">
+            <h2>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Червоні прапорці: як розпізнати шахраїв
+            </h2>
+            <div class="rules-list">
+                <div class="rule-item">
+                    <div class="rule-badge warn">✕</div>
+                    <div class="rule-content">
+                        <h4>Сторонні посилання на «підтвердження оплати»</h4>
+                        <p>Шахраї можуть надсилати посилання на сторонні сайти-клони, які просять ввести реквізити картки (номер, CVV, баланс). Справжні сповіщення про замовлення приходять <strong>виключно в кабінет Loop Market</strong> або від бота <code>@LoopMarket_Verify_bot</code>.</p>
+                    </div>
+                </div>
+
+                <div class="rule-item">
+                    <div class="rule-badge warn">✕</div>
+                    <div class="rule-content">
+                        <h4>Вимагання секретних кодів з SMS чи паролів</h4>
+                        <p>Співробітники та адміністрація Loop Market <strong>ніколи</strong> не запитують ваш пароль від акаунта, CVV-код банківської картки чи одноразові коди авторизації.</p>
+                    </div>
+                </div>
+
+                <div class="rule-item">
+                    <div class="rule-badge warn">✕</div>
+                    <div class="rule-content">
+                        <h4>Нав'язливе переведення спілкування у WhatsApp / сторонні месенджери</h4>
+                        <p>Якщо співрозмовник наполегливо просить перейти у сторонній додаток для «безпечної оплати кур'єром» — не погоджуйтеся та негайно повідомте службу підтримки.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- БЛОК ПІДТРИМКИ ТА TELEGRAM БОТА -->
+        <div class="support-cta">
+            <h2>Потрібна допомога чи виявили підозріле оголошення?</h2>
+            <p>Наша служба підтримки та автоматичний модератор працюють 24/7. Повідомте про порушення або отримайте допомогу щодо замовлення прямо зараз.</p>
+            <a href="https://t.me/LoopMarket_Verify_bot?start=start" target="_blank" class="btn-tg-support">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                Звернутися в підтримку Telegram
+            </a>
+        </div>
+
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="logo" style="margin-bottom: 12px;">
+                    <div class="logo-circle">L</div>
+                    <span>Loop<span style="color: #10b981;">Market</span></span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">Локальна студентська платформа товарів та якісних послуг.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Навігація</h4>
+                <a href="/index.html">Головна</a>
+                <a href="/index.html?type=service">Послуги</a>
+                <a href="/create.html">Створити оголошення</a>
+                <a href="/messages.html">Повідомлення</a>
+            </div>
+            <div class="footer-col">
+                <h4>Безпека та правила</h4>
+                <a href="/safety.html">Правила безпеки</a>
+                <a href="/terms.html">Умови використання</a>
+                <a href="/about.html">Про платформу</a>
+            </div>
+            <div class="footer-col">
+                <h4>Контакти</h4>
+                <a href="https://t.me/LoopMarket_Verify_bot?start=start" target="_blank">Офіційний Telegram-бот</a>
+                <a href="mailto:support@loopmarket.ua">support@loopmarket.ua</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2026 Loop Market. Усі права захищено. Безпечні студентські угоди.
+        </div>
+    </footer>
+
+    <!-- ==================== SCRIPT ==================== -->
+    <script>
+        const token = localStorage.getItem('loopToken');
+        if (token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                const user = JSON.parse(jsonPayload);
+                const name = user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "Профіль";
+                document.getElementById('navProfileText').innerText = name.split(' ')[0] || "Профіль";
+                document.getElementById('btnLogout').style.display = 'inline-flex';
+            } catch(e) {}
+        } else {
+            const pLink = document.getElementById('navProfileLink');
+            if (pLink) pLink.href = '/login.html';
+            document.getElementById('navProfileText').innerText = 'Увійти';
+            document.getElementById('btnLogout').style.display = 'none';
+        }
+
+        function toggleTheme() {
+            const cur = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = cur === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('loopTheme', next);
+            document.getElementById('themeToggle').innerText = next === 'dark' ? '☀️' : '🌙';
+        }
+        const savedTheme = localStorage.getItem('loopTheme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeToggle').innerText = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        function showLogoutModal() {
+            if (confirm("Ви дійсно бажаєте вийти з облікового запису?")) {
+                localStorage.removeItem('loopToken');
+                localStorage.removeItem('loopRefreshToken');
+                localStorage.removeItem('loopUserRole');
+                window.location.href = '/login.html';
+            }
+        }
+        function toggleNotifications() {
+            window.location.href = '/profile.html#orders';
+        }
+    </script>
+</body>
+</html>

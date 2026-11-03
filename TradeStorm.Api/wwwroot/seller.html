@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профіль продавця | Loop Market</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><circle cx='12' cy='7' r='4'/><path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #10b981;
+            --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            --accent-green: #10b981;
+            --accent-green-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --surface: #ffffff;
+            --surface-hover: #f8fafc;
+            --bg-color: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --border-focus: #3b82f6;
+            --card-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+            --card-shadow-hover: 0 10px 24px rgba(15, 23, 42, 0.1);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+            --shadow-lg: 0 16px 36px rgba(15, 23, 42, 0.12);
+        }
+
+        [data-theme="dark"] {
+            --primary: #f8fafc;
+            --primary-light: #10b981;
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --accent-green: #10b981;
+            --accent-green-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --surface: #1e293b;
+            --surface-hover: #27354a;
+            --bg-color: #0b0f19;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --border-focus: #60a5fa;
+            --card-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+            --card-shadow-hover: 0 10px 24px rgba(0, 0, 0, 0.4);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.25);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+            --shadow-lg: 0 16px 36px rgba(0,0,0,0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        body {
+            background-color: #0b0f19;
+            background-image: 
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37, 99, 235, 0.07), transparent 60%),
+                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(16, 185, 129, 0.04), transparent 50%),
+                url('/images/bg_tech_constellation.svg');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            background: rgba(11, 15, 25, 0.94) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-content {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-circle {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #10b981 0%, #2563eb 100%);
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            flex-shrink: 0;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--text-main);
+            background: var(--surface-hover);
+        }
+
+        .nav-link.active {
+            color: #2563eb;
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-create-top {
+            background: var(--accent-green-grad);
+            color: white;
+            padding: 9px 18px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.88rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-create-top:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-icon {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            border-color: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid var(--surface);
+        }
+
+        /* NOTIFICATIONS DROPDOWN */
+        .notif-dropdown {
+            position: absolute;
+            top: 72px;
+            right: 80px;
+            width: 360px;
+            background: var(--surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1500;
+        }
+
+        .notif-dropdown.active {
+            display: flex !important;
+        }
+
+        .notif-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 800;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notif-body {
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        .notif-item {
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border-color);
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            transition: background 0.15s;
+        }
+
+        .notif-item:hover {
+            background: var(--surface-hover);
+        }
+
+        .notif-item.unread {
+            background: rgba(37, 99, 235, 0.05);
+            border-left: 3px solid #2563eb;
+        }
+
+        /* MAIN CONTENT LAYOUT */
+        main {
+            padding: 2.2rem 4%;
+            max-width: 1360px;
+            margin: 0 auto;
+            flex: 1;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 28px;
+            align-items: start;
+        }
+
+        /* SIDEBAR */
+        .profile-sidebar {
+            background: var(--surface);
+            border-radius: 18px;
+            padding: 26px 20px;
+            border: 1.5px solid var(--border-color);
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 86px;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 14px;
+            border-radius: 50%;
+            border: 3.5px solid var(--primary-light);
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            overflow: hidden;
+        }
+
+        .profile-info h1 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            color: var(--text-main);
+            line-height: 1.25;
+        }
+
+        .profile-info p.role {
+            color: var(--primary-light);
+            font-size: 0.84rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+
+        .sidebar-rating-box {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        .sidebar-rating-num {
+            font-size: 1.7rem;
+            font-weight: 900;
+            color: #f59e0b;
+            line-height: 1;
+        }
+
+        .contact-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 11px 16px;
+            background: var(--surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-weight: 800;
+            font-size: 0.88rem;
+            text-decoration: none;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .contact-btn:hover {
+            border-color: #10b981;
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .chat-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.92rem;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+            transition: all 0.2s;
+            margin-bottom: 8px;
+        }
+
+        .chat-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+        }
+
+        .btn-rate-seller {
+            width: 100%;
+            padding: 11px;
+            border-radius: 12px;
+            background: rgba(245, 158, 11, 0.12);
+            color: #d97706;
+            border: 1.5px solid rgba(245, 158, 11, 0.4);
+            font-weight: 800;
+            font-size: 0.88rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-rate-seller:hover {
+            background: rgba(245, 158, 11, 0.2);
+            border-color: #d97706;
+        }
+
+        /* RIGHT CONTENT */
+        .profile-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .listings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        /* PRODUCT CARDS */
+        .card {
+            background: var(--surface);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1.5px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            transition: all 0.22s ease;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--card-shadow-hover);
+            border-color: rgba(37, 99, 235, 0.4);
+        }
+
+        .card-img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 190px;
+            background-color: var(--bg-color);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .card-img {
+            transform: scale(1.04);
+        }
+
+        .btn-fav {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            transition: all 0.18s;
+            z-index: 10;
+        }
+
+        .btn-fav:hover {
+            background: rgba(15, 23, 42, 0.85);
+            transform: scale(1.1);
+        }
+
+        .card-content {
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.35;
+            height: 2.7em;
+        }
+
+        .card-price {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #10b981;
+            margin-bottom: 12px;
+        }
+
+        .card-footer {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            padding-top: 10px;
+        }
+
+        .btn-view {
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: var(--surface-hover);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 0.78rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-view:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+            background: var(--surface);
+        }
+
+        /* REVIEWS BOX */
+        .reviews-box {
+            background: var(--surface);
+            border-radius: 18px;
+            padding: 24px;
+            border: 1.5px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .review-card {
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            margin-bottom: 12px;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-card {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 28px;
+            width: 90%;
+            max-width: 440px;
+            border: 1.5px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border-color);
+            padding: 40px 4% 20px;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1360px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+
+        .footer-col h4 {
+            margin-bottom: 15px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .footer-col a {
+            display: block;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: color 0.18s;
+        }
+
+        .footer-col a:hover {
+            color: #2563eb;
+        }
+
+        .footer-bottom {
+            max-width: 1360px;
+            margin: 30px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.84rem;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+            .profile-sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="/index.html" class="logo">
+                <div class="logo-circle">L</div>
+                <span>Loop<span style="color: #10b981;">Market</span></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="/index.html" class="nav-link" id="navHome">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                    Головна
+                </a>
+                <a href="/index.html?type=service" class="nav-link" id="navServices">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    Послуги
+                </a>
+                <a href="/messages.html" class="nav-link" id="navChat">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Чат
+                </a>
+                <a href="/safety.html" class="nav-link" id="navSafety">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Безпека
+                </a>
+                <a href="/about.html" class="nav-link" id="navAbout">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>
+                    Про нас
+                </a>
+                <a href="/profile.html" class="nav-link" id="navProfileLink">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span id="navProfileText">Профіль</span>
+                </a>
+
+                <button class="btn-icon" id="notifBtn" onclick="toggleNotifications()" title="Сповіщення">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                    <span class="notif-badge" id="notifBadge" style="display: none;"></span>
+                </button>
+
+                <button class="btn-icon" id="themeToggleBtn" onclick="toggleTheme()" title="Змінити тему">🌙</button>
+
+                <a href="/create.html" class="btn-create-top">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    Створити
+                </a>
+
+                <button class="btn-icon" id="btnLogoutHeader" onclick="showLogoutModal()" title="Вийти з акаунта" style="color: #ef4444; display: none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+                <span>Сповіщення</span>
+                <span style="font-size: 0.8rem; color: #2563eb; cursor: pointer; font-weight: 700;" onclick="clearNotifications()">Позначити прочитаними</span>
+            </div>
+            <div class="notif-body" id="notifList">
+                <p style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Завантаження...</p>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <aside class="profile-sidebar">
+            <div class="avatar-wrapper">
+                <div class="avatar" id="sellerAvatar">👤</div>
+            </div>
+            <div class="profile-info">
+                <h1 id="sellerName">Завантаження...</h1>
+                <p class="role">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                    Перевірений користувач Loop
+                </p>
+
+                <!-- РЕЙТИНГ ПРОДАВЦЯ -->
+                <div class="sidebar-rating-box">
+                    <div>
+                        <div class="sidebar-rating-num" id="sellerAvgRating">0.0</div>
+                        <div id="sellerStars" style="display:inline-flex;align-items:center;gap:2px;margin-top:4px;"></div>
+                    </div>
+                    <div style="text-align: left; font-size: 0.82rem; color: var(--text-muted);">
+                        <b id="sellerTotalReviews" style="color: var(--text-main); font-size: 1.05rem;">0</b> відгуків
+                    </div>
+                </div>
+
+                <!-- БЕЙДЖ ВИКОНАНИХ ПОСЛУГ -->
+                <div id="sellerServicesBadgeBox" style="display: none; margin-bottom: 14px; padding: 10px 14px; background: rgba(37, 99, 235, 0.08); border: 1.5px solid rgba(37, 99, 235, 0.28); border-radius: 12px; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.25rem;">🛠</span>
+                        <div style="text-align: left;">
+                            <div style="font-size: 0.7rem; color: #2563eb; font-weight: 800; text-transform: uppercase;">Послуги майстра</div>
+                            <div style="font-size: 0.92rem; font-weight: 800; color: var(--text-main);" id="sellerCompletedServicesText">0 виконано</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sellerContactBtn"></div>
+            <div id="sellerChatBtn"></div>
+            <button id="rateSellerBtn" onclick="openReviewModal()" class="btn-rate-seller" style="display: none;">
+                ⭐ Оцінити співпрацю
+            </button>
+        </aside>
+
+        <div class="profile-content">
+            <h2 class="section-title">
+                Оголошення продавця (<span id="listingsCount">0</span>)
+            </h2>
+            <div class="listings-grid" id="sellerListingsContainer">
+                <p style="grid-column: 1 / -1; padding: 30px; text-align: center; color: var(--text-muted);">Завантаження оголошень...</p>
+            </div>
+
+            <!-- ВІДГУКИ -->
+            <div class="reviews-box">
+                <h3 style="margin-bottom: 16px; font-size: 1.2rem; font-weight: 800;">Відгуки покупців та замовників</h3>
+                <div id="sellerReviewsList" style="max-height: 440px; overflow-y: auto; padding-right: 4px;">
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Завантаження відгуків...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальне вікно відгуку -->
+    <div class="modal-overlay" id="reviewModal" style="display: none;">
+        <div class="modal-card">
+            <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 16px; color: var(--text-main);">Залишити відгук про автора</h3>
+            <form onsubmit="submitSellerReview(event)">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 0.88rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Ваша оцінка</label>
+                    <select id="reviewRating" style="width: 100%; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 12px; color: var(--text-main); font-size: 0.95rem; outline: none; font-weight: 700;">
+                        <option value="5">⭐⭐⭐⭐⭐ 5 / 5 (Відмінно)</option>
+                        <option value="4">⭐⭐⭐⭐ 4 / 5 (Добре)</option>
+                        <option value="3">⭐⭐⭐ 3 / 5 (Нормально)</option>
+                        <option value="2">⭐⭐ 2 / 5 (Погано)</option>
+                        <option value="1">⭐ 1 / 5 (Жахливо)</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 22px;">
+                    <label style="display: block; font-size: 0.88rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Коментар про угоду чи послугу</label>
+                    <textarea id="reviewComment" rows="4" placeholder="Опишіть якість виконання, швидкість та враження..." style="width: 100%; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 12px; color: var(--text-main); font-size: 0.94rem; outline: none; resize: vertical;" required></textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" onclick="closeReviewModal()" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border: 1px solid var(--border-color); background: var(--surface-hover); color: var(--text-main);">Скасувати</button>
+                    <button type="submit" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 800; cursor: pointer; border: none; background: var(--primary-gradient); color: white;">Надіслати</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальне вікно виходу -->
+    <div class="modal-overlay" id="logoutModal" style="display: none;">
+        <div class="modal-card" style="text-align: center;">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); color: #ef4444; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 1.3rem;">🚪</div>
+            <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">Вихід з акаунта</h3>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 20px;">Ви дійсно хочете вийти зі свого облікового запису Loop Market?</p>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="closeLogoutModal()" style="flex: 1; padding: 11px; border-radius: 12px; font-weight: 700; cursor: pointer; border: 1px solid var(--border-color); background: var(--surface-hover); color: var(--text-main);">Скасувати</button>
+                <button type="button" onclick="confirmLogoutAction()" style="flex: 1; padding: 11px; border-radius: 12px; font-weight: 800; cursor: pointer; border: none; background: #ef4444; color: white;">Вийти</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-col">
+                <h4>Про Loop Market</h4>
+                <a href="/about.html">Про платформу</a>
+                <a href="/index.html?type=service">Послуги</a>
+                <a href="/index.html">Усі товари</a>
+            </div>
+            <div class="footer-col">
+                <h4>Безпека</h4>
+                <a href="/safety.html">Центр безпеки</a>
+                <a href="/safety.html#tips">Поради покупцям</a>
+                <a href="/safety.html#guarantee">Loop Захист</a>
+            </div>
+            <div class="footer-col">
+                <h4>Підтримка</h4>
+                <a href="https://t.me" target="_blank">Telegram-бот</a>
+                <a href="/messages.html">Чат підтримки</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2026 Loop Market. Платформа для зручних та безпечних угод.
+        </div>
+    </footer>
+
+    <script>
+        const ICONS = {
+            sun: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+            moon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
+            chat: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+            phone: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+            chatBtn: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+            starFilled: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+            starEmpty: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+            heartFilled: '<svg width="18" height="18" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+            heartOutline: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+            pin: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+            package: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>'
+        };
+
+        const token = localStorage.getItem('loopToken');
+        let targetSellerId = null;
+
+        function parseJwt(t) {
+            try {
+                const base64Url = t.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                return JSON.parse(jsonPayload);
+            } catch(e) { return null; }
+        }
+
+        function renderStars(rating) {
+            const count = Math.round(rating) || 0;
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                html += (i <= count) ? ICONS.starFilled : ICONS.starEmpty;
+            }
+            return html;
+        }
+
+        // Керування темою
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('loopTheme', next);
+            updateThemeButton(next);
+        }
+        function updateThemeButton(t) {
+            const btn = document.getElementById('themeToggleBtn');
+            if (btn) btn.innerText = (t === 'dark') ? '☀️' : '🌙';
+        }
+        const savedTheme = localStorage.getItem('loopTheme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeButton(savedTheme);
+
+        // Header Auth State
+        function initHeaderAuth() {
+            if (token) {
+                const user = parseJwt(token);
+                const userName = user ? (user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "Профіль") : "Профіль";
+                const profText = document.getElementById('navProfileText');
+                if (profText) profText.innerText = (userName.split(' ')[0]) || "Профіль";
+                const btnLogout = document.getElementById('btnLogoutHeader');
+                if (btnLogout) btnLogout.style.display = 'inline-flex';
+                loadNotifications();
+            } else {
+                const profLink = document.getElementById('navProfileLink');
+                if (profLink) profLink.href = '/login.html';
+                const profText = document.getElementById('navProfileText');
+                if (profText) profText.innerText = 'Увійти';
+                const btnLogout = document.getElementById('btnLogoutHeader');
+                if (btnLogout) btnLogout.style.display = 'none';
+            }
+        }
+        initHeaderAuth();
+
+        // Сповіщення
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notifDropdown');
+            if (!dropdown) return;
+            dropdown.classList.toggle('active');
+            if (dropdown.classList.contains('active')) {
+                loadNotifications();
+            }
+        }
+
+        async function loadNotifications() {
+            if (!token) return;
+            try {
+                const res = await fetch('/api/notifications', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const notifs = await res.json();
+                    renderNotifications(notifs);
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        function renderNotifications(notifs) {
+            const listContainer = document.getElementById('notifList');
+            const badge = document.getElementById('notifBadge');
+            if (!listContainer) return;
+            const unreadCount = notifs.filter(n => !n.isRead).length;
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+            if (notifs.length === 0) {
+                listContainer.innerHTML = '<p style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Нових сповіщень немає</p>';
+                return;
+            }
+            listContainer.innerHTML = notifs.map(n => `
+                <a href="${n.link || '#'}" class="notif-item ${n.isRead ? '' : 'unread'}">
+                    <span>${ICONS.chat}</span>
+                    <div>
+                        <b>${n.title}</b>
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">${n.message}</p>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        async function clearNotifications() {
+            if (!token) return;
+            await fetch('/api/notifications/mark-read', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+            loadNotifications();
+        }
+
+        window.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('notifDropdown');
+            const btn = document.getElementById('notifBtn');
+            if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+            const modal = document.getElementById('reviewModal');
+            if (e.target === modal) closeReviewModal();
+            const logoutModal = document.getElementById('logoutModal');
+            if (e.target === logoutModal) closeLogoutModal();
+        });
+
+        function showLogoutModal() { document.getElementById('logoutModal').style.display = 'flex'; }
+        function closeLogoutModal() { document.getElementById('logoutModal').style.display = 'none'; }
+        function confirmLogoutAction() {
+            localStorage.removeItem('loopToken');
+            localStorage.removeItem('loopRefreshToken');
+            localStorage.removeItem('loopUserRole');
+            window.location.reload();
+        }
+
+        function getFavorites() { return JSON.parse(localStorage.getItem('loopFavorites') || '[]'); }
+
+        window.toggleFavorite = function(id, event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            let favs = getFavorites();
+            const isFav = favs.includes(id);
+            if (isFav) {
+                favs = favs.filter(f => f !== id);
+            } else {
+                favs.push(id);
+            }
+            localStorage.setItem('loopFavorites', JSON.stringify(favs));
+            if (event && event.currentTarget) {
+                event.currentTarget.innerHTML = isFav ? ICONS.heartOutline : ICONS.heartFilled;
+            }
+        };
+
+        // --- ГОЛОВНА ЛОГІКА ПРОФІЛЮ ПРОДАВЦЯ ---
+        async function initSellerPage() {
+            const params = new URLSearchParams(window.location.search);
+            const sellerIdParam = params.get('id') || params.get('sellerId') || params.get('seller') || params.get('userId');
+            if (!sellerIdParam) {
+                window.location.href = '/index.html';
+                return;
+            }
+            targetSellerId = parseInt(sellerIdParam);
+
+            // Якщо це власний профіль — перенаправляємо на Мій профіль
+            if (token) {
+                const userData = parseJwt(token);
+                if (userData) {
+                    const idClaim = userData["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || userData.nameid || userData.sub || userData.id;
+                    const currentUserId = idClaim ? parseInt(idClaim) : null;
+                    if (currentUserId && currentUserId === targetSellerId) {
+                        window.location.href = '/profile.html';
+                        return;
+                    }
+                }
+            }
+
+            try {
+                // 1. Отримуємо публічні дані про користувача
+                let sellerInfo = null;
+                try {
+                    const uRes = await fetch(`/api/users/public/${targetSellerId}`);
+                    if (uRes.ok) {
+                        sellerInfo = await uRes.json();
+                    }
+                } catch(e) {}
+
+                // 2. Отримуємо оголошення цього продавця
+                let sellerListings = [];
+                try {
+                    const lRes = await fetch(`/api/listings?sellerId=${targetSellerId}`);
+                    if (lRes.ok) {
+                        const lData = await lRes.json();
+                        sellerListings = Array.isArray(lData) ? lData : (lData.listings || []);
+                        if (!sellerInfo && sellerListings.length > 0 && sellerListings[0].seller) {
+                            sellerInfo = sellerListings[0].seller;
+                        }
+                    }
+                } catch(e) {}
+
+                // 3. Заповнюємо інформацію про продавця
+                const sFirst = sellerInfo ? (sellerInfo.firstName || 'Користувач') : 'Користувач';
+                const sLast = sellerInfo ? (sellerInfo.lastName || '') : '';
+                const fullName = `${sFirst} ${sLast}`.trim();
+                document.getElementById('sellerName').innerText = fullName;
+
+                const sInitials = (((sFirst || 'U')[0]) || 'U').toUpperCase();
+                const savedAvatar = localStorage.getItem(`userAvatar_${targetSellerId}`) || (sellerInfo ? sellerInfo.avatarUrl : null);
+                const avatarEl = document.getElementById('sellerAvatar');
+                if (avatarEl) {
+                    if (savedAvatar && typeof savedAvatar === 'string' && savedAvatar.trim()) {
+                        avatarEl.innerHTML = `<img src="${savedAvatar}" alt="${fullName}" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" onerror="this.remove(); document.getElementById('sellerAvatar').innerText='${sInitials}';">`;
+                    } else {
+                        avatarEl.innerText = sInitials;
+                    }
+                }
+
+                // Кнопка дзвінка
+                const phone = sellerInfo ? (sellerInfo.phoneNumber || (sellerListings[0] && sellerListings[0].seller ? sellerListings[0].seller.phoneNumber : null)) : null;
+                const contactBtn = document.getElementById('sellerContactBtn');
+                if (contactBtn) {
+                    if (phone) {
+                        contactBtn.innerHTML = `<a href="tel:+${phone}" class="contact-btn">${ICONS.phone} Зателефонувати (+${phone})</a>`;
+                    } else {
+                        contactBtn.innerHTML = '';
+                    }
+                }
+
+                // Кнопка переходу в чат з продавцем
+                const chatBtn = document.getElementById('sellerChatBtn');
+                if (chatBtn) {
+                    chatBtn.innerHTML = `<a href="/messages.html?seller=${targetSellerId}" class="chat-btn">${ICONS.chatBtn} Написати у чат</a>`;
+                }
+
+                if (token) {
+                    const rateBtn = document.getElementById('rateSellerBtn');
+                    if (rateBtn) rateBtn.style.display = 'inline-flex';
+                }
+
+                // Кількість та список оголошень
+                const countEl = document.getElementById('listingsCount');
+                if (countEl) countEl.innerText = sellerListings.length;
+                renderListings(sellerListings);
+
+                // Відгуки та статистика виконаних послуг
+                loadSellerReviews(targetSellerId);
+                loadSellerServicesStats(targetSellerId);
+
+            } catch (error) {
+                console.error("Error loading seller profile:", error);
+                const cont = document.getElementById('sellerListingsContainer');
+                if (cont) cont.innerHTML = '<p style="color: #ef4444; text-align: center; padding: 20px;">Помилка завантаження профілю продавця.</p>';
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSellerPage);
+        } else {
+            initSellerPage();
+        }
+
+        async function loadSellerReviews(sellerId) {
+            try {
+                const res = await fetch(`/api/reviews/user/${sellerId}`);
+                if (!res.ok) return;
+                const data = await res.json();
+
+                const avgRating = data.averageRating || 0;
+                const totalRev = data.totalReviews || (data.reviews ? data.reviews.length : 0);
+
+                document.getElementById('sellerAvgRating').innerText = Number(avgRating).toFixed(1);
+                document.getElementById('sellerTotalReviews').innerText = totalRev;
+                document.getElementById('sellerStars').innerHTML = renderStars(avgRating);
+
+                const container = document.getElementById('sellerReviewsList');
+                if (!data.reviews || !data.reviews.length) {
+                    container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem; padding: 12px 0;">У цього користувача поки немає отриманих відгуків.</p>';
+                    return;
+                }
+
+                container.innerHTML = data.reviews.map(r => `
+                    <div class="review-card">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center;">
+                            <b style="font-size: 0.95rem;">${r.author ? (r.author.firstName + ' ' + (r.author.lastName || '')) : 'Користувач'}</b>
+                            <span style="display:inline-flex;align-items:center;gap:2px;">${renderStars(r.rating)}</span>
+                        </div>
+                        <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 8px;">${r.comment || 'Без коментаря'}</p>
+
+                        ${r.listing ? `
+                            <a href="/details.html?id=${r.listing.id}" style="display: flex; align-items: center; gap: 10px; background: var(--surface); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color); text-decoration: none; margin-top: 8px;">
+                                <img src="${(r.listing.imageUrl ? r.listing.imageUrl.split(';')[0] : '') || 'https://placehold.co/50x50'}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover;" onerror="this.onerror=null; this.src='https://placehold.co/50x50';">
+                                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ICONS.package} ${r.listing.title}</span>
+                            </a>
+                        ` : ''}
+
+                        <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; display: block;">${new Date(r.createdAt || Date.now()).toLocaleDateString('uk-UA')}</span>
+                    </div>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        function openReviewModal() { document.getElementById('reviewModal').style.display = 'flex'; }
+        function closeReviewModal() { document.getElementById('reviewModal').style.display = 'none'; }
+
+        async function submitSellerReview(e) {
+            e.preventDefault();
+            if (!token) {
+                alert('Будь ласка, увійдіть в систему.');
+                window.location.href = '/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search);
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        targetUserId: targetSellerId,
+                        rating: parseInt(document.getElementById('reviewRating').value),
+                        comment: document.getElementById('reviewComment').value
+                    })
+                });
+
+                if (res.ok) {
+                    closeReviewModal();
+                    document.getElementById('reviewComment').value = '';
+                    loadSellerReviews(targetSellerId);
+                    alert('Дякуємо! Відгук успішно додано.');
+                } else {
+                    const err = await res.json();
+                    alert(err.error || 'Помилка при додаванні відгуку');
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        function renderListings(listingsToRender) {
+            const container = document.getElementById('sellerListingsContainer');
+            if (!container) return;
+            if (!listingsToRender || listingsToRender.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1 / -1; padding: 36px 20px; color: var(--text-muted); background: var(--surface); border-radius: 14px; border: 1.5px solid var(--border-color); text-align: center; font-weight: 600;">У цього користувача поки немає активних оголошень.</p>';
+                return;
+            }
+
+            const favs = getFavorites();
+
+            container.innerHTML = listingsToRender.map(item => {
+                const imgUrl = item.imageUrl ? item.imageUrl.split(';')[0] : 'https://placehold.co/600x400/e2e8f0/64748b?text=Немає+фото';
+                const locationText = item.location ? item.location.split(',')[0] : 'Кременчук';
+                const isFav = favs.includes(item.id);
+                const favIcon = isFav ? ICONS.heartFilled : ICONS.heartOutline;
+                const isService = (item.categoryId === 8) || (item.title && item.title.toLowerCase().includes('послуг'));
+
+                return `
+                    <div class="card">
+                        <div class="card-img-wrapper">
+                            <img src="${imgUrl}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e2e8f0/64748b?text=Loop+Market';">
+                            <button onclick="toggleFavorite(${item.id}, event)" class="btn-fav" title="Додати в обране">${favIcon}</button>
+                            ${isService ? '<span style="position: absolute; top: 10px; left: 10px; background: #2563eb; color: white; font-size: 0.72rem; font-weight: 800; padding: 4px 8px; border-radius: 6px;">🛠 Послуга</span>' : ''}
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">${item.title}</div>
+                            <div class="card-price">${item.price} ₴</div>
+                            <div class="card-footer">
+                                <span>${ICONS.pin} ${locationText}</span>
+                                <a href="/details.html?id=${item.id}" class="btn-view">${isService ? 'Замовити' : 'Огляд'}</a>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        async function loadSellerServicesStats(sellerId) {
+            try {
+                const res = await fetch(`/api/users/${sellerId}/services-stats`);
+                if (res.ok) {
+                    const stats = await res.json();
+                    const box = document.getElementById('sellerServicesBadgeBox');
+                    const text = document.getElementById('sellerCompletedServicesText');
+                    if (box && text && (stats.completedServicesCount > 0 || stats.activeServicesCount > 0)) {
+                        box.style.display = 'flex';
+                        if (stats.completedServicesCount > 0) {
+                            text.innerText = `${stats.completedServicesCount} виконано`;
+                        } else {
+                            text.innerText = `${stats.activeServicesCount} активних послуг`;
+                        }
+                    }
+                }
+            } catch(e) {}
+        }
+    </script>
+    <!-- Realtime In-App Push Notifications -->
+    <script src="/js/push-notifications.js"></script>
+</body>
+</html>
