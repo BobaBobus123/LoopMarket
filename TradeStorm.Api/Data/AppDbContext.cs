@@ -15,6 +15,9 @@ public class AppDbContext : DbContext
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Favorite> Favorites { get; set; }
     public DbSet<Order> Orders { get; set; }
+    public DbSet<Complaint> Complaints { get; set; }
+    public DbSet<AdminAuditLog> AdminAuditLogs { get; set; }
+    public DbSet<SiteAnnouncement> SiteAnnouncements { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -65,5 +68,27 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Order>()
             .HasIndex(o => o.Status);
+
+        // Налаштування зв'язків скарг модерації
+        modelBuilder.Entity<Complaint>()
+            .HasOne(c => c.Reporter)
+            .WithMany()
+            .HasForeignKey(c => c.ReporterId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Complaint>()
+            .HasOne(c => c.TargetUser)
+            .WithMany()
+            .HasForeignKey(c => c.TargetUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Complaint>()
+            .HasOne(c => c.Listing)
+            .WithMany()
+            .HasForeignKey(c => c.ListingId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Complaint>()
+            .HasIndex(c => c.Status);
     }
 }

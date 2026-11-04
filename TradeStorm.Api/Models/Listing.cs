@@ -28,4 +28,5 @@ public class Listing
     public string? Location { get; set; }
     public bool IsShippingAvailable { get; set; }
     public string Status { get; set; } = "Active"; // Active, Sold, Reserved
+    public bool IsFeatured { get; set; } = false;
 }

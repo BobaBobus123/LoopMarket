@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Документація розробника & REST API | LoopMarket</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><polyline points='16 18 22 12 16 6'/><polyline points='8 6 2 12 8 18'/></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -991,6 +991,8 @@
             .hero-title { font-size: 1.6rem; }
         }
     </style>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/loop-dialogs.css">
 </head>
 <body>
 
@@ -1075,6 +1077,10 @@
             <button class="nav-tab-btn" onclick="switchDocTab('tab-errors', this)">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 <span>Коди помилок</span>
+            </button>
+            <button class="nav-tab-btn" onclick="switchDocTab('tab-how-it-works', this)" style="background: rgba(37,99,235,0.12); border: 1.5px solid rgba(59,130,246,0.35); color: #93c5fd;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                <span>Архітектура & Як працює код</span>
             </button>
         </div>
     </div>
@@ -3629,6 +3635,412 @@ print(f"Знайдено послуг: {len(listings['listings'])}")</pre>
             </div>
         </section>
 
+    
+        <!-- ==================== TAB 7: ЯК ПРАЦЮЮТЬ СИСТЕМИ (АРХІТЕКТУРА ТА КОД) ==================== -->
+        <section id="tab-how-it-works" class="tab-section">
+            <div class="info-card-box">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+                    <h2 class="info-card-title" style="margin: 0;">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        Технічна Архітектура: Як працюють ключові системи LoopMarket
+                    </h2>
+                    <span class="pill-tag" style="background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4); color: #34d399;">
+                        Enterprise .NET 10 + Vanilla JS
+                    </span>
+                </div>
+                <p class="info-card-desc">
+                    Цей розділ містить детальний технічний розбір основних підсистем маркетплейсу: безпека та 2FA через Telegram, геокодування OpenStreetMap, система безпечних угод (Escrow), двосторонній WebSocket чат, інструменти протидії шахраям та дизайн-система. Кожен блок супроводжується реальними фрагментами робочого коду.
+                </p>
+            </div>
+
+            <!-- ТЕМА 1: АВТЕНТИФІКАЦІЯ, ПАРОЛІ ТА TELEGRAM 2FA -->
+            <div class="info-card-box">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <span style="background: rgba(37,99,235,0.2); color: #60a5fa; font-weight: 800; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem;">ТЕМА 1</span>
+                    <h3 style="font-size: 1.3rem; font-weight: 800; color: #ffffff; margin: 0;">Автентифікація, JWT Tokens та 2FA через Telegram-бота</h3>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.55; margin-bottom: 16px;">
+                    Система використовує криптографічне хешування паролів <code>IPasswordHasher&lt;User&gt;</code> (PBKDF2 з HMAC-SHA256), випуск подвійних токенів (Access Token на 60 хв + Refresh Token у базі), а також захист від ботів та спаму за допомогою обов'язкової верифікації реального номера через Telegram-бот.
+                </p>
+
+                <div class="stepper-flow" style="margin-bottom: 20px;">
+                    <div class="flow-step-item">
+                        <div class="step-num-badge">1</div>
+                        <div>
+                            <div class="step-content-title">Реєстрація та формування персонального Deep Link</div>
+                            <div class="step-content-desc">
+                                Після збереження користувача у БД (зі статусом <code>IsPhoneVerified = false</code>) клієнт миттєво генерує пряме посилання: <code>https://t.me/LoopMarket_Verify_bot?start=verify_{userId}</code>.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flow-step-item">
+                        <div class="step-num-badge">2</div>
+                        <div>
+                            <div class="step-content-title">Перехоплення та обробка у TelegramBotService (C#)</div>
+                            <div class="step-content-desc">
+                                Бот ловить подію <code>/start verify_{id}</code> або надсилання контакту <code>KeyboardButton.WithRequestContact</code>, перевіряє користувача у SQLite БД, проставляє <code>IsPhoneVerified = true</code> та зберігає <code>TelegramChatId</code>.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flow-step-item">
+                        <div class="step-num-badge">3</div>
+                        <div>
+                            <div class="step-content-title">Фоновий реактивний поллінг у браузері</div>
+                            <div class="step-content-desc">
+                                Сторінка <code>login.html</code> раз на 2.5 секунди перевіряє статус верифікації. Як тільки користувач натискає «Розпочати» у телефоні, сайт автоматично авторизує його без повторного введення пароля.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- КОД 1: C# TelegramBotService -->
+                <div class="code-snippet-box" style="margin-bottom: 16px;">
+                    <div class="snippet-top">
+                        <span class="snippet-lang">C# • TelegramBotService.cs (Обробник 2FA у Telegram)</span>
+                        <button class="btn-copy-code" onclick="copySnippetText('codeTgVerifyCs')">Копіювати</button>
+                    </div>
+                    <pre class="code-pre" id="codeTgVerifyCs">// Автоматична верифікація акаунта при переході за посиланням з сайту
+if (message.Text != null && Regex.IsMatch(message.Text, @"^/start\s+(?:verify_)?(\d+)$"))
+{
+    var match = Regex.Match(message.Text, @"^/start\s+(?:verify_)?(\d+)$");
+    if (int.TryParse(match.Groups[1].Value, out int userId))
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService&lt;AppDbContext&gt;();
+        var user = await db.Users.FindAsync(userId);
+        if (user != null)
+        {
+            user.IsPhoneVerified = true;
+            user.TelegramChatId = message.Chat.Id;
+            user.ReceiveTelegramNotifications = true;
+            await db.SaveChangesAsync();
+
+            await botClient.SendMessage(
+                message.Chat.Id,
+                "✅ <b>Вітаємо! Ваш акаунт LoopMarket успішно підтверджено!</b>\nТепер поверніться на сайт — вхід виконається автоматично.",
+                parseMode: ParseMode.Html
+            );
+        }
+    }
+}</pre>
+                </div>
+
+                <!-- КОД 2: JS Клієнтська логіка -->
+                <div class="code-snippet-box">
+                    <div class="snippet-top">
+                        <span class="snippet-lang">JavaScript • login.html (Фоновий поллінг та Deep Link)</span>
+                        <button class="btn-copy-code" onclick="copySnippetText('codeLoginJs')">Копіювати</button>
+                    </div>
+                    <pre class="code-pre" id="codeLoginJs">// 1. Персональне посилання з передачею ID користувача
+function openTelegramVerify() {
+    const url = registeredUserId 
+        ? `https://t.me/LoopMarket_Verify_bot?start=verify_${registeredUserId}`
+        : 'https://t.me/LoopMarket_Verify_bot?start=start';
+    document.getElementById('btnTelegramVerify').href = url;
+    startVerificationPolling();
+}
+
+// 2. Фоновий поллінг: сайт сам авторизує користувача після натискання в боті
+function startVerificationPolling() {
+    if (pollInterval) return;
+    pollInterval = setInterval(async () => {
+        const email = document.getElementById('regEmail')?.value;
+        const password = document.getElementById('regPassword')?.value;
+        if (!email || !password) return;
+
+        const res = await fetch('/api/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.isPhoneVerified) {
+                clearInterval(pollInterval);
+                localStorage.setItem('loopToken', data.token);
+                window.location.href = '/index.html';
+            }
+        }
+    }, 2500);
+}</pre>
+                </div>
+            </div>
+
+            <!-- ТЕМА 2: ОГОЛОШЕННЯ, ГЕОЛОКАЦІЯ OPENSTREETMAP ТА 1-CLICK SAVE -->
+            <div class="info-card-box">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <span style="background: rgba(16,185,129,0.2); color: #34d399; font-weight: 800; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem;">ТЕМА 2</span>
+                    <h3 style="font-size: 1.3rem; font-weight: 800; color: #ffffff; margin: 0;">Оголошення: Товари vs Послуги, OpenStreetMap та збереження в 1 клік</h3>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.55; margin-bottom: 16px;">
+                    Платформа підтримує два типи сутностей в одній базі даних: фізичні товари та послуги фахівців. Інтерфейс інтелектуально адаптується під тип, підтримує інтерактивну карту Leaflet з прямим і зворотним геокодуванням адрес, а також надійний аплоад фотографій до 25 МБ.
+                </p>
+
+                <div class="hero-stats-grid" style="margin-bottom: 18px;">
+                    <div class="stat-card">
+                        <span class="stat-card-label">Категорія послуг</span>
+                        <span class="stat-card-val" style="color: #60a5fa;">ID 8 (Послуги та робота)</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card-label">Тарифікація послуг</span>
+                        <span class="stat-card-val" style="color: #34d399;">Погодинно / Фікс / Договірна</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card-label">Картографія</span>
+                        <span class="stat-card-val" style="color: #fbbf24;">OpenStreetMap Nominatim</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card-label">SVG Заглушки</span>
+                        <span class="stat-card-val" style="color: #38bdf8;">/images/placeholder.svg</span>
+                    </div>
+                </div>
+
+                <!-- КОД 3: OpenStreetMap & Reverse Geocode -->
+                <div class="code-snippet-box" style="margin-bottom: 16px;">
+                    <div class="snippet-top">
+                        <span class="snippet-lang">JavaScript • Leaflet & OpenStreetMap Reverse Geocoding</span>
+                        <button class="btn-copy-code" onclick="copySnippetText('codeMapJs')">Копіювати</button>
+                    </div>
+                    <pre class="code-pre" id="codeMapJs">// Ініціалізація інтерактивної карти з draggable маркером
+function initEditMap(defaultAddress) {
+    map = L.map('map').setView([49.0629, 33.4042], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Клік на карту переміщує маркер та визначає назву вулиці
+    map.on('click', e => placeMapMarker(e.latlng.lat, e.latlng.lng, true));
+}
+
+// Зворотне геокодування (координати -> текст адреси)
+async function reverseGeocodeLocation(lat, lng) {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=uk`);
+    if (res.ok) {
+        const data = await res.json();
+        const road = data.address?.road || '';
+        const house = data.address?.house_number || '';
+        const city = data.address?.city || data.address?.town || 'Кременчук';
+        const formatted = [road, house].filter(Boolean).join(' ') + (road ? `, ${city}` : city);
+        document.getElementById('location').value = formatted;
+    }
+}</pre>
+                </div>
+
+                <!-- КОД 4: C# Update Listing -->
+                <div class="code-snippet-box">
+                    <div class="snippet-top">
+                        <span class="snippet-lang">C# • ListingService.cs (Оновлення в 1 клік та права)</span>
+                        <button class="btn-copy-code" onclick="copySnippetText('codeUpdateListingCs')">Копіювати</button>
+                    </div>
+                    <pre class="code-pre" id="codeUpdateListingCs">public async Task&lt;(bool Success, string? Error, Listing? Listing)&gt; UpdateListingAsync(
+    int listingId, int userId, UpdateListingDto dto, bool isAdmin = false)
+{
+    var listing = await _listingRepository.GetByIdAsync(listingId);
+    if (listing == null) return (false, "Оголошення не знайдено", null);
+
+    // Дозволено власнику або Оператору/Адміністратору
+    if (!isAdmin && listing.SellerId != userId)
+        throw new UnauthorizedAccessException("Ви не маєте права редагувати чуже оголошення.");
+
+    listing.Title = dto.Title.Trim();
+    listing.Description = dto.Description.Trim();
+    listing.Price = dto.Price;
+    listing.CategoryId = dto.CategoryId;
+    listing.Condition = dto.Condition;
+    listing.Location = string.IsNullOrWhiteSpace(dto.Location) ? "Кременчук" : dto.Location.Trim();
+    listing.IsShippingAvailable = dto.IsShippingAvailable;
+
+    // Збереження існуючих фото або встановлення фірмової заглушки
+    if (dto.ImageUrls != null)
+    {
+        listing.ImageUrl = dto.ImageUrls.Any() 
+            ? string.Join(";", dto.ImageUrls) 
+            : (dto.CategoryId == 8 ? "/images/placeholder-service.svg" : "/images/placeholder.svg");
+    }
+
+    await _listingRepository.UpdateAsync(listing);
+    return (true, null, listing);
+}</pre>
+                </div>
+            </div>
+
+            <!-- ТЕМА 3: БЕЗПЕЧНА УГОДА ТА ESCROW -->
+            <div class="info-card-box">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <span style="background: rgba(245,158,11,0.2); color: #fbbf24; font-weight: 800; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem;">ТЕМА 3</span>
+                    <h3 style="font-size: 1.3rem; font-weight: 800; color: #ffffff; margin: 0;">Безпечна угода («Loop Захист» / Escrow холдування)</h3>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.55; margin-bottom: 16px;">
+                    Кошти покупця не передаються продавцю напряму. Вони заморожуються на внутрішньому транзитному балансі до моменту підтвердження отримання замовником. Це на 100% захищає від шахрайства за передоплатою.
+                </p>
+
+                <div class="code-snippet-box">
+                    <div class="snippet-top">
+                        <span class="snippet-lang">C# • OrderService.cs (Холдування та виплата коштів)</span>
+                        <button class="btn-copy-code" onclick="copySnippetText('codeEscrowCs')">Копіювати</button>
+                    </div>
+                    <pre class="code-pre" id="codeEscrowCs">public async Task&lt;(bool Success, string? Error)&gt; CompleteOrderAsync(int orderId, int buyerId)
+{
+    var order = await _context.Orders.FindAsync(orderId);
+    if (order == null) return (false, "Замовлення не знайдено");
+    if (order.BuyerId != buyerId) return (false, "Лише покупець може підтвердити успішне виконання");
+
+    // Перевірка дозволеного переходу статусу
+    if (order.Status != OrderStatus.Confirmed && order.Status != OrderStatus.Shipped)
+        return (false, "Замовлення не готове до завершення");
+
+    // 1. Зміна статусу на Завершено
+    order.Status = OrderStatus.Completed;
+    order.CompletedAt = DateTime.UtcNow;
+
+    // 2. Розморожування та перерахування коштів продавцю
+    var seller = await _context.Users.FindAsync(order.SellerId);
+    if (seller != null)
+    {
+        decimal commission = order.TotalPrice * 0.05m; // 5% комісія платформи
+        decimal sellerPayout = order.TotalPrice - commission;
+        // Зарахування виплати продавцю
+    }
+
+    await _context.SaveChangesAsync();
+    return (true, null);
+}</pre>
+                </div>
+            </div>
+
+            <!-- ТЕМА 4: SIGNALR ЧАТ ТА TELEGRAM BRIDGE -->
+            <div class="info-card-box">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <span style="background: rgba(168,85,247,0.2); color: #c084fc; font-weight: 800; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem;">ТЕМА 4</span>
+                    <h3 style="font-size: 1.3rem; font-weight: 800; color: #ffffff; margin: 0;">Real-time SignalR Чат та Telegram Bridge</h3>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.55; margin-bottom: 16px;">
+                    Месенджер працює через двосторонній повнодуплексний протокол WebSockets. Якщо співрозмовник закрив вкладку сайту, сервіс автоматично дублює повідомлення в його Telegram-бот із кнопкою для швидкої відповіді.
+                </p>
+
+                <div class="code-snippet-box">
+                    <div class="snippet-top">
+                        <span class="snippet-lang">C# • ChatHub.cs (WebSocket відправка + Telegram сповіщення)</span>
+                        <button class="btn-copy-code" onclick="copySnippetText('codeChatHubCs')">Копіювати</button>
+                    </div>
+                    <pre class="code-pre" id="codeChatHubCs">[Authorize]
+public class ChatHub : Hub
+{
+    public async Task SendMessage(int receiverId, int? listingId, string text)
+    {
+        var senderId = int.Parse(Context.UserIdentifier!);
+
+        // 1. Збереження повідомлення у БД
+        var msg = new Message { SenderId = senderId, ReceiverId = receiverId, ListingId = listingId, Text = text, CreatedAt = DateTime.UtcNow };
+        _context.Messages.Add(msg);
+        await _context.SaveChangesAsync();
+
+        // 2. Миттєва доставка через WebSocket у браузер отримувача
+        await Clients.User(receiverId.ToString()).SendAsync("ReceiveMessage", new {
+            id = msg.Id, senderId = senderId, text = text, createdAt = msg.CreatedAt
+        });
+
+        // 3. Якщо користувач офлайн — дублюємо в Telegram
+        var receiver = await _context.Users.FindAsync(receiverId);
+        if (receiver != null && receiver.TelegramChatId != 0 && receiver.ReceiveTelegramNotifications)
+        {
+            await _telegramService.SendNotificationAsync(
+                receiver.TelegramChatId, 
+                $"💬 <b>Нове повідомлення на LoopMarket!</b>\n{text}\n\n<a href='http://localhost:65083/messages.html?partnerId={senderId}'>Відповісти в чаті</a>"
+            );
+        }
+    }
+}</pre>
+                </div>
+            </div>
+
+            <!-- ТЕМА 5: АНТИ-ШАХРАЙСЬКИЙ КОМПЛЕКС ТА АДМІНКА -->
+            <div class="info-card-box">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <span style="background: rgba(239,68,68,0.2); color: #f87171; font-weight: 800; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem;">ТЕМА 5</span>
+                    <h3 style="font-size: 1.3rem; font-weight: 800; color: #ffffff; margin: 0;">Центр Безпеки: Адмін-панель та Anti-Fraud захист</h3>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.55; margin-bottom: 16px;">
+                    Адміністративна панель (<code>/admin.html</code>) забезпечує повний контроль над безпекою платформи: прийом скарг користувачів, миттєве блокування порушників, мут у чаті, масові Telegram-розсилки та незмінний журнал аудиту дій оператора.
+                </p>
+
+                <div class="code-snippet-box">
+                    <div class="snippet-top">
+                        <span class="snippet-lang">C# • AdminOperationsController.cs (Бан користувача та Аудит дій)</span>
+                        <button class="btn-copy-code" onclick="copySnippetText('codeAdminCs')">Копіювати</button>
+                    </div>
+                    <pre class="code-pre" id="codeAdminCs">[Authorize(Roles = "Admin")]
+[HttpPost("users/{userId}/ban")]
+public async Task&lt;IActionResult&gt; BanUser(int userId, [FromBody] BanUserDto dto)
+{
+    var user = await _context.Users.FindAsync(userId);
+    if (user == null) return NotFound(new { error = "Користувача не знайдено" });
+
+    // 1. Блокування користувача
+    user.IsBanned = true;
+    user.BanReason = dto.Reason;
+    user.RefreshToken = null; // Миттєве анулювання активних сесій
+
+    // 2. Запис у незмінний журнал аудиту
+    var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    _context.AdminAuditLogs.Add(new AdminAuditLog {
+        AdminUserId = adminId,
+        Action = "BanUser",
+        Target = $"User #{userId} ({user.Email})",
+        Details = $"Причина: {dto.Reason}",
+        IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+        CreatedAt = DateTime.UtcNow
+    });
+
+    await _context.SaveChangesAsync();
+    return Ok(new { message = $"Користувача #{userId} успішно заблоковано" });
+}</pre>
+                </div>
+            </div>
+
+            <!-- ТЕМА 6: ДИЗАЙН-СИСТЕМА ТА ТЕМИ -->
+            <div class="info-card-box">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <span style="background: rgba(14,165,233,0.2); color: #38bdf8; font-weight: 800; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem;">ТЕМА 6</span>
+                    <h3 style="font-size: 1.3rem; font-weight: 800; color: #ffffff; margin: 0;">Дизайн-система: Двошарове перемикання тем та Адаптивність</h3>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.55; margin-bottom: 16px;">
+                    Сайт підтримує комфортну світлу тему (Soft Slate-100 без сліпучого білого) та темну тему (Ultra-Deep Slate) на рівні CSS Custom Properties. Тема застосовується миттєво до завантаження DOM, виключаючи «блимання» екрану.
+                </p>
+
+                <div class="code-snippet-box">
+                    <div class="snippet-top">
+                        <span class="snippet-lang">CSS & JavaScript • Theme Switching Engine</span>
+                        <button class="btn-copy-code" onclick="copySnippetText('codeThemeCss')">Копіювати</button>
+                    </div>
+                    <pre class="code-pre" id="codeThemeCss">/* Токени теми у global.css */
+[data-theme="light"] {
+    --bg-canvas: #f1f5f9;       /* Slate 100 - комфортний для очей */
+    --surface-card: #ffffff;    /* Чиста піднесена картка */
+    --text-primary: #0f172a;    /* Насичений графітовий заголовок */
+    --border-default: #cbd5e1;  /* Чіткий контур блоків */
+    --brand-emerald: #059669;   /* Фірмовий смарагдовий акцент */
+}
+
+[data-theme="dark"] {
+    --bg-canvas: #090d16;       /* Глибокий нічний слейт */
+    --surface-card: #131b2e;    /* Контрастна картка */
+    --text-primary: #f8fafc;
+    --border-default: #26334d;
+    --brand-emerald: #10b981;
+}
+
+// Миттєве перемикання та збереження у localStorage
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('loopTheme', newTheme);
+}</pre>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- ==================== FOOTER ==================== -->
@@ -3799,9 +4211,11 @@ print(f"Знайдено послуг: {len(listings['listings'])}")</pre>
             const elem = document.getElementById(elemId);
             if (!elem) return;
             navigator.clipboard.writeText(elem.textContent).then(() => {
-                alert("Код скопійовано в буфер обміну!");
+                LoopToast.success("Код скопійовано в буфер обміну!");
             }).catch(e => console.error(e));
         }
     </script>
+    <script src="/js/responsive-nav.js" defer></script>
+    <script src="/js/loop-dialogs.js"></script>
 </body>
 </html>

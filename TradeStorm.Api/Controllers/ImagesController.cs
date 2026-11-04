@@ -5,7 +5,6 @@ namespace TradeStorm.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class ImagesController : ControllerBase
 {
     private readonly IWebHostEnvironment _environment;
@@ -16,19 +15,21 @@ public class ImagesController : ControllerBase
     }
 
     [HttpPost]
+    [AllowAnonymous]
+    [RequestSizeLimit(35 * 1024 * 1024)]
     public async Task<IActionResult> UploadImage(IFormFile file)
     {
         if (file == null || file.Length == 0)
             return BadRequest(new { error = "Файл не вибрано" });
 
-        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".jfif", ".bmp", ".gif", ".avif", ".heic" };
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
         if (!allowedExtensions.Contains(extension))
-            return BadRequest(new { error = "Недопустимий формат файлу. Використовуйте JPG, PNG або WEBP." });
+            return BadRequest(new { error = "Недопустимий формат файлу. Використовуйте JPG, PNG, WEBP, GIF, JFIF або BMP." });
 
-        if (file.Length > 5 * 1024 * 1024)
-            return BadRequest(new { error = "Розмір файлу не має перевищувати 5 МБ" });
+        if (file.Length > 25 * 1024 * 1024)
+            return BadRequest(new { error = "Розмір файлу не має перевищувати 25 МБ" });
 
         var webRoot = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
         var uploadsFolder = Path.Combine(webRoot, "uploads");

@@ -27,4 +27,9 @@ public class User
     // Refresh Token для безпечного оновлення сесії (Етап 5)
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiryTime { get; set; }
+
+    // Модерація та блокування (Оператор/Адмін)
+    public bool IsBanned { get; set; } = false;
+    public string? BanReason { get; set; }
+    public DateTime? MutedUntil { get; set; }
 }

@@ -262,6 +262,15 @@ public class OrderService : IOrderService
         );
     }
 
+    private static OrderDto MapToDto(Order o) => MapToDto(
+        o,
+        o.Listing?.Title ?? "Товар видалено",
+        o.Listing?.ImageUrl,
+        $"{o.Seller?.FirstName} {o.Seller?.LastName}".Trim(),
+        o.Seller?.PhoneNumber,
+        o.Listing?.CategoryId == 8 || (o.Listing?.Title ?? "").Contains("Послуг", StringComparison.OrdinalIgnoreCase) || (o.DeliveryBranch != null && o.DeliveryBranch.Contains("год"))
+    );
+
     private static OrderDto MapToDto(Order o, string listingTitle, string? listingImageUrl, string sellerName, string? sellerPhone = null, bool isService = false)
     {
         return new OrderDto

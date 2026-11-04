@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Профіль продавця | Loop Market</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><circle cx='12' cy='7' r='4'/><path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -59,7 +59,7 @@
         }
 
         body {
-            background-color: #0b0f19;
+            background-color: var(--bg-color);
             background-image: 
                 radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37, 99, 235, 0.07), transparent 60%),
                 radial-gradient(ellipse 60% 40% at 100% 100%, rgba(16, 185, 129, 0.04), transparent 50%),
@@ -657,6 +657,8 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/loop-dialogs.css">
 </head>
 <body>
     <header>
@@ -1169,7 +1171,7 @@
         async function submitSellerReview(e) {
             e.preventDefault();
             if (!token) {
-                alert('Будь ласка, увійдіть в систему.');
+                LoopToast.info('Будь ласка, увійдіть в систему.');
                 window.location.href = '/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search);
                 return;
             }
@@ -1192,10 +1194,10 @@
                     closeReviewModal();
                     document.getElementById('reviewComment').value = '';
                     loadSellerReviews(targetSellerId);
-                    alert('Дякуємо! Відгук успішно додано.');
+                    LoopToast.success('Дякуємо! Відгук успішно додано.');
                 } else {
                     const err = await res.json();
-                    alert(err.error || 'Помилка при додаванні відгуку');
+                    LoopToast.error(err.error || 'Помилка при додаванні відгуку');
                 }
             } catch (err) { console.error(err); }
         }
@@ -1211,7 +1213,7 @@
             const favs = getFavorites();
 
             container.innerHTML = listingsToRender.map(item => {
-                const imgUrl = item.imageUrl ? item.imageUrl.split(';')[0] : 'https://placehold.co/600x400/e2e8f0/64748b?text=Немає+фото';
+                const imgUrl = item.imageUrl ? item.imageUrl.split(';')[0] : '/images/placeholder.svg';
                 const locationText = item.location ? item.location.split(',')[0] : 'Кременчук';
                 const isFav = favs.includes(item.id);
                 const favIcon = isFav ? ICONS.heartFilled : ICONS.heartOutline;
@@ -1220,7 +1222,7 @@
                 return `
                     <div class="card">
                         <div class="card-img-wrapper">
-                            <img src="${imgUrl}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e2e8f0/64748b?text=Loop+Market';">
+                            <img src="${imgUrl}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
                             <button onclick="toggleFavorite(${item.id}, event)" class="btn-fav" title="Додати в обране">${favIcon}</button>
                             ${isService ? '<span style="position: absolute; top: 10px; left: 10px; background: #2563eb; color: white; font-size: 0.72rem; font-weight: 800; padding: 4px 8px; border-radius: 6px;">🛠 Послуга</span>' : ''}
                         </div>
@@ -1257,5 +1259,7 @@
     </script>
     <!-- Realtime In-App Push Notifications -->
     <script src="/js/push-notifications.js"></script>
+    <script src="/js/responsive-nav.js" defer></script>
+    <script src="/js/loop-dialogs.js"></script>
 </body>
 </html>

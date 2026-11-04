@@ -1,0 +1,335 @@
+/**
+ * LoopMarket Enterprise Modal & Toast Dialog System
+ * Replaces archaic browser alerts, confirms and prompts with gorgeous native-feeling UI
+ */
+
+/* ==================== MODAL OVERLAY & CARD ==================== */
+.loop-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(11, 15, 25, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.22s;
+}
+
+.loop-dialog-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loop-dialog-card {
+    background: var(--surface, #ffffff);
+    color: var(--text-main, #0f172a);
+    width: 100%;
+    max-width: 440px;
+    border-radius: 22px;
+    border: 1.5px solid var(--border-color, #e2e8f0);
+    box-shadow: 0 24px 60px -8px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    padding: 26px 26px 22px 26px;
+    box-sizing: border-box;
+    transform: scale(0.92) translateY(12px);
+    transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.loop-dialog-overlay.active .loop-dialog-card {
+    transform: scale(1) translateY(0);
+}
+
+/* Icon Badges */
+.loop-dialog-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.loop-dialog-icon.success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.25) 100%);
+    color: #10b981;
+    border: 1.5px solid rgba(16, 185, 129, 0.35);
+}
+
+.loop-dialog-icon.warning, .loop-dialog-icon.danger {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.25) 100%);
+    color: #ef4444;
+    border: 1.5px solid rgba(239, 68, 68, 0.35);
+}
+
+.loop-dialog-icon.info {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(29, 78, 216, 0.25) 100%);
+    color: #2563eb;
+    border: 1.5px solid rgba(37, 99, 235, 0.35);
+}
+
+.loop-dialog-icon.prompt {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(37, 99, 235, 0.2) 100%);
+    color: #10b981;
+    border: 1.5px solid rgba(16, 185, 129, 0.35);
+}
+
+/* Typography */
+.loop-dialog-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-main, #0f172a);
+    margin-bottom: 8px;
+    line-height: 1.3;
+    letter-spacing: -0.3px;
+}
+
+.loop-dialog-message {
+    font-size: 0.94rem;
+    color: var(--text-muted, #64748b);
+    line-height: 1.55;
+    margin-bottom: 20px;
+    word-break: break-word;
+}
+
+/* Prompt Input */
+.loop-dialog-input {
+    width: 100%;
+    background: var(--bg-color, #f8fafc);
+    color: var(--text-main, #0f172a);
+    border: 1.5px solid var(--border-color, #e2e8f0);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.loop-dialog-input:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+/* Radio Group (for complaints) */
+.loop-dialog-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.loop-dialog-radio-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg-color, #f8fafc);
+    border: 1.5px solid var(--border-color, #e2e8f0);
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.loop-dialog-radio-item:hover, .loop-dialog-radio-item.selected {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.08);
+    color: #10b981;
+}
+
+/* Action Buttons */
+.loop-dialog-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.loop-dialog-btn {
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.18s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: inherit;
+    min-height: 42px;
+}
+
+.loop-dialog-btn.cancel {
+    background: var(--bg-color, #f1f5f9);
+    color: var(--text-main, #0f172a);
+    border-color: var(--border-color, #e2e8f0);
+}
+
+.loop-dialog-btn.cancel:hover {
+    background: var(--border-color, #e2e8f0);
+}
+
+.loop-dialog-btn.confirm-primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+
+.loop-dialog-btn.confirm-primary:hover {
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+    transform: translateY(-1px);
+}
+
+.loop-dialog-btn.confirm-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+}
+
+.loop-dialog-btn.confirm-danger:hover {
+    box-shadow: 0 6px 18px rgba(239, 68, 68, 0.45);
+    transform: translateY(-1px);
+}
+
+/* ==================== TOAST NOTIFICATIONS ==================== */
+.loop-toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 100001;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 380px;
+    width: calc(100vw - 32px);
+    pointer-events: none;
+}
+
+.loop-toast {
+    pointer-events: auto;
+    background: var(--surface, #ffffff);
+    color: var(--text-main, #0f172a);
+    border: 1.5px solid var(--border-color, #e2e8f0);
+    border-radius: 16px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-sizing: border-box;
+    transform: translateX(120%);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.loop-toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.loop-toast-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.05rem;
+}
+
+.loop-toast.success .loop-toast-icon {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+.loop-toast.error .loop-toast-icon {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.loop-toast.info .loop-toast-icon {
+    background: rgba(37, 99, 235, 0.15);
+    color: #2563eb;
+}
+
+.loop-toast-message {
+    flex-grow: 1;
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.loop-toast-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted, #64748b);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: color 0.15s;
+}
+
+.loop-toast-close:hover {
+    color: var(--text-main, #0f172a);
+}
+
+.loop-toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background: #10b981;
+    transform-origin: left;
+    animation: toastTimer linear forwards;
+}
+
+.loop-toast.error .loop-toast-progress {
+    background: #ef4444;
+}
+
+.loop-toast.info .loop-toast-progress {
+    background: #2563eb;
+}
+
+@keyframes toastTimer {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
+
+@media (max-width: 480px) {
+    .loop-toast-container {
+        top: 16px;
+        right: 16px;
+        left: 16px;
+        width: auto;
+    }
+}

@@ -89,6 +89,18 @@ public class ChatHub : Hub
 
             if (int.TryParse(senderIdStr, out int senderId) && int.TryParse(receiverIdStr, out int receiverId))
             {
+                var sender = await _context.Users.FindAsync(senderId);
+                if (sender != null && sender.IsBanned)
+                {
+                    await Clients.Caller.SendAsync("ErrorMessage", "Ваш акаунт заблоковано.");
+                    return;
+                }
+                if (sender != null && sender.MutedUntil.HasValue && sender.MutedUntil.Value > DateTime.UtcNow)
+                {
+                    await Clients.Caller.SendAsync("ErrorMessage", $"Ваш чат тимчасово обмежено оператором безпеки до {sender.MutedUntil.Value.ToLocalTime():dd.MM.yyyy HH:mm} за порушення правил.");
+                    return;
+                }
+
                 // 1. Зберігаємо повідомлення в базу даних
                 var message = new Message
                 {
@@ -100,8 +112,6 @@ public class ChatHub : Hub
                 };
 
                 _context.Messages.Add(message);
-
-                var sender = await _context.Users.FindAsync(senderId);
                 string senderName = sender != null ? $"{sender.FirstName} {sender.LastName}" : "Користувач";
 
                 // 2. Створюємо сповіщення для отримувача

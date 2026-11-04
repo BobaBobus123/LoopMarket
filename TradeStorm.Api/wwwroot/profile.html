@@ -6,7 +6,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Мій Профіль | Loop Market</title>
 
     <script>
@@ -16,14 +16,14 @@
 
     <style>
         :root {
-            --primary: #002f34;
+            --primary: #0f172a;
             --primary-light: #10b981;
             --surface: #ffffff;
-            --bg-color: #f2f4f5;
-            --text-main: #002f34;
-            --text-muted: #707e82;
-            --border-color: #d8dfe0;
-            --trust-bg: #e8eff1;
+            --bg-color: #f1f5f9;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --trust-bg: #e2e8f0;
         }
 
         [data-theme="dark"] {
@@ -49,7 +49,7 @@
         }
 
         body {
-            background-color: #0b0f19;
+            background-color: var(--bg-color);
             background-image: 
                 radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37, 99, 235, 0.07), transparent 60%),
                 radial-gradient(ellipse 60% 40% at 100% 100%, rgba(16, 185, 129, 0.04), transparent 50%),
@@ -1012,6 +1012,8 @@
         }
 
     </style>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/loop-dialogs.css">
 </head>
 <body>
     <header>
@@ -1251,7 +1253,7 @@
             <div class="footer-col"><h4>Безпека</h4><a href="/safety.html">Правила безпеки</a><a href="#">Умови використання</a></div>
             <div class="footer-col"><h4>Підтримка</h4><a href="#">Telegram-канал</a><a href="#">Instagram</a></div>
         </div>
-        <div class="footer-bottom">© 2026 Loop Market. Створено для студентів.</div>
+        <div class="footer-bottom">© 2026 Loop Market. Зручні та безпечні угоди.</div>
     </footer>
 
     <!-- Модальное окно выхода -->
@@ -1611,12 +1613,12 @@
                                 });
                                 if (res.ok) {
                                     document.getElementById('userName').innerText = `${fn} ${ln}`.trim();
-                                    alert('Дані профілю успішно збережено!');
+                                    LoopToast.success('Дані профілю успішно збережено!');
                                 } else {
-                                    alert('Помилка при збереженні');
+                                    LoopToast.error('Помилка при збереженні');
                                 }
                             } catch(err) {
-                                alert("Помилка зв'язку з сервером");
+                                LoopToast.error("Помилка зв'язку з сервером");
                             }
                         });
                     }
@@ -1632,7 +1634,7 @@
                         if (!file) return;
 
                         if (!checkAndUpdateAvatarLimit(currentUserId)) {
-                            alert('Ліміт вичерпано! Ви можете змінювати фото профілю не частіше 3 разів на місяць.');
+                            LoopToast.warning('Ліміт вичерпано! Ви можете змінювати фото профілю не частіше 3 разів на місяць.');
                             return;
                         }
 
@@ -1834,7 +1836,7 @@
                     container.innerHTML = myListings.map(item => `
                         <div class="card">
                             <div class="card-img-wrapper">
-                                <img src="${(item.imageUrl ? item.imageUrl.split(';')[0] : '') || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e2e8f0/64748b?text=Loop+Market';">
+                                <img src="${(item.imageUrl ? item.imageUrl.split(';')[0] : '') || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
                             </div>
                             <div class="card-content">
                                 <div class="card-title">${item.title}</div>
@@ -1859,7 +1861,7 @@
                     container.innerHTML = favoriteItems.map(item => `
                         <div class="card">
                             <div class="card-img-wrapper">
-                                <img src="${(item.imageUrl ? item.imageUrl.split(';')[0] : '') || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e2e8f0/64748b?text=Loop+Market';">
+                                <img src="${(item.imageUrl ? item.imageUrl.split(';')[0] : '') || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
                                 <button onclick="toggleFavorite(${item.id}, event)" class="btn-fav" title="Видалити з обраного">${ICONS.heartFilled}</button>
                             </div>
                             <div class="card-content">
@@ -1871,11 +1873,16 @@
                 }
 
                 async function deleteListing(id) {
-                    if (!confirm("Ви впевнені, що хочете видалити це оголошення?")) return;
+                    const confirmed = await LoopDialog.confirm("Ви впевнені, що хочете видалити це оголошення?", {
+                        title: "Видалення оголошення",
+                        confirmText: "Видалити",
+                        danger: true
+                    });
+                    if (!confirmed) return;
                     try {
                         const response = await fetch(`/api/listings/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
                         if (response.ok) location.reload();
-                    } catch (err) { alert("Помилка з'єднання."); }
+                    } catch (err) { LoopToast.error("Помилка з'єднання."); }
                 }
     
         // ==================== ЗАМОВЛЕННЯ ТА СПОВІЩЕННЯ ====================
@@ -1963,7 +1970,7 @@
 
             list.innerHTML = orders.map(o => {
                 const s = statusMap[o.status] || { label: o.status, bg: 'var(--bg-color)', color: 'var(--text-muted)', border: 'var(--border-color)' };
-                const img = o.listingImageUrl ? o.listingImageUrl.split(';')[0] : 'https://placehold.co/100x100?text=Loop';
+                const img = o.listingImageUrl ? o.listingImageUrl.split(';')[0] : '/images/placeholder.svg';
                 const createdDate = new Date(o.createdAt).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
                 return `
@@ -1982,7 +1989,7 @@
                         </div>
 
                         <div style="display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap;">
-                            <img src="${img}" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; border: 1px solid var(--border-color); flex-shrink: 0;" onclick="window.location.href='/details.html?id=${o.listingId}'" onerror="this.onerror=null; this.src='https://placehold.co/100x100?text=Loop';">
+                            <img src="${img}" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; border: 1px solid var(--border-color); flex-shrink: 0;" onclick="window.location.href='/details.html?id=${o.listingId}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
                             
                             <div style="flex: 1; min-width: 240px;">
                                 <a href="/details.html?id=${o.listingId}" style="text-decoration: none; font-weight: 800; font-size: 1.1rem; color: var(--text-main); display: block; margin-bottom: 6px;">
@@ -2504,14 +2511,14 @@
                 wrapper.innerHTML = `
                     <div style="display: flex; flex-direction: column; gap: 14px;">
                         ${data.services.map(s => {
-                            let img = s.imageUrl ? s.imageUrl.split(';')[0] : 'https://placehold.co/400x300/e2e8f0/64748b?text=Послуга';
+                            let img = s.imageUrl ? s.imageUrl.split(';')[0] : '/images/placeholder-service.svg';
                             let isHourly = !((s.condition || '').includes('Фіксован'));
                             let rateDisplay = isHourly ? `${s.price} ₴ / год` : `${s.price} ₴ (фіксовано)`;
 
                             return `
                                 <div style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; box-shadow: var(--card-shadow);">
                                     <div style="display: flex; align-items: center; gap: 16px; min-width: 0;">
-                                        <img src="${img}" style="width: 70px; height: 70px; border-radius: 12px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border-color);" onerror="this.onerror=null; this.src='https://placehold.co/400x300/e2e8f0/64748b?text=Послуга';">
+                                        <img src="${img}" style="width: 70px; height: 70px; border-radius: 12px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border-color);" onerror="this.onerror=null; this.src='/images/placeholder-service.svg';">
                                         <div style="min-width: 0;">
                                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                                                 <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #2563eb; background: rgba(37,99,235,0.1); padding: 2px 8px; border-radius: 6px;">🛠 Послуга</span>
@@ -2581,5 +2588,7 @@
     </script>
     <!-- Realtime In-App Push Notifications -->
     <script src="/js/push-notifications.js"></script>
+    <script src="/js/responsive-nav.js" defer></script>
+    <script src="/js/loop-dialogs.js"></script>
 </body>
 </html>

@@ -92,6 +92,14 @@ public class UsersController : ControllerBase
 
         if (!isPasswordValid) return Unauthorized(new { error = "Невірний email або пароль" });
 
+        if (user.IsBanned)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = $"Ваш акаунт заблоковано адміністрацією LoopMarket. Причина: {user.BanReason ?? "Порушення правил спільноти / шахрайські дії"}."
+            });
+        }
+
         // Генерація пари токенів (Access + Refresh Token)
         var accessToken = _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
@@ -133,6 +141,11 @@ public class UsersController : ControllerBase
             return Unauthorized(new { error = "Недійсний або прострочений Refresh Token. Необхідно авторизуватися знову." });
         }
 
+        if (user.IsBanned)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Акаунт заблоковано через порушення правил платформи." });
+        }
+
         // Ротація токенів
         var newAccessToken = _tokenService.GenerateAccessToken(user);
         var newRefreshToken = _tokenService.GenerateRefreshToken();
@@ -169,7 +182,7 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Адміністрування: перегляд усіх користувачів системи з ролями (Етап 6 RBAC)
+    /// Адміністрування: перегляд усіх користувачів системи з ролями та статусом блокування (Етап 6 RBAC)
     /// </summary>
     [HttpGet("admin/all")]
     [Authorize(Roles = UserRoles.Admin)]
@@ -186,11 +199,115 @@ public class UsersController : ControllerBase
                 u.PhoneNumber,
                 u.Role,
                 u.IsPhoneVerified,
-                u.TelegramChatId
+                u.TelegramChatId,
+                u.IsBanned,
+                u.BanReason,
+                u.MutedUntil,
+                ListingCount = _context.Listings.Count(l => l.SellerId == u.Id)
             })
             .ToListAsync();
 
         return Ok(users);
+    }
+
+    /// <summary>
+    /// Адміністрування: блокування / розблокування користувача
+    /// </summary>
+    [HttpPatch("admin/{id}/ban")]
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> BanUser(int id, [FromBody] BanUserDto dto)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return NotFound(new { error = "Користувача не знайдено" });
+
+        // Не дозволяти блокувати головного адміністратора (id 1)
+        if (user.Id == 1 && dto.IsBanned)
+        {
+            return BadRequest(new { error = "Головного адміністратора системи не можна заблокувати." });
+        }
+
+        user.IsBanned = dto.IsBanned;
+        user.BanReason = dto.IsBanned ? (dto.Reason ?? "Блокування за порушення правил") : null;
+
+        if (dto.IsBanned)
+        {
+            user.RefreshToken = null; // Негайно скидаємо сесію
+        }
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            message = dto.IsBanned ? $"Користувача {user.Email} заблоковано" : $"Користувача {user.Email} розблоковано",
+            isBanned = user.IsBanned,
+            banReason = user.BanReason
+        });
+    }
+
+    /// <summary>
+    /// Адміністрування: редагування даних користувача оператором (Ім'я, Телефон, Роль, Верифікація)
+    /// </summary>
+    [HttpPut("admin/{id}")]
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> UpdateUserByAdmin(int id, [FromBody] UpdateUserAdminDto dto)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return NotFound(new { error = "Користувача не знайдено" });
+
+        if (!string.IsNullOrWhiteSpace(dto.FirstName)) user.FirstName = dto.FirstName.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.LastName)) user.LastName = dto.LastName.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.PhoneNumber)) user.PhoneNumber = dto.PhoneNumber.Trim();
+        
+        var validRoles = new[] { UserRoles.Admin, UserRoles.Seller, UserRoles.Buyer, "User" };
+        if (!string.IsNullOrWhiteSpace(dto.Role) && validRoles.Contains(dto.Role))
+        {
+            user.Role = dto.Role;
+        }
+
+        user.IsPhoneVerified = dto.IsPhoneVerified;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            message = "Дані користувача успішно оновлено оператором",
+            user = new
+            {
+                user.Id,
+                user.FirstName,
+                user.LastName,
+                user.Email,
+                user.PhoneNumber,
+                user.Role,
+                user.IsPhoneVerified,
+                user.IsBanned
+            }
+        });
+    }
+
+    /// <summary>
+    /// Адміністрування: зведена статистика платформи для панелі оператора
+    /// </summary>
+    [HttpGet("admin/stats")]
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> GetAdminStats()
+    {
+        var totalUsers = await _context.Users.CountAsync();
+        var totalListings = await _context.Listings.CountAsync();
+        var totalOrders = await _context.Orders.CountAsync();
+        var pendingComplaints = await _context.Complaints.CountAsync(c => c.Status == ComplaintStatus.Pending);
+        var bannedUsersCount = await _context.Users.CountAsync(u => u.IsBanned);
+        var totalTurnover = await _context.Orders.Where(o => o.Status == "Completed").SumAsync(o => (decimal?)o.TotalPrice) ?? 0;
+
+        return Ok(new AdminStatsDto
+        {
+            TotalUsers = totalUsers,
+            TotalListings = totalListings,
+            TotalOrders = totalOrders,
+            PendingComplaints = pendingComplaints,
+            BannedUsersCount = bannedUsersCount,
+            TotalTurnover = totalTurnover
+        });
     }
 
     /// <summary>

@@ -45,7 +45,9 @@ public class ListingService : IListingService
             Title = dto.Title.Trim(),
             Description = dto.Description.Trim(),
             Price = dto.Price,
-            ImageUrl = dto.ImageUrls != null && dto.ImageUrls.Any() ? string.Join(";", dto.ImageUrls) : null,
+            ImageUrl = dto.ImageUrls != null && dto.ImageUrls.Any() 
+                ? string.Join(";", dto.ImageUrls) 
+                : (dto.CategoryId == 8 || dto.Title.Contains("Послуг") ? "/images/placeholder-service.svg" : "/images/placeholder.svg"),
             CategoryId = dto.CategoryId,
             Condition = dto.Condition,
             Location = string.IsNullOrWhiteSpace(dto.Location) ? "Не вказано" : dto.Location.Trim(),
@@ -58,7 +60,7 @@ public class ListingService : IListingService
         return await _listingRepository.AddAsync(listing);
     }
 
-    public async Task<(bool Success, string? Error, Listing? Listing)> UpdateListingAsync(int listingId, int userId, UpdateListingDto dto)
+    public async Task<(bool Success, string? Error, Listing? Listing)> UpdateListingAsync(int listingId, int userId, UpdateListingDto dto, bool isAdmin = false)
     {
         var listing = await _listingRepository.GetByIdAsync(listingId);
         if (listing == null)
@@ -66,7 +68,7 @@ public class ListingService : IListingService
             return (false, "Оголошення не знайдено", null);
         }
 
-        if (listing.SellerId != userId)
+        if (listing.SellerId != userId && !isAdmin)
         {
             return (false, "Ви не маєте права редагувати чуже оголошення", null);
         }
@@ -79,9 +81,11 @@ public class ListingService : IListingService
         listing.Location = string.IsNullOrWhiteSpace(dto.Location) ? "Не вказано" : dto.Location.Trim();
         listing.IsShippingAvailable = dto.IsShippingAvailable;
 
-        if (dto.ImageUrls != null && dto.ImageUrls.Any())
+        if (dto.ImageUrls != null)
         {
-            listing.ImageUrl = string.Join(";", dto.ImageUrls);
+            listing.ImageUrl = dto.ImageUrls.Any() 
+                ? string.Join(";", dto.ImageUrls) 
+                : (listing.CategoryId == 8 || listing.Title.Contains("Послуг") ? "/images/placeholder-service.svg" : "/images/placeholder.svg");
         }
 
         if (!string.IsNullOrWhiteSpace(dto.Status))

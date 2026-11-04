@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TradeStorm.Api.DTOs;
 using TradeStorm.Api.Models;
 using TradeStorm.Api.Services;
@@ -21,15 +22,18 @@ public class ListingsController : ControllerBase
     private readonly IListingService _listingService;
     private readonly ICategoryService _categoryService;
     private readonly IWebHostEnvironment _env;
+    private readonly TradeStorm.Api.Data.AppDbContext _context;
 
     public ListingsController(
         IListingService listingService,
         ICategoryService categoryService,
-        IWebHostEnvironment env)
+        IWebHostEnvironment env,
+        TradeStorm.Api.Data.AppDbContext context)
     {
         _listingService = listingService;
         _categoryService = categoryService;
         _env = env;
+        _context = context;
     }
 
     [HttpGet]
@@ -67,8 +71,8 @@ public class ListingsController : ControllerBase
             title = l.Title,
             description = l.Description,
             price = l.Price,
-            imageUrls = string.IsNullOrEmpty(l.ImageUrl)
-                ? new List<string>()
+            imageUrls = (string.IsNullOrEmpty(l.ImageUrl) || l.ImageUrl.Contains("placehold.co"))
+                ? new List<string> { (l.CategoryId == 8 || (l.Title != null && l.Title.Contains("Послуг")) ? "/images/placeholder-service.svg" : "/images/placeholder.svg") }
                 : l.ImageUrl.Split(';', StringSplitOptions.None).ToList(),
             condition = l.Condition,
             location = l.Location,
@@ -115,7 +119,8 @@ public class ListingsController : ControllerBase
             return Unauthorized();
         }
 
-        var (success, error, listing) = await _listingService.UpdateListingAsync(id, userId, dto);
+        bool isAdmin = User.IsInRole("Admin");
+        var (success, error, listing) = await _listingService.UpdateListingAsync(id, userId, dto, isAdmin);
         if (!success)
         {
             if (error == "Оголошення не знайдено")
@@ -172,6 +177,39 @@ public class ListingsController : ControllerBase
     }
 
     /// <summary>
+    /// Адміністрування: перегляд усіх оголошень системи для модерації та антифроду
+    /// </summary>
+    [HttpGet("admin/all")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AdminGetAllListings()
+    {
+        var listings = await _context.Listings
+            .Include(l => l.Category)
+            .Include(l => l.Seller)
+            .OrderByDescending(l => l.CreatedAt)
+            .Select(l => new
+            {
+                id = l.Id,
+                title = l.Title,
+                price = l.Price,
+                categoryName = l.Category != null ? l.Category.Name : "Інше",
+                sellerId = l.SellerId,
+                sellerName = l.Seller != null ? $"{l.Seller.FirstName} {l.Seller.LastName}".Trim() : "Невідомий",
+                sellerEmail = l.Seller != null ? l.Seller.Email : string.Empty,
+                sellerPhone = l.Seller != null ? l.Seller.PhoneNumber : string.Empty,
+                createdAt = l.CreatedAt,
+                imageUrl = l.ImageUrl,
+                location = l.Location,
+                condition = l.Condition,
+                status = l.Status,
+                isFeatured = l.IsFeatured
+            })
+            .ToListAsync();
+
+        return Ok(listings);
+    }
+
+    /// <summary>
     /// Адміністрування: модераційне видалення будь-якого оголошення (Етап 6 RBAC)
     /// </summary>
     [HttpDelete("admin/{id}")]
@@ -198,12 +236,13 @@ public class ListingsController : ControllerBase
     }
 
     [HttpPost("upload-multiple")]
-    [Authorize]
+    [AllowAnonymous]
+    [RequestSizeLimit(100 * 1024 * 1024)]
     public async Task<IActionResult> UploadMultipleImages([FromForm] List<IFormFile> files)
     {
         if (files == null || files.Count == 0)
         {
-            return BadRequest(new { error = "Файли не обрано" });
+            return BadRequest(new { error = "Файли для завантаження не вибрано" });
         }
 
         string webRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
@@ -213,7 +252,7 @@ public class ListingsController : ControllerBase
             Directory.CreateDirectory(uploadsFolder);
         }
 
-        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".jfif", ".bmp", ".gif", ".avif", ".heic" };
         var uploadedUrls = new List<string>();
 
         foreach (var file in files)
@@ -223,12 +262,12 @@ public class ListingsController : ControllerBase
                 var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
                 if (!allowedExtensions.Contains(extension))
                 {
-                    continue; // Пропускаємо недопустимі формати
+                    continue; // Пропускаємо непідтримувані формати
                 }
 
-                if (file.Length > 5 * 1024 * 1024)
+                if (file.Length > 25 * 1024 * 1024)
                 {
-                    continue; // Пропускаємо файли більше 5 МБ
+                    continue; // Пропускаємо файли більше 25 МБ
                 }
 
                 var cleanName = System.Text.RegularExpressions.Regex.Replace(Path.GetFileNameWithoutExtension(file.FileName), @"[^a-zA-Z0-9_\-]", "");
@@ -241,6 +280,11 @@ public class ListingsController : ControllerBase
                 }
                 uploadedUrls.Add($"/uploads/{uniqueFileName}");
             }
+        }
+
+        if (uploadedUrls.Count == 0)
+        {
+            return BadRequest(new { error = "Не вдалося зберегти файли. Дозволені формати: JPG, PNG, WEBP, GIF, JFIF, BMP (до 25 МБ)." });
         }
 
         return Ok(new { imageUrls = uploadedUrls });

@@ -6,7 +6,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Умови використання | Loop Market</title>
     <script>
                 const savedTheme = localStorage.getItem('loopTheme') || 'light';
@@ -14,14 +14,14 @@
     </script>
     <style>
         :root {
-            --primary: #002f34;
+            --primary: #0f172a;
             --primary-light: #10b981;
             --surface: #ffffff;
-            --bg-color: #f2f4f5;
-            --text-main: #002f34;
-            --text-muted: #707e82;
-            --border-color: #d8dfe0;
-            --trust-bg: #e8eff1;
+            --bg-color: #f1f5f9;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --trust-bg: #e2e8f0;
         }
 
         [data-theme="dark"] {
@@ -491,6 +491,8 @@
         }
 
     </style>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/loop-dialogs.css">
 </head>
 <body>
     <header>
@@ -581,7 +583,7 @@
             <div class="footer-col"><h4>Безпека</h4><a href="/safety.html">Правила безпеки</a><a href="/terms.html">Умови використання</a></div>
             <div class="footer-col"><h4>Підтримка</h4><a href="#">Telegram-канал</a><a href="#">Instagram</a></div>
         </div>
-        <div class="footer-bottom">© 2026 Loop Market. Створено для студентів.</div>
+        <div class="footer-bottom">© 2026 Loop Market. Зручні та безпечні угоди.</div>
     </footer>
 
     <!-- Модальное окно выхода -->
@@ -742,5 +744,7 @@
                     setInterval(loadNotifications, 15000);
                 }
     </script>
+    <script src="/js/responsive-nav.js" defer></script>
+    <script src="/js/loop-dialogs.js"></script>
 </body>
 </html>

@@ -4,6 +4,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TradeStorm.Api.Data;
 using TradeStorm.Api.DTOs;
 using TradeStorm.Api.Services;
 
@@ -116,5 +118,39 @@ public class OrdersController : ControllerBase
         {
             return BadRequest(new { error = ex.Message });
         }
+    }
+
+    /// <summary>
+    /// Адміністрування: перегляд усіх угод платформи для оператора
+    /// </summary>
+    [HttpGet("admin/all")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AdminGetAllOrders([FromServices] AppDbContext db)
+    {
+        var orders = await db.Orders
+            .Include(o => o.Buyer)
+            .Include(o => o.Seller)
+            .Include(o => o.Listing)
+            .OrderByDescending(o => o.CreatedAt)
+            .Select(o => new
+            {
+                id = o.Id,
+                listingId = o.ListingId,
+                listingTitle = o.Listing != null ? o.Listing.Title : "Товар / послуга",
+                listingImageUrl = o.Listing != null ? o.Listing.ImageUrl : null,
+                buyerId = o.BuyerId,
+                buyerName = o.Buyer != null ? $"{o.Buyer.FirstName} {o.Buyer.LastName}".Trim() : "Покупець",
+                buyerPhone = o.Buyer != null ? o.Buyer.PhoneNumber : string.Empty,
+                sellerId = o.SellerId,
+                sellerName = o.Seller != null ? $"{o.Seller.FirstName} {o.Seller.LastName}".Trim() : "Продавець",
+                sellerPhone = o.Seller != null ? o.Seller.PhoneNumber : string.Empty,
+                status = o.Status,
+                totalPrice = o.TotalPrice,
+                trackingNumber = o.TrackingNumber,
+                createdAt = o.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(orders);
     }
 }

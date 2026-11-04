@@ -128,6 +128,13 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+// Оптимізація та стабілізація SQLite (WAL-режим, busy_timeout для усунення блокувань та помилок доступу)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA synchronous=NORMAL;");
+}
+
 // RFC 7807 Exception Handler
 app.UseExceptionHandler();
 app.UseStatusCodePages();

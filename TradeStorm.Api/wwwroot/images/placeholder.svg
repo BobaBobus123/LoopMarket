@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="lmDarkBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0f1d" />
+      <stop offset="55%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#064e3b" />
+    </linearGradient>
+    <linearGradient id="lmLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+    <radialGradient id="lmCenterGlow" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.18" />
+      <stop offset="60%" stop-color="#2563eb" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0" />
+    </radialGradient>
+    <filter id="lmCardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="800" height="600" fill="url(#lmDarkBg)" />
+  <rect width="800" height="600" fill="url(#lmCenterGlow)" />
+
+  <!-- Subtle Ambient Tech Grid Lines -->
+  <g stroke="#ffffff" stroke-opacity="0.04" stroke-width="1">
+    <line x1="0" y1="150" x2="800" y2="150" />
+    <line x1="0" y1="300" x2="800" y2="300" />
+    <line x1="0" y1="450" x2="800" y2="450" />
+    <line x1="200" y1="0" x2="200" y2="600" />
+    <line x1="400" y1="0" x2="400" y2="600" />
+    <line x1="600" y1="0" x2="600" y2="600" />
+  </g>
+
+  <!-- Central Emblem Container -->
+  <g transform="translate(400, 260)" text-anchor="middle">
+    <!-- Outer Glow Ring -->
+    <circle r="68" fill="none" stroke="#10b981" stroke-width="1.5" stroke-opacity="0.3" stroke-dasharray="6 6" />
+    
+    <!-- Logo Box -->
+    <rect x="-44" y="-44" width="88" height="88" rx="24" fill="url(#lmLogoGrad)" filter="url(#lmCardShadow)" />
+    
+    <!-- L Character inside logo -->
+    <text x="0" y="16" font-family="'Plus Jakarta Sans', -apple-system, system-ui, sans-serif" font-size="44" font-weight="900" fill="#ffffff" letter-spacing="-1">L</text>
+  </g>
+
+  <!-- Brand Typography -->
+  <g transform="translate(400, 375)" text-anchor="middle" font-family="'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+    <text font-size="36" font-weight="900" letter-spacing="-0.8">
+      <tspan fill="#f8fafc">Loop</tspan>
+      <tspan fill="#10b981">Market</tspan>
+    </text>
+  </g>
+
+  <!-- Pill Badge: No Photo Available -->
+  <g transform="translate(400, 435)">
+    <!-- Pill background -->
+    <rect x="-140" y="-18" width="280" height="36" rx="18" fill="#1e293b" fill-opacity="0.85" stroke="#334155" stroke-width="1.2" />
+    <!-- Camera icon & text -->
+    <text x="0" y="6" text-anchor="middle" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-size="14" font-weight="700" fill="#94a3b8">
+      📷 Фотографію ще не додано
+    </text>
+  </g>
+
+  <!-- Bottom Slogan -->
+  <text x="400" y="525" text-anchor="middle" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-size="13" font-weight="600" fill="#64748b" letter-spacing="0.3">
+    Зручні та безпечні угоди на LoopMarket
+  </text>
+</svg>
