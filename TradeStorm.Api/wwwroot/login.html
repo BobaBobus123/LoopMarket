@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -7,12 +7,9 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вхід | Loop Market</title>
+    <title>Вхід та Реєстрація | Loop Market</title>
 
-    <script>
-                const savedTheme = localStorage.getItem('loopTheme') || 'light';
-                document.documentElement.setAttribute('data-theme', savedTheme);
-    </script>
+    <script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
 
     <style>
         :root {
@@ -46,10 +43,6 @@
             font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
         }
 
-        body, header, .auth-wrapper, .auth-card, .modern-input, footer, .tab, .instruction-box {
-            transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
-        }
-
         body {
             background: var(--bg-color);
             color: var(--text-main);
@@ -58,7 +51,6 @@
             flex-direction: column;
         }
 
-        /* ЧИСТЫЙ ХЕДЕР ДЛЯ АВТОРИЗАЦИИ */
         header {
             background: var(--surface);
             border-bottom: 1px solid var(--border-color);
@@ -71,10 +63,31 @@
             z-index: 100;
         }
 
-        .logo-link {
+        .logo {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.5px;
+            line-height: 1;
+        }
+
+        .logo-circle {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #10b981 0%, #2563eb 100%);
+            border-radius: 11px;
             display: flex;
             align-items: center;
-            text-decoration: none;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            flex-shrink: 0;
         }
 
         .theme-toggle-corner {
@@ -88,12 +101,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.3s;
+            transition: 0.2s;
         }
-
-            .theme-toggle-corner:hover {
-                border-color: var(--primary-light);
-            }
 
         main {
             display: flex;
@@ -126,18 +135,18 @@
             border-right: 1px solid rgba(255,255,255,0.1);
         }
 
-            .auth-banner h2 {
-                font-size: 2.2rem;
-                margin-bottom: 15px;
-                font-weight: 900;
-            }
+        .auth-banner h2 {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            font-weight: 900;
+        }
 
-            .auth-banner p {
-                font-size: 1.1rem;
-                line-height: 1.6;
-                opacity: 0.9;
-                margin-bottom: 30px;
-            }
+        .auth-banner p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
 
         .banner-features {
             list-style: none;
@@ -146,290 +155,199 @@
             gap: 15px;
         }
 
-            .banner-features li {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                font-size: 1.05rem;
-                font-weight: 600;
-            }
+        .banner-features li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.02rem;
+            font-weight: 600;
+        }
 
         .feature-icon {
             background: rgba(255,255,255,0.2);
             width: 36px;
             height: 36px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
-            font-size: 1.1rem;
         }
 
         .auth-card {
-            flex: 1;
-            padding: 50px 40px;
-            background: var(--surface);
+            flex: 1.1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .tabs {
             display: flex;
-            margin-bottom: 25px;
             border-bottom: 2px solid var(--border-color);
+            margin-bottom: 24px;
         }
 
         .tab {
             flex: 1;
             text-align: center;
             padding: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--text-muted);
             font-size: 1.05rem;
-        }
-
-            .tab.active {
-                color: var(--primary-light);
-                border-bottom: 2px solid var(--primary-light);
-                margin-bottom: -2px;
-            }
-
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-            .form-group label {
-                display: block;
-                font-weight: 600;
-                margin-bottom: 8px;
-                color: var(--text-main);
-                font-size: 0.95rem;
-            }
-
-        .modern-input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-            background: var(--bg-color);
-            color: var(--text-main);
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
             transition: 0.2s;
         }
 
-            .modern-input:focus {
-                border-color: var(--primary-light);
-                background: var(--surface);
-                box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.14);
-            }
+        .tab.active {
+            color: var(--primary-light);
+            border-bottom-color: var(--primary-light);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .modern-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-color);
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .modern-input:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
 
         .row {
             display: flex;
-            gap: 15px;
-        }
-
-            .row .form-group {
-                flex: 1;
-            }
-
-        .instruction-box {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-            text-align: left;
-        }
-
-        .step-item {
-            display: flex;
-            align-items: flex-start;
             gap: 12px;
-            margin-bottom: 12px;
-            color: var(--text-main);
-            font-size: 0.95rem;
         }
 
-            .step-item:last-child {
-                margin-bottom: 0;
-            }
-
-        .step-num {
-            background: var(--primary-light);
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.8rem;
-            flex-shrink: 0;
-            margin-top: 2px;
+        .row .form-group {
+            flex: 1;
         }
 
         .btn-submit {
             width: 100%;
-            padding: 16px;
-            background: var(--primary-light);
+            padding: 14px;
+            background: #10b981;
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
+            border-radius: 10px;
+            font-size: 1.05rem;
             font-weight: 700;
             cursor: pointer;
             transition: 0.2s;
-            margin-top: 5px;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
         }
 
-            .btn-submit:hover {
-                background: #059669;
-                transform: translateY(-1px);
-            }
+        .btn-submit:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
 
-        .btn-telegram {
-            background: #0088cc;
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-oauth-google {
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 12px rgba(0, 136, 204, 0.3);
-        }
-
-            .btn-telegram:hover {
-                background: #0077b5;
-            }
-
-        .btn-outline {
-            width: 100%;
-            padding: 14px;
-            background: transparent;
+            gap: 10px;
+            padding: 12px;
+            background: var(--surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
             color: var(--text-main);
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: 0.2s;
         }
 
-            .btn-outline:hover {
-                border-color: var(--primary-light);
-                color: var(--primary-light);
-            }
+        .btn-oauth-google:hover {
+            border-color: #4285F4;
+            background: rgba(66, 133, 244, 0.05);
+        }
+
+        .btn-oauth-telegram {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px;
+            background: #0088cc;
+            border: 1.5px solid #0088cc;
+            border-radius: 10px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 136, 204, 0.25);
+        }
+
+        .btn-oauth-telegram:hover {
+            background: #0077b5;
+        }
 
         .error-msg {
             color: #ef4444;
             font-size: 0.9rem;
             text-align: center;
-            margin-top: 15px;
+            margin-top: 14px;
             min-height: 20px;
             font-weight: 600;
+        }
+
+        @keyframes loopSpin {
+            to { transform: rotate(360deg); }
         }
 
         footer {
             background: var(--surface);
             border-top: 1px solid var(--border-color);
-            padding: 40px 5% 20px;
+            padding: 24px 5%;
             margin-top: auto;
-        }
-
-        .footer-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 30px;
-        }
-
-        .footer-col h4 {
-            margin-bottom: 15px;
-            color: var(--text-main);
-            font-size: 1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .footer-col a {
-            display: block;
-            color: var(--text-muted);
-            text-decoration: none;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-
-            .footer-col a:hover {
-                color: var(--primary-light);
-                text-decoration: underline;
-            }
-
-        .footer-bottom {
             text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
             color: var(--text-muted);
             font-size: 0.85rem;
         }
 
         @media (max-width: 850px) {
-            .auth-banner {
-                display: none;
-            }
-
-            .auth-wrapper {
-                max-width: 480px;
-            }
-
-            .auth-card {
-                padding: 30px 25px;
-            }
+            .auth-banner { display: none; }
+            .auth-wrapper { max-width: 460px; }
+            .auth-card { padding: 30px 20px; }
         }
-    
-        /* UNIFIED LOOPMARKET BRAND LOGO */
-        .logo {
-            font-size: 1.45rem;
-            font-weight: 800;
-            color: var(--text-main);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            letter-spacing: -0.5px;
-            line-height: 1;
-            transition: transform 0.2s;
-        }
-        .logo:hover {
-            transform: scale(1.02);
-        }
-        .logo-circle {
-            width: 38px;
-            height: 38px;
-            background: linear-gradient(135deg, #10b981 0%, #2563eb 100%);
-            border-radius: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 900;
-            font-size: 1.25rem;
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
-            flex-shrink: 0;
-        }
-
     </style>
-    <link rel="stylesheet" href="/css/global.css">
 </head>
 <body>
     <header>
         <a href="/index.html" class="logo">
-                <div class="logo-circle">L</div>
-                <span>Loop<span style="color: #10b981;">Market</span></span>
-            </a>
+            <div class="logo-circle">L</div>
+            <span>Loop<span style="color: #10b981;">Market</span></span>
+        </a>
 
         <button class="theme-toggle-corner" id="themeToggleBtn" aria-label="Змінити тему" title="Змінити тему">
             <span id="themeIcon"></span>
@@ -438,17 +356,27 @@
 
     <main>
         <div class="auth-wrapper">
+            <!-- Лівий промо-банер -->
             <div class="auth-banner">
                 <h2>Ласкаво просимо!</h2>
-                <p>Приєднуйся до закритого маркетплейсу, де безпека та зручність стоять на першому місці.</p>
+                <p>LoopMarket — безпечний та надійний маркетплейс, де кожен акаунт верифіковано для захисту від шахраїв.</p>
                 <ul class="banner-features">
-                    <li><div class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div> Перевірені користувачі</li>
-                    <li><div class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></div> Жодних комісій за продаж</li>
-                    <li><div class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div> Швидкі угоди на платформі</li>
-                    <li><div class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></div> Захист через Telegram</li>
+                    <li>
+                        <div class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+                        <span>100% перевірені користувачі</span>
+                    </li>
+                    <li>
+                        <div class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></div>
+                        <span>Жодних прихованих комісій</span>
+                    </li>
+                    <li>
+                        <div class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></div>
+                        <span>Миттєвий захист через Telegram</span>
+                    </li>
                 </ul>
             </div>
 
+            <!-- Права форма авторизації/реєстрації -->
             <div class="auth-card">
                 <div id="authContainer">
                     <div class="tabs">
@@ -456,39 +384,38 @@
                         <div class="tab" id="tabRegister" onclick="switchTab('register')">Реєстрація</div>
                     </div>
 
-                    <form id="loginForm">
+                    <!-- 1. ФОРМА ВХОДУ -->
+                    <form id="loginForm" autocomplete="off">
                         <div class="form-group">
                             <label>Email адреса</label>
-                            <input type="email" id="logEmail" class="modern-input" required placeholder="name@example.com">
+                            <input type="email" id="logEmail" class="modern-input" required placeholder="name@example.com" autocomplete="off" value="">
                         </div>
                         <div class="form-group">
                             <label>Пароль</label>
-                            <input type="password" id="logPassword" class="modern-input" required placeholder="••••••••">
+                            <input type="password" id="logPassword" class="modern-input" required placeholder="••••••••" autocomplete="new-password" value="">
                         </div>
-                        <button type="submit" class="btn-submit">Увійти</button>
+                        <button type="submit" id="btnLoginSubmit" class="btn-submit">Увійти</button>
+
+                        <div style="display: flex; align-items: center; gap: 10px; margin: 20px 0 14px;">
+                            <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+                            <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">або через швидкий вхід</span>
+                            <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+                        </div>
+
+                        <!-- РІВНО ДВІ КНОПКИ ШВИДКОГО ВХОДУ -->
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button type="button" class="btn-oauth-google" onclick="startGoogleOAuth()">
+                                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                                <span>Увійти через Google (OAuth 2.0)</span>
+                            </button>
+                            <button type="button" class="btn-oauth-telegram" onclick="startTelegramLoginFlow()">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                                <span>Увійти через Telegram</span>
+                            </button>
+                        </div>
                     </form>
 
-                    <div style="margin-top: 18px; padding: 14px; background: rgba(37,99,235,0.06); border: 1.5px dashed rgba(37,99,235,0.3); border-radius: 12px;">
-                        <div style="font-weight: 800; font-size: 0.85rem; color: #2563eb; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                            Швидкий вибір акаунта для тестування:
-                        </div>
-                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                            <button type="button" onclick="quickLogin('nikitazhidenko@gmail.com')" style="flex: 1 1 45%; background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; font-weight: 700; color: var(--text-main); cursor: pointer; text-align: left; transition: 0.2s;">
-                                👤 Нікіта (Майстер #1)
-                            </button>
-                            <button type="button" onclick="quickLogin('test1@gmail.com')" style="flex: 1 1 45%; background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; font-weight: 700; color: var(--text-main); cursor: pointer; text-align: left; transition: 0.2s;">
-                                👤 Вова Вакуленко (#3)
-                            </button>
-                            <button type="button" onclick="quickLogin('bobababus1@gmail.com')" style="flex: 1 1 45%; background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; font-weight: 700; color: var(--text-main); cursor: pointer; text-align: left; transition: 0.2s;">
-                                👤 Вова Вовус (#2)
-                            </button>
-                            <button type="button" onclick="quickLogin('testbuyer_orders@khta.edu.ua')" style="flex: 1 1 45%; background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; font-weight: 700; color: var(--text-main); cursor: pointer; text-align: left; transition: 0.2s;">
-                                👤 Олексій (Замовник #8)
-                            </button>
-                        </div>
-                    </div>
-
+                    <!-- 2. ФОРМА РЕЄСТРАЦІЇ -->
                     <form id="registerForm" style="display: none;">
                         <div class="row">
                             <div class="form-group">
@@ -501,260 +428,446 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>Email</label>
+                            <label>Email адреса</label>
                             <input type="email" id="regEmail" class="modern-input" required placeholder="name@example.com">
                         </div>
                         <div class="form-group">
-                            <label>Номер телефону (для Telegram)</label>
+                            <label>Номер телефону (для Telegram верифікації)</label>
                             <input type="tel" id="regPhone" class="modern-input" required placeholder="+380991234567">
                         </div>
                         <div class="form-group">
                             <label>Пароль</label>
                             <input type="password" id="regPassword" class="modern-input" required minlength="6" placeholder="Мінімум 6 символів">
                         </div>
-                        <button type="submit" class="btn-submit">Створити акаунт</button>
+                        <button type="submit" id="btnRegisterSubmit" class="btn-submit">Створити акаунт</button>
+
+                        <div style="display: flex; align-items: center; gap: 10px; margin: 20px 0 14px;">
+                            <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+                            <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">або через швидкий вхід</span>
+                            <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button type="button" class="btn-oauth-google" onclick="startGoogleOAuth()">
+                                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                                <span>Увійти через Google (OAuth 2.0)</span>
+                            </button>
+                            <button type="button" class="btn-oauth-telegram" onclick="startTelegramLoginFlow()">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                                <span>Увійти через Telegram</span>
+                            </button>
+                        </div>
                     </form>
 
                     <div id="errorMsg" class="error-msg"></div>
                 </div>
 
-                <div id="successScreen" style="display: none; padding: 10px 0;">
-                    <div style="text-align: center; margin-bottom: 14px; color: var(--primary-light);"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
-                    <h2 style="color: var(--text-main); text-align: center; margin-bottom: 10px; font-size: 1.8rem;">Майже готово!</h2>
+                <!-- 3. ЕКРАН ВЕРИФІКАЦІЇ В TELEGRAM (ПОКАЗУЄТЬСЯ ТІЛЬКИ ПРИ ПОТРЕБІ ПІДТВЕРДЖЕННЯ) -->
+                <div id="successScreen" style="display: none; padding: 10px 0; text-align: center;">
+                    <div style="width: 68px; height: 68px; border-radius: 50%; background: #0088cc; color: white; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0, 136, 204, 0.4);">
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    </div>
 
-                    <div class="instruction-box">
-                        <div class="step-item">
-                            <div class="step-num">1</div>
-                            <div>Натисніть кнопку <b>"Перейти в Telegram (/start)"</b> нижче.</div>
+                    <h2 id="verifyTitle" style="color: var(--text-main); font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;">Підтвердіть номер у Telegram</h2>
+                    <p id="verifyDesc" style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.5; margin-bottom: 22px;">
+                        Для захисту платформи від шахраїв, перейдіть у Telegram та натисніть <b>START</b> або <b>«Поділитися контактом»</b>.
+                    </p>
+
+                    <a id="btnTelegramVerify" href="https://t.me/LoopMarket_Verify_bot?start=start" target="_blank" class="btn-oauth-telegram" style="display: flex; text-decoration: none; padding: 14px; font-size: 1rem; margin-bottom: 16px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                        <span>Відкрити Telegram для підтвердження</span>
+                    </a>
+
+                    <!-- АВТОМАТИЧНИЙ СТАТУС-СПІННЕР БЕЗ НЕОБХІДНОСТІ ТИСНУТИ КНОПКУ -->
+                    <div style="padding: 14px; background: rgba(37,99,235,0.08); border: 1.5px dashed rgba(37,99,235,0.3); border-radius: 12px; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; color: #2563eb; font-weight: 700; font-size: 0.92rem;">
+                            <span style="width: 14px; height: 14px; border: 2.5px solid #2563eb; border-top-color: transparent; border-radius: 50%; display: inline-block; animation: loopSpin 0.8s linear infinite;"></span>
+                            <span id="verifyStatusText">Очікуємо підтвердження у Telegram-боті...</span>
                         </div>
-                        <div class="step-item">
-                            <div class="step-num">2</div>
-                            <div>У боті натисніть кнопку <b>"Поділитися контактом"</b>.</div>
-                        </div>
-                        <div class="step-item">
-                            <div class="step-num">3</div>
-                            <div>Поверніться сюди та натисніть <b>"Я вже підтвердив"</b>.</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">
+                            Сторінка автоматично перенаправить вас на маркетплейс одразу після підтвердження!
                         </div>
                     </div>
 
-                    <a id="btnTelegramVerify" href="https://t.me/LoopMarket_Verify_bot?start=start" target="_blank" onclick="openTelegramVerify(event)" class="btn-submit btn-telegram" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                        Перейти в Telegram (/start)
-                    </a>
-
-                    <button onclick="checkVerification()" class="btn-outline">
-                        Я вже підтвердив, увійти
-                    </button>
-
-                    <div id="verifyError" style="color: #ef4444; font-size: 0.95rem; text-align: center; margin-top: 15px; display: none; font-weight: 600;"></div>
+                    <div>
+                        <button type="button" onclick="cancelVerification()" style="background: none; border: none; color: var(--text-muted); font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: underline;">
+                            ← Повернутися до вибору способу входу
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
     <footer>
-        <div class="footer-content">
-            <div class="footer-col"><h4>Про Loop Market</h4><a href="/about.html">Про нас</a><a href="#">Як це працює</a></div>
-            <div class="footer-col"><h4>Безпека</h4><a href="/safety.html">Правила безпеки</a><a href="#">Умови використання</a></div>
-            <div class="footer-col"><h4>Підтримка</h4><a href="#">Telegram-канал</a><a href="#">Instagram</a></div>
-        </div>
-        <div class="footer-bottom">© 2026 Loop Market. Зручні та безпечні угоди.</div>
+        © 2026 LoopMarket. Сучасний та безпечний маркетплейс товарів і послуг.
     </footer>
 
+    <!-- Telegram Login Modal (для швидкого входу) -->
+    <div id="telegramOAuthModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 20px; width: 100%; max-width: 440px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden; text-align: center;">
+            <div style="padding: 30px 24px 20px;">
+                <div style="width: 60px; height: 60px; border-radius: 50%; background: #0088cc; color: white; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(0, 136, 204, 0.4);">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                </div>
+                <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin-bottom: 8px;">Вхід через Telegram</h3>
+                <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px;">
+                    Натисніть кнопку нижче, щоб підтвердити вхід у Telegram.
+                </p>
+
+                <a id="btnOpenTgDeepLink" href="#" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; background: #0088cc; color: white; border-radius: 12px; font-weight: 800; font-size: 1rem; text-decoration: none; box-shadow: 0 4px 14px rgba(0,136,204,0.35);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    <span>Відкрити Telegram та підтвердити</span>
+                </a>
+
+                <div style="margin-top: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; color: #2563eb;">
+                    <span style="width: 12px; height: 12px; border: 2px solid #2563eb; border-top-color: transparent; border-radius: 50%; display: inline-block; animation: loopSpin 0.8s linear infinite;"></span>
+                    <span>Очікуємо підтвердження... Авто-вхід за мить</span>
+                </div>
+            </div>
+
+            <div style="padding: 12px 20px; background: var(--bg-color); border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; align-items: center;">
+                <button type="button" onclick="closeTelegramOAuthModal()" style="background: none; border: none; color: var(--text-muted); font-size: 0.85rem; font-weight: 600; cursor: pointer;">Скасувати</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-                
+        // THEME
         const ICONS = {
-            sun: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
-            moon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>'
+            sun: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+            moon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>'
         };
 
         function updateThemeButton(theme) {
-                    const iconEl = document.getElementById('themeIcon');
-                    if (iconEl) iconEl.innerHTML = (theme === 'dark') ? ICONS.sun : ICONS.moon;
+            const iconEl = document.getElementById('themeIcon');
+            if (iconEl) iconEl.innerHTML = (theme === 'dark') ? ICONS.sun : ICONS.moon;
+        }
+        updateThemeButton(localStorage.getItem('loopTheme') || 'light');
+
+        document.getElementById('themeToggleBtn').addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('loopTheme', newTheme);
+            updateThemeButton(newTheme);
+        });
+
+        function switchTab(tab) {
+            document.getElementById('errorMsg').innerText = '';
+            if (tab === 'login') {
+                document.getElementById('tabLogin').classList.add('active');
+                document.getElementById('tabRegister').classList.remove('active');
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('registerForm').style.display = 'none';
+            } else {
+                document.getElementById('tabRegister').classList.add('active');
+                document.getElementById('tabLogin').classList.remove('active');
+                document.getElementById('registerForm').style.display = 'block';
+                document.getElementById('loginForm').style.display = 'none';
+            }
+        }
+
+        let pollVerificationInterval = null;
+
+        function showVerificationScreen(userId, titleText, descText) {
+            document.getElementById('authContainer').style.display = 'none';
+            const screen = document.getElementById('successScreen');
+            screen.style.display = 'block';
+
+            if (titleText) document.getElementById('verifyTitle').innerText = titleText;
+            if (descText) document.getElementById('verifyDesc').innerText = descText;
+
+            const tgBtn = document.getElementById('btnTelegramVerify');
+            if (tgBtn) {
+                tgBtn.href = `https://t.me/LoopMarket_Verify_bot?start=verify_${userId}`;
+            }
+
+            startVerificationPolling(userId);
+        }
+
+        function cancelVerification() {
+            if (pollVerificationInterval) {
+                clearInterval(pollVerificationInterval);
+                pollVerificationInterval = null;
+            }
+            document.getElementById('successScreen').style.display = 'none';
+            document.getElementById('authContainer').style.display = 'block';
+            document.getElementById('errorMsg').innerText = '';
+        }
+
+        // АВТОМАТИЧНЕ ОПИТУВАННЯ СТАТУСУ ВЕРИФІКАЦІЇ В ТЕЛЕГРАМ (БЕЗ НАТИСКАННЯ КНОПОК)
+        function startVerificationPolling(userId) {
+            if (pollVerificationInterval) clearInterval(pollVerificationInterval);
+
+            pollVerificationInterval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/users/verify-status?userId=${userId}`);
+                    if (!res.ok) return;
+
+                    const data = await res.json();
+                    if (data && data.isVerified) {
+                        clearInterval(pollVerificationInterval);
+                        pollVerificationInterval = null;
+
+                        const statusText = document.getElementById('verifyStatusText');
+                        if (statusText) statusText.innerText = "✅ Номер успішно підтверджено! Входимо...";
+
+                        localStorage.setItem('loopToken', data.token);
+                        localStorage.setItem('token', data.token);
+                        if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
+                        if (data.role) localStorage.setItem('loopUserRole', data.role);
+
+                        setTimeout(() => {
+                            const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+                            if (data.role === 'Admin') {
+                                window.location.href = returnUrl || '/admin.html';
+                            } else {
+                                window.location.href = returnUrl || '/index.html';
+                            }
+                        }, 500);
+                    }
+                } catch (e) {
+                    // тиха обробка опитування
                 }
-                updateThemeButton(localStorage.getItem('loopTheme') || 'light');
+            }, 1200);
+        }
 
-                document.getElementById('themeToggleBtn').addEventListener('click', () => {
-                    const currentTheme = document.documentElement.getAttribute('data-theme');
-                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                    document.documentElement.setAttribute('data-theme', newTheme);
-                    localStorage.setItem('loopTheme', newTheme);
-                    updateThemeButton(newTheme);
+        // 1. ОБРОБКА ВХОДУ (ЛОГІН)
+                function clearAuthInputs() {
+            const form = document.getElementById('loginForm');
+            if (form) form.reset();
+            const emailInput = document.getElementById('logEmail');
+            const passInput = document.getElementById('logPassword');
+            if (emailInput) emailInput.value = '';
+            if (passInput) passInput.value = '';
+        }
+        window.addEventListener('DOMContentLoaded', clearAuthInputs);
+        window.addEventListener('pageshow', clearAuthInputs);
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('logEmail').value.trim();
+            const password = document.getElementById('logPassword').value;
+            const errorDiv = document.getElementById('errorMsg');
+            const submitBtn = document.getElementById('btnLoginSubmit');
+
+            errorDiv.innerText = '';
+            submitBtn.disabled = true;
+
+            try {
+                const res = await fetch('/api/users/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
                 });
+                const data = await res.json();
 
-                function switchTab(tab) {
-                    document.getElementById('errorMsg').innerText = '';
-                    if (tab === 'login') {
-                        document.getElementById('tabLogin').classList.add('active');
-                        document.getElementById('tabRegister').classList.remove('active');
-                        document.getElementById('loginForm').style.display = 'block';
-                        document.getElementById('registerForm').style.display = 'none';
+                if (res.ok) {
+                    if (data.isPhoneVerified === false) {
+                        // Потрібно підтвердити номер у Telegram
+                        showVerificationScreen(
+                            data.userId,
+                            "Підтвердіть номер у Telegram",
+                            "Ваш акаунт очікує верифікації номера телефону через Telegram-бота для безпеки угод."
+                        );
                     } else {
-                        document.getElementById('tabRegister').classList.add('active');
-                        document.getElementById('tabLogin').classList.remove('active');
-                        document.getElementById('registerForm').style.display = 'block';
-                        document.getElementById('loginForm').style.display = 'none';
+                        // Успішний вхід
+                        localStorage.setItem('loopToken', data.token);
+                        localStorage.setItem('token', data.token);
+                        if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
+                        if (data.role) localStorage.setItem('loopUserRole', data.role);
+
+                        const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+                        if (data.role === 'Admin') {
+                            window.location.href = returnUrl || '/admin.html';
+                        } else {
+                            window.location.href = returnUrl || '/index.html';
+                        }
+                    }
+                } else {
+                    errorDiv.innerText = data.error || 'Невірний email або пароль';
+                }
+            } catch (err) {
+                errorDiv.innerText = "Помилка зв'язку з сервером";
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+
+        // 2. ОБРОБКА РЕЄСТРАЦІЇ
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const firstName = document.getElementById('regFirstName').value.trim();
+            const lastName = document.getElementById('regLastName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const phoneNumber = document.getElementById('regPhone').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const errorDiv = document.getElementById('errorMsg');
+            const submitBtn = document.getElementById('btnRegisterSubmit');
+
+            errorDiv.innerText = '';
+            submitBtn.disabled = true;
+
+            try {
+                const res = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstName, lastName, email, phoneNumber, password })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    showVerificationScreen(
+                        data.id,
+                        "Майже готово! Підтвердіть номер",
+                        `Вітаємо, ${firstName}! Щоб активувати акаунт та уникнути шахрайства, підтвердіть номер ${phoneNumber} через нашого бота.`
+                    );
+                } else {
+                    errorDiv.innerText = data.error || 'Помилка реєстрації. Перевірте дані.';
+                }
+            } catch (err) {
+                errorDiv.innerText = "Помилка з'єднання з сервером";
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+
+        // 3. GOOGLE OAUTH 2.0
+        async function startGoogleOAuth() {
+            try {
+                const res = await fetch('/api/auth/google/url?redirectUri=' + encodeURIComponent(window.location.origin + '/login.html'));
+                const data = await res.json();
+                if (data && data.authorizationUrl) {
+                    window.location.href = data.authorizationUrl;
+                } else {
+                    alert("Google OAuth тимчасово недоступний");
+                }
+            } catch (e) {
+                alert("Помилка підключення до Google сервісу");
+            }
+        }
+
+        // ОБРОБКА ЗВОРОТНОГО ВИКЛИКУ GOOGLE OAUTH
+        window.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const error = urlParams.get('error');
+
+            if (error) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+                const errorDiv = document.getElementById('errorMsg');
+                if (errorDiv) {
+                    errorDiv.innerText = "Вхід через Google скасовано.";
+                    errorDiv.style.color = "var(--text-muted)";
+                }
+                return;
+            }
+
+            if (code) {
+                const errorDiv = document.getElementById('errorMsg');
+                if (errorDiv) {
+                    errorDiv.innerText = "Входимо через Google...";
+                    errorDiv.style.color = "#2563eb";
+                }
+                try {
+                    const res = await fetch('/api/auth/external/callback', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            provider: "Google", 
+                            code: code, 
+                            redirectUri: window.location.origin + window.location.pathname 
+                        })
+                    });
+                    const data = await res.json();
+                    window.history.replaceState({}, document.title, window.location.pathname);
+
+                    if (res.ok) {
+                        if (data.isPhoneVerified === false) {
+                            showVerificationScreen(
+                                data.userId,
+                                "Безпека акаунта: підтвердіть номер",
+                                "Вхід через Google успішний! Для захисту маркетплейсу та захисту від шахраїв, підтвердіть ваш номер телефону через Telegram."
+                            );
+                        } else if (data.token) {
+                            localStorage.setItem('loopToken', data.token);
+                            localStorage.setItem('token', data.token);
+                            if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
+                            const userRole = data.user?.role || 'Buyer';
+                            localStorage.setItem('loopUserRole', userRole);
+
+                            const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+                            if (userRole === 'Admin') {
+                                window.location.href = returnUrl || '/admin.html';
+                            } else {
+                                window.location.href = returnUrl || '/index.html';
+                            }
+                        }
+                    } else {
+                        if (errorDiv) {
+                            errorDiv.style.color = "#ef4444";
+                            errorDiv.innerText = data.error || "Не вдалося виконати вхід через Google";
+                        }
+                    }
+                } catch (e) {
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    if (errorDiv) {
+                        errorDiv.style.color = "#ef4444";
+                        errorDiv.innerText = "Помилка авторизації через Google";
                     }
                 }
+            }
+        });
 
-                                window.quickLogin = function(email) {
-                    document.getElementById('logEmail').value = email;
-                    document.getElementById('logPassword').value = '123456';
-                    document.getElementById('loginForm').dispatchEvent(new Event('submit'));
-                };
+        // 4. TELEGRAM ВХІД
+        let tgPollingInterval = null;
 
-                document.getElementById('loginForm').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const email = document.getElementById('logEmail').value;
-                    const password = document.getElementById('logPassword').value;
-                    const errorDiv = document.getElementById('errorMsg');
+        async function startTelegramLoginFlow() {
+            try {
+                const res = await fetch('/api/auth/telegram/start');
+                const data = await res.json();
+                if (data && data.deepLink) {
+                    const linkElem = document.getElementById('btnOpenTgDeepLink');
+                    if (linkElem) linkElem.href = data.deepLink;
+                    const modal = document.getElementById('telegramOAuthModal');
+                    if (modal) modal.style.display = 'flex';
 
-                    try {
-                        const res = await fetch('/api/users/login', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email, password })
-                        });
-                        const data = await res.json();
-
-                        if (res.ok) {
-                            localStorage.setItem('loopToken', data.token);
-                            if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
-                            if (data.role) localStorage.setItem('loopUserRole', data.role);
-                            const returnUrl = new URLSearchParams(window.location.search).get('returnUrl') || '/index.html';
-                            window.location.href = returnUrl;
-                        } else {
-                            errorDiv.innerText = data.error || 'Помилка входу';
-                        }
-                    } catch (err) {
-                        errorDiv.innerText = 'Помилка з\'єднання з сервером';
-                    }
-                });
-
-                
-                let registeredUserId = null;
-                let pollVerificationInterval = null;
-
-                window.openTelegramVerify = function(e) {
-                    let url = 'https://t.me/LoopMarket_Verify_bot?start=start';
-                    if (registeredUserId) {
-                        url = `https://t.me/LoopMarket_Verify_bot?start=verify_${registeredUserId}`;
-                    }
-                    const btn = document.getElementById('btnTelegramVerify');
-                    if (btn) btn.href = url;
-                    startVerificationPolling();
-                };
-
-                function startVerificationPolling() {
-                    if (pollVerificationInterval) return;
-                    pollVerificationInterval = setInterval(async () => {
-                        const email = document.getElementById('regEmail')?.value;
-                        const password = document.getElementById('regPassword')?.value;
-                        if (!email || !password) return;
-
+                    if (tgPollingInterval) clearInterval(tgPollingInterval);
+                    tgPollingInterval = setInterval(async () => {
                         try {
-                            const res = await fetch('/api/users/login', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ email, password })
-                            });
-                            if (res.ok) {
-                                const data = await res.json();
-                                if (data.isPhoneVerified) {
-                                    clearInterval(pollVerificationInterval);
-                                    localStorage.setItem('loopToken', data.token);
-                                    if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
-                                    if (data.role) localStorage.setItem('loopUserRole', data.role);
-                                    const errorDiv = document.getElementById('verifyError');
-                                    if (errorDiv) {
-                                        errorDiv.style.color = "var(--primary-light)";
-                                        errorDiv.innerText = "✅ Номер телефону успішно підтверджено! Входимо...";
-                                        errorDiv.style.display = 'block';
-                                    }
-                                    setTimeout(() => {
-                                        const returnUrl = new URLSearchParams(window.location.search).get('returnUrl') || '/index.html';
-                                        window.location.href = returnUrl;
-                                    }, 800);
+                            const checkRes = await fetch('/api/auth/telegram/check-login?code=' + data.code);
+                            const checkData = await checkRes.json();
+                            if (checkData.approved && checkData.token) {
+                                clearInterval(tgPollingInterval);
+                                if (modal) modal.style.display = 'none';
+
+                                localStorage.setItem('loopToken', checkData.token);
+                                localStorage.setItem('token', checkData.token);
+                                if (checkData.refreshToken) localStorage.setItem('loopRefreshToken', checkData.refreshToken);
+                                const userRole = checkData.user?.role || 'Buyer';
+                                localStorage.setItem('loopUserRole', userRole);
+
+                                const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+                                if (userRole === 'Admin') {
+                                    window.location.href = returnUrl || '/admin.html';
+                                } else {
+                                    window.location.href = returnUrl || '/index.html';
                                 }
                             }
-                        } catch (e) {}
-                    }, 2500);
+                        } catch (err) {}
+                    }, 1000);
                 }
+            } catch (e) {
+                alert("Помилка зв'язку з Telegram-ботом");
+            }
+        }
 
-                document.getElementById('registerForm').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const firstName = document.getElementById('regFirstName').value;
-                    const lastName = document.getElementById('regLastName').value;
-                    const email = document.getElementById('regEmail').value;
-                    const phoneNumber = document.getElementById('regPhone').value;
-                    const password = document.getElementById('regPassword').value;
-                    const errorDiv = document.getElementById('errorMsg');
-
-                    try {
-                        const res = await fetch('/api/users', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ firstName, lastName, email, phoneNumber, password })
-                        });
-
-                        if (res.ok) {
-                            const regData = await res.json();
-                            registeredUserId = regData?.id || regData?.user?.id || null;
-                            const tgBtn = document.getElementById('btnTelegramVerify');
-                            if (tgBtn) {
-                                tgBtn.href = registeredUserId 
-                                    ? `https://t.me/LoopMarket_Verify_bot?start=verify_${registeredUserId}`
-                                    : 'https://t.me/LoopMarket_Verify_bot?start=start';
-                            }
-                            startVerificationPolling();
-                            document.getElementById('authContainer').style.display = 'none';
-                            document.getElementById('successScreen').style.display = 'block';
-                        } else {
-                            const data = await res.json();
-                            errorDiv.innerText = data.error || 'Помилка реєстрації';
-                        }
-                    } catch (err) {
-                        errorDiv.innerText = 'Помилка з\'єднання з сервером';
-                    }
-                });
-
-                async function checkVerification() {
-                    const email = document.getElementById('regEmail').value;
-                    const password = document.getElementById('regPassword').value;
-                    const errorDiv = document.getElementById('verifyError');
-
-                    errorDiv.innerText = "Перевіряємо статус верифікації у Telegram...";
-                    errorDiv.style.color = "var(--primary-light)";
-                    errorDiv.style.display = 'block';
-
-                    try {
-                        const res = await fetch('/api/users/login', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email, password })
-                        });
-                        const data = await res.json();
-
-                        if (res.ok) {
-                            if (data.isPhoneVerified) {
-                                localStorage.setItem('loopToken', data.token);
-                                if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
-                                if (data.role) localStorage.setItem('loopUserRole', data.role);
-                                const returnUrl = new URLSearchParams(window.location.search).get('returnUrl') || '/index.html';
-                                window.location.href = returnUrl;
-                            } else {
-                                errorDiv.style.color = "#ef4444";
-                                errorDiv.innerText = "Номер ще не підтверджено. Будь ласка, перейдіть у Telegram-бот та надішліть контакт.";
-                            }
-                        } else {
-                            errorDiv.style.color = "#ef4444";
-                            errorDiv.innerText = "Помилка перевірки даних.";
-                        }
-                    } catch (err) {
-                        errorDiv.style.color = "#ef4444";
-                        errorDiv.innerText = 'Помилка з\'єднання з сервером';
-                    }
-                }
+        function closeTelegramOAuthModal() {
+            if (tgPollingInterval) clearInterval(tgPollingInterval);
+            const modal = document.getElementById('telegramOAuthModal');
+            if (modal) modal.style.display = 'none';
+        }
     </script>
 </body>
 </html>

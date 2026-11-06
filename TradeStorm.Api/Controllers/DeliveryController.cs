@@ -38,10 +38,10 @@ public class DeliveryController : ControllerBase
     /// Отримати перелік відділень та поштоматів для обраного міста (через API Нової Пошти)
     /// </summary>
     [HttpGet("novaposhta/warehouses")]
-    public async Task<IActionResult> GetWarehouses([FromQuery] string city, [FromQuery] string? type = null)
+    public async Task<IActionResult> GetWarehouses([FromQuery] string city = "Київ", [FromQuery] string? type = null)
     {
         if (string.IsNullOrWhiteSpace(city))
-            return BadRequest(new { error = "Параметр 'city' (назва або код міста) обов'язковий" });
+            city = "Київ";
 
         var warehouses = await _deliveryService.GetWarehousesAsync(city, type);
         return Ok(warehouses);

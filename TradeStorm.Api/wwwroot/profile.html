@@ -9,10 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Мій Профіль | Loop Market</title>
 
-    <script>
-                const savedTheme = localStorage.getItem('loopTheme') || 'light';
-                document.documentElement.setAttribute('data-theme', savedTheme);
-    </script>
+    <script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
 
     <style>
         :root {
@@ -1092,7 +1089,7 @@
 
             <div class="profile-info">
                 <h1 id="userName">Завантаження...</h1>
-                <p class="role">Студент</p>
+                <p class="role" id="userRoleText">Користувач</p>
                 <p class="phone" id="userPhone"></p>
 
                 <!-- Новые аккуратные виджеты статистики -->
@@ -1139,6 +1136,7 @@
                 <div class="tab" id="tabServices" onclick="switchTab('services')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Мої послуги та статистика</div>
                 <div class="tab" id="tabFavorites" onclick="switchTab('favorites')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> Обране</div>
                 <div class="tab" id="tabReviews" onclick="switchTab('reviews')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Відгуки</div>
+                <div class="tab" id="tabAnalytics" onclick="switchTab('analytics')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Статистика & Доходи</div>
                 <div class="tab" id="tabSettings" onclick="switchTab('settings')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg> Налаштування</div>
             </div>
 
@@ -1201,6 +1199,102 @@
                 <p style="color: var(--text-muted);">Тут будуть ваші улюблені товари.</p>
             </div>
 
+            
+            <!-- РОЗДІЛ: 📊 СТАТИСТИКА ТА ДОХОДИ (LOOP АНАЛІТИКА) -->
+            <div id="analyticsContainerTab" style="display: none; margin-top: 10px;">
+                <!-- 5 Карток аналітики -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px;">
+                    <div style="background: var(--surface); padding: 18px; border-radius: 14px; border: 1.5px solid var(--border-color); box-shadow: var(--card-shadow);">
+                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">👁️ Перегляди</div>
+                        <div style="font-size: 1.85rem; font-weight: 800; color: #10b981; margin: 4px 0;" id="statTotalViews">0</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Активних товарів: <b id="statActiveCount">0</b></div>
+                    </div>
+
+                    <div style="background: var(--surface); padding: 18px; border-radius: 14px; border: 1.5px solid var(--border-color); box-shadow: var(--card-shadow);">
+                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">❤️ Вподобання</div>
+                        <div style="font-size: 1.85rem; font-weight: 800; color: #ef4444; margin: 4px 0;" id="statTotalFavs">0</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Додано покупцями в обране</div>
+                    </div>
+
+                    <div style="background: var(--surface); padding: 18px; border-radius: 14px; border: 1.5px solid var(--border-color); box-shadow: var(--card-shadow);">
+                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">🛡️ Угоди Loop Захист</div>
+                        <div style="font-size: 1.85rem; font-weight: 800; color: #2563eb; margin: 4px 0;" id="statCompletedOrders">0</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Успішно завершено через ескроу</div>
+                    </div>
+
+                    <div style="background: var(--surface); padding: 18px; border-radius: 14px; border: 1.5px solid var(--border-color); box-shadow: var(--card-shadow);">
+                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">💰 Отриманий дохід</div>
+                        <div style="font-size: 1.85rem; font-weight: 800; color: #10b981; margin: 4px 0;" id="statTotalRevenue">0 ₴</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Виплачено на рахунок продавця</div>
+                    </div>
+
+                    <div style="background: var(--surface); padding: 18px; border-radius: 14px; border: 1.5px solid var(--border-color); box-shadow: var(--card-shadow);">
+                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">⭐ Рейтинг довіри</div>
+                        <div style="font-size: 1.85rem; font-weight: 800; color: #f59e0b; margin: 4px 0;" id="statAvgRating">5.0</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);"><b id="statVerifiedCount">0</b> перевірених відгуків</div>
+                    </div>
+                </div>
+
+                <!-- Блок Топ Оголошень за переглядами -->
+                <div style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 22px; margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0;">🏆 Топ ваших популярних пропозицій</h3>
+                            <p style="font-size: 0.82rem; color: var(--text-muted); margin: 2px 0 0 0;">Оголошення з найбільшою кількістю переглядів та інтересом покупців</p>
+                        </div>
+                    </div>
+                    <div id="statTopListingsList" style="display: flex; flex-direction: column; gap: 10px;">
+                        <p style="color: var(--text-muted); font-size: 0.85rem;">Завантаження статистики...</p>
+                    </div>
+                </div>
+
+                <!-- Захист угод інфоблок -->
+                <div style="display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: rgba(16, 185, 129, 0.08); border: 1.5px solid rgba(16, 185, 129, 0.25); border-radius: 14px;">
+                    <div style="font-size: 1.8rem;">🛡️</div>
+                    <div>
+                        <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">Loop Захист гарантує 100% безпеку виплат</div>
+                        <div style="font-size: 0.84rem; color: var(--text-muted); margin-top: 2px;">Кошти покупця резервуються в ескроу-системі платформи при замовленні та зараховуються продавцю одразу після огляду та отримання у відділенні пошти.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- МОДАЛЬНЕ ВІКНО: ЗАЛИШИТИ ВІДГУК ДЛЯ ЗАВЕРШЕНОГО ЗАМОВЛЕННЯ -->
+            <div id="profileReviewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); justify-content: center; align-items: center; z-index: 2500;">
+                <div style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 24px; width: 440px; max-width: calc(100vw - 32px); box-shadow: 0 16px 40px rgba(0,0,0,0.35);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--text-main);">⭐ Оцінити угоду</h3>
+                        <button type="button" onclick="closeProfileReviewModal()" style="background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">✕</button>
+                    </div>
+                    <div id="reviewOrderTitle" style="font-size: 0.88rem; font-weight: 600; color: var(--primary-light); margin-bottom: 14px;"></div>
+                    
+                    <form onsubmit="submitProfileReview(event)">
+                        <input type="hidden" id="reviewTargetUserId">
+                        <input type="hidden" id="reviewListingId">
+
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Ваша оцінка *</label>
+                            <select id="reviewRatingSelect" style="width: 100%; padding: 10px 12px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-size: 0.95rem; font-weight: 700; outline: none;">
+                                <option value="5">⭐⭐⭐⭐⭐ 5 - Чудово, рекомендую!</option>
+                                <option value="4">⭐⭐⭐⭐ 4 - Добре</option>
+                                <option value="3">⭐⭐⭐ 3 - Нормально</option>
+                                <option value="2">⭐⭐ 2 - Є зауваження</option>
+                                <option value="1">⭐ 1 - Погано</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Ваш відгук про продавця *</label>
+                            <textarea id="reviewCommentText" rows="3" required placeholder="Опишіть якість товару, швидкість відправки та відповідність опису..." style="width: 100%; box-sizing: border-box; padding: 10px 12px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-size: 0.9rem; outline: none; resize: vertical;"></textarea>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button type="button" onclick="closeProfileReviewModal()" style="padding: 10px 16px; border: 1px solid var(--border-color); background: transparent; color: var(--text-muted); border-radius: 10px; font-weight: 700; cursor: pointer;">Скасувати</button>
+                            <button type="submit" id="btnSubmitProfileReview" style="padding: 10px 20px; border: none; background: #10b981; color: white; border-radius: 10px; font-weight: 700; cursor: pointer;">Опублікувати відгук</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div id="reviewsContainerTab" class="reviews-container" style="display: none;">
                 <h3 style="margin-bottom: 15px; font-size: 1.2rem; font-weight: 700;">Отримані відгуки</h3>
                 <div id="profileReviewsList" style="max-height: 500px; overflow-y: auto; padding-right: 6px;">
@@ -1238,7 +1332,7 @@
                             <div id="telegramStatusBox">
                                 <p style="font-size: 0.85rem; color: var(--primary-light); margin-bottom: 10px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg> Перевірка статусу підключення Telegram...</p>
                             </div>
-                            <a id="telegramBotLink" href="https://t.me/LoopMarket_Verify_bot?start=verify" target="_blank" class="btn-primary" style="font-size: 0.85rem; padding: 8px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Відкрити @LoopMarket_Verify_bot (/start)</a>
+                            <a id="telegramBotLink" href="https://t.me/LoopMarket_Verify_bot?start=verify" target="_blank" class="btn-primary" style="font-size: 0.85rem; padding: 8px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Відкрити Telegram для підтвердження (/start)</a>
                         </div>
                         <button type="submit" class="btn-submit" style="margin-top: 20px;">Зберегти зміни</button>
                     </form>
@@ -1448,23 +1542,32 @@
             const user = parseJwt(token);
             if (!user) return null;
             const idVal = user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || user["nameid"] || user["sub"] || user["id"];
-            const nameVal = user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || user["name"] || user["unique_name"] || "Студент";
+            const nameVal = user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || user["name"] || user["unique_name"] || "Користувач";
             return {
                 id: idVal ? parseInt(idVal) : null,
                 name: nameVal
             };
         }
 
-                let token = localStorage.getItem('loopToken');
+                let token = localStorage.getItem('loopToken') || localStorage.getItem('token');
                 if (token === 'undefined' || token === 'null') {
                     localStorage.removeItem('loopToken');
+                    localStorage.removeItem('token');
                     token = null;
                 }
                 
-                
+                function isTokenExpired(t) {
+                    try {
+                        if (!t || typeof t !== 'string' || !t.includes('.')) return true;
+                        const p = parseJwt(t);
+                        if (!p || !p.exp) return false;
+                        return (Date.now() >= p.exp * 1000);
+                    } catch(e) { return true; }
+                }
+
                 const currentUser = getJwtUserData(token);
 
-                if (currentUser) {
+                if (currentUser && !isTokenExpired(token)) {
                     const userName = currentUser.name;
 
                     const pText = document.getElementById('navProfileText');
@@ -1472,7 +1575,9 @@
                     const logoutBtn = document.getElementById('btnLogoutHeader');
                     if (logoutBtn) logoutBtn.style.display = 'inline-flex';
                 } else {
-                    window.location.href = '/login.html';
+                    localStorage.removeItem('loopToken');
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html?returnUrl=' + encodeURIComponent(window.location.pathname);
                 }
 
                 function toggleNotifications() {
@@ -1485,23 +1590,19 @@
 
                 function showLogoutModal() { document.getElementById('logoutModal').classList.add('active'); }
                 function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('active'); }
-                function confirmLogoutAction() {
-                    const refreshToken = localStorage.getItem('loopRefreshToken');
-                    if (token && refreshToken) {
-                        fetch('/api/users/revoke', {
-                            method: 'POST',
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                'Authorization': 'Bearer ' + token 
-                            },
-                            body: JSON.stringify({ refreshToken })
-                        }).catch(() => {});
-                    }
-                    localStorage.removeItem('loopToken');
-                    localStorage.removeItem('loopRefreshToken');
-                    localStorage.removeItem('loopUserRole');
-                    window.location.reload();
-                }
+                async function confirmLogoutAction() {
+            if (window.performLoopLogout) {
+                await window.performLoopLogout('/login.html');
+            } else {
+                localStorage.removeItem('loopToken');
+                localStorage.removeItem('token');
+                localStorage.removeItem('loopRefreshToken');
+                localStorage.removeItem('loopUserRole');
+                localStorage.removeItem('user');
+                sessionStorage.clear();
+                window.location.href = '/login.html';
+            }
+        }
 
                 let allListingsData = [];
                 let currentUserId = null;
@@ -1510,16 +1611,16 @@
                     const activeUser = getJwtUserData(token);
                     if (!activeUser) { window.location.href = '/login.html'; return; }
                     currentUserId = activeUser.id || 1;
-                    const fullName = activeUser.name || "Студент";
+                    const fullName = activeUser.name || "Користувач";
 
                     document.getElementById('userName').innerText = fullName;
                     const nameParts = fullName.split(' ');
-                    document.getElementById('editFirstName').value = nameParts[0] || 'Студент';
+                    document.getElementById('editFirstName').value = nameParts[0] || 'Користувач';
                     document.getElementById('editLastName').value = nameParts.slice(1).join(' ') || '';
 
                     // Завантаження профілю та аватара з API та збереженого кешу
                     const fullNameParts = fullName.split(' ').filter(Boolean);
-                    const userInitials = (fullNameParts.map(p => p[0]).join('') || 'С').toUpperCase();
+                    const userInitials = (fullNameParts.map(p => p[0]).join('') || 'К').toUpperCase();
                     
                     function updateAvatarDisplay(avatarUrl) {
                         const avatarEl = document.getElementById('userAvatar');
@@ -1541,11 +1642,24 @@
                     fetch('/api/users/me', {
                         headers: { 'Authorization': `Bearer ${token}` }
                     })
-                    .then(r => r.ok ? r.json() : null)
+                    .then(r => {
+                        if (r.status === 401) {
+                            localStorage.removeItem('loopToken');
+                            localStorage.removeItem('token');
+                            window.location.href = '/login.html?returnUrl=' + encodeURIComponent(window.location.pathname);
+                            return null;
+                        }
+                        return r.ok ? r.json() : null;
+                    })
                     .then(meData => {
                         if (meData) {
                             if (meData.firstName) {
                                 document.getElementById('userName').innerText = `${meData.firstName} ${meData.lastName || ''}`.trim();
+                                if (meData.role) {
+                                    const roleMap = { 'Admin': 'Адміністратор', 'Seller': 'Продавець', 'Buyer': 'Покупець', 'User': 'Користувач' };
+                                    const rEl = document.getElementById('userRoleText') || document.querySelector('.profile-info p.role');
+                                    if (rEl) rEl.innerText = roleMap[meData.role] || meData.role;
+                                }
                                 document.getElementById('editFirstName').value = meData.firstName;
                                 document.getElementById('editLastName').value = meData.lastName || '';
                             }
@@ -1762,6 +1876,7 @@
                     document.getElementById('settingsContainer').style.display = 'none';
                     if (document.getElementById('ordersContainer')) document.getElementById('ordersContainer').style.display = 'none';
                     if (document.getElementById('servicesContainer')) document.getElementById('servicesContainer').style.display = 'none';
+                    if (document.getElementById('analyticsContainerTab')) document.getElementById('analyticsContainerTab').style.display = 'none';
 
                     if (tabName === 'myListings') {
                         document.getElementById('tabMyListings').classList.add('active');
@@ -1778,6 +1893,10 @@
                         document.getElementById('tabServices').classList.add('active');
                         document.getElementById('servicesContainer').style.display = 'block';
                         loadMyServicesStats();
+                    } else if (tabName === 'analytics') {
+                        document.getElementById('tabAnalytics')?.classList.add('active');
+                        document.getElementById('analyticsContainerTab').style.display = 'block';
+                        loadSellerAnalytics();
                     } else if (tabName === 'reviews') {
                         document.getElementById('tabReviews').classList.add('active');
                         document.getElementById('reviewsContainerTab').style.display = 'block';
@@ -2052,6 +2171,11 @@
                                 ${(o.status === 'Pending' || o.status === 'PendingConfirmation') ? `
                                     <button type="button" onclick="openGeneralStatusConfirm(${o.id}, 'Cancelled')" style="padding: 8px 16px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
                                         ✕ Скасувати замовлення
+                                    </button>
+                                ` : ''}
+                                ${o.status === 'Completed' ? `
+                                    <button type="button" onclick="openOrderReviewModal(${o.sellerId}, ${o.listingId}, '${o.listingTitle.replace(/'/g, "\\'")}')" style="padding: 8px 16px; background: rgba(245, 158, 11, 0.14); color: #d97706; border: 1.5px solid rgba(245, 158, 11, 0.35); border-radius: 8px; font-weight: 800; font-size: 0.86rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;">
+                                        ⭐ Оцінити продавця (Loop Захист)
                                     </button>
                                 ` : ''}
                                 <a href="/messages.html?seller=${o.sellerId}&item=${o.listingId}" style="text-decoration: none; padding: 8px 16px; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; font-weight: 700; font-size: 0.86rem; display: inline-flex; align-items: center; gap: 6px;">
@@ -2473,6 +2597,71 @@
         }
         loadNotifications();
 
+
+        
+        async function loadSellerAnalytics() {
+            if (!currentUserId) return;
+            try {
+                const res = await fetch(`/api/users/${currentUserId}/analytics`);
+                if (!res.ok) throw new Error("Помилка завантаження аналітики");
+                const data = await res.json();
+
+                // 1. Оновлюємо картки аналітики
+                const elViews = document.getElementById('statTotalViews');
+                if (elViews) elViews.innerText = (data.totalViews || 0).toLocaleString('uk-UA');
+
+                const elActive = document.getElementById('statActiveCount');
+                if (elActive) elActive.innerText = data.activeCount || 0;
+
+                const elFavs = document.getElementById('statTotalFavs');
+                if (elFavs) elFavs.innerText = (data.totalFavs || 0).toLocaleString('uk-UA');
+
+                const elOrders = document.getElementById('statCompletedOrders');
+                if (elOrders) elOrders.innerText = data.completedOrders || 0;
+
+                const elRev = document.getElementById('statTotalRevenue');
+                if (elRev) elRev.innerText = `${(data.totalRevenue || 0).toLocaleString('uk-UA')} ₴`;
+
+                const elRating = document.getElementById('statAvgRating');
+                if (elRating) elRating.innerText = (data.avgRating || 5.0).toFixed(1);
+
+                const elVerif = document.getElementById('statVerifiedCount');
+                if (elVerif) elVerif.innerText = data.verifiedReviewsCount || 0;
+
+                // 2. Оновлюємо список топ пропозицій
+                const topList = document.getElementById('statTopListingsList');
+                if (topList) {
+                    if (!data.topListings || data.topListings.length === 0) {
+                        topList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem; padding: 12px 0;">У вас поки немає активних оголошень для відображення у топі.</p>';
+                    } else {
+                        topList.innerHTML = data.topListings.map((item, idx) => `
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                                    <div style="width: 28px; height: 28px; border-radius: 8px; background: ${idx === 0 ? '#f59e0b' : (idx === 1 ? '#94a3b8' : '#cd7f32')}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;">
+                                        ${idx + 1}
+                                    </div>
+                                    <img src="${item.imageUrl || '/images/placeholder.svg'}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0;" onerror="this.src='/images/placeholder.svg'">
+                                    <div style="min-width: 0;">
+                                        <a href="/details.html?id=${item.id}" style="font-weight: 700; font-size: 0.92rem; color: var(--text-main); text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                            ${item.title}
+                                        </a>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                                            ${item.isService ? '🛠 Послуга' : '📦 Товар'} • Статус: <b>${item.status}</b>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="text-align: right; flex-shrink: 0;">
+                                    <div style="font-weight: 800; font-size: 0.95rem; color: #10b981;">${(item.price || 0).toLocaleString('uk-UA')} ₴</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">👁️ ${item.viewsCount || 0} переглядів</div>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch(err) {
+                console.error("Error loading seller analytics:", err);
+            }
+        }
 
         async function loadMyServicesStats() {
             if (!currentUserId) return;

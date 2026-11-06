@@ -1,6 +1,34 @@
 <!DOCTYPE html>
-<html lang="uk" data-theme="light">
+<html lang="uk">
 <head>
+    <script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
+    <script>
+        (function() {
+            try {
+                const token = localStorage.getItem('loopToken') || localStorage.getItem('token');
+                if (!token) {
+                    window.location.replace('/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search));
+                    return;
+                }
+                const base64Url = token.split('.')[1];
+                if (!base64Url) throw new Error("Invalid token format");
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const payload = JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+                const role = localStorage.getItem('loopUserRole') || (payload ? (payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]) : null);
+                if (role !== 'Admin') {
+                    window.location.replace('/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search));
+                    return;
+                }
+                document.documentElement.classList.add('admin-authorized');
+            } catch(e) {
+                window.location.replace('/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search));
+            }
+        })();
+    </script>
+    <style>
+        body { opacity: 0; transition: opacity 0.15s ease-in; }
+        body.admin-authorized, html.admin-authorized body { opacity: 1 !important; }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Панель оператора безпеки — LoopMarket</title>
@@ -709,6 +737,7 @@
                         <option value="Banned">🔴 Заблоковані</option>
                     </select>
                     <button class="btn-action primary" onclick="loadUsers()">🔄 Оновити список</button>
+                    <button class="btn-action success" onclick="openCreateUserModal()" style="font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 2px 8px rgba(16,185,129,0.3);">➕ Додати користувача</button>
                 </div>
             </div>
 
@@ -744,6 +773,7 @@
                     <input type="text" id="listingsSearchInput" class="search-input" placeholder="Пошук за назвою або продавцем..." oninput="filterListingsTable()">
                 </div>
                 <button class="btn-action primary" onclick="loadListings()">🔄 Оновити оголошення</button>
+                <button class="btn-action success" onclick="openCreateListingModal()" style="font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 2px 8px rgba(16,185,129,0.3);">➕ Додати оголошення</button>
             </div>
 
             <div class="admin-card">
@@ -945,6 +975,179 @@
         </section>
     </main>
 
+    <!-- MODAL: CREATE USER -->
+    <div class="admin-modal-overlay" id="createUserModal">
+        <div class="admin-modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="margin: 0; font-size: 1.25rem;">➕ Додати нового користувача</h3>
+                <button onclick="closeCreateUserModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+            </div>
+            <form id="createUserForm" onsubmit="submitCreateUser(event)">
+                <div class="admin-form-group">
+                    <label>Email адреса *</label>
+                    <input type="email" id="createEmail" class="admin-form-input" placeholder="user@gmail.com" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="admin-form-group">
+                        <label>Ім'я *</label>
+                        <input type="text" id="createFirstName" class="admin-form-input" placeholder="Тарас" required>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Прізвище</label>
+                        <input type="text" id="createLastName" class="admin-form-input" placeholder="Шевченко">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="admin-form-group">
+                        <label>Пароль *</label>
+                        <input type="password" id="createPassword" class="admin-form-input" placeholder="123456" value="123456" required>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Номер телефону</label>
+                        <input type="text" id="createPhone" class="admin-form-input" placeholder="+380991234567">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="admin-form-group">
+                        <label>Системна роль</label>
+                        <select id="createRole" class="admin-form-select">
+                            <option value="Buyer">Buyer (Покупець)</option>
+                            <option value="Seller">Seller (Продавець)</option>
+                            <option value="Admin">Admin (Адміністратор)</option>
+                        </select>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Верифікація</label>
+                        <select id="createVerified" class="admin-form-select">
+                            <option value="true">✅ Підтверджено</option>
+                            <option value="false" selected>⏳ Очікує</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="admin-modal-actions">
+                    <button type="button" class="btn-action neutral" onclick="closeCreateUserModal()">Скасувати</button>
+                    <button type="submit" class="btn-action success" style="padding: 8px 18px;">Створити акаунт</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: SEND NOTIFICATION TO SPECIFIC USER -->
+    <div class="admin-modal-overlay" id="sendNotificationModal">
+        <div class="admin-modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="margin: 0; font-size: 1.25rem;">🔔 Сповіщення на акаунт користувача</h3>
+                <button onclick="closeSendNotificationModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+            </div>
+            <form id="sendNotificationForm" onsubmit="submitSendNotification(event)">
+                <input type="hidden" id="notifyUserId">
+                <div style="margin-bottom: 14px; padding: 10px 14px; background: rgba(37, 99, 235, 0.08); border-radius: 10px; font-size: 0.88rem; color: var(--text-main);">
+                    Одержувач: <strong id="notifyUserName">—</strong>
+                </div>
+                <div class="admin-form-group">
+                    <label>Тема / Заголовок *</label>
+                    <input type="text" id="notifyTitle" class="admin-form-input" placeholder="Важливе сповіщення від адміністрації" required>
+                </div>
+                <div class="admin-form-group">
+                    <label>Текст повідомлення *</label>
+                    <textarea id="notifyMessage" class="admin-form-input" rows="4" placeholder="Введіть текст повідомлення для користувача..." required style="resize: vertical; font-family: inherit;"></textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>Посилання при кліку (опціонально)</label>
+                    <input type="text" id="notifyLink" class="admin-form-input" placeholder="/profile.html" value="/profile.html">
+                </div>
+                <div class="admin-form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                    <input type="checkbox" id="notifySendTelegram" checked style="width: 18px; height: 18px; cursor: pointer;">
+                    <label for="notifySendTelegram" style="margin: 0; cursor: pointer; font-size: 0.88rem;">Надіслати також у Telegram (якщо підключено бот)</label>
+                </div>
+                <div class="admin-modal-actions">
+                    <button type="button" class="btn-action neutral" onclick="closeSendNotificationModal()">Скасувати</button>
+                    <button type="submit" class="btn-action primary" style="padding: 8px 18px;">Надіслати сповіщення</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: QUICK CREATE LISTING -->
+    <div class="admin-modal-overlay" id="createListingModal">
+        <div class="admin-modal-box" style="max-width: 600px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="margin: 0; font-size: 1.25rem;">➕ Додати нове оголошення (в 1 клік)</h3>
+                <button onclick="closeCreateListingModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+            </div>
+            <form id="createListingForm" onsubmit="submitCreateListing(event)">
+                <div class="admin-form-group">
+                    <label>Назва товару або послуги *</label>
+                    <input type="text" id="listingTitle" class="admin-form-input" placeholder="Наприклад: Apple iPad Pro 11 M2" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="admin-form-group">
+                        <label>Категорія *</label>
+                        <select id="listingCategory" class="admin-form-select" required>
+                            <option value="1">Електроніка</option>
+                            <option value="2">Одяг та аксесуари</option>
+                            <option value="3">Навчання та книги</option>
+                            <option value="4">Дім та затишок</option>
+                            <option value="5">Спорт та хобі</option>
+                            <option value="6">Тварини</option>
+                            <option value="7">Транспорт</option>
+                            <option value="8">Послуги та сервіси</option>
+                            <option value="10">Інше</option>
+                        </select>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Ціна (₴) *</label>
+                        <input type="number" id="listingPrice" class="admin-form-input" placeholder="1500" min="0" step="any" required>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="admin-form-group">
+                        <label>Стан</label>
+                        <select id="listingCondition" class="admin-form-select">
+                            <option value="Нове">Нове</option>
+                            <option value="Вживане" selected>Вживане</option>
+                            <option value="Послуга">Послуга</option>
+                        </select>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Місто / Локація</label>
+                        <input type="text" id="listingLocation" class="admin-form-input" placeholder="м. Кременчук" value="м. Кременчук">
+                    </div>
+                </div>
+                <div class="admin-form-group">
+                    <label>Опис оголошення</label>
+                    <textarea id="listingDescription" class="admin-form-input" rows="3" placeholder="Детальний опис товару чи послуги..." style="resize: vertical; font-family: inherit;"></textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="admin-form-group">
+                        <label>Автор / Продавець</label>
+                        <select id="listingSellerId" class="admin-form-select">
+                            <!-- Populated dynamically with users list -->
+                        </select>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>URL фото (або залиште порожнім)</label>
+                        <input type="text" id="listingImage" class="admin-form-input" placeholder="/uploads/... або посилання">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 20px; align-items: center; margin-top: 10px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.88rem;">
+                        <input type="checkbox" id="listingFeatured" style="width: 18px; height: 18px; cursor: pointer;">
+                        ⭐ Закріпити як ТОП / VIP
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.88rem;">
+                        <input type="checkbox" id="listingShipping" checked style="width: 18px; height: 18px; cursor: pointer;">
+                        📦 Можлива доставка
+                    </label>
+                </div>
+                <div class="admin-modal-actions">
+                    <button type="button" class="btn-action neutral" onclick="closeCreateListingModal()">Скасувати</button>
+                    <button type="submit" class="btn-action success" style="padding: 8px 18px;">Опублікувати в 1 клік</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL: EDIT USER DETAILS -->
     <div class="admin-modal-overlay" id="editUserModal">
         <div class="admin-modal-box">
@@ -971,6 +1174,14 @@
                 <div class="admin-form-group">
                     <label>Номер телефону (для сповіщень та зв'язку)</label>
                     <input type="text" id="editUserPhone" class="admin-form-input" placeholder="+380..." required>
+                </div>
+                <div class="admin-form-group">
+                    <label>Telegram Chat ID (персональні сповіщення в Telegram)</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="number" id="editUserTelegramChatId" class="admin-form-input" placeholder="0 (не прив'язано)">
+                        <button type="button" class="btn-action neutral" onclick="document.getElementById('editUserTelegramChatId').value = '0'" style="padding: 6px 12px; font-size: 0.8rem;" title="Відв'язати Telegram">Відв'язати</button>
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">1 Telegram Chat ID закріплено строго за 1 номером/акаунтом (Нікіта: 1010562582, Вова: 6760959105).</div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div class="admin-form-group">
@@ -1055,101 +1266,134 @@
         </div>
     </div>
 
-    <!-- OPERATOR ACCESS GATE (IF NOT ADMIN) -->
-    <div id="adminAuthGate" style="display: none; position: fixed; inset: 0; background: var(--bg-color); z-index: 99999; align-items: center; justify-content: center; padding: 20px;">
-        <div style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 22px; padding: 40px 32px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.25);">
-            <div style="width: 70px; height: 70px; border-radius: 20px; background: linear-gradient(135deg, rgba(37,99,235,0.15), rgba(16,185,129,0.15)); border: 1px solid rgba(37,99,235,0.25); display: inline-flex; align-items: center; justify-content: center; font-size: 2.2rem; margin-bottom: 20px;">🛡️</div>
-            <h2 style="font-size: 1.5rem; font-weight: 900; color: var(--text-main); margin-bottom: 10px; letter-spacing: -0.5px;">Панель оператора безпеки</h2>
-            <p id="adminAuthGateMsg" style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.55; margin-bottom: 26px;">
-                Для перегляду скарг, антифрод-моніторингу, модерації оголошень та керування замовленнями потрібні права <b>Admin</b>.
-            </p>
-            <button type="button" onclick="autoLoginAdmin()" class="btn-action primary" style="width: 100%; padding: 15px; font-size: 1rem; font-weight: 800; justify-content: center; margin-bottom: 14px; border-radius: 12px; box-shadow: 0 4px 14px rgba(37,99,235,0.3);">
-                ⚡ Швидкий вхід: Нікіта (Адмін • +19285345308)
-            </button>
-            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
-                <a href="/login.html?returnUrl=/admin.html" class="btn-action neutral" style="font-size: 0.85rem; padding: 8px 14px; text-decoration: none;">🔑 Інший акаунт</a>
-                <a href="/index.html" class="btn-action neutral" style="font-size: 0.85rem; padding: 8px 14px; text-decoration: none;">🏠 На головну</a>
-            </div>
-        </div>
-    </div>
-
     <script src="/js/loop-dialogs.js"></script>
     <script>
         // AUTHENTICATION & ACCESS VERIFICATION
-        let token = localStorage.getItem('loopToken');
+        let token = localStorage.getItem('loopToken') || localStorage.getItem('token');
         let currentUser = null;
         let userRole = null;
 
-        function checkAuth() {
-            token = localStorage.getItem('loopToken');
-            if (!token) {
-                showAuthGate("Ви не авторизовані. Будь ласка, увійдіть як адміністратор для доступу до панелі оператора.");
-                return false;
-            }
+        function parseJwt(tok) {
             try {
-                const base64Url = token.split('.')[1];
+                if (!tok || typeof tok !== 'string' || !tok.includes('.')) return null;
+                const base64Url = tok.split('.')[1];
                 const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
                 const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-                currentUser = JSON.parse(jsonPayload);
+                return JSON.parse(jsonPayload);
             } catch (e) {
+                return null;
+            }
+        }
+
+        async function tryAutoRefresh() {
+            const currentToken = localStorage.getItem('loopToken') || localStorage.getItem('token');
+            const refreshToken = localStorage.getItem('loopRefreshToken');
+            if (!currentToken || !refreshToken) return false;
+
+            try {
+                const res = await fetch('/api/users/refresh', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accessToken: currentToken, refreshToken: refreshToken })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    localStorage.setItem('loopToken', data.token);
+                    localStorage.setItem('token', data.token);
+                    if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
+                    if (data.role) localStorage.setItem('loopUserRole', data.role);
+                    token = data.token;
+                    currentUser = parseJwt(token);
+                    userRole = data.role || (currentUser ? (currentUser.role || currentUser["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]) : null);
+                    return true;
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        async function adminFetch(url, options = {}) {
+            options.headers = options.headers || {};
+            token = localStorage.getItem('loopToken') || localStorage.getItem('token');
+            if (token && !options.headers['Authorization']) {
+                options.headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            let res = await fetch(url, options);
+            if (res.status === 401) {
+                console.warn("[Admin] 401 Unauthorized, attempting token refresh...");
+                const refreshed = await tryAutoRefresh();
+                if (refreshed) {
+                    token = localStorage.getItem('loopToken') || localStorage.getItem('token');
+                    options.headers['Authorization'] = `Bearer ${token}`;
+                    res = await fetch(url, options);
+                } else {
+                    showAuthGate("Сесію завершено (401 Unauthorized). Будь ласка, оберіть акаунт оператора для продовження роботи.");
+                }
+            }
+            return res;
+        }
+
+        function checkAuth() {
+            token = localStorage.getItem('loopToken') || localStorage.getItem('token');
+            if (!token) {
+                showAuthGate("Ви не авторизовані.");
+                return false;
+            }
+
+            currentUser = parseJwt(token);
+            if (!currentUser) {
                 localStorage.removeItem('loopToken');
-                showAuthGate("Сесію завершено або токен пошкоджено. Будь ласка, увійдіть знову.");
+                localStorage.removeItem('token');
+                showAuthGate("Сесію завершено або токен пошкоджено.");
+                return false;
+            }
+
+            // Check if token expired
+            if (currentUser.exp && currentUser.exp * 1000 <= Date.now()) {
+                console.warn("Token expired, attempting refresh...");
+                tryAutoRefresh().then(success => {
+                    if (success) {
+                        window.location.reload();
+                    } else {
+                        showAuthGate("Термін дії сесії закінчився.");
+                    }
+                });
                 return false;
             }
 
             userRole = currentUser ? (currentUser.role || currentUser["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]) : null;
             if (userRole !== 'Admin') {
-                showAuthGate(`Поточний акаунт (${currentUser.email || 'Користувач'}) має роль "${userRole || 'User'}". Для доступу до цієї панелі потрібна роль Admin.`);
+                showAuthGate("Недостатньо прав.");
                 return false;
             }
 
-            const gate = document.getElementById('adminAuthGate');
-            if (gate) gate.style.display = 'none';
+            document.body.classList.add('admin-authorized');
 
             const adminName = currentUser ? (currentUser["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || currentUser.name || currentUser.email || 'Адміністратор') : 'Адміністратор';
-            document.getElementById('adminFullName').innerText = adminName;
-            document.getElementById('adminAvatarLetter').innerText = (adminName.charAt(0) || 'A').toUpperCase();
+            const nameEl = document.getElementById('adminFullName');
+            if (nameEl) nameEl.innerText = adminName;
+            const avatarEl = document.getElementById('adminAvatarLetter');
+            if (avatarEl) avatarEl.innerText = (adminName.charAt(0) || 'A').toUpperCase();
             return true;
         }
 
-        function showAuthGate(msg) {
-            const gate = document.getElementById('adminAuthGate');
-            if (gate) {
-                gate.style.display = 'flex';
-                const msgEl = document.getElementById('adminAuthGateMsg');
-                if (msgEl && msg) msgEl.innerText = msg;
-            }
-        }
 
-        async function autoLoginAdmin() {
-            try {
-                const res = await fetch('/api/users/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: 'nikitazhidenko@gmail.com', password: '123456' })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    localStorage.setItem('loopToken', data.token);
-                    if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
-                    if (data.role) localStorage.setItem('loopUserRole', data.role);
-                    window.location.reload();
-                } else {
-                    LoopToast.error(data.error || 'Помилка входу');
-                }
-            } catch (e) {
-                LoopToast.error("Помилка зв'язку з сервером");
-            }
-        }
 
         // Run check
         checkAuth();
 
-        function logoutAdmin() {
-            localStorage.removeItem('loopToken');
-            localStorage.removeItem('loopRefreshToken');
-            localStorage.removeItem('loopUserRole');
-            window.location.href = '/login.html';
+        async function logoutAdmin() {
+            if (window.performLoopLogout) {
+                await window.performLoopLogout('/login.html');
+            } else {
+                localStorage.removeItem('loopToken');
+                localStorage.removeItem('token');
+                localStorage.removeItem('loopRefreshToken');
+                localStorage.removeItem('loopUserRole');
+                localStorage.removeItem('user');
+                sessionStorage.clear();
+                window.location.href = '/login.html';
+            }
         }
 
         // THEME TOGGLE
@@ -1197,7 +1441,7 @@
         // LOAD DASHBOARD STATS
         async function loadStats() {
             try {
-                const res = await fetch('/api/users/admin/stats', {
+                const res = await adminFetch('/api/users/admin/stats', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -1231,7 +1475,7 @@
 
             try {
                 const url = status && status !== 'All' ? `/api/complaints/admin?status=${status}` : '/api/complaints/admin';
-                const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+                const res = await adminFetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
                 if (!res.ok) {
                     container.innerHTML = `<div style="padding: 30px; text-align: center; color: #ef4444; grid-column: 1 / -1;">Помилка завантаження скарг (${res.status})</div>`;
                     return;
@@ -1337,7 +1581,7 @@
             document.getElementById('chatAuditModal').classList.add('active');
 
             try {
-                const res = await fetch(`/api/complaints/admin/${complaintId}/chat`, {
+                const res = await adminFetch(`/api/complaints/admin/${complaintId}/chat`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!res.ok) {
@@ -1383,7 +1627,7 @@
             if (reasonPrompt === null) return;
 
             try {
-                const res = await fetch(`/api/complaints/admin/${complaintId}`, {
+                const res = await adminFetch(`/api/complaints/admin/${complaintId}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ status: 'Resolved', resolutionNotes: `Порушника заблоковано: ${reasonPrompt}`, banTargetUser: true, banReason: reasonPrompt })
@@ -1405,7 +1649,7 @@
             if (note === null) return;
 
             try {
-                const res = await fetch(`/api/complaints/admin/${id}`, {
+                const res = await adminFetch(`/api/complaints/admin/${id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ status: 'Resolved', resolutionNotes: note, banTargetUser: false })
@@ -1426,7 +1670,7 @@
             if (!confirmed) return;
 
             try {
-                const res = await fetch(`/api/complaints/admin/${id}`, {
+                const res = await adminFetch(`/api/complaints/admin/${id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ status: 'Dismissed', resolutionNotes: "Скаргу відхилено", banTargetUser: false })
@@ -1446,7 +1690,7 @@
         async function loadUsers() {
             const tbody = document.getElementById('usersTableBody');
             try {
-                const res = await fetch('/api/users/admin/all', { headers: { 'Authorization': `Bearer ${token}` } });
+                const res = await adminFetch('/api/users/admin/all', { headers: { 'Authorization': `Bearer ${token}` } });
                 if (!res.ok) {
                     tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #ef4444;">Помилка завантаження користувачів</td></tr>`;
                     return;
@@ -1500,9 +1744,11 @@
                 if (isBanned) statusBadge = `<span class="status-badge banned">🔴 Заблоковано</span>`;
                 else if (isMuted) statusBadge = `<span class="status-badge muted" title="До ${new Date(u.mutedUntil).toLocaleString('uk-UA')}">🔇 Мут чату</span>`;
 
-                const verifiedBadge = u.isPhoneVerified
-                    ? `<span style="color: #10b981; font-weight: 700;">✅ Так</span>`
-                    : `<span style="color: var(--text-muted);">⏳ Ні</span>`;
+                const verifiedBadge = `
+                    <button class="btn-action ${u.isPhoneVerified ? 'success' : 'neutral'}" onclick="toggleUserVerification(${u.id}, ${!!u.isPhoneVerified})" title="1 клік: перемкнути верифікацію" style="padding: 4px 8px; font-size: 0.76rem; border-radius: 8px;">
+                        ${u.isPhoneVerified ? '✅ Підтверджено' : '⏳ Непідтверджено'}
+                    </button>
+                `;
 
                 const roleBadge = u.role === 'Admin' 
                     ? `<span class="status-badge admin">🛡️ Admin</span>`
@@ -1516,13 +1762,19 @@
                             ${u.isBanned && u.banReason ? `<div style="font-size: 0.72rem; color: #ef4444; margin-top: 2px;">Причина: ${escapeHtml(u.banReason)}</div>` : ''}
                         </td>
                         <td><code>${escapeHtml(u.email)}</code></td>
-                        <td><b>${escapeHtml(u.phoneNumber || '—')}</b></td>
+                        <td>
+                            <b>${escapeHtml(u.phoneNumber || '—')}</b>
+                            ${u.telegramChatId && u.telegramChatId !== 0 ? `<div style="font-size: 0.72rem; color: #2563eb; font-weight: 700; margin-top: 2px;">✈️ TG: ${u.telegramChatId}</div>` : `<div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">✈️ TG: —</div>`}
+                        </td>
                         <td>${roleBadge}</td>
                         <td>${verifiedBadge}</td>
                         <td>${statusBadge}</td>
                         <td style="font-weight: 700;">${u.listingCount ?? 0}</td>
                         <td style="text-align: right; white-space: nowrap;">
-                            <button class="btn-action primary" onclick="openEditUserModal(${u.id})" title="Редагувати">
+                            <button class="btn-action primary" onclick="openSendNotificationModal(${u.id}, '${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}')" title="Надіслати сповіщення на акаунт">
+                                🔔
+                            </button>
+                            <button class="btn-action neutral" onclick="openEditUserModal(${u.id})" title="Редагувати профіль">
                                 ✏️
                             </button>
                             <button class="btn-action warning" onclick="promptMuteUser(${u.id}, ${isMuted})" title="${isMuted ? 'Зняти мут' : 'Тимчасовий мут чату'}">
@@ -1537,6 +1789,9 @@
                                     🚫 Бан
                                 </button>
                             `}
+                            <button class="btn-action danger" onclick="deleteUser(${u.id}, '${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}')" title="Видалити користувача з бази (в 1 клік)">
+                                🗑️
+                            </button>
                         </td>
                     </tr>
                 `;
@@ -1562,7 +1817,7 @@
 
         async function setMuteMinutes(userId, minutes) {
             try {
-                const res = await fetch(`/api/users/admin/${userId}/mute`, {
+                const res = await adminFetch(`/api/users/admin/${userId}/mute`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ minutes })
@@ -1592,7 +1847,7 @@
             }
 
             try {
-                const res = await fetch(`/api/users/admin/${userId}/ban`, {
+                const res = await adminFetch(`/api/users/admin/${userId}/ban`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ isBanned: shouldBan, reason: reason })
@@ -1617,6 +1872,7 @@
             document.getElementById('editUserFirstName').value = user.firstName || '';
             document.getElementById('editUserLastName').value = user.lastName || '';
             document.getElementById('editUserPhone').value = user.phoneNumber || '';
+            document.getElementById('editUserTelegramChatId').value = user.telegramChatId || 0;
             document.getElementById('editUserRole').value = user.role || 'User';
             document.getElementById('editUserVerified').value = user.isPhoneVerified ? 'true' : 'false';
             document.getElementById('editUserModal').classList.add('active');
@@ -1632,14 +1888,15 @@
             const firstName = document.getElementById('editUserFirstName').value.trim();
             const lastName = document.getElementById('editUserLastName').value.trim();
             const phoneNumber = document.getElementById('editUserPhone').value.trim();
+            const telegramChatId = parseInt(document.getElementById('editUserTelegramChatId').value) || 0;
             const role = document.getElementById('editUserRole').value;
             const isPhoneVerified = document.getElementById('editUserVerified').value === 'true';
 
             try {
-                const res = await fetch(`/api/users/admin/${id}`, {
+                const res = await adminFetch(`/api/users/admin/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ firstName, lastName, phoneNumber, role, isPhoneVerified })
+                    body: JSON.stringify({ firstName, lastName, phoneNumber, role, isPhoneVerified, telegramChatId })
                 });
                 if (res.ok) {
                     LoopToast.success("Дані користувача збережено!");
@@ -1659,7 +1916,7 @@
         async function loadListings() {
             const tbody = document.getElementById('listingsTableBody');
             try {
-                const res = await fetch('/api/listings/admin/all', { headers: { 'Authorization': `Bearer ${token}` } });
+                const res = await adminFetch('/api/listings/admin/all', { headers: { 'Authorization': `Bearer ${token}` } });
                 if (!res.ok) {
                     tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #ef4444;">Помилка завантаження</td></tr>`;
                     return;
@@ -1736,7 +1993,7 @@
 
         async function toggleFeaturedListing(id) {
             try {
-                const res = await fetch(`/api/listings/admin/${id}/feature`, {
+                const res = await adminFetch(`/api/listings/admin/${id}/feature`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -1757,7 +2014,7 @@
             if (!confirmed) return;
 
             try {
-                const res = await fetch(`/api/listings/admin/${id}`, {
+                const res = await adminFetch(`/api/listings/admin/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -1779,7 +2036,7 @@
         async function loadOrders() {
             const tbody = document.getElementById('ordersTableBody');
             try {
-                const res = await fetch('/api/orders/admin/all', { headers: { 'Authorization': `Bearer ${token}` } });
+                const res = await adminFetch('/api/orders/admin/all', { headers: { 'Authorization': `Bearer ${token}` } });
                 if (!res.ok) {
                     tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #ef4444;">Помилка завантаження угод</td></tr>`;
                     return;
@@ -1859,7 +2116,7 @@
             const totalPrice = parseFloat(document.getElementById('arbOrderPrice').value);
 
             try {
-                const res = await fetch(`/api/orders/admin/${id}/force-update`, {
+                const res = await adminFetch(`/api/orders/admin/${id}/force-update`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ status, trackingNumber, totalPrice })
@@ -1883,7 +2140,7 @@
             const message = document.getElementById('bannerMessageInput').value.trim();
 
             try {
-                const res = await fetch('/api/admin/announcement', {
+                const res = await adminFetch('/api/admin/announcement', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ type, message, isActive: true })
@@ -1904,7 +2161,7 @@
             if (!confirmed) return;
 
             try {
-                const res = await fetch('/api/admin/announcement/1', {
+                const res = await adminFetch('/api/admin/announcement/1', {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -1926,7 +2183,7 @@
             if (!confirmed) return;
 
             try {
-                const res = await fetch('/api/admin/broadcast', {
+                const res = await adminFetch('/api/admin/broadcast', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ title, message, sendTelegram })
@@ -1948,7 +2205,7 @@
         async function loadCategories() {
             const tbody = document.getElementById('categoriesTableBody');
             try {
-                const res = await fetch('/api/categories');
+                const res = await adminFetch('/api/categories');
                 if (!res.ok) {
                     tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#ef4444;">Помилка завантаження</td></tr>';
                     return;
@@ -1978,7 +2235,7 @@
             if (!name) return;
 
             try {
-                const res = await fetch('/api/admin/categories', {
+                const res = await adminFetch('/api/admin/categories', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ name })
@@ -1999,7 +2256,7 @@
             if (!name || name === currentName) return;
 
             try {
-                const res = await fetch(`/api/admin/categories/${id}`, {
+                const res = await adminFetch(`/api/admin/categories/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ name })
@@ -2020,7 +2277,7 @@
             if (!confirmed) return;
 
             try {
-                const res = await fetch(`/api/admin/categories/${id}`, {
+                const res = await adminFetch(`/api/admin/categories/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -2039,7 +2296,7 @@
         async function loadAuditLogs() {
             const tbody = document.getElementById('auditTableBody');
             try {
-                const res = await fetch('/api/admin/audit-logs', {
+                const res = await adminFetch('/api/admin/audit-logs', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!res.ok) {
@@ -2076,6 +2333,185 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
+        }
+
+                // ==================== НОВІ ФУНКЦІЇ АДМІНІСТРУВАННЯ ====================
+
+        // 1. СТВОРЕННЯ КОРИСТУВАЧА В 1 КЛІК
+        function openCreateUserModal() {
+            document.getElementById('createUserForm').reset();
+            document.getElementById('createPassword').value = '123456';
+            document.getElementById('createUserModal').classList.add('active');
+        }
+
+        function closeCreateUserModal() {
+            document.getElementById('createUserModal').classList.remove('active');
+        }
+
+        async function submitCreateUser(e) {
+            e.preventDefault();
+            const email = document.getElementById('createEmail').value.trim();
+            const firstName = document.getElementById('createFirstName').value.trim();
+            const lastName = document.getElementById('createLastName').value.trim();
+            const password = document.getElementById('createPassword').value.trim() || '123456';
+            const phoneNumber = document.getElementById('createPhone').value.trim();
+            const role = document.getElementById('createRole').value;
+            const isPhoneVerified = document.getElementById('createVerified').value === 'true';
+
+            try {
+                const res = await adminFetch('/api/users/admin/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ email, firstName, lastName, password, phoneNumber, role, isPhoneVerified })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    LoopToast.success(data.message || "Користувача успішно створено!");
+                    closeCreateUserModal();
+                    loadUsers();
+                    loadStats();
+                } else {
+                    LoopToast.error(data.error || "Помилка створення користувача");
+                }
+            } catch (err) {
+                LoopToast.error("Помилка мережі при створенні");
+            }
+        }
+
+        // 2. ПЕРЕМИКАННЯ ВЕРИФІКАЦІЇ В 1 КЛІК
+        async function toggleUserVerification(userId, currentStatus) {
+            try {
+                const res = await adminFetch(`/api/users/admin/${userId}/verify`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ isVerified: !currentStatus })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    LoopToast.success(data.message || "Верифікацію оновлено!");
+                    loadUsers();
+                } else {
+                    LoopToast.error(data.error || "Помилка оновлення верифікації");
+                }
+            } catch (err) {
+                LoopToast.error("Помилка мережі");
+            }
+        }
+
+        // 3. ПЕРСОНАЛЬНЕ СПОВІЩЕННЯ НА АКАУНТ / ПРОФІЛЬ
+        function openSendNotificationModal(userId, userName) {
+            document.getElementById('sendNotificationForm').reset();
+            document.getElementById('notifyUserId').value = userId;
+            document.getElementById('notifyUserName').innerText = userName || `#${userId}`;
+            document.getElementById('notifyTitle').value = 'Особисте сповіщення від платформи LoopMarket';
+            document.getElementById('notifyLink').value = '/profile.html';
+            document.getElementById('notifySendTelegram').checked = true;
+            document.getElementById('sendNotificationModal').classList.add('active');
+        }
+
+        function closeSendNotificationModal() {
+            document.getElementById('sendNotificationModal').classList.remove('active');
+        }
+
+        async function submitSendNotification(e) {
+            e.preventDefault();
+            const userId = document.getElementById('notifyUserId').value;
+            const title = document.getElementById('notifyTitle').value.trim();
+            const message = document.getElementById('notifyMessage').value.trim();
+            const link = document.getElementById('notifyLink').value.trim() || '/profile.html';
+            const sendTelegram = document.getElementById('notifySendTelegram').checked;
+
+            try {
+                const res = await adminFetch(`/api/users/admin/${userId}/notify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ title, message, link, sendTelegram })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    LoopToast.success(data.message || "Сповіщення надіслано в акаунт!");
+                    closeSendNotificationModal();
+                } else {
+                    LoopToast.error(data.error || "Помилка надсилання");
+                }
+            } catch (err) {
+                LoopToast.error("Помилка мережі при надсиланні сповіщення");
+            }
+        }
+
+        // 4. ВИДАЛЕННЯ КОРИСТУВАЧА В 1 КЛІК З ПІДТВЕРДЖЕННЯМ
+        async function deleteUser(userId, userName) {
+            const confirmed = await LoopDialog.confirm(`Ви дійсно бажаєте повністю видалити користувача ${userName} (#${userId}) та всі його оголошення/замовлення?`, "Видалення користувача");
+            if (!confirmed) return;
+
+            try {
+                const res = await adminFetch(`/api/users/admin/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    LoopToast.success(data.message || "Користувача видалено!");
+                    loadUsers();
+                    loadStats();
+                } else {
+                    LoopToast.error(data.error || "Не вдалося видалити користувача");
+                }
+            } catch (err) {
+                LoopToast.error("Помилка зв'язку при видаленні користувача");
+            }
+        }
+
+        // 5. СТВОРЕННЯ ОГОЛОШЕННЯ В 1 КЛІК З АДМІН-ПАНЕЛІ
+        function openCreateListingModal() {
+            document.getElementById('createListingForm').reset();
+            const sellerSelect = document.getElementById('listingSellerId');
+            if (sellerSelect && allUsers && allUsers.length) {
+                sellerSelect.innerHTML = allUsers.map(u => 
+                    `<option value="${u.id}">${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)} (${u.email}) [${u.role}]</option>`
+                ).join('');
+            }
+            document.getElementById('createListingModal').classList.add('active');
+        }
+
+        function closeCreateListingModal() {
+            document.getElementById('createListingModal').classList.remove('active');
+        }
+
+        async function submitCreateListing(e) {
+            e.preventDefault();
+            const title = document.getElementById('listingTitle').value.trim();
+            const categoryId = parseInt(document.getElementById('listingCategory').value) || 1;
+            const price = parseFloat(document.getElementById('listingPrice').value) || 0;
+            const condition = document.getElementById('listingCondition').value;
+            const location = document.getElementById('listingLocation').value.trim() || 'м. Кременчук';
+            const description = document.getElementById('listingDescription').value.trim();
+            const sellerId = parseInt(document.getElementById('listingSellerId').value) || null;
+            const imageUrl = document.getElementById('listingImage').value.trim();
+            const isFeatured = document.getElementById('listingFeatured').checked;
+            const isShippingAvailable = document.getElementById('listingShipping').checked;
+
+            try {
+                const res = await adminFetch('/api/listings/admin/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({
+                        title, categoryId, price, condition, location, description,
+                        sellerId, imageUrl, isFeatured, isShippingAvailable
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    LoopToast.success(data.message || "Оголошення успішно додано!");
+                    closeCreateListingModal();
+                    loadListings();
+                    loadStats();
+                } else {
+                    LoopToast.error(data.error || "Помилка створення оголошення");
+                }
+            } catch (err) {
+                LoopToast.error("Помилка мережі при створенні оголошення");
+            }
         }
 
         // INITIAL LOAD

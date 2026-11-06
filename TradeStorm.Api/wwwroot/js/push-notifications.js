@@ -4,6 +4,34 @@
  */
 
 (function () {
+    function getDismissedNotificationIds() {
+        try {
+            return new Set(JSON.parse(localStorage.getItem('loop_dismissed_notifications') || '[]'));
+        } catch(e) {
+            return new Set();
+        }
+    }
+
+    function markNotificationDismissed(id) {
+        if (!id) return;
+        try {
+            const list = JSON.parse(localStorage.getItem('loop_dismissed_notifications') || '[]');
+            if (!list.includes(id)) {
+                list.push(id);
+                if (list.length > 250) list.shift();
+                localStorage.setItem('loop_dismissed_notifications', JSON.stringify(list));
+            }
+        } catch(e) {}
+
+        const token = localStorage.getItem('loopToken') || localStorage.getItem('token');
+        if (token && (typeof id === 'number' || (typeof id === 'string' && !id.startsWith('notif_')))) {
+            fetch('/api/notifications/' + id + '/read', {
+                method: 'PUT',
+                headers: { 'Authorization': 'Bearer ' + token }
+            }).catch(() => {});
+        }
+    }
+
     if (window.LoopPushNotifications) return;
 
     // 1. Inject Styles
@@ -292,9 +320,12 @@
         }
 
         // Close logic
-        function dismiss() {
+                function dismiss() {
             if (toast.classList.contains('hiding')) return;
             toast.classList.add('hiding');
+            if (id) {
+                markNotificationDismissed(id);
+            }
             setTimeout(() => {
                 if (toast.parentNode) toast.parentNode.removeChild(toast);
             }, 300);
@@ -388,10 +419,11 @@
             const me = getCurrentUser();
 
             // When new notifications arrive while user is sitting on the site:
+                        const dismissedIds = getDismissedNotificationIds();
             notifs.forEach(n => {
                 if (!seenNotifications.has(n.id)) {
                     seenNotifications.add(n.id);
-                    if (!n.isRead) {
+                    if (!n.isRead && !dismissedIds.has(n.id)) {
                         // Double safeguard: don't show self-notifications
                         if (me && me.name && n.message && n.message.includes(`Вам написав(ла) ${me.name}`)) {
                             return;

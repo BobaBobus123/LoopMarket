@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+    <script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Профіль продавця | Loop Market</title>
@@ -991,11 +992,18 @@
 
         function showLogoutModal() { document.getElementById('logoutModal').style.display = 'flex'; }
         function closeLogoutModal() { document.getElementById('logoutModal').style.display = 'none'; }
-        function confirmLogoutAction() {
-            localStorage.removeItem('loopToken');
-            localStorage.removeItem('loopRefreshToken');
-            localStorage.removeItem('loopUserRole');
-            window.location.reload();
+        async function confirmLogoutAction() {
+            if (window.performLoopLogout) {
+                await window.performLoopLogout('/login.html');
+            } else {
+                localStorage.removeItem('loopToken');
+                localStorage.removeItem('token');
+                localStorage.removeItem('loopRefreshToken');
+                localStorage.removeItem('loopUserRole');
+                localStorage.removeItem('user');
+                sessionStorage.clear();
+                window.location.href = '/login.html';
+            }
         }
 
         function getFavorites() { return JSON.parse(localStorage.getItem('loopFavorites') || '[]'); }

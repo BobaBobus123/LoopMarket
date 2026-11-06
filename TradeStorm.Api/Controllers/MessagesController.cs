@@ -22,6 +22,50 @@ public class MessagesController : ControllerBase
     }
 
     // Отримати історію повідомлень між поточним користувачем та співрозмовником
+        // Відправка повідомлення через REST API
+    [HttpPost("send")]
+    public async Task<IActionResult> SendMessage([FromBody] SendMessageDto dto, [FromServices] IHubContext<ChatHub> hubContext)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int senderId)) return Unauthorized();
+
+        if (string.IsNullOrWhiteSpace(dto.Text))
+            return BadRequest(new { error = "Повідомлення не може бути порожнім" });
+
+        var receiver = await _context.Users.FindAsync(dto.ReceiverId);
+        if (receiver == null)
+            return NotFound(new { error = "Отримувача не знайдено" });
+
+        var msg = new Message
+        {
+            SenderId = senderId,
+            ReceiverId = dto.ReceiverId,
+            Text = dto.Text.Trim(),
+            SentAt = DateTime.UtcNow,
+            IsRead = false
+        };
+
+        _context.Messages.Add(msg);
+        await _context.SaveChangesAsync();
+
+        try
+        {
+            await hubContext.Clients.User(dto.ReceiverId.ToString()).SendAsync("ReceiveMessage", senderId, msg.Text, msg.SentAt);
+        }
+        catch { }
+
+        return Ok(new
+        {
+            id = msg.Id,
+            senderId = msg.SenderId,
+            receiverId = msg.ReceiverId,
+            text = msg.Text,
+            sentAt = msg.SentAt,
+            isRead = msg.IsRead
+        });
+    }
+
+    // Отримати історію повідомлень
     [HttpGet("history/{partnerId}")]
     public async Task<IActionResult> GetMessageHistory(int partnerId)
     {
@@ -168,6 +212,12 @@ public class MessagesController : ControllerBase
 
         return Ok();
     }
+}
+
+public class SendMessageDto
+{
+    public int ReceiverId { get; set; }
+    public string Text { get; set; } = string.Empty;
 }
 
 public class DialogDto

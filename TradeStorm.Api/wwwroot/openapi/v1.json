@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Loop Market REST API & Real-Time Specifications",
-    "description": "Повна офіційна документація та специфікація API платформи Loop Market для електронної комерції, студентських послуг, безпечної оплати (Loop Захист) та SignalR чату в реальному часі.",
+    "description": "Повна офіційна документація та специфікація API платформи Loop Market для електронної комерції, користувачських послуг, безпечної оплати (Loop Захист) та SignalR чату в реальному часі.",
     "version": "2.4.0",
     "contact": {
       "name": "Loop Market Support & Dev Team",

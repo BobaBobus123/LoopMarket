@@ -34,6 +34,7 @@ public class ReviewsController : ControllerBase
                     id = r.Id,
                     rating = r.Rating,
                     comment = r.Comment,
+                    isVerifiedPurchase = r.IsVerifiedPurchase,
                     createdAt = r.CreatedAt,
                     author = r.Author != null ? new
                     {
@@ -57,6 +58,50 @@ public class ReviewsController : ControllerBase
             {
                 averageRating = Math.Round(averageRating, 1),
                 totalReviews = reviews.Count,
+                verifiedReviewsCount = reviews.Count(r => r.isVerifiedPurchase),
+                reviews
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    [HttpGet("listing/{listingId}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetListingReviews(int listingId)
+    {
+        try
+        {
+            var reviews = await _context.Reviews
+                .Where(r => r.ListingId == listingId)
+                .OrderByDescending(r => r.CreatedAt)
+                .Include(r => r.Author)
+                .Select(r => new
+                {
+                    id = r.Id,
+                    rating = r.Rating,
+                    comment = r.Comment,
+                    isVerifiedPurchase = r.IsVerifiedPurchase,
+                    createdAt = r.CreatedAt,
+                    author = r.Author != null ? new
+                    {
+                        id = r.Author.Id,
+                        firstName = r.Author.FirstName,
+                        lastName = r.Author.LastName,
+                        avatarUrl = r.Author.AvatarUrl
+                    } : null
+                })
+                .ToListAsync();
+
+            double averageRating = reviews.Any() ? reviews.Average(r => r.rating) : 0;
+
+            return Ok(new
+            {
+                averageRating = Math.Round(averageRating, 1),
+                totalReviews = reviews.Count,
+                verifiedReviewsCount = reviews.Count(r => r.isVerifiedPurchase),
                 reviews
             });
         }
@@ -87,6 +132,11 @@ public class ReviewsController : ControllerBase
                 return NotFound(new { error = "Користувача не знайдено" });
             }
 
+            if (dto.Rating < 1 || dto.Rating > 5)
+            {
+                return BadRequest(new { error = "Оцінка має бути від 1 до 5 зірок" });
+            }
+
             if (dto.ListingId.HasValue)
             {
                 var listingExists = await _context.Listings.AnyAsync(l => l.Id == dto.ListingId.Value);
@@ -94,7 +144,35 @@ public class ReviewsController : ControllerBase
                 {
                     return BadRequest(new { error = "Оголошення не знайдено" });
                 }
+
+                // Перевірка на повторний відгук до одного й того ж товару
+                var alreadyReviewed = await _context.Reviews.AnyAsync(r => r.AuthorId == authorId && r.ListingId == dto.ListingId.Value);
+                if (alreadyReviewed)
+                {
+                    return BadRequest(new { error = "Ви вже залишили відгук до цієї угоди" });
+                }
             }
+
+            // Перевіряємо, чи є підтверджена угода через Loop Захист
+            bool isVerified = false;
+            if (dto.ListingId.HasValue)
+            {
+                isVerified = await _context.Orders.AnyAsync(o =>
+                    o.BuyerId == authorId &&
+                    o.ListingId == dto.ListingId.Value &&
+                    o.Status == OrderStatus.Completed);
+            }
+            if (!isVerified)
+            {
+                // Також перевіряємо, чи була будь-яка успішна угода між цим покупцем і продавцем
+                isVerified = await _context.Orders.AnyAsync(o =>
+                    o.BuyerId == authorId &&
+                    o.SellerId == dto.TargetUserId &&
+                    o.Status == OrderStatus.Completed);
+            }
+
+            var author = await _context.Users.FindAsync(authorId);
+            var authorName = author != null ? $"{author.FirstName} {author.LastName}".Trim() : "Покупець";
 
             var review = new Review
             {
@@ -102,14 +180,34 @@ public class ReviewsController : ControllerBase
                 AuthorId = authorId,
                 ListingId = dto.ListingId,
                 Rating = dto.Rating,
-                Comment = dto.Comment,
+                Comment = dto.Comment?.Trim(),
+                IsVerifiedPurchase = isVerified,
                 CreatedAt = DateTime.UtcNow
             };
 
             _context.Reviews.Add(review);
+
+            // Створюємо сповіщення для продавця
+            var notif = new Notification
+            {
+                UserId = dto.TargetUserId,
+                Title = isVerified ? "🛡️ Новий перевірений відгук (Loop Захист)!" : "⭐ Новий відгук про вас!",
+                Message = $"{authorName} оцінив(ла) вас на {dto.Rating}/5 зірок" + (!string.IsNullOrWhiteSpace(dto.Comment) ? $": \"{dto.Comment}\"" : "."),
+                Link = "/profile.html#reviews",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Notifications.Add(notif);
+
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Відгук успішно додано!" });
+            return Ok(new
+            {
+                message = isVerified
+                    ? "Дякуємо! Відгук опубліковано з відзнакою '🛡️ Перевірена угода (Loop Захист)'"
+                    : "Відгук успішно додано!",
+                isVerifiedPurchase = isVerified
+            });
         }
         catch (Exception ex)
         {

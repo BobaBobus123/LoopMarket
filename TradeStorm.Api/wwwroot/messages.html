@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+    <script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Повідомлення | Loop Market</title>
@@ -1378,7 +1380,7 @@
                     Профіль
                 </a>
 
-                <button class="btn-icon" onclick="toggleNotifications()" title="Сповіщення">
+                <button class="btn-icon" id="notifBtn" onclick="toggleNotifications()" title="Сповіщення">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
                     <span class="notif-badge" id="notifBadge" style="display: none;"></span>
                 </button>
@@ -1748,9 +1750,20 @@
         let allDialogsCache = [];
         let currentFilterTab = 'all';
 
+        function isTokenExpired(t) {
+            try {
+                if (!t || typeof t !== 'string' || !t.includes('.')) return true;
+                const p = parseJwt(t);
+                if (!p || !p.exp) return false;
+                return (Date.now() >= p.exp * 1000);
+            } catch(e) { return true; }
+        }
+
         // Перевірка авторизації
-        if (!token) {
+        if (!token || isTokenExpired(token)) {
             const currentUrl = window.location.pathname + window.location.search;
+            localStorage.removeItem('loopToken');
+            localStorage.removeItem('token');
             window.location.href = '/login.html?returnUrl=' + encodeURIComponent(currentUrl);
         } else {
             try {
@@ -1800,14 +1813,19 @@
             connection.on("ReceiveMessage", (senderId, receiverId, text) => {
                 const sid = parseInt(senderId);
                 const rid = parseInt(receiverId);
-                if (sid === activeReceiverId || rid === activeReceiverId) {
-                    appendMessage(text, sid === currentUserId ? 'sent' : 'received', new Date(), false);
-                    if (sid === activeReceiverId) {
-                        fetch(`/api/messages/mark-read/${activeReceiverId}`, {
-                            method: 'POST',
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        }).catch(() => {});
-                    }
+
+                // Якщо повідомлення відправили ми самі — воно вже додано оптимістично, уникаємо дублювання
+                if (sid === currentUserId) {
+                    loadDialogs();
+                    return;
+                }
+
+                if (sid === activeReceiverId) {
+                    appendMessage(text, 'received', new Date(), false);
+                    fetch(`/api/messages/mark-read/${activeReceiverId}`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }).catch(() => {});
                 }
                 loadDialogs();
                 loadNotifications();
@@ -1932,9 +1950,17 @@
         // ЗАВАНТАЖЕННЯ ДІАЛОГІВ
         async function loadDialogs() {
             try {
+                const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
                 const res = await fetch('/api/messages/dialogs', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${curToken}` }
                 });
+                if (res.status === 401) {
+                    console.warn("401 Unauthorized in loadDialogs, redirecting to login");
+                    localStorage.removeItem('loopToken');
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search);
+                    return;
+                }
                 if (res.ok) {
                     const data = await res.json();
                     allDialogsCache = data || [];
@@ -2506,20 +2532,22 @@
                 }
             }
 
-            // 3. Завжди підстраховуємо REST ендпоінтом для 100% збереження в базі та Telegram
-            try {
-                await fetch('/api/messages/send', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        receiverId: activeReceiverId,
-                        text: text
-                    })
-                });
-            } catch(e) {}
+            // 3. REST ендпоінт викликається ТІЛЬКИ як fallback, якщо SignalR не підключено
+            if (!signalRSent) {
+                try {
+                    await fetch('/api/messages/send', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            receiverId: activeReceiverId,
+                            text: text
+                        })
+                    });
+                } catch(e) {}
+            }
 
             loadDialogs();
         }

@@ -343,3 +343,56 @@ dotnet test "d:\LoopMarket\TradeStorm.Api.Tests\TradeStorm.Api.Tests.csproj"
 > - `Telegram__BotToken`
 > - `Authentication__Google__ClientId`
 > - `Authentication__Google__ClientSecret`
+
+---
+
+## 🛡️ Спеціалізований модуль захисту лабораторних робіт
+
+### 1. Автентифікація на основі веб-токенів (JWT)
+- **Алгоритм підпису:** HMAC-SHA256 (`Microsoft.IdentityModel.Tokens`).
+- **Склад токена (Claims):**
+  - `sub` / `NameIdentifier`: числовий первинний ключ користувача (`Id`);
+  - `email`: унікальна електронна пошта;
+  - `name`: повне ім'я (`FirstName + LastName`);
+  - `role`: роль у системі (`Admin`, `Seller`, `Buyer`).
+- **Схема двох токенів (Access + Refresh Token):**
+  - **Access Token:** короткоживучий токен доступу (термін 60 хв).
+  - **Refresh Token:** криптографічний 64-байтовий рядок (Base64), збережений у БД з терміном дії 7 днів.
+- **Ротація токенів (`POST /api/users/refresh` та `POST /api/auth/refresh`):** при кожному оновленні старий токен інвалідується і створюється нова пара.
+- **Відкликання токенів / Logout (`POST /api/users/revoke` та `POST /api/auth/revoke`):** миттєве занулення `RefreshToken` у БД, що запобігає несанкціонованому продовженню сесії.
+
+### 2. Авторизація та захист від типових атак
+- **Рольовий доступ (RBAC) та політики:**
+  - `[Authorize(Roles = "Admin")]` та політика `RequireAdminRole` — захист адміністративних операцій (`/api/users/admin/*`).
+  - `[Authorize(Roles = "Seller,Admin")]` та політика `RequireSellerRole` — публікація послуг.
+  - Покупці (`Buyer`) при спробі виклику адмінських функцій отримують статус **`403 Forbidden`**.
+- **Захист від DoS та Brute-Force (Rate Limiting):**
+  - Інтегровано middleware `Microsoft.AspNetCore.RateLimiting`.
+  - Політика `AuthRateLimit`: ліміт 30 запитів на хвилину для захисту від підбору паролів.
+  - Політика `GlobalApiLimit`: ковзне вікно 200 запитів на хвилину для захисту публічного API.
+  - При перевищенні повертається код **`429 Too Many Requests`**.
+- **OWASP Security Headers:**
+  - `X-Content-Type-Options: nosniff` — запобігання MIME-sniffing.
+  - `X-Frame-Options: DENY` — блокування вбудовування в iframe (захист від Clickjacking).
+  - `Referrer-Policy: strict-origin-when-cross-origin` — захист чутливих параметрів у Referrer.
+  - `X-XSS-Protection: 1; mode=block` — блокування міжсайтового скриптингу браузером.
+- **Захист від CSRF (Cross-Site Request Forgery):**
+  - Архітектура stateless REST API використовує заголовок `Authorization: Bearer <token>`, який браузер ніколи не передає автоматично у сторонніх запитах (на відміну від cookies).
+- **Захист від SQL Injection:**
+  - Усі запити виконуються через ORM Entity Framework Core із параметризацією значень у LINQ.
+
+### 3. Зовнішня автентифікація (OAuth 2.0), керування секретами та валідація
+- **OAuth 2.0 / OpenID Connect:**
+  - `GET /api/auth/google/url` — генерація URL для переходу на Google Accounts (Authorization Code Flow).
+  - `POST /api/auth/external/callback` — обмін коду на обліковий запис та локальний JWT.
+  - `POST /api/auth/external/sandbox` — офлайн-режим тестування OAuth для показу викладачеві без робочих ключів Google.
+  - Кнопки швидкого OAuth-входу реалізовані у `login.html`.
+- **Керування секретами (Secret Management):**
+  - Конфігурація `UserSecretsId`: `loopmarket-tradestorm-api-secret-2026` у `TradeStorm.Api.csproj`.
+  - Підтримка змінних оточення операційної системи (`Jwt__Key`, `Authentication__Google__ClientSecret`).
+  - Файл-шаблон `appsettings.Example.json` для безпечного розгортання без витоку секретів у Git.
+- **Декларативна валідація даних (Model Validation):**
+  - Усі DTO перевіряються через `System.ComponentModel.DataAnnotations` (`[Required]`, `[EmailAddress]`, `[Range]`, `[Phone]`, `[MaxLength]`).
+  - При порушенні повертається стандартизований RFC 7807 документ `ValidationProblemDetails` із кодом **`400 Bad Request`**.
+- **Ендпоінт статусу безпеки:**
+  - `GET /api/system/security-status` — демонструє стан усіх 3 етапів безпеки в один клік.

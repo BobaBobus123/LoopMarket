@@ -55,6 +55,35 @@ public class ListingsController : ControllerBase
         return Ok(new { totalCount, listings });
     }
 
+    [HttpGet("suggest")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Suggest([FromQuery] string? q)
+    {
+        if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2)
+            return Ok(new List<object>());
+
+        var term = q.Trim().ToLower();
+        var items = await _context.Listings
+            .Include(l => l.Category)
+            .Where(l => l.Status == "Active" && (l.Title.ToLower().Contains(term) || (l.Category != null && l.Category.Name.ToLower().Contains(term))))
+            .OrderByDescending(l => l.CreatedAt)
+            .Take(8)
+            .Select(l => new
+            {
+                id = l.Id,
+                title = l.Title,
+                price = l.Price,
+                imageUrl = string.IsNullOrEmpty(l.ImageUrl) || l.ImageUrl.Contains("placehold.co")
+                    ? (l.CategoryId == 8 || (l.Title != null && l.Title.Contains("Послуг")) ? "/images/placeholder-service.svg" : "/images/placeholder.svg")
+                    : l.ImageUrl.Split(';', StringSplitOptions.None)[0],
+                categoryName = l.Category != null ? l.Category.Name : "Інше",
+                isService = l.CategoryId == 8 || (l.Title != null && l.Title.Contains("Послуг"))
+            })
+            .ToListAsync();
+
+        return Ok(items);
+    }
+
     [HttpGet("{id}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetListingById(int id)
@@ -64,6 +93,13 @@ public class ListingsController : ControllerBase
         {
             return NotFound(new { error = "Оголошення не знайдено" });
         }
+
+        try
+        {
+            l.ViewsCount++;
+            await _context.SaveChangesAsync();
+        }
+        catch { }
 
         var result = new
         {
@@ -79,6 +115,7 @@ public class ListingsController : ControllerBase
             isShippingAvailable = l.IsShippingAvailable,
             status = l.Status ?? "Active",
             createdAt = l.CreatedAt,
+            viewsCount = l.ViewsCount,
             categoryName = l.Category != null ? l.Category.Name : null,
             categoryId = l.CategoryId,
             sellerId = l.SellerId,
@@ -105,6 +142,11 @@ public class ListingsController : ControllerBase
             return Unauthorized(new { error = "Невірний токен авторизації" });
         }
 
+        if (PhishingGuard.IsPhishingOrScam(dto.Title + " " + dto.Description, out var scamReason))
+        {
+            return BadRequest(new { error = $"🛡️ Антишахрайський фільтр: {scamReason}. Будь ласка, видаліть підозрілі посилання." });
+        }
+
         var listing = await _listingService.CreateListingAsync(userId, dto);
         return CreatedAtAction(nameof(GetListingById), new { id = listing.Id }, listing);
     }
@@ -117,6 +159,11 @@ public class ListingsController : ControllerBase
         if (!int.TryParse(userIdString, out int userId))
         {
             return Unauthorized();
+        }
+
+        if (PhishingGuard.IsPhishingOrScam(dto.Title + " " + dto.Description, out var scamReason))
+        {
+            return BadRequest(new { error = $"🛡️ Антишахрайський фільтр: {scamReason}. Будь ласка, видаліть підозрілі посилання." });
         }
 
         bool isAdmin = User.IsInRole("Admin");
@@ -224,6 +271,49 @@ public class ListingsController : ControllerBase
 
         await _listingService.DeleteListingAsync(id, listing.SellerId);
         return Ok(new { message = "Оголошення успішно видалено адміністратором платформи" });
+    }
+
+    /// <summary>
+    /// Адміністрування: створення нового оголошення в 1 клік з панелі оператора
+    /// </summary>
+    [HttpPost("admin/create")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AdminCreateListing([FromBody] AdminCreateListingDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Title))
+            return BadRequest(new { error = "Назва оголошення обов'язкова" });
+
+        var adminIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        int currentAdminId = int.TryParse(adminIdStr, out int aId) ? aId : 1;
+        int targetSellerId = dto.SellerId.HasValue && dto.SellerId.Value > 0 ? dto.SellerId.Value : currentAdminId;
+
+        var listing = new Listing
+        {
+            Title = dto.Title.Trim(),
+            Description = dto.Description?.Trim() ?? string.Empty,
+            Price = dto.Price,
+            CategoryId = dto.CategoryId > 0 ? dto.CategoryId : 1,
+            Condition = string.IsNullOrWhiteSpace(dto.Condition) ? "Вживане" : dto.Condition.Trim(),
+            Location = string.IsNullOrWhiteSpace(dto.Location) ? "Не вказано" : dto.Location.Trim(),
+            IsShippingAvailable = dto.IsShippingAvailable,
+            SellerId = targetSellerId,
+            ImageUrl = string.IsNullOrWhiteSpace(dto.ImageUrl)
+                ? (dto.CategoryId == 8 || dto.Title.Contains("Послуг") ? "/images/placeholder-service.svg" : "/images/placeholder.svg")
+                : dto.ImageUrl.Trim(),
+            IsFeatured = false, // Тільки адміністратор може призначати статус VIP
+            Status = "Active",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.Listings.Add(listing);
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            id = listing.Id,
+            title = listing.Title,
+            message = "Оголошення успішно додано!"
+        });
     }
 
     [HttpGet("categories")]

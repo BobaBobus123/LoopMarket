@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+    <script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Про нас | Loop Market</title>
@@ -501,7 +503,7 @@
                     <span id="navProfileText">Профіль</span>
                 </a>
 
-                <button class="btn-icon" onclick="toggleNotifications()" title="Сповіщення">
+                <button class="btn-icon" id="notifBtn" onclick="toggleNotifications()" title="Сповіщення">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
                     <span class="notif-badge" id="notifBadge" style="display: none;"></span>
                 </button>
@@ -613,7 +615,7 @@
                     <div class="logo-circle">L</div>
                     <span>Loop<span style="color: #10b981;">Market</span></span>
                 </div>
-                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">Локальна студентська платформа товарів та якісних послуг.</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">Сучасний онлайн-маркетплейс товарів та якісних послуг.</p>
             </div>
             <div class="footer-col">
                 <h4>Навігація</h4>
@@ -659,28 +661,39 @@
             document.getElementById('btnLogout').style.display = 'none';
         }
 
+        function updateThemeButton(theme) {
+            const btn = document.getElementById('themeToggle') || document.getElementById('themeToggleBtn');
+            if (btn) btn.innerText = (theme === 'dark') ? '☀️' : '🌙';
+        }
+
         function toggleTheme() {
             const cur = document.documentElement.getAttribute('data-theme') || 'light';
             const next = cur === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', next);
             localStorage.setItem('loopTheme', next);
-            document.getElementById('themeToggle').innerText = next === 'dark' ? '☀️' : '🌙';
+            updateThemeButton(next);
         }
-        const savedTheme = localStorage.getItem('loopTheme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        document.getElementById('themeToggle').innerText = savedTheme === 'dark' ? '☀️' : '🌙';
+        window.toggleTheme = toggleTheme;
 
-        function showLogoutModal() {
+        const currentSavedTheme = localStorage.getItem('loopTheme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentSavedTheme);
+        updateThemeButton(currentSavedTheme);
+
+        async function showLogoutModal() {
             const confirmed = await LoopDialog.confirm("Ви дійсно бажаєте вийти з облікового запису?", { title: "Вихід", confirmText: "Вийти" });
             if (confirmed) {
+            if (window.performLoopLogout) {
+                await window.performLoopLogout('/login.html');
+            } else {
                 localStorage.removeItem('loopToken');
+                localStorage.removeItem('token');
                 localStorage.removeItem('loopRefreshToken');
                 localStorage.removeItem('loopUserRole');
+                localStorage.removeItem('user');
+                sessionStorage.clear();
                 window.location.href = '/login.html';
             }
         }
-        function toggleNotifications() {
-            window.location.href = '/profile.html#orders';
         }
     </script>
     <script src="/js/responsive-nav.js" defer></script>

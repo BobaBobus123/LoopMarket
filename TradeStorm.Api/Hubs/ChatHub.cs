@@ -101,6 +101,42 @@ public class ChatHub : Hub
                     return;
                 }
 
+                // 🛡️ АНТИШАХРАЙСЬКИЙ ФІЛЬТР: Перевірка на фішинг, підроблені сайти оплат та скорочувачі посилань
+                if (PhishingGuard.IsPhishingOrScam(text, out var scamReason))
+                {
+                    Console.WriteLine($"🚨 [Антифрод] Заблоковано фішингове повідомлення від ID {senderId}: '{text}' ({scamReason})");
+
+                    // 1. Попередження відправнику
+                    await Clients.Caller.SendAsync("ErrorMessage", $"🛡️ Повідомлення заблоковано системою безпеки Loop Захист! {scamReason}. Для вашої безпеки та безпеки співрозмовника надсилання зовнішніх платіжних посилань суворо заборонено.");
+
+                    // 2. Фіксація скарги на шахрайство
+                    var autoComplaint = new Complaint
+                    {
+                        ReporterId = receiverId,
+                        TargetUserId = senderId,
+                        Reason = "Автоматичний захист: спроба фішингу або підозріле платіжне посилання",
+                        Details = $"Виявлена загроза: {scamReason}\nТекст: {text}",
+                        Status = ComplaintStatus.Pending,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.Complaints.Add(autoComplaint);
+
+                    // 3. Запис в журнал аудиту безпеки
+                    var auditLog = new AdminAuditLog
+                    {
+                        AdminId = 1,
+                        AdminEmail = "security-guard@loopmarket.ua",
+                        Action = "ANTIFRAUD_PHISHING_BLOCKED",
+                        TargetType = "User",
+                        TargetId = senderId,
+                        Details = $"Спроба надсилання фішингу користувачу {receiverId}. Причина: {scamReason}. Текст: {text}",
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.AdminAuditLogs.Add(auditLog);
+                    await _context.SaveChangesAsync();
+                    return;
+                }
+
                 // 1. Зберігаємо повідомлення в базу даних
                 var message = new Message
                 {
@@ -145,8 +181,17 @@ public class ChatHub : Hub
                 var receiver = await _context.Users.FindAsync(receiverId);
                 if (receiver != null && receiver.TelegramChatId != 0 && receiver.ReceiveTelegramNotifications)
                 {
-                    string notificationText = $"💬 Нове повідомлення від {senderName}:\n\"{text}\"\n\nПерейдіть на Loop Market, щоб відповісти!";
-                    await _telegramService.SendNotificationAsync(receiver.TelegramChatId, notificationText);
+                    // 🛡️ Захист від надсилання сповіщення відправнику про власне повідомлення або на той самий TelegramChatId
+                    var senderUser = sender ?? await _context.Users.FindAsync(senderId);
+                    if (senderUser != null && senderUser.TelegramChatId == receiver.TelegramChatId)
+                    {
+                        Console.WriteLine($"⚠️ Пропуск Telegram-сповіщення: у відправника ID {senderId} та отримувача ID {receiverId} однаковий TelegramChatId ({receiver.TelegramChatId})!");
+                    }
+                    else
+                    {
+                        string notificationText = $"💬 Нове повідомлення від {senderName}:\n\"{text}\"\n\nПерейдіть на Loop Market, щоб відповісти!";
+                        await _telegramService.SendNotificationAsync(receiver.TelegramChatId, notificationText);
+                    }
                 }
             }
             else

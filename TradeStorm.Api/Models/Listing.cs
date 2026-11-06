@@ -29,4 +29,5 @@ public class Listing
     public bool IsShippingAvailable { get; set; }
     public string Status { get; set; } = "Active"; // Active, Sold, Reserved
     public bool IsFeatured { get; set; } = false;
+    public int ViewsCount { get; set; } = 0;
 }

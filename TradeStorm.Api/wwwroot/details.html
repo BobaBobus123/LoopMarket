@@ -15,43 +15,7 @@
     <script>
                 const savedTheme = localStorage.getItem('loopTheme') || 'light';
                 document.documentElement.setAttribute('data-theme', savedTheme);
-        async function reportListing() {
-            if (!currentItem || !currentItem.sellerId) return;
-            const sellerName = currentItem.seller ? (currentItem.seller.firstName + ' ' + (currentItem.seller.lastName || '')) : 'продавця';
-            const result = await LoopDialog.complaint(sellerName);
-            if (result) {
-                try {
-                    const token = localStorage.getItem('loopToken');
-                    if (!token) {
-                        LoopToast.error("Для подання скарги необхідно увійти в акаунт");
-                        return;
-                    }
-                    const res = await fetch('/api/complaints', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({
-                            targetUserId: currentItem.sellerId,
-                            listingId: currentItem.id,
-                            reason: result.reason,
-                            details: result.details
-                        })
-                    });
-                    const data = await res.json();
-                    if (res.ok) {
-                        LoopToast.success("Дякуємо! Вашу скаргу надіслано оператору LoopMarket. Ми перевіримо порушення найближчим часом.");
-                    } else {
-                        LoopToast.error(data.error || "Не вдалося надіслати скаргу");
-                    }
-                } catch (e) {
-                    LoopToast.error("Помилка надсилання скарги на сервер");
-                }
-            }
-        }
-
-    </script>
+        </script>
 
     <style>
         :root {
@@ -1057,6 +1021,7 @@
     </style>
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
+    <script src="/js/loop-dialogs.js"></script>
 </head>
 <body>
     <header>
@@ -1170,8 +1135,13 @@
                     <div class="spec-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><strong id="itemLocation"></strong></div>
                     <div class="spec-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg><span id="itemCondition"></span></div>
                     <div class="spec-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg><span id="itemShipping"></span></div>
-                    <div class="spec-item" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="itemDate"></span>
+                    <div class="spec-item" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="itemDate"></span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--primary-light); font-weight: 700;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><span id="itemViews">1 перегляд</span>
+                        </div>
                     </div>
                 </div>
 
@@ -1405,6 +1375,88 @@
                                 </div>
                             </div>
                             <input type="hidden" id="orderPaymentMethod" value="Накладений платіж (при отриманні)">
+
+                            <!-- 💳 ІНТЕРАКТИВНИЙ ШЛЮЗ ОПЛАТИ "LOOP ЗАХИСТ" -->
+                            <div id="onlineCardGatewaySection" style="display: none; margin-top: 14px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 18px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <div style="font-size: 0.85rem; font-weight: 800; color: var(--primary-light); display: flex; align-items: center; gap: 6px;">
+                                        🛡️ Loop Захист (Безпечний ескроу-холдинг)
+                                    </div>
+                                    <span style="font-size: 0.72rem; color: var(--text-muted); background: var(--surface); padding: 2px 8px; border-radius: 6px; border: 1px solid var(--border-color);">3D Secure 2.0</span>
+                                </div>
+
+                                <!-- 3D Віртуальна банківська картка -->
+                                <div style="perspective: 1000px; width: 100%; max-width: 320px; height: 180px; margin: 0 auto 16px;">
+                                    <div id="virtualCardInner" style="position: relative; width: 100%; height: 100%; text-align: left; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; border-radius: 16px; box-shadow: 0 12px 30px rgba(0,0,0,0.35);">
+                                        
+                                        <!-- Лицьовий бік (Front) -->
+                                        <div style="position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 16px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #064e3b 100%); border: 1px solid rgba(255,255,255,0.18); padding: 16px 20px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: white;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <div style="width: 34px; height: 26px; background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); border-radius: 5px; border: 1px solid #fef08a;"></div>
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 6a6 6 0 0 1 6 6"/><path d="M12 10a2 2 0 0 1 2 2"/></svg>
+                                                </div>
+                                                <div id="cardBrandLogo" style="font-weight: 800; font-size: 1.05rem; letter-spacing: 1px; color: #10b981;">Loop Захист</div>
+                                            </div>
+
+                                            <div id="cardDisplayNumber" style="font-family: 'Courier New', monospace; font-size: 1.15rem; font-weight: 700; letter-spacing: 2px; color: #f8fafc; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">•••• •••• •••• ••••</div>
+
+                                            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                                <div>
+                                                    <div style="font-size: 0.6rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">Власник картки</div>
+                                                    <div id="cardDisplayName" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #ffffff; white-space: nowrap; overflow: hidden; max-width: 170px;">КЛІЄНТ LOOP MARKET</div>
+                                                </div>
+                                                <div>
+                                                    <div style="font-size: 0.6rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">Термін</div>
+                                                    <div id="cardDisplayExpiry" style="font-family: 'Courier New', monospace; font-size: 0.85rem; font-weight: 700; color: #ffffff;">MM/YY</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Зворотний бік (Back) -->
+                                        <div style="position: absolute; width: 100%; height: 100%; backface-visibility: hidden; transform: rotateY(180deg); border-radius: 16px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(255,255,255,0.18); box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: white;">
+                                            <div style="height: 38px; background: #020617; width: 100%; margin-top: 14px;"></div>
+                                            <div style="padding: 0 20px 20px 20px;">
+                                                <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
+                                                    <div style="font-size: 0.65rem; color: #94a3b8;">CVV:</div>
+                                                    <div id="cardDisplayCvv" style="background: white; color: #0f172a; font-family: 'Courier New', monospace; font-weight: 800; font-size: 0.95rem; padding: 4px 12px; border-radius: 4px; letter-spacing: 2px;">•••</div>
+                                                </div>
+                                                <div style="font-size: 0.65rem; color: #64748b; margin-top: 10px; text-align: center;">
+                                                    Кошти резервуються в ескроу та захищені протоколом Loop Safe
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Експрес кнопки Apple Pay / Google Pay -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;">
+                                    <button type="button" onclick="fillExpressPay('Apple Pay')" style="background: #000000; color: #ffffff; border: 1px solid #334155; border-radius: 10px; padding: 9px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                         Pay
+                                    </button>
+                                    <button type="button" onclick="fillExpressPay('Google Pay')" style="background: var(--surface); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 9px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                        <span style="font-weight: 800;"><span style="color:#4285F4">G</span><span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span><span style="color:#34A853">l</span><span style="color:#EA4335">e</span> Pay</span>
+                                    </button>
+                                </div>
+
+                                <!-- Поля вводу картки -->
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <div>
+                                        <label style="display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Номер картки *</label>
+                                        <input type="text" id="cardInputNumber" placeholder="4441 •••• •••• ••••" maxlength="19" oninput="onCardNumberInput(this)" style="width: 100%; box-sizing: border-box; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 14px; color: var(--text-main); font-family: monospace; font-size: 0.92rem; outline: none;">
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                        <div>
+                                            <label style="display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Термін дії (ММ/РР) *</label>
+                                            <input type="text" id="cardInputExpiry" placeholder="12/28" maxlength="5" oninput="onCardExpiryInput(this)" style="width: 100%; box-sizing: border-box; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 14px; color: var(--text-main); font-family: monospace; font-size: 0.92rem; outline: none;">
+                                        </div>
+                                        <div>
+                                            <label style="display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">CVV код *</label>
+                                            <input type="password" id="cardInputCvv" placeholder="•••" maxlength="3" onfocus="flipCard(true)" onblur="flipCard(false)" oninput="onCardCvvInput(this)" style="width: 100%; box-sizing: border-box; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 14px; color: var(--text-main); font-family: monospace; font-size: 0.92rem; outline: none;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- 4. Коментар -->
@@ -1835,7 +1887,7 @@
             chatBtn: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:8px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
             clock: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
             shield: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>',
-            verifiedStudent: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>',
+            verifiedUser: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>',
             sparkles: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>'
         };
 
@@ -1896,13 +1948,7 @@
         const currentUser = getJwtUserData(token);
 
         if (currentUser) {
-            if (dynamicIcons) {
-                dynamicIcons.innerHTML = `
-                    <button class="nav-pill" id="notifBtn" onclick="toggleNotifications()">
-                        ${ICONS.bell} Сповіщення <span style="background: #ef4444; color: white; font-size: 0.65rem; padding: 1px 5px; border-radius: 10px; font-weight: bold; display:none;" id="globalUnreadBadge">0</span>
-                    </button>
-                `;
-            }
+// dynamicIcons not used
 
             if (headerBtns) {
                 headerBtns.innerHTML = `
@@ -1934,9 +1980,18 @@
             const m = document.getElementById('logoutModal');
             if (m) m.classList.remove('active'); 
         }
-        function confirmLogoutAction() {
-            localStorage.removeItem('loopToken');
-            window.location.reload();
+        async function confirmLogoutAction() {
+            if (window.performLoopLogout) {
+                await window.performLoopLogout('/login.html');
+            } else {
+                localStorage.removeItem('loopToken');
+                localStorage.removeItem('token');
+                localStorage.removeItem('loopRefreshToken');
+                localStorage.removeItem('loopUserRole');
+                localStorage.removeItem('user');
+                sessionStorage.clear();
+                window.location.href = '/login.html';
+            }
         }
 
         let currentListingId = null;
@@ -1978,6 +2033,8 @@
                     return;
                 }
                 const item = await response.json();
+                window.currentItem = item;
+                window.currentListingData = item;
 
                 currentSellerId = item.sellerId;
                 if (currentSellerId) {
@@ -2062,6 +2119,8 @@
                 if (dateEl) {
                     dateEl.innerText = `Опубліковано: ${new Date(item.createdAt || Date.now()).toLocaleDateString('uk-UA')}`;
                 }
+                const viewsEl = document.getElementById('itemViews');
+                if (viewsEl) viewsEl.innerText = `${item.viewsCount || 1} переглядів`;
 
                 // Вибране (синхронізація з БД)
                 const favs = JSON.parse(localStorage.getItem('loopFavorites') || '[]');
@@ -2161,11 +2220,13 @@
                 const actionButtons = document.getElementById('actionButtons');
                 if (actionButtons) {
                     let buttonsHtml = '';
+                    const isOwner = Boolean(currentUserId && currentUserId === item.sellerId);
+                    const isAdmin = Boolean((activeUser && activeUser.role === 'Admin') || localStorage.getItem('loopUserRole') === 'Admin');
 
                     if (item.status === 'Sold') {
                         buttonsHtml += `<div style="padding: 14px; background: rgba(239, 68, 68, 0.1); border: 1.5px solid #ef4444; border-radius: 12px; color: #ef4444; font-weight: 800; text-align: center; margin-bottom: 12px;">${isServiceListing ? 'Надання послуги завершено' : 'Цей товар вже продано'}</div>`;
-                    } else if (currentUserId && (currentUserId === item.sellerId || (activeUser && activeUser.role === 'Admin') || localStorage.getItem('loopUserRole') === 'Admin')) {
-                        // ВЛАСНЕ ОГОЛОШЕННЯ
+                    } else if (isOwner) {
+                        // ВЛАСНЕ ОГОЛОШЕННЯ (СПРАВЖНІЙ АВТОР)
                         if (isServiceListing) {
                             buttonsHtml += `
                                 <div style="background: rgba(37, 99, 235, 0.08); border: 1.5px solid #2563eb; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px;">
@@ -2222,6 +2283,25 @@
                         }
                         buttonsHtml += `<a href="/messages.html?seller=${item.sellerId}&item=${item.id}" class="btn-chat">${ICONS.chatBtn} Написати ${isServiceListing ? 'майстру' : 'продавцю'}</a>`;
                         buttonsHtml += `<button type="button" onclick="reportListing()" class="btn-report" style="width: 100%; margin-top: 10px; padding: 10px; background: transparent; border: 1.5px dashed rgba(239, 68, 68, 0.4); color: #ef4444; border-radius: 12px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.08)'" onmouseout="this.style.background='transparent'">⚠️ Поскаржитися на порушення</button>`;
+
+                        // Якщо переглядає Адміністратор (але не є автором) — показати окрему акуратну панель модератора
+                        if (isAdmin) {
+                            buttonsHtml += `
+                                <div style="margin-top: 14px; padding: 12px 14px; background: rgba(37, 99, 235, 0.08); border: 1.5px dashed rgba(37, 99, 235, 0.35); border-radius: 12px;">
+                                    <div style="font-size: 0.8rem; font-weight: 800; color: #2563eb; display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                                        🛡️ Інструменти модератора безпеки (Admin):
+                                    </div>
+                                    <div style="display: flex; gap: 6px;">
+                                        <button type="button" onclick="window.location.href='/edit.html?id=${item.id}'" style="flex: 1; padding: 8px; font-size: 0.82rem; font-weight: 700; background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); cursor: pointer;">
+                                            ✏️ Редагувати
+                                        </button>
+                                        <button type="button" onclick="deleteListing(${item.id})" style="flex: 1; padding: 8px; font-size: 0.82rem; font-weight: 700; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #ef4444; cursor: pointer;">
+                                            🗑️ Видалити
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }
                     }
                     actionButtons.innerHTML = buttonsHtml;
                 }
@@ -2266,12 +2346,17 @@
                         }
 
                         list.innerHTML = data.reviews.map(r => `
-                            <div style="background: var(--surface); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
-                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">
+                            <div style="background: var(--surface); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px;">
                                     <span><b>${r.author ? r.author.firstName + ' ' + (r.author.lastName || '') : 'Користувач'}</b></span>
                                     <span style="display:inline-flex;align-items:center;gap:2px;">${renderStars(r.rating)}</span>
                                 </div>
-                                <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 6px;">${r.comment || 'Без коментаря'}</p>
+                                ${r.isVerifiedPurchase ? `
+                                    <div style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.74rem; color: #10b981; font-weight: 700; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); padding: 2px 8px; border-radius: 6px; margin-bottom: 6px;">
+                                        🛡️ Перевірена угода (Loop Захист)
+                                    </div>
+                                ` : ''}
+                                <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 6px; line-height: 1.4;">${r.comment || 'Без коментаря'}</p>
 
                                 ${r.listing ? `
                                     <a href="/details.html?id=${r.listing.id}" style="display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); text-decoration: none; margin-top: 6px;">
@@ -2494,14 +2579,102 @@
             document.getElementById('orderPaymentMethod').value = method;
             document.querySelectorAll('.payment-card').forEach(p => p.classList.remove('active'));
 
+            const cardGateway = document.getElementById('onlineCardGatewaySection');
+
             if (method.includes('Накладений')) {
                 document.getElementById('payCard_cod')?.classList.add('active');
+                if (cardGateway) cardGateway.style.display = 'none';
             } else if (method.includes('карткою')) {
                 document.getElementById('payCard_card')?.classList.add('active');
+                if (cardGateway) {
+                    cardGateway.style.display = 'block';
+                    const buyerName = document.getElementById('orderBuyerName')?.value.trim();
+                    const cardDisplayName = document.getElementById('cardDisplayName');
+                    if (cardDisplayName && buyerName) {
+                        cardDisplayName.innerText = buyerName.toUpperCase();
+                    }
+                }
             } else {
                 document.getElementById('payCard_cash')?.classList.add('active');
+                if (cardGateway) cardGateway.style.display = 'none';
             }
         };
+
+        // ==========================================
+        // 💳 INTERACTIVE PAYMENT GATEWAY (LOOP ЗАХИСТ)
+        // ==========================================
+        window.flipCard = function(isFlipped) {
+            const card = document.getElementById('virtualCardInner');
+            if (card) {
+                card.style.transform = isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+            }
+        };
+
+        window.onCardNumberInput = function(input) {
+            let val = input.value.replace(/\D/g, '').substring(0, 16);
+            let formatted = val.match(/.{1,4}/g)?.join(' ') || '';
+            input.value = formatted;
+
+            const display = document.getElementById('cardDisplayNumber');
+            if (display) {
+                display.innerText = formatted.padEnd(19, '•');
+            }
+
+            const brand = document.getElementById('cardBrandLogo');
+            if (brand) {
+                if (val.startsWith('4')) brand.innerHTML = '<span style="color:#38bdf8;font-weight:900;">VISA</span>';
+                else if (val.startsWith('5')) brand.innerHTML = '<span style="color:#f97316;font-weight:900;">Mastercard</span>';
+                else brand.innerText = 'Loop Захист';
+            }
+        };
+
+        window.onCardExpiryInput = function(input) {
+            let val = input.value.replace(/\D/g, '').substring(0, 4);
+            if (val.length >= 2) {
+                input.value = val.substring(0, 2) + '/' + val.substring(2);
+            } else {
+                input.value = val;
+            }
+            const display = document.getElementById('cardDisplayExpiry');
+            if (display) {
+                display.innerText = input.value || 'MM/YY';
+            }
+        };
+
+        window.onCardCvvInput = function(input) {
+            let val = input.value.replace(/\D/g, '').substring(0, 3);
+            input.value = val;
+            const display = document.getElementById('cardDisplayCvv');
+            if (display) {
+                display.innerText = val ? val : '•••';
+            }
+        };
+
+        window.fillExpressPay = function(walletName) {
+            const numInput = document.getElementById('cardInputNumber');
+            const expInput = document.getElementById('cardInputExpiry');
+            const cvvInput = document.getElementById('cardInputCvv');
+            const nameInput = document.getElementById('orderBuyerName');
+
+            if (numInput && expInput && cvvInput) {
+                numInput.value = '4441 8901 2345 6789';
+                window.onCardNumberInput(numInput);
+                expInput.value = '12/28';
+                window.onCardExpiryInput(expInput);
+                cvvInput.value = '777';
+                window.onCardCvvInput(cvvInput);
+
+                const cardName = document.getElementById('cardDisplayName');
+                if (cardName && nameInput && nameInput.value.trim()) {
+                    cardName.innerText = nameInput.value.trim().toUpperCase();
+                }
+
+                if (window.LoopToast) {
+                    LoopToast.success(`💳 Реквізити ${walletName} автоматично додано та верифіковано!`);
+                }
+            }
+        };
+
 
         function updateOrderCostSummary() {
             const basePrice = window.currentBasePriceUah || 0;
@@ -3284,41 +3457,7 @@
         };
         loadNotifications();
 
-        async function reportListing() {
-            if (!currentItem || !currentItem.sellerId) return;
-            const sellerName = currentItem.seller ? (currentItem.seller.firstName + ' ' + (currentItem.seller.lastName || '')) : 'продавця';
-            const result = await LoopDialog.complaint(sellerName);
-            if (result) {
-                try {
-                    const token = localStorage.getItem('loopToken');
-                    if (!token) {
-                        LoopToast.error("Для подання скарги необхідно увійти в акаунт");
-                        return;
-                    }
-                    const res = await fetch('/api/complaints', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({
-                            targetUserId: currentItem.sellerId,
-                            listingId: currentItem.id,
-                            reason: result.reason,
-                            details: result.details
-                        })
-                    });
-                    const data = await res.json();
-                    if (res.ok) {
-                        LoopToast.success("Дякуємо! Вашу скаргу надіслано оператору LoopMarket. Ми перевіримо порушення найближчим часом.");
-                    } else {
-                        LoopToast.error(data.error || "Не вдалося надіслати скаргу");
-                    }
-                } catch (e) {
-                    LoopToast.error("Помилка надсилання скарги на сервер");
-                }
-            }
-        }
+
 
     </script>
 <script>
@@ -3344,42 +3483,82 @@
                 if (btnLo) btnLo.style.display = 'none';
             }
         })();
-        async function reportListing() {
-            if (!currentItem || !currentItem.sellerId) return;
-            const sellerName = currentItem.seller ? (currentItem.seller.firstName + ' ' + (currentItem.seller.lastName || '')) : 'продавця';
-            const result = await LoopDialog.complaint(sellerName);
-            if (result) {
-                try {
-                    const token = localStorage.getItem('loopToken');
-                    if (!token) {
-                        LoopToast.error("Для подання скарги необхідно увійти в акаунт");
-                        return;
-                    }
-                    const res = await fetch('/api/complaints', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({
-                            targetUserId: currentItem.sellerId,
-                            listingId: currentItem.id,
-                            reason: result.reason,
-                            details: result.details
-                        })
-                    });
-                    const data = await res.json();
-                    if (res.ok) {
-                        LoopToast.success("Дякуємо! Вашу скаргу надіслано оператору LoopMarket. Ми перевіримо порушення найближчим часом.");
-                    } else {
-                        LoopToast.error(data.error || "Не вдалося надіслати скаргу");
-                    }
-                } catch (e) {
-                    LoopToast.error("Помилка надсилання скарги на сервер");
+
+
+            async function reportListing() {
+            const item = window.currentItem || window.currentListingData;
+            if (!item || !item.sellerId) {
+                console.warn("[Report] Item or sellerId not ready", item);
+                if (typeof LoopToast !== 'undefined') LoopToast.error("Дані оголошення ще завантажуються...");
+                return;
+            }
+
+            const token = localStorage.getItem('loopToken') || localStorage.getItem('token');
+            if (!token) {
+                if (typeof LoopToast !== 'undefined') {
+                    LoopToast.error("Для подання скарги необхідно увійти в акаунт");
+                } else {
+                    alert("Для подання скарги необхідно увійти в акаунт");
                 }
+                setTimeout(() => {
+                    window.location.href = '/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search);
+                }, 1200);
+                return;
+            }
+
+            const sellerName = item.seller ? `${item.seller.firstName || ''} ${item.seller.lastName || ''}`.trim() : 'продавця';
+            
+            if (typeof LoopDialog === 'undefined' || !LoopDialog.complaint) {
+                const reason = prompt("Вкажіть причину скарги (наприклад: Шахрайство, Спам, Невідповідність):", "Шахрайство або фішинг");
+                if (!reason) return;
+                const details = prompt("Додаткові коментарі (необов'язково):", "");
+                await submitComplaintApi(item, reason, details || '', token);
+                return;
+            }
+
+            const result = await LoopDialog.complaint(sellerName || 'продавця');
+            if (result && result.reason) {
+                await submitComplaintApi(item, result.reason, result.details || '', token);
             }
         }
 
+        async function submitComplaintApi(item, reason, details, token) {
+            try {
+                const res = await fetch('/api/complaints', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        targetUserId: item.sellerId,
+                        listingId: item.id,
+                        reason: reason,
+                        details: details
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    if (typeof LoopToast !== 'undefined') {
+                        LoopToast.success("Дякуємо! Вашу скаргу зареєстровано та передано модератору безпеки.");
+                    } else {
+                        alert("Дякуємо! Вашу скаргу зареєстровано та передано модератору безпеки.");
+                    }
+                } else {
+                    if (typeof LoopToast !== 'undefined') {
+                        LoopToast.error(data.error || "Не вдалося надіслати скаргу");
+                    } else {
+                        alert(data.error || "Не вдалося надіслати скаргу");
+                    }
+                }
+            } catch (e) {
+                if (typeof LoopToast !== 'undefined') {
+                    LoopToast.error("Помилка надсилання скарги на сервер");
+                } else {
+                    alert("Помилка надсилання скарги на сервер");
+                }
+            }
+        }
     </script>
     <!-- Realtime In-App Push Notifications -->
     <script src="/js/push-notifications.js"></script>

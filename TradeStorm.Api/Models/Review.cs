@@ -22,5 +22,7 @@ public class Review
 
     public string? Comment { get; set; } // Текст відгуку
 
+    public bool IsVerifiedPurchase { get; set; } = false;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

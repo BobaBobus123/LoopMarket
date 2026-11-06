@@ -78,15 +78,15 @@ public class ListingRepository : Repository<Listing>, IListingRepository
 
         if (sortBy == "price_asc")
         {
-            query = query.OrderBy(l => l.Price);
+            query = query.OrderByDescending(l => l.IsFeatured).ThenBy(l => l.Price);
         }
         else if (sortBy == "price_desc")
         {
-            query = query.OrderByDescending(l => l.Price);
+            query = query.OrderByDescending(l => l.IsFeatured).ThenByDescending(l => l.Price);
         }
         else
         {
-            query = query.OrderByDescending(l => l.CreatedAt);
+            query = query.OrderByDescending(l => l.IsFeatured).ThenByDescending(l => l.CreatedAt);
         }
 
         int p = (page.HasValue && page.Value > 0) ? page.Value : 1;
@@ -105,11 +105,13 @@ public class ListingRepository : Repository<Listing>, IListingRepository
                 condition = l.Condition,
                 location = l.Location,
                 isShippingAvailable = l.IsShippingAvailable,
+                isFeatured = l.IsFeatured,
                 status = l.Status,
                 createdAt = l.CreatedAt,
                 categoryName = l.Category != null ? l.Category.Name : "Інше",
                 categoryId = l.CategoryId,
                 sellerId = l.SellerId,
+                viewsCount = l.ViewsCount,
                 seller = l.Seller != null ? new
                 {
                     id = l.Seller.Id,

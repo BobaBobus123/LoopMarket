@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+    <script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Документація розробника & REST API | LoopMarket</title>
@@ -1028,7 +1029,7 @@
                 </h1>
             </div>
             <p class="hero-desc">
-                Повний технічний довідник для розробників: каталог товарів, безпечне холдування коштів для студентських послуг (Loop Захист), двосторонній SignalR чат у реальному часі, інтеграція Нової Пошти та автентифікація через JWT токени.
+                Повний технічний довідник для розробників: каталог товарів, безпечне холдування коштів для послуг та замовлень (Loop Захист), двосторонній SignalR чат у реальному часі, інтеграція Нової Пошти та автентифікація через JWT токени.
             </p>
             <div class="hero-stats-grid">
                 <div class="stat-card">
@@ -1097,10 +1098,10 @@
                     👑 Нікіта (Admin / ID 1)
                 </button>
                 <button class="auth-chip" onclick="setAuthPreset('vova', this)">
-                    💼 Вова (Продавець / ID 2)
+                    💼 Вова (Користувач / ID 3)
                 </button>
                 <button class="auth-chip" onclick="setAuthPreset('buyer', this)">
-                    🛒 Покупець (ID 3)
+                    🛒 Покупець (ID 8)
                 </button>
             </div>
             <div class="token-input-wrap">
@@ -1122,6 +1123,8 @@
                 <div class="cat-chips-scroll" id="catFilterChips">
                     <button class="cat-chip active" onclick="filterByTag('all', this)">Всі (33)</button>
                     <button class="cat-chip" onclick="filterByTag('Auth', this)">Auth</button>
+                    <button class="cat-chip" onclick="filterByTag('Security', this)">🛡️ Безпека & Захист (Етап 6)</button>
+                    <button class="cat-chip" onclick="filterByTag('OAuth', this)">🌐 OAuth & Секрети (Етап 7)</button>
                     <button class="cat-chip" onclick="filterByTag('Users', this)">Users</button>
                     <button class="cat-chip" onclick="filterByTag('Listings', this)">Listings</button>
                     <button class="cat-chip" onclick="filterByTag('Orders', this)">Orders (Loop Захист)</button>
@@ -1170,7 +1173,7 @@
     <div style="margin: 10px 0 4px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Тіло запиту (Request Body JSON):</div>
     <textarea id="body-ep-card-0" class="body-editor">{
   &quot;email&quot;: &quot;nikitazhidenko@gmail.com&quot;,
-  &quot;password&quot;: &quot;Password123!&quot;
+  &quot;password&quot;: &quot;123456&quot;
 }</textarea>
     
 
@@ -1253,6 +1256,263 @@
             </div>
         </div>
     </div>
+
+    <!-- ==================== ЕТАП 5: JWT REFRESH TOKEN ROTATION ==================== -->
+    <div class="endpoint-card" id="ep-card-refresh" data-tags="Auth Security" data-search="post /api/users/refresh оновлення пари jwt токенів (ротація refresh token) етап 5 auth security">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-refresh')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-post">POST</span>
+                <span class="endpoint-path">/api/users/refresh</span>
+                <span class="endpoint-summary">Оновлення пари JWT токенів (Ротація Refresh Token) [Етап 5]</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Auth</span>
+                <span class="tag-pill" style="background: rgba(16,185,129,0.15); color: #10b981;">Етап 5</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Перевіряє валідність поточного Refresh Token, видає нову пару токенів (Access Token на 60 хв + новий Refresh Token) та оновлює запис у БД (ротація токенів для захисту від крадіжки сесії).</p>
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Автоматично підставляє активні токени
+                    </span>
+                </div>
+
+                <div style="margin: 10px 0 4px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Тіло запиту (Request Body JSON):</div>
+                <textarea id="body-ep-card-refresh" class="body-editor">{
+  &quot;accessToken&quot;: &quot;AUTO_FILLED_ON_RUN&quot;,
+  &quot;refreshToken&quot;: &quot;AUTO_FILLED_ON_RUN&quot;
+}</textarea>
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-refresh" onclick="executeApiTest('ep-card-refresh', 'POST', '/api/users/refresh', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-refresh" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-refresh">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-refresh" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-refresh" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-refresh">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ЕТАП 5: JWT REVOCATION / LOGOUT ==================== -->
+    <div class="endpoint-card" id="ep-card-revoke" data-tags="Auth Security" data-search="post /api/users/revoke відкликання сесії (logout / token revocation) етап 5 auth security">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-revoke')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-post">POST</span>
+                <span class="endpoint-path">/api/users/revoke</span>
+                <span class="endpoint-summary">Відкликання сесії та анулювання Refresh Token [Етап 5]</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill">Auth</span>
+                <span class="tag-pill" style="background: rgba(16,185,129,0.15); color: #10b981;">Етап 5</span>
+                <span class="auth-indicator auth-lock" title="Потрібен Bearer JWT токен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bearer</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Анулює збережений у базі даних Refresh Token поточного користувача. Унеможливлює повторне отримання нових Access токенів без повторного введення логіна та пароля.</p>
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Вимагає активний Bearer JWT
+                    </span>
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-revoke" onclick="executeApiTest('ep-card-revoke', 'POST', '/api/users/revoke', true)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-revoke" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-revoke">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-revoke" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-revoke" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-revoke">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ЕТАП 6 & 7: SECURITY AUDIT & CONFIGURATION ==================== -->
+    <div class="endpoint-card" id="ep-card-sec-status" data-tags="Security OAuth Auth" data-search="get /api/system/security-status аудит безпеки, захисту від атак, rbac, rate limiting, owasp headers та конфігурації секретів етап 6 етап 7 security oauth">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-sec-status')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/system/security-status</span>
+                <span class="endpoint-summary">Аудит безпеки, захисту від атак та секретів [Етапи 5, 6, 7]</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill" style="background: rgba(37,99,235,0.15); color: #3b82f6;">Етап 6 & 7</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Повертає повний звіт про стан конфігурації безпеки системи: статус JWT, ролі RBAC, політики доступу, Rate Limiter (Brute-Force & DoS), OWASP Security Headers, CSRF захист, OAuth 2.0 провайдери та UserSecrets без розкриття чутливих даних.</p>
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-sec-status" onclick="executeApiTest('ep-card-sec-status', 'GET', '/api/system/security-status', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-sec-status" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-sec-status">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-sec-status" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-sec-status" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-sec-status">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ЕТАП 7: GOOGLE OAUTH 2.0 URL ==================== -->
+    <div class="endpoint-card" id="ep-card-google-url" data-tags="OAuth Auth" data-search="get /api/auth/google/url отримання url для перенаправлення на google oauth 2.0 authorization code flow етап 7 oauth auth">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-google-url')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-get">GET</span>
+                <span class="endpoint-path">/api/auth/google/url</span>
+                <span class="endpoint-summary">Отримання Google OAuth 2.0 URL (Authorization Code Flow) [Етап 7]</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill" style="background: rgba(245,158,11,0.15); color: #f59e0b;">OAuth 2.0</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Формує валідний URL перенаправлення на сервер авторизації Google OAuth 2.0 із передачею ClientId, RedirectUri, Scopes (openid email profile) та prompt=consent.</p>
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-google-url" onclick="executeApiTest('ep-card-google-url', 'GET', '/api/auth/google/url', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-google-url" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-google-url">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-google-url" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-google-url" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-google-url">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ЕТАП 7: OAUTH 2.0 SANDBOX DEMO ==================== -->
+    <div class="endpoint-card" id="ep-card-oauth-sandbox" data-tags="OAuth Auth" data-search="post /api/auth/external/sandbox демонстраційний вхід через oauth 2.0 sandbox етап 7 oauth auth">
+        <div class="endpoint-header" onclick="toggleEndpointCard('ep-card-oauth-sandbox')">
+            <div class="endpoint-main-info">
+                <span class="badge-method badge-post">POST</span>
+                <span class="endpoint-path">/api/auth/external/sandbox</span>
+                <span class="endpoint-summary">Вхід через OAuth 2.0 Sandbox (Демо для викладача) [Етап 7]</span>
+            </div>
+            <div class="endpoint-badges-right">
+                <span class="tag-pill" style="background: rgba(245,158,11,0.15); color: #f59e0b;">OAuth 2.0</span>
+                <span class="auth-indicator auth-globe" title="Публічний ендпоінт"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> Public</span>
+                <svg class="chevron-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+        </div>
+
+        <div class="endpoint-details">
+            <p class="details-desc">Демонстраційний режим зовнішньої автентифікації без необхідності наявності живих Google API credentials. Автоматично створює або авторизує користувача, верифікує його та випускає локальний JWT з Refresh токеном.</p>
+
+            <div class="tester-box">
+                <div class="tester-row-title">
+                    <span class="section-subhead" style="margin-bottom: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Інтерактивна консоль тестування
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                        Авторизація не обов'язкова
+                    </span>
+                </div>
+
+                <div style="margin: 10px 0 4px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Тіло запиту (Request Body JSON):</div>
+                <textarea id="body-ep-card-oauth-sandbox" class="body-editor">{
+  &quot;provider&quot;: &quot;Google&quot;,
+  &quot;email&quot;: &quot;user@loopmarket.com&quot;,
+  &quot;firstName&quot;: &quot;Користувач&quot;,
+  &quot;lastName&quot;: &quot;LoopMarket&quot;
+}</textarea>
+
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-oauth-sandbox" onclick="executeApiTest('ep-card-oauth-sandbox', 'POST', '/api/auth/external/sandbox', false)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <span>Виконати запит</span>
+                    </button>
+                    <span id="spinner-ep-card-oauth-sandbox" style="display: none; font-size: 0.82rem; color: #60a5fa;">Запит виконується...</span>
+                </div>
+
+                <div class="live-response-output" id="res-box-ep-card-oauth-sandbox">
+                    <div class="live-response-header">
+                        <span id="res-status-ep-card-oauth-sandbox" class="res-status-badge res-status-200">200 OK</span>
+                        <span id="res-time-ep-card-oauth-sandbox" class="res-time">14 ms</span>
+                    </div>
+                    <div class="res-json-code" id="res-body-ep-card-oauth-sandbox">{}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     
 
     <div class="endpoint-card" id="ep-card-2" data-tags="Users" data-search="get /api/users/me отримати профіль поточного користувача повертає повну інформацію про авторизованого користувача на основі bearer токена. users">
@@ -2859,7 +3119,7 @@
                 
 
                 <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
-                    <button type="button" class="btn-run-request" id="btn-run-ep-card-27" onclick="executeApiTest('ep-card-27', 'GET', '/api/delivery/novaposhta/warehouses', false)">
+                    <button type="button" class="btn-run-request" id="btn-run-ep-card-27" onclick="executeApiTest('ep-card-27', 'GET', '/api/delivery/novaposhta/warehouses?city=Київ', false)">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                         <span>Виконати запит</span>
                     </button>
@@ -4061,38 +4321,86 @@ function toggleTheme() {
     <script>
         const PRESETS = {
             nikita: {
-                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZWlkIjoiMSIsIm5hbWUiOiLRndGW0LrRltGC0LAg0JbQuNC00LXQvdC60L4iLCJyb2xlIjoiQWRtaW4iLCJlbWFpbCI6Im5pa2l0YXpoaWRlbmtvQGdtYWlsLmNvbSIsImV4cCI6MTk5OTk5OTk5OX0.mock_secret_signature"
+                email: "nikitazhidenko@gmail.com",
+                password: "123456",
+                name: "👑 Нікіта (Admin)"
             },
             vova: {
-                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZWlkIjoiMiIsIm5hbWUiOiLQktC-0LLQsCDQktCw0LrRg9C70LXQvdC60L4iLCJyb2xlIjoiU2VsbGVyIiwiZW1haWwiOiJ2b3ZhQGdtYWlsLmNvbSIsImV4cCI6MTk5OTk5OTk5OX0.mock_secret_signature"
+                email: "test1@gmail.com",
+                password: "123456",
+                name: "💼 Вова (Користувач)"
             },
             buyer: {
-                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwibmFtZWlkIjoiMyIsIm5hbWUiOiLQn9C-0LrRg9C_0LXRhiIsInJvbGUiOiJCdXllciIsImVtYWlsIjoiYnV5ZXJAbWFpbC5jb20iLCJleHAiOjE5OTk5OTk5OTl9.mock_secret_signature"
+                email: "testbuyer_orders@khta.edu.ua",
+                password: "123456",
+                name: "🛒 Покупець (Олександр)"
             }
         };
 
-        let currentActiveToken = PRESETS.nikita.token;
+        const tokenCache = {};
+        let currentActiveToken = "";
         let activeTag = 'all';
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const tokenInput = document.getElementById("activeJwtTokenInput");
-            if (tokenInput) tokenInput.value = currentActiveToken;
-        });
+        async function getPresetToken(presetKey) {
+            if (tokenCache[presetKey]) return tokenCache[presetKey];
+            const creds = PRESETS[presetKey];
+            if (!creds) return "";
+            try {
+                const res = await fetch("/api/users/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: creds.email, password: creds.password })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.token) {
+                        tokenCache[presetKey] = data.token;
+                        return data.token;
+                    }
+                }
+            } catch (e) {
+                console.warn("Помилка отримання токена для пресету", presetKey, e);
+            }
+            return "";
+        }
 
-        function setAuthPreset(presetKey, btnElem) {
+        async function setAuthPreset(presetKey, btnElem) {
             document.querySelectorAll(".auth-chip").forEach(b => b.classList.remove("active"));
             if (btnElem) btnElem.classList.add("active");
 
-            if (PRESETS[presetKey]) {
-                currentActiveToken = PRESETS[presetKey].token;
-                const tokenInput = document.getElementById("activeJwtTokenInput");
-                if (tokenInput) tokenInput.value = currentActiveToken;
+            const tokenInput = document.getElementById("activeJwtTokenInput");
+            if (tokenInput) {
+                tokenInput.value = "";
+                tokenInput.placeholder = "⚡ Отримання дійсного JWT токена...";
+            }
+
+            const token = await getPresetToken(presetKey);
+            if (token) {
+                currentActiveToken = token;
+                if (tokenInput) {
+                    tokenInput.value = token;
+                    tokenInput.placeholder = "Bearer JWT Token...";
+                }
+                if (window.LoopToast) {
+                    LoopToast.info(`Авторизовано як ${PRESETS[presetKey]?.name || presetKey}`);
+                }
             }
         }
 
         function updateActiveToken(val) {
             currentActiveToken = val.trim();
         }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const savedToken = localStorage.getItem("loopToken") || localStorage.getItem("token");
+            if (savedToken) {
+                currentActiveToken = savedToken;
+                const tokenInput = document.getElementById("activeJwtTokenInput");
+                if (tokenInput) tokenInput.value = savedToken;
+            } else {
+                await setAuthPreset("nikita", document.querySelector(".auth-chip.active"));
+            }
+        });
 
         function switchDocTab(tabId, btnElem) {
             document.querySelectorAll(".nav-tab-btn").forEach(b => b.classList.remove("active"));
@@ -4143,15 +4451,51 @@ function toggleTheme() {
             if (btn) btn.disabled = true;
             if (spinner) spinner.style.display = 'inline-block';
 
+                        // Parameter replacement with real DB entities
             let finalUrl = pathPattern;
-            finalUrl = finalUrl.replace('{id}', '9')
-                               .replace('{partnerId}', '2')
-                               .replace('{userId}', '1')
-                               .replace('{listingId}', '9');
+            if (cardId === 'ep-card-refresh') {
+                // Ensure valid token and refresh token in request body
+                const loginRes = await fetch('/api/users/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'nikitazhidenko@gmail.com', password: '123456' })
+                });
+                const loginData = await loginRes.json();
+                if (loginData && loginData.refreshToken) {
+                    const bodyEditor = document.getElementById('body-ep-card-refresh');
+                    if (bodyEditor) {
+                        bodyEditor.value = JSON.stringify({
+                            accessToken: loginData.token,
+                            refreshToken: loginData.refreshToken
+                        }, null, 2);
+                    }
+                }
+            }
+            if (pathPattern.includes('/api/orders/{id}')) {
+                finalUrl = finalUrl.replace('{id}', '2');
+            } else if (pathPattern.includes('/api/listings/{id}') && method === 'DELETE') {
+                finalUrl = finalUrl.replace('{id}', '999999');
+            } else {
+                finalUrl = finalUrl.replace('{id}', '8')
+                                   .replace('{partnerId}', '3')
+                                   .replace('{userId}', '1')
+                                   .replace('{listingId}', '8');
+            }
 
             const headers = { 'Accept': 'application/json' };
-            if (isAuthRequired && currentActiveToken) {
-                headers['Authorization'] = `Bearer ${currentActiveToken}`;
+            if (isAuthRequired) {
+                // Ensure active token is loaded if empty
+                if (!currentActiveToken) {
+                    const activeChip = document.querySelector(".auth-chip.active");
+                    const pKey = activeChip && activeChip.textContent.includes("Вова") ? "vova" : 
+                                 (activeChip && activeChip.textContent.includes("Покупець") ? "buyer" : "nikita");
+                    currentActiveToken = await getPresetToken(pKey);
+                    const tokenInput = document.getElementById("activeJwtTokenInput");
+                    if (tokenInput && currentActiveToken) tokenInput.value = currentActiveToken;
+                }
+                if (currentActiveToken) {
+                    headers['Authorization'] = `Bearer ${currentActiveToken}`;
+                }
             }
 
             let requestOptions = {
@@ -4177,6 +4521,17 @@ function toggleTheme() {
                     data = await response.json();
                 } else {
                     data = await response.text();
+                }
+
+                // If user logged in successfully via card-0, auto-refresh JWT token across docs
+                if (cardId === 'ep-card-0' && response.ok && data && data.token) {
+                    currentActiveToken = data.token;
+                    tokenCache['nikita'] = data.token;
+                    const tokenInput = document.getElementById("activeJwtTokenInput");
+                    if (tokenInput) tokenInput.value = data.token;
+                    if (window.LoopToast) {
+                        LoopToast.success("JWT токен автоматично збережено та активовано!");
+                    }
                 }
 
                 if (resBox) resBox.style.display = 'block';
@@ -4211,7 +4566,7 @@ function toggleTheme() {
             const elem = document.getElementById(elemId);
             if (!elem) return;
             navigator.clipboard.writeText(elem.textContent).then(() => {
-                LoopToast.success("Код скопійовано в буфер обміну!");
+                if (window.LoopToast) LoopToast.success("Код скопійовано в буфер обміну!");
             }).catch(e => console.error(e));
         }
     </script>

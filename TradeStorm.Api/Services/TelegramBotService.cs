@@ -8,8 +8,22 @@ using TradeStorm.Api.Data;
 
 namespace TradeStorm.Api.Services;
 
+public class TelegramLoginSession
+{
+    public string Code { get; set; } = string.Empty;
+    public bool IsApproved { get; set; }
+    public string? Token { get; set; }
+    public string? RefreshToken { get; set; }
+    public string? UserEmail { get; set; }
+    public string? UserName { get; set; }
+    public string? UserRole { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
 public class TelegramBotService : BackgroundService
 {
+    public static readonly System.Collections.Concurrent.ConcurrentDictionary<string, TelegramLoginSession> LoginSessions = new();
+
     private readonly TelegramBotClient? _botClient;
     private readonly IServiceScopeFactory _scopeFactory;
 
@@ -98,6 +112,67 @@ public class TelegramBotService : BackgroundService
 
         Console.WriteLine($"[Telegram Message] Повідомлення від {message.Chat.Id}: {message.Text ?? message.Type.ToString()}");
 
+                // 0. Авторизація через Telegram-бота: /start login_XYZ
+        if (message.Text != null && System.Text.RegularExpressions.Regex.IsMatch(message.Text, @"^/start\s+(login_[a-zA-Z0-9_]+)$"))
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(message.Text, @"^/start\s+(login_[a-zA-Z0-9_]+)$");
+            var code = match.Groups[1].Value.Trim();
+
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+
+            // Знаходимо користувача за TelegramChatId
+            var targetUser = await db.Users.FirstOrDefaultAsync(u => u.TelegramChatId == message.Chat.Id, cancellationToken);
+            if (targetUser == null)
+            {
+                // Автоматична реєстрація нового облікового запису через Telegram
+                var firstName = message.Chat.FirstName ?? "Користувач";
+                var lastName = message.Chat.LastName ?? "Telegram";
+                var email = !string.IsNullOrWhiteSpace(message.Chat.Username)
+                    ? $"{message.Chat.Username}@t.me"
+                    : $"tg_{message.Chat.Id}@loopmarket.ua";
+
+                targetUser = new TradeStorm.Api.Models.User
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    TelegramChatId = message.Chat.Id,
+                    IsPhoneVerified = true,
+                    Role = TradeStorm.Api.Models.UserRoles.Buyer,
+                    PasswordHash = "TELEGRAM_BOT_LOGIN",
+                    ReceiveTelegramNotifications = true
+                };
+                db.Users.Add(targetUser);
+                await db.SaveChangesAsync(cancellationToken);
+            }
+
+            var accessToken = tokenService.GenerateAccessToken(targetUser);
+            var refreshToken = tokenService.GenerateRefreshToken();
+            targetUser.RefreshToken = refreshToken;
+            targetUser.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            await db.SaveChangesAsync(cancellationToken);
+
+            // Підтверджуємо сесію для клієнта
+            if (LoginSessions.TryGetValue(code, out var session))
+            {
+                session.IsApproved = true;
+                session.Token = accessToken;
+                session.RefreshToken = refreshToken;
+                session.UserEmail = targetUser.Email;
+                session.UserName = $"{targetUser.FirstName} {targetUser.LastName}";
+                session.UserRole = targetUser.Role;
+            }
+
+            await botClient.SendMessage(
+                chatId: message.Chat.Id,
+                text: $"✅ <b>Вхід підтверджено!</b>\n\nВи успішно увійшли на платформу <b>LoopMarket</b> як <b>{targetUser.FirstName} {targetUser.LastName}</b>.\nБраузер автоматично відкриє ваш профіль.",
+                parseMode: ParseMode.Html,
+                cancellationToken: cancellationToken);
+            return;
+        }
+
         // 1. Коли користувач надсилає команду з прив'язкою акаунту /start verify_123
         if (message.Text != null && System.Text.RegularExpressions.Regex.IsMatch(message.Text, @"^/start\s+(?:verify_)?(\d+)$"))
         {
@@ -109,6 +184,13 @@ public class TelegramBotService : BackgroundService
                 var targetUser = await db.Users.FindAsync(new object[] { userId }, cancellationToken);
                 if (targetUser != null)
                 {
+                    // 🛡️ Гарантуємо унікальність: 1 Telegram Chat ID належить виключно 1 акаунту
+                    var oldUsers = await db.Users.Where(u => u.TelegramChatId == message.Chat.Id && u.Id != targetUser.Id).ToListAsync(cancellationToken);
+                    foreach (var ou in oldUsers)
+                    {
+                        ou.TelegramChatId = 0;
+                    }
+
                     targetUser.IsPhoneVerified = true;
                     targetUser.TelegramChatId = message.Chat.Id;
                     targetUser.ReceiveTelegramNotifications = true;
@@ -181,6 +263,13 @@ public class TelegramBotService : BackgroundService
 
             if (user != null)
             {
+                // 🛡️ Гарантуємо унікальність: відв'язуємо цей ChatId від будь-яких інших номерів
+                var oldUsers = await db.Users.Where(u => u.TelegramChatId == message.Chat.Id && u.Id != user.Id).ToListAsync(cancellationToken);
+                foreach (var ou in oldUsers)
+                {
+                    ou.TelegramChatId = 0;
+                }
+
                 user.IsPhoneVerified = true;
                 user.TelegramChatId = message.Chat.Id;
                 user.ReceiveTelegramNotifications = true;

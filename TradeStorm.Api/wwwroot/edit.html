@@ -11,10 +11,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <script>
-                const savedTheme = localStorage.getItem('loopTheme') || 'light';
-                document.documentElement.setAttribute('data-theme', savedTheme);
-    </script>
+    <script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
 
     <style>
         :root {

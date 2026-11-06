@@ -41,6 +41,11 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Listing>()
             .HasIndex(l => l.Status);
 
+        // Автор оголошення (SellerId) є абсолютно незмінним: автор назавжди закріплюється за тим, хто його створив
+        modelBuilder.Entity<Listing>()
+            .Property(l => l.SellerId)
+            .Metadata.SetAfterSaveBehavior(Microsoft.EntityFrameworkCore.Metadata.PropertySaveBehavior.Ignore);
+
         // Налаштування зв'язків замовлень
         modelBuilder.Entity<Order>()
             .HasOne(o => o.Buyer)

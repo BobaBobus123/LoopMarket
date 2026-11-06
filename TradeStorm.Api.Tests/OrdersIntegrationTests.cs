@@ -27,7 +27,7 @@ public class OrdersIntegrationTests : IClassFixture<CustomWebApplicationFactory>
         var client = _factory.CreateClient();
 
         // 1. Створюємо Продавця (Seller)
-        var sellerEmail = $"seller_{Guid.NewGuid():N}@kgta.edu.ua";
+        var sellerEmail = $"seller_{Guid.NewGuid():N}@loopmarket.com";
         await client.PostAsJsonAsync("/api/users", new CreateUserDto
         {
             FirstName = "Олександр",
@@ -57,7 +57,7 @@ public class OrdersIntegrationTests : IClassFixture<CustomWebApplicationFactory>
         int listingId = listingDoc.RootElement.GetProperty("id").GetInt32();
 
         // 3. Створюємо Покупця (Buyer)
-        var buyerEmail = $"buyer_{Guid.NewGuid():N}@kgta.edu.ua";
+        var buyerEmail = $"buyer_{Guid.NewGuid():N}@loopmarket.com";
         await client.PostAsJsonAsync("/api/users", new CreateUserDto
         {
             FirstName = "Михайло",

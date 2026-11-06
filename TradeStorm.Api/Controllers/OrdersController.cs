@@ -30,11 +30,30 @@ public class OrdersController : ControllerBase
         throw new UnauthorizedAccessException("Користувач не авторизований");
     }
 
+    [HttpPost("create-service")]
+    public async Task<ActionResult<OrderDto>> CreateServiceOrder([FromBody] CreateOrderDto dto)
+    {
+        if (string.IsNullOrEmpty(dto.DeliveryCity))
+            dto.DeliveryCity = dto.Address ?? "м. Київ";
+        if (string.IsNullOrEmpty(dto.DeliveryBranch))
+            dto.DeliveryBranch = !string.IsNullOrEmpty(dto.ExecutionDate)
+                ? $"За адресою {dto.Address ?? "замовника"}, {dto.ExecutionDate} {dto.ExecutionTime}".Trim()
+                : "За адресою замовника";
+        if (!dto.CustomTotalPrice.HasValue && dto.TotalPrice.HasValue)
+            dto.CustomTotalPrice = dto.TotalPrice;
+        if (string.IsNullOrEmpty(dto.Comment) && !string.IsNullOrEmpty(dto.Specifications))
+            dto.Comment = dto.Specifications;
+
+        return await CreateOrder(dto);
+    }
+
     [HttpPost]
     public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] CreateOrderDto dto)
     {
         try
         {
+            if (string.IsNullOrEmpty(dto.DeliveryCity)) dto.DeliveryCity = dto.Address ?? "м. Київ";
+            if (string.IsNullOrEmpty(dto.DeliveryBranch)) dto.DeliveryBranch = "Відділення / Адреса";
             var userId = GetCurrentUserId();
             var order = await _orderService.CreateOrderAsync(userId, dto);
             return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, order);

@@ -1960,9 +1960,18 @@
         // МОДАЛЬНЕ ВІКНО ВИХОДУ
         function showLogoutModal() { document.getElementById('logoutModal')?.classList.add('active'); }
         function closeLogoutModal() { document.getElementById('logoutModal')?.classList.remove('active'); }
-        function confirmLogout() {
-            localStorage.removeItem('loopToken');
-            window.location.href = '/index.html';
+        async function confirmLogout() {
+            if (window.performLoopLogout) {
+                await window.performLoopLogout('/login.html');
+            } else {
+                localStorage.removeItem('loopToken');
+                localStorage.removeItem('token');
+                localStorage.removeItem('loopRefreshToken');
+                localStorage.removeItem('loopUserRole');
+                localStorage.removeItem('user');
+                sessionStorage.clear();
+                window.location.href = '/login.html';
+            }
         }
         window.showLogoutModal = showLogoutModal;
         window.closeLogoutModal = closeLogoutModal;

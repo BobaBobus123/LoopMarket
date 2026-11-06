@@ -36,7 +36,7 @@ public class TokenService : ITokenService
             issuer: _config["Jwt:Issuer"] ?? "LoopMarketApi",
             audience: _config["Jwt:Audience"] ?? "LoopMarketUsers",
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(60), // Короткоживучий Access Token (60 хв)
+            expires: DateTime.UtcNow.AddDays(30), // Надійний термін для захисту проекту та демонстрації (30 днів)
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

@@ -25,7 +25,7 @@ public class ListingsIntegrationTests : IClassFixture<CustomWebApplicationFactor
     public async Task CreateListing_And_ToggleFavorite_ModifiesDatabaseCorrectly()
     {
         var client = _factory.CreateClient();
-        var uniqueEmail = $"seller_{Guid.NewGuid():N}@kgta.edu.ua";
+        var uniqueEmail = $"seller_{Guid.NewGuid():N}@loopmarket.com";
 
         // 1. Реєструємо та логінимо користувача
         var regDto = new CreateUserDto

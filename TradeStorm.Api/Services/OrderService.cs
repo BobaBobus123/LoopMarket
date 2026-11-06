@@ -65,6 +65,7 @@ public class OrderService : IOrderService
         }
 
         _context.Orders.Add(order);
+        await _context.SaveChangesAsync(); // Зберігаємо спочатку для отримання дійсного ID замовлення
 
         var notifTitle = isService ? "🛠 Нове замовлення послуги!" : "📦 Нове замовлення!";
         var notifMessage = isService
@@ -81,10 +82,10 @@ public class OrderService : IOrderService
         };
         _context.Notifications.Add(notif);
 
-        // Автоматичне повідомлення в чат сайту між покупцем і продавцем
+        // Автоматичне повідомлення в чат сайту між покупцем і продавцем (чистий текст без зайвих сирих HTML-тегів)
         var chatMsgText = isService
-            ? $"🛠 <b>Замовлення послуги #{order.Id}!</b>\nПослуга: {listing.Title}\nСума: {totalPrice:N0} грн\nДеталі: {dto.DeliveryBranch}\nЛокація: {dto.DeliveryCity}\nОплата: {order.PaymentMethod}" + (!string.IsNullOrWhiteSpace(dto.Comment) ? $"\nКоментар: {dto.Comment}" : "")
-            : $"📦 <b>Замовлення товару #{order.Id}!</b>\nТовар: {listing.Title}\nСума: {totalPrice:N0} грн\nДоставка: {dto.DeliveryCity}, {dto.DeliveryBranch}\nОплата: {order.PaymentMethod}" + (!string.IsNullOrWhiteSpace(dto.Comment) ? $"\nКоментар: {dto.Comment}" : "");
+            ? $"🛠 Замовлення послуги #{order.Id}!\nПослуга: {listing.Title}\nСума: {totalPrice:N0} грн\nДеталі: {dto.DeliveryBranch}\nЛокація: {dto.DeliveryCity}\nОплата: {order.PaymentMethod}" + (!string.IsNullOrWhiteSpace(dto.Comment) ? $"\nКоментар: {dto.Comment}" : "")
+            : $"📦 Замовлення товару #{order.Id}!\nТовар: {listing.Title}\nСума: {totalPrice:N0} грн\nДоставка: {dto.DeliveryCity}, {dto.DeliveryBranch}\nОплата: {order.PaymentMethod}" + (!string.IsNullOrWhiteSpace(dto.Comment) ? $"\nКоментар: {dto.Comment}" : "");
 
         var chatMsg = new Message
         {

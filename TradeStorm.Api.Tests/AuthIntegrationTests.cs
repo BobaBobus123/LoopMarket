@@ -22,7 +22,7 @@ public class AuthIntegrationTests : IClassFixture<CustomWebApplicationFactory>
     public async Task RegisterAndLogin_ShouldReturnAccessAndRefreshToken()
     {
         var client = _factory.CreateClient();
-        var uniqueEmail = $"student_{Guid.NewGuid():N}@kgta.edu.ua";
+        var uniqueEmail = $"user_{Guid.NewGuid():N}@loopmarket.com";
         var uniquePhone = $"38099{Random.Shared.Next(1000000, 9999999)}";
 
         // 1. Реєстрація нового користувача

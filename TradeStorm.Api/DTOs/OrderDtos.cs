@@ -16,11 +16,9 @@ public class CreateOrderDto
     [MaxLength(30)]
     public string BuyerPhone { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Вкажіть місто доставки")]
     [MaxLength(100)]
     public string DeliveryCity { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Вкажіть відділення пошти")]
     [MaxLength(150)]
     public string DeliveryBranch { get; set; } = string.Empty;
 
@@ -31,6 +29,12 @@ public class CreateOrderDto
     public string? Comment { get; set; }
 
     public decimal? CustomTotalPrice { get; set; }
+
+    public string? ExecutionDate { get; set; }
+    public string? ExecutionTime { get; set; }
+    public string? Address { get; set; }
+    public string? Specifications { get; set; }
+    public decimal? TotalPrice { get; set; }
 }
 
 public class UpdateOrderStatusDto

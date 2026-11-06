@@ -1,6 +1,8 @@
+using TradeStorm.Api.Data;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TradeStorm.Api.DTOs;
+using TradeStorm.Api.Models;
 using TradeStorm.Api.Services;
 
 namespace TradeStorm.Api.Controllers;
@@ -22,8 +24,17 @@ public class AuthController : ControllerBase
     [HttpGet("google/url")]
     public IActionResult GetGoogleAuthUrl([FromQuery] string redirectUri = "http://localhost:65083/login.html")
     {
+        var isConfigured = _externalAuthService.IsConfigured("Google");
         var url = _externalAuthService.GetAuthorizationUrl("Google", redirectUri);
-        return Ok(new { provider = "Google", authorizationUrl = url });
+        return Ok(new 
+        { 
+            provider = "Google", 
+            isConfigured = isConfigured,
+            authorizationUrl = url,
+            note = isConfigured
+                ? "Дійсний Google ClientId налаштовано."
+                : "Використовується демонстраційний ClientId. Для захисту лабораторних робіт використовуйте вбудований OAuth Sandbox."
+        });
     }
 
     /// <summary>
@@ -38,15 +49,28 @@ public class AuthController : ControllerBase
             return BadRequest(new { error = error ?? "Помилка зовнішньої авторизації" });
         }
 
+        if (!user.IsPhoneVerified && user.Role != UserRoles.Admin)
+        {
+            return Ok(new
+            {
+                isPhoneVerified = false,
+                userId = user.Id,
+                email = user.Email,
+                role = user.Role,
+                message = "Для безпеки маркетплейсу підтвердіть свій номер телефону через Telegram"
+            });
+        }
+
         return Ok(new
         {
+            isPhoneVerified = true,
             token = accessToken,
             refreshToken = refreshToken,
             user = new
             {
                 id = user.Id,
                 email = user.Email,
-                name = $"{user.FirstName} {user.LastName}",
+                name = $"{user.FirstName} {user.LastName}".Trim(),
                 role = user.Role
             }
         });
@@ -64,17 +88,132 @@ public class AuthController : ControllerBase
             return BadRequest(new { error = error ?? "Помилка зовнішньої авторизації" });
         }
 
+        if (!user.IsPhoneVerified && user.Role != UserRoles.Admin)
+        {
+            return Ok(new
+            {
+                isPhoneVerified = false,
+                userId = user.Id,
+                email = user.Email,
+                role = user.Role,
+                message = "Для безпеки маркетплейсу підтвердіть свій номер телефону через Telegram"
+            });
+        }
+
         return Ok(new
         {
+            isPhoneVerified = true,
             token = accessToken,
             refreshToken = refreshToken,
             user = new
             {
                 id = user.Id,
                 email = user.Email,
-                name = $"{user.FirstName} {user.LastName}",
+                name = $"{user.FirstName} {user.LastName}".Trim(),
                 role = user.Role
             }
         });
+    }
+
+    /// <summary>
+    /// Оновлення Access Token за допомогою валідного Refresh Token (Етап 5)
+    /// </summary>
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshToken([FromBody] TokenRefreshDto dto, [FromServices] AppDbContext db, [FromServices] ITokenService tokenService)
+    {
+        var principal = tokenService.GetPrincipalFromExpiredToken(dto.AccessToken);
+        if (principal == null)
+            return BadRequest(new { error = "Недійсний токен доступу" });
+
+        var userIdString = principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(userIdString, out int userId))
+            return BadRequest(new { error = "Недійсний ідентифікатор користувача в токені" });
+
+        var user = await db.Users.FindAsync(userId);
+        if (user == null || user.RefreshToken != dto.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            return BadRequest(new { error = "Недійсний або прострочений Refresh токен" });
+
+        var newAccessToken = tokenService.GenerateAccessToken(user);
+        var newRefreshToken = tokenService.GenerateRefreshToken();
+
+        user.RefreshToken = newRefreshToken;
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        await db.SaveChangesAsync();
+
+        return Ok(new
+        {
+            token = newAccessToken,
+            refreshToken = newRefreshToken
+        });
+    }
+
+    /// <summary>
+    /// Відкликання токенів / завершення сесії (Revocation/Logout) (Етап 5)
+    /// </summary>
+    [HttpPost("revoke")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
+    public async Task<IActionResult> Revoke([FromServices] AppDbContext db)
+    {
+        var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
+
+        var user = await db.Users.FindAsync(userId);
+        if (user != null)
+        {
+            user.RefreshToken = null;
+            user.RefreshTokenExpiryTime = null;
+            await db.SaveChangesAsync();
+        }
+
+        return Ok(new { message = "Сесію успішно завершено. Refresh Token відкликано." });
+    }
+
+    /// <summary>
+    /// Ініціалізація сесії авторизації через Telegram-бота (Етап 6 & 7)
+    /// </summary>
+    [HttpGet("telegram/start")]
+    public IActionResult StartTelegramLogin()
+    {
+        var code = "login_" + Guid.NewGuid().ToString("N").Substring(0, 8);
+        var session = new TelegramLoginSession { Code = code };
+        TelegramBotService.LoginSessions[code] = session;
+
+        return Ok(new
+        {
+            code = code,
+            botUsername = "LoopMarket_Verify_bot",
+            deepLink = $"https://t.me/LoopMarket_Verify_bot?start={code}"
+        });
+    }
+
+    /// <summary>
+    /// Перевірка статусу підтвердження входу через Telegram
+    /// </summary>
+    [HttpGet("telegram/check-login")]
+    public IActionResult CheckTelegramLogin([FromQuery] string code)
+    {
+        if (string.IsNullOrEmpty(code) || !TelegramBotService.LoginSessions.TryGetValue(code, out var session))
+        {
+            return Ok(new { approved = false, error = "Сесію не знайдено або термін дії вичерпано" });
+        }
+
+        if (session.IsApproved && !string.IsNullOrEmpty(session.Token))
+        {
+            TelegramBotService.LoginSessions.TryRemove(code, out _);
+            return Ok(new
+            {
+                approved = true,
+                token = session.Token,
+                refreshToken = session.RefreshToken,
+                user = new
+                {
+                    email = session.UserEmail,
+                    name = session.UserName,
+                    role = session.UserRole
+                }
+            });
+        }
+
+        return Ok(new { approved = false });
     }
 }

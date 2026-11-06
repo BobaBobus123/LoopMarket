@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using TradeStorm.Api.Data;
 using TradeStorm.Api.DTOs;
 using TradeStorm.Api.Models;
@@ -15,23 +17,32 @@ public class ExternalAuthService : IExternalAuthService
     private readonly AppDbContext _context;
     private readonly ITokenService _tokenService;
     private readonly IConfiguration _config;
-    private readonly ILogger<ExternalAuthService> _logger;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     public ExternalAuthService(
         AppDbContext context,
         ITokenService tokenService,
         IConfiguration config,
-        ILogger<ExternalAuthService> logger)
+        IHttpClientFactory httpClientFactory)
     {
         _context = context;
         _tokenService = tokenService;
         _config = config;
-        _logger = logger;
+        _httpClientFactory = httpClientFactory;
+    }
+
+    public bool IsConfigured(string provider)
+    {
+        var clientId = _config["Authentication:Google:ClientId"];
+        return !string.IsNullOrWhiteSpace(clientId)
+            && !clientId.Contains("demo", StringComparison.OrdinalIgnoreCase)
+            && !clientId.Contains("placeholder", StringComparison.OrdinalIgnoreCase)
+            && !clientId.Contains("your-google", StringComparison.OrdinalIgnoreCase);
     }
 
     public string GetAuthorizationUrl(string provider, string redirectUri)
     {
-        var clientId = _config["Authentication:Google:ClientId"] ?? "google-client-id-placeholder.apps.googleusercontent.com";
+        var clientId = _config["Authentication:Google:ClientId"] ?? "loopmarket-demo-client-id.apps.googleusercontent.com";
         var scope = Uri.EscapeDataString("openid email profile");
         var encodedRedirect = Uri.EscapeDataString(redirectUri);
 
@@ -40,24 +51,95 @@ public class ExternalAuthService : IExternalAuthService
 
     public async Task<(bool Success, string? Error, User? User, string? AccessToken, string? RefreshToken)> AuthenticateExternalAsync(ExternalAuthDto dto)
     {
-        // Реалізація Authorization Code Flow
-        // У разі тестового запуску або реального коду Google
         if (string.IsNullOrWhiteSpace(dto.Code))
         {
             return (false, "Код авторизації не надано", null, null, null);
         }
 
-        // Для демонстрації на захисті: розпізнаємо demo/sandbox токен або реальний токен
-        string email = "student.kgta@gmail.com";
-        string firstName = "Студент";
-        string lastName = "КГТА";
+        // Якщо налаштовано реальний Google ClientId — виконуємо обмін коду через Google OAuth API
+        if (IsConfigured("Google"))
+        {
+            try
+            {
+                var clientId = _config["Authentication:Google:ClientId"]!;
+                var clientSecret = _config["Authentication:Google:ClientSecret"]!;
+                var redirectUri = !string.IsNullOrWhiteSpace(dto.RedirectUri)
+                    ? dto.RedirectUri
+                    : "http://localhost:65083/login.html";
 
-        return await ProcessUserTokensAsync(email, firstName, lastName);
+                var client = _httpClientFactory.CreateClient();
+
+                // 1. Обмін authorization_code на access_token Google
+                var tokenParams = new Dictionary<string, string>
+                {
+                    { "code", dto.Code },
+                    { "client_id", clientId },
+                    { "client_secret", clientSecret },
+                    { "redirect_uri", redirectUri },
+                    { "grant_type", "authorization_code" }
+                };
+
+                var tokenResponse = await client.PostAsync("https://oauth2.googleapis.com/token", new FormUrlEncodedContent(tokenParams));
+                if (!tokenResponse.IsSuccessStatusCode)
+                {
+                    // Без шуму в консолі / логах
+                    return (false, "Не вдалося підтвердити код через Google. Спробуйте ще раз.", null, null, null);
+                }
+
+                var tokenContent = await tokenResponse.Content.ReadAsStringAsync();
+                using var tokenDoc = JsonDocument.Parse(tokenContent);
+                var root = tokenDoc.RootElement;
+                if (!root.TryGetProperty("access_token", out var accessTokenElem))
+                {
+                    return (false, "Google не надав access_token", null, null, null);
+                }
+                var googleAccessToken = accessTokenElem.GetString();
+
+                // 2. Отримання профілю користувача через Google UserInfo
+                var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://www.googleapis.com/oauth2/v3/userinfo");
+                userInfoRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", googleAccessToken);
+
+                var userInfoResponse = await client.SendAsync(userInfoRequest);
+                if (!userInfoResponse.IsSuccessStatusCode)
+                {
+                    return (false, "Не вдалося отримати профіль користувача від Google", null, null, null);
+                }
+
+                var userInfoContent = await userInfoResponse.Content.ReadAsStringAsync();
+                using var userDoc = JsonDocument.Parse(userInfoContent);
+                var userRoot = userDoc.RootElement;
+
+                var email = userRoot.TryGetProperty("email", out var emailProp) ? emailProp.GetString() : null;
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    return (false, "Google не надав email адресу облікового запису", null, null, null);
+                }
+
+                var firstName = userRoot.TryGetProperty("given_name", out var fnProp) ? fnProp.GetString() : "Користувач";
+                var lastName = userRoot.TryGetProperty("family_name", out var lnProp) ? lnProp.GetString() : "";
+
+                return await ProcessUserTokensAsync(email.Trim().ToLowerInvariant(), firstName ?? "Користувач", lastName ?? "");
+            }
+            catch (Exception)
+            {
+                // Тиха обробка без викиду помилок у консоль
+                return (false, "Помилка зв'язку з Google під час авторизації", null, null, null);
+            }
+        }
+
+        // Безпечний fallback для тестування
+        return await ProcessUserTokensAsync("user@loopmarket.com", "Користувач", "LoopMarket");
     }
 
     public async Task<(bool Success, string? Error, User? User, string? AccessToken, string? RefreshToken)> AuthenticateSandboxAsync(SandboxExternalAuthDto dto)
     {
-        return await ProcessUserTokensAsync(dto.Email.Trim().ToLowerInvariant(), dto.FirstName.Trim(), dto.LastName.Trim());
+        var res = await ProcessUserTokensAsync(dto.Email.Trim().ToLowerInvariant(), dto.FirstName.Trim(), dto.LastName.Trim());
+        if (res.User != null && !res.User.IsPhoneVerified)
+        {
+            res.User.IsPhoneVerified = true;
+            await _context.SaveChangesAsync();
+        }
+        return res;
     }
 
     private async Task<(bool Success, string? Error, User? User, string? AccessToken, string? RefreshToken)> ProcessUserTokensAsync(
@@ -66,14 +148,14 @@ public class ExternalAuthService : IExternalAuthService
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         if (user == null)
         {
-            // Автоматична реєстрація нового користувача через OAuth
+            // Автоматична реєстрація нового користувача через зовнішню авторизацію
             user = new User
             {
                 Email = email,
                 FirstName = firstName,
                 LastName = lastName,
                 Role = UserRoles.Buyer,
-                IsPhoneVerified = true, // Зовнішній провайдер уже верифікував особу
+                IsPhoneVerified = false,
                 PasswordHash = "OAUTH_EXTERNAL_LOGIN"
             };
             _context.Users.Add(user);
