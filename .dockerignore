@@ -1,0 +1,7 @@
+**/.git
+**/.vs
+**/bin
+**/obj
+**/scratch
+*.user
+loopmarket_postgres_dump.sql

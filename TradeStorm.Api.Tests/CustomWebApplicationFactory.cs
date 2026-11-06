@@ -15,22 +15,21 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseSetting("DatabaseProvider", "Sqlite");
+
         builder.ConfigureServices(services =>
         {
-            // Видаляємо основний AppDbContext
             var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
             if (descriptor != null)
             {
                 services.Remove(descriptor);
             }
 
-            // Додаємо тестову ізольовану базу даних SQLite (Етап 3)
             services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseSqlite($"Data Source={_testDbName}");
             });
 
-            // Застосовуємо міграції та створюємо схему для тестів
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

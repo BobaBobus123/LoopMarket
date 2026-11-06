@@ -96,7 +96,21 @@ Write-Host "  -> Вхід / Авторизація:        http://localhost:6508
 Write-Host ""
 Write-Host "  -> Telegram-бот верифікації:   @LoopMarket_Verify_bot (активний)" -ForegroundColor Cyan
 Write-Host "  -> Google OAuth 2.0:           Налаштовано" -ForegroundColor Cyan
-Write-Host "  -> База даних SQLite:          Підключено (TradeStorm.Api/loopmarket.db)" -ForegroundColor Cyan
+$isPg = $false
+$devSettings = Join-Path $apiDir "appsettings.Development.json"
+$mainSettings = Join-Path $apiDir "appsettings.json"
+if (Test-Path $devSettings) {
+    $cJson = Get-Content $devSettings -Raw | ConvertFrom-Json -ErrorAction SilentlyContinue
+    if ($cJson.DatabaseProvider -eq "PostgreSQL") { $isPg = $true }
+} elseif (Test-Path $mainSettings) {
+    $cJson = Get-Content $mainSettings -Raw | ConvertFrom-Json -ErrorAction SilentlyContinue
+    if ($cJson.DatabaseProvider -eq "PostgreSQL") { $isPg = $true }
+}
+if ($isPg) {
+    Write-Host "  -> База даних:                 PostgreSQL (Хмара Neon.tech / neondb)" -ForegroundColor Cyan
+} else {
+    Write-Host "  -> База даних:                 SQLite (TradeStorm.Api/loopmarket.db)" -ForegroundColor Cyan
+}
 Write-Host ""
 Write-Host "  -> Тестові облікові записи (Пароль для всіх: 123456):" -ForegroundColor Magenta
 Write-Host "     * Адмін:       nikitazhidenko@gmail.com  (або тел: +19285345308)" -ForegroundColor Gray

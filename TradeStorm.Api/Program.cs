@@ -10,24 +10,42 @@ using TradeStorm.Api.Hubs;
 using TradeStorm.Api.Repositories;
 using TradeStorm.Api.Services;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
-// База даних EF Core
+// Конфігурація EF Core (Підтримка SQLite та PostgreSQL)
+var dbProvider = builder.Configuration["DatabaseProvider"] ?? "Sqlite";
+var isPostgres = dbProvider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase) ||
+                 dbProvider.Equals("Postgres", StringComparison.OrdinalIgnoreCase);
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    var connStr = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=loopmarket.db";
-    const string prefix = "Data Source=";
-    var idx = connStr.IndexOf(prefix, StringComparison.OrdinalIgnoreCase);
-    if (idx >= 0)
+    if (isPostgres)
     {
-        var rawPath = connStr.Substring(idx + prefix.Length).Split(';')[0].Trim();
-        if (!Path.IsPathRooted(rawPath))
+        var pgConn = builder.Configuration.GetConnectionString("PostgreSqlConnection");
+        if (string.IsNullOrWhiteSpace(pgConn))
         {
-            var absolutePath = Path.Combine(builder.Environment.ContentRootPath, rawPath);
-            connStr = $"Data Source={absolutePath}";
+            pgConn = builder.Configuration.GetConnectionString("DefaultConnection");
         }
+        options.UseNpgsql(pgConn);
     }
-    options.UseSqlite(connStr);
+    else
+    {
+        var connStr = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=loopmarket.db";
+        const string prefix = "Data Source=";
+        var idxPrefix = connStr.IndexOf(prefix, StringComparison.OrdinalIgnoreCase);
+        if (idxPrefix >= 0)
+        {
+            var rawPath = connStr.Substring(idxPrefix + prefix.Length).Split(';')[0].Trim();
+            if (!Path.IsPathRooted(rawPath))
+            {
+                var absolutePath = Path.Combine(builder.Environment.ContentRootPath, rawPath);
+                connStr = $"Data Source={absolutePath}";
+            }
+        }
+        options.UseSqlite(connStr);
+    }
 });
 
 // RFC 7807 стандартизована обробка помилок (Етап 2)
@@ -197,7 +215,15 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA synchronous=NORMAL;");
+    if (db.Database.IsSqlite())
+    {
+        db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA synchronous=NORMAL;");
+    }
+    else
+    {
+        // Автоматичне створення структури таблиць у PostgreSQL
+        db.Database.EnsureCreated();
+    }
 }
 
 // RFC 7807 Exception Handler
