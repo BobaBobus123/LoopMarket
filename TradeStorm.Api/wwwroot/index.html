@@ -996,73 +996,594 @@
             }
         }
 
+        /* -------------------------------------------------------------
+           МОБІЛЬНИЙ ПОШУК ТА ПАНЕЛЬ ДІЙ (< 768px)
+           ------------------------------------------------------------- */
+        .mobile-search-strip {
+            display: none;
+            position: relative;
+            width: 100%;
+            background: var(--bg-color);
+        }
+
+        .mobile-search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .mobile-search-icon {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .mobile-search-input {
+            width: 100%;
+            height: 44px;
+            padding: 0 40px 0 42px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-color);
+            background: var(--surface);
+            color: var(--text-main);
+            font-size: 0.92rem;
+            font-weight: 500;
+            outline: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .mobile-search-input:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        .mobile-search-clear {
+            position: absolute;
+            right: 12px;
+            background: var(--border-color);
+            border: none;
+            color: var(--text-muted);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-action-bar {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin: 4px 0 10px 0;
+            width: 100%;
+        }
+
+        .mobile-mode-tabs {
+            display: flex;
+            gap: 6px;
+            background: var(--surface);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .mobile-tab-btn {
+            flex: 1;
+            padding: 8px 6px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .mobile-tab-btn.active {
+            background: var(--primary-light);
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .mobile-filter-tools {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-mobile-filter-trigger {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            color: var(--text-main);
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+
+        .btn-mobile-filter-trigger:active {
+            transform: scale(0.98);
+        }
+
+        .filter-count-badge {
+            background: var(--primary-light);
+            color: white;
+            border-radius: 10px;
+            padding: 2px 7px;
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+
+        .mobile-sort-select-wrap {
+            position: relative;
+            min-width: 130px;
+        }
+
+        .mobile-sort-select {
+            width: 100%;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            color: var(--text-main);
+            font-size: 0.84rem;
+            font-weight: 600;
+            padding: 0 28px 0 10px;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+        }
+
+        /* Мобільний Bottom Sheet фільтрів */
+        .mobile-filter-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .mobile-filter-backdrop.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .mobile-filter-sheet {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: -100%;
+            max-height: 85vh;
+            background: var(--surface);
+            border-radius: 20px 20px 0 0;
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.35);
+            transition: bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .mobile-filter-sheet.active {
+            bottom: 0;
+        }
+
+        .mobile-sheet-drag-handle {
+            width: 44px;
+            height: 5px;
+            background: var(--border-color);
+            border-radius: 3px;
+            margin: 10px auto 4px auto;
+        }
+
+        .mobile-filter-sheet-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px 14px 18px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .btn-sheet-close {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-filter-sheet-body {
+            padding: 16px 18px;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .sheet-group-title {
+            font-size: 0.88rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .sheet-price-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sheet-price-input-wrap {
+            position: relative;
+            flex: 1;
+        }
+
+        .sheet-price-input-wrap input {
+            width: 100%;
+            height: 42px;
+            padding: 0 28px 0 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-main);
+            font-size: 0.92rem;
+            outline: none;
+        }
+
+        .sheet-price-input-wrap span {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+
+        .sheet-pills-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .sheet-cond-pill, .sheet-curr-pill {
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-main);
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sheet-cond-pill.active, .sheet-curr-pill.active {
+            border-color: var(--primary-light);
+            background: var(--primary-soft);
+            color: var(--primary-light);
+            font-weight: 700;
+        }
+
+        .sheet-cat-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .sheet-cat-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: var(--bg-color);
+            border: 1px solid transparent;
+            color: var(--text-main);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .sheet-cat-item.active {
+            border-color: var(--primary-light);
+            background: var(--primary-soft);
+            color: var(--primary-light);
+            font-weight: 700;
+        }
+
+        .mobile-filter-sheet-footer {
+            display: flex;
+            gap: 10px;
+            padding: 14px 18px calc(14px + env(safe-area-inset-bottom, 0px)) 18px;
+            border-top: 1px solid var(--border-color);
+            background: var(--surface);
+        }
+
+        .sheet-btn-reset {
+            flex: 1;
+            height: 46px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.92rem;
+            cursor: pointer;
+        }
+
+        .sheet-btn-apply {
+            flex: 2;
+            height: 46px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+        }
+
+        /* -------------------------------------------------------------
+           BREAKPOINT: Планшети (< 960px)
+           ------------------------------------------------------------- */
         @media (max-width: 960px) {
             .main-layout {
-                grid-template-columns: 1fr;
-                gap: 20px;
-                padding: 1.2rem 3%;
+                grid-template-columns: 1fr !important;
+                gap: 14px !important;
+                padding: 10px 3% !important;
             }
 
             .sidebar {
-                position: static;
-                width: 100%;
-                box-sizing: border-box;
-                top: 0;
+                display: none !important;
             }
 
-            .listings-grid {
-                grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-                gap: 16px;
+            .sidebar.mobile-visible {
+                display: block !important;
             }
         }
 
-        @media (max-width: 640px) {
-            .listings-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 10px;
+        /* -------------------------------------------------------------
+           BREAKPOINT: СМАРТФОНИ (< 768px) - 2-КОЛОНКОВИЙ СТАНДАРТ OLX/ROZETKA
+           ------------------------------------------------------------- */
+        @media (max-width: 768px) {
+            header {
+                height: 56px !important;
+                padding: 0 12px !important;
             }
 
-            .card-img-wrapper {
-                height: 140px;
+            .logo {
+                font-size: 1.25rem !important;
+                gap: 8px !important;
             }
 
-            .card-content {
-                padding: 10px;
-                gap: 4px;
+            .logo-circle {
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 1.05rem !important;
+                border-radius: 9px !important;
             }
 
-            .card-title {
-                font-size: 0.86rem;
-                height: 2.6em;
+            .btn-create-top {
+                display: none !important;
             }
 
-            .card-price {
-                font-size: 1.1rem;
-            }
-
-            .card-location {
-                font-size: 0.72rem;
-            }
-
-            .btn-view {
-                font-size: 0.75rem;
+            .btn-icon {
+                width: 36px !important;
+                height: 36px !important;
             }
 
             .trust-banner {
-                gap: 12px;
-                font-size: 0.78rem;
-                padding: 8px 3%;
+                display: none !important;
             }
-        }
 
-        @media (max-width: 440px) {
+            .mobile-search-strip {
+                display: block !important;
+                padding: 8px 12px 2px 12px !important;
+            }
+
+            .mobile-action-bar {
+                display: flex !important;
+            }
+
+            .desktop-only-modes {
+                display: none !important;
+            }
+
+            .catalog-header {
+                margin-bottom: 8px !important;
+            }
+
+            .catalog-title {
+                font-size: 1.12rem !important;
+            }
+
+            .catalog-sort {
+                display: none !important;
+            }
+
+            .catalog-currency-wrap {
+                display: none !important;
+            }
+
+            /* СТРОГА 2-КОЛОНКОВА СІТКА НА ВСІХ ТЕЛЕФОНАХ */
             .listings-grid {
-                grid-template-columns: 1fr;
-                gap: 14px;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 8px !important;
+                padding: 0 !important;
+            }
+
+            /* Компактна мобільна картка: швидкий скрол без перегортання */
+            .card {
+                border-radius: 12px !important;
+                border: 1px solid var(--border-color) !important;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
             }
 
             .card-img-wrapper {
-                height: 190px;
+                height: 130px !important;
+                border-radius: 12px 12px 0 0 !important;
+            }
+
+            .card-img {
+                height: 100% !important;
+                object-fit: cover !important;
+            }
+
+            .card-badge {
+                top: 6px !important;
+                left: 6px !important;
+                font-size: 0.62rem !important;
+                padding: 2px 6px !important;
+                border-radius: 6px !important;
+            }
+
+            .btn-fav {
+                top: 6px !important;
+                right: 6px !important;
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 0.85rem !important;
+            }
+
+            .card-content {
+                padding: 8px 8px 10px 8px !important;
+                gap: 2px !important;
+            }
+
+            .card-category {
+                font-size: 0.64rem !important;
+                margin-bottom: 1px !important;
+            }
+
+            .card-title {
+                font-size: 0.82rem !important;
+                line-height: 1.25 !important;
+                min-height: 2.1em !important;
+                max-height: 2.1em !important;
+                -webkit-line-clamp: 2 !important;
+                overflow: hidden !important;
+                font-weight: 600 !important;
+                margin-bottom: 2px !important;
+            }
+
+            .card-price-row {
+                margin: 2px 0 4px 0 !important;
+                display: flex !important;
+                align-items: baseline !important;
+                justify-content: space-between !important;
+            }
+
+            .card-price {
+                font-size: 1.05rem !important;
+                font-weight: 800 !important;
+                line-height: 1.1 !important;
+            }
+
+            .shipping-tag {
+                font-size: 0.62rem !important;
+                padding: 2px 5px !important;
+                border-radius: 5px !important;
+            }
+
+            .card-footer {
+                padding-top: 6px !important;
+                margin-top: auto !important;
+                font-size: 0.7rem !important;
+            }
+
+            .card-location {
+                font-size: 0.7rem !important;
+            }
+
+            .btn-view {
+                display: none !important;
+            }
+
+            /* Компактний горизонтальний VIP-слайдер */
+            .vip-section {
+                margin-bottom: 12px !important;
+                padding: 10px 12px !important;
+                border-radius: 14px !important;
+            }
+
+            .vip-title {
+                font-size: 0.92rem !important;
+                margin-bottom: 8px !important;
+            }
+
+            .vip-carousel {
+                gap: 8px !important;
+                padding-bottom: 4px !important;
+                scroll-snap-type: x mandatory;
+            }
+
+            .vip-carousel .card {
+                min-width: 145px !important;
+                max-width: 145px !important;
+                flex: 0 0 145px !important;
+                scroll-snap-align: start;
+            }
+
+            .vip-carousel .card-img-wrapper {
+                height: 105px !important;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .listings-grid {
+                gap: 6px !important;
+            }
+            .card-img-wrapper {
+                height: 115px !important;
+            }
+            .card-title {
+                font-size: 0.78rem !important;
+            }
+            .card-price {
+                font-size: 0.98rem !important;
             }
         }
     
@@ -1303,6 +1824,15 @@
         </div>
     </header>
 
+    <!-- ВЕРХНІЙ МОБІЛЬНИЙ ПОШУК (ЛИШЕ НА СМАРТФОНАХ < 768px) -->
+    <div class="mobile-search-strip" id="mobileSearchStrip">
+        <div class="mobile-search-box">
+            <svg class="mobile-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="mobileTopSearchInput" class="mobile-search-input" placeholder="Пошук серед оголошень..." autocomplete="off">
+            <button type="button" id="mobileTopSearchClear" class="mobile-search-clear" style="display: none;" onclick="clearMobileSearch()">✕</button>
+        </div>
+    </div>
+
     <div class="trust-banner">
         <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg> Перевірені користувачі</div>
         <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Безпечні зустрічі на платформі</div>
@@ -1315,6 +1845,30 @@
         <div class="categories-scroll-wrapper" id="categoriesScrollWrapper">
             <div class="categories-scroll-list" id="categoryPillsList">
                 <button type="button" class="cat-pill active" data-category="" onclick="filterByCategory('', this)">✨ Всі товари</button>
+            </div>
+            </div>
+
+    <!-- МОБІЛЬНА ПАНЕЛЬ ШВИДКИХ ДІЙ (РЕЖИМИ, ФІЛЬТРИ, СОРТУВАННЯ) -->
+    <div class="container mobile-action-bar-container" style="padding-top: 0; padding-bottom: 4px;">
+        <div class="mobile-action-bar" id="mobileActionBar">
+            <div class="mobile-mode-tabs">
+                <button type="button" class="mobile-tab-btn active" id="mTabAll" onclick="setCatalogMode('all')">🌟 Всі</button>
+                <button type="button" class="mobile-tab-btn" id="mTabGoods" onclick="setCatalogMode('goods')">📦 Товари</button>
+                <button type="button" class="mobile-tab-btn" id="mTabServices" onclick="setCatalogMode('services')">🛠 Послуги</button>
+            </div>
+            <div class="mobile-filter-tools">
+                <button type="button" class="btn-mobile-filter-trigger" id="btnOpenMobileFilterSheet" onclick="openMobileFilterSheet()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="20" y1="14" y2="14"/><line x1="4" x2="20" y1="7" y2="7"/><circle cx="14" cy="21" r="2"/><circle cx="8" cy="14" r="2"/><circle cx="16" cy="7" r="2"/></svg>
+                    <span>Фільтри</span>
+                    <span class="filter-count-badge" id="mobileFilterCountBadge" style="display: none;">0</span>
+                </button>
+                <div class="mobile-sort-select-wrap">
+                    <select id="mobileSortFilterSelect" class="mobile-sort-select" onchange="syncMobileSort(this.value)">
+                        <option value="newest">Найновіші</option>
+                        <option value="price_asc">Дешевші</option>
+                        <option value="price_desc">Дорожчі</option>
+                    </select>
+                </div>
             </div>
         </div>
     </div>
@@ -1368,7 +1922,7 @@
 
         <main style="padding: 0; min-width: 0; width: 100%; box-sizing: border-box;">
             <!-- ПЕРЕМИКАЧ КАТАЛОГУ: ВСІ ОГОЛОШЕННЯ / ТОВАРИ / ПОСЛУГИ -->
-            <div style="display: flex; gap: 10px; margin-bottom: 18px; align-items: center; flex-wrap: wrap;">
+            <div class="desktop-only-modes" style="display: flex; gap: 10px; margin-bottom: 18px; align-items: center; flex-wrap: wrap;">
                 <button type="button" id="tabCatalogAll" onclick="setCatalogMode('all')" style="padding: 10px 18px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; border: 2px solid var(--primary-light); background: var(--primary-soft); color: var(--primary-light); display: inline-flex; align-items: center; gap: 8px; transition: 0.2s;">
                     🌟 Всі оголошення
                 </button>
@@ -1412,7 +1966,7 @@
                     <span class="catalog-counter" id="catalogCount"></span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 6px;">
+                    <div class="catalog-currency-wrap" style="display: flex; align-items: center; gap: 6px;">
                         <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 700;">Валюта:</span>
                         <div class="currency-pills" style="display: inline-flex; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 20px; padding: 2px; gap: 2px;">
                             <button type="button" class="curr-pill-global active" onclick="switchGlobalCurrency('UAH', this)" style="border: none; background: var(--primary-light); color: white; border-radius: 14px; padding: 4px 9px; font-size: 0.78rem; font-weight: 800; cursor: pointer; transition: 0.2s;">₴ UAH</button>
@@ -1436,6 +1990,68 @@
                 <p style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Завантаження оголошень...</p>
             </div>
         </main>
+    </div>
+
+        <!-- МОБІЛЬНЕ BOTTOM-SHEET ВІКНО ФІЛЬТРІВ -->
+    <div class="mobile-filter-backdrop" id="mobileFilterBackdrop" onclick="closeMobileFilterSheet()"></div>
+    <div class="mobile-filter-sheet" id="mobileFilterSheet">
+        <div class="mobile-sheet-drag-handle"></div>
+        <div class="mobile-filter-sheet-header">
+            <div style="font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="20" y1="14" y2="14"/><line x1="4" x2="20" y1="7" y2="7"/><circle cx="14" cy="21" r="2"/><circle cx="8" cy="14" r="2"/><circle cx="16" cy="7" r="2"/></svg>
+                <span>Фільтри пошуку</span>
+            </div>
+            <button type="button" class="btn-sheet-close" onclick="closeMobileFilterSheet()" aria-label="Закрити">✕</button>
+        </div>
+        <div class="mobile-filter-sheet-body">
+            <!-- Ціна -->
+            <div class="sheet-group">
+                <div class="sheet-group-title">Ціна (₴)</div>
+                <div class="sheet-price-row">
+                    <div class="sheet-price-input-wrap">
+                        <input type="number" id="mMinPrice" class="sheet-input" placeholder="Від" min="0" oninput="syncMobilePriceInputs()">
+                        <span>₴</span>
+                    </div>
+                    <div class="sheet-price-input-wrap">
+                        <input type="number" id="mMaxPrice" class="sheet-input" placeholder="До" min="0" oninput="syncMobilePriceInputs()">
+                        <span>₴</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Стан товару -->
+            <div class="sheet-group">
+                <div class="sheet-group-title">Стан товару</div>
+                <div class="sheet-pills-row" id="mConditionPills">
+                    <button type="button" class="sheet-cond-pill active" data-condition="" onclick="selectSheetCondition('', this)">Будь-який</button>
+                    <button type="button" class="sheet-cond-pill" data-condition="Нове" onclick="selectSheetCondition('Нове', this)">Нове</button>
+                    <button type="button" class="sheet-cond-pill" data-condition="Вживане" onclick="selectSheetCondition('Вживане', this)">Вживане</button>
+                </div>
+            </div>
+
+            <!-- Валюта -->
+            <div class="sheet-group">
+                <div class="sheet-group-title">Валюта відображення</div>
+                <div class="sheet-pills-row">
+                    <button type="button" class="sheet-curr-pill active" data-curr="UAH" onclick="switchGlobalCurrency('UAH', this); updateSheetCurr(this);">₴ UAH</button>
+                    <button type="button" class="sheet-curr-pill" data-curr="USD" onclick="switchGlobalCurrency('USD', this); updateSheetCurr(this);">$ USD</button>
+                    <button type="button" class="sheet-curr-pill" data-curr="EUR" onclick="switchGlobalCurrency('EUR', this); updateSheetCurr(this);">€ EUR</button>
+                    <button type="button" class="sheet-curr-pill" data-curr="PLN" onclick="switchGlobalCurrency('PLN', this); updateSheetCurr(this);">zł PLN</button>
+                </div>
+            </div>
+
+            <!-- Категорії -->
+            <div class="sheet-group">
+                <div class="sheet-group-title">Категорія</div>
+                <div class="sheet-cat-list" id="mobileSheetCategoryList">
+                    <button type="button" class="sheet-cat-item active" data-category="" onclick="selectSheetCategory('', this)"><span>✨ Всі категорії</span><span>✓</span></button>
+                </div>
+            </div>
+        </div>
+        <div class="mobile-filter-sheet-footer">
+            <button type="button" class="sheet-btn-reset" onclick="resetMobileFilters()">Скинути всі</button>
+            <button type="button" class="sheet-btn-apply" onclick="applyMobileFiltersAndClose()">Застосувати фільтри</button>
+        </div>
     </div>
 
     <footer>
@@ -1669,13 +2285,21 @@
                     'Спорт': '⚽', 'Зоотовари': '🐾', 'Транспорт': '🚲', 'Послуги': '💼',
                     'Безкоштовно': '🎁', 'Інше': '📦'
                 };
+                const sheetCatList = document.getElementById('mobileSheetCategoryList');
+                if (sheetCatList) {
+                    sheetCatList.innerHTML = `<button type="button" class="sheet-cat-item active" data-category="" onclick="selectSheetCategory('', this)"><span>✨ Всі категорії</span><span>✓</span></button>`;
+                }
+
                 categories.forEach(c => {
                     const safeName = c.name.replace(/'/g, "\\'");
                     if (list) list.innerHTML += `<li class="category-item" data-category="${c.name}" onclick="filterByCategory('${safeName}', this)">${c.name}</li>`;
+                    let icon = '🏷️';
+                    for (let k in ICONS) { if (c.name.includes(k)) { icon = ICONS[k]; break; } }
                     if (pillsList) {
-                        let icon = '🏷️';
-                        for (let k in ICONS) { if (c.name.includes(k)) { icon = ICONS[k]; break; } }
                         pillsList.innerHTML += `<button type="button" class="cat-pill" data-category="${c.name}" onclick="filterByCategory('${safeName}', this)">${icon} ${c.name}</button>`;
+                    }
+                    if (sheetCatList) {
+                        sheetCatList.innerHTML += `<button type="button" class="sheet-cat-item" data-category="${c.name}" onclick="selectSheetCategory('${safeName}', this)"><span>${icon} ${c.name}</span></button>`;
                     }
                 });
                 syncCategoryUI(selectedCategoryName);
@@ -1817,6 +2441,13 @@
             const tabAll = document.getElementById('tabCatalogAll');
             const tabGoods = document.getElementById('tabCatalogGoods');
             const tabServ = document.getElementById('tabCatalogServices');
+
+            const mAll = document.getElementById('mTabAll');
+            const mGoods = document.getElementById('mTabGoods');
+            const mServ = document.getElementById('mTabServices');
+            if (mAll) mAll.classList.toggle('active', mode === 'all');
+            if (mGoods) mGoods.classList.toggle('active', mode === 'goods');
+            if (mServ) mServ.classList.toggle('active', mode === 'services');
             const banner = document.getElementById('servicesPromoBanner');
             const navServ = document.getElementById('navServices');
             const vipSection = document.getElementById('vipSection');
@@ -1935,10 +2566,25 @@
 
             let defaultTitle = (catalogMode === 'services') ? "🛠 Послуги та сервіси" : (catalogMode === 'goods' ? "📦 Каталог товарів" : "🌟 Всі свіжі оголошення");
             document.getElementById('gridTitle').innerText = selectedCategoryName || (query ? `Результати пошуку: "${query}"` : defaultTitle);
+            
+            if (window.updateMobileFilterCountBadge) updateMobileFilterCountBadge();
+            const mSort = document.getElementById('mobileSortFilterSelect');
+            if (mSort && sortBy) mSort.value = sortBy;
         }
 
         function syncCategoryUI(catName) {
             const target = catName ? String(catName).trim() : '';
+
+            // Оновлюємо мобільне вікно фільтрів (sheet-cat-item)
+            document.querySelectorAll('.sheet-cat-item').forEach(item => {
+                const iCat = item.getAttribute('data-category');
+                const isAll = (iCat === '' || !iCat);
+                if (!target) {
+                    item.classList.toggle('active', isAll);
+                } else {
+                    item.classList.toggle('active', iCat === target);
+                }
+            });
 
             // Оновлюємо верхній скролер кнопок (cat-pill)
             document.querySelectorAll('.cat-pill').forEach(pill => {
@@ -1996,6 +2642,148 @@
             syncCategoryUI(selectedCategoryName);
             applyFilters();
         };
+
+        
+        // ==========================================
+        // 📱 МОБІЛЬНИЙ UX: ПОШУК, ФІЛЬТРИ, BOTTOM-SHEET
+        // ==========================================
+        window.openMobileFilterSheet = function() {
+            const sheet = document.getElementById('mobileFilterSheet');
+            const backdrop = document.getElementById('mobileFilterBackdrop');
+            if (!sheet || !backdrop) return;
+            
+            // Синхронізація поточних значень цін
+            const minP = document.getElementById('minPrice')?.value || '';
+            const maxP = document.getElementById('maxPrice')?.value || '';
+            const cond = document.getElementById('conditionFilter')?.value || '';
+            
+            const mMin = document.getElementById('mMinPrice');
+            const mMax = document.getElementById('mMaxPrice');
+            if (mMin) mMin.value = minP;
+            if (mMax) mMax.value = maxP;
+            
+            document.querySelectorAll('.sheet-cond-pill').forEach(pill => {
+                pill.classList.toggle('active', (pill.getAttribute('data-condition') || '') === cond);
+            });
+
+            document.querySelectorAll('.sheet-curr-pill').forEach(pill => {
+                pill.classList.toggle('active', (pill.getAttribute('data-curr') || 'UAH') === (currentGlobalCurrency || 'UAH'));
+            });
+
+            syncCategoryUI(selectedCategoryName);
+
+            backdrop.classList.add('active');
+            sheet.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeMobileFilterSheet = function() {
+            const sheet = document.getElementById('mobileFilterSheet');
+            const backdrop = document.getElementById('mobileFilterBackdrop');
+            if (sheet) sheet.classList.remove('active');
+            if (backdrop) backdrop.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        window.syncMobilePriceInputs = function() {
+            const mMin = document.getElementById('mMinPrice');
+            const mMax = document.getElementById('mMaxPrice');
+            const dMin = document.getElementById('minPrice');
+            const dMax = document.getElementById('maxPrice');
+            if (mMin && dMin) dMin.value = mMin.value;
+            if (mMax && dMax) dMax.value = mMax.value;
+        };
+
+        window.selectSheetCondition = function(condition, btn) {
+            document.querySelectorAll('.sheet-cond-pill').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            const condSelect = document.getElementById('conditionFilter');
+            if (condSelect) condSelect.value = condition;
+        };
+
+        window.updateSheetCurr = function(btn) {
+            document.querySelectorAll('.sheet-curr-pill').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        };
+
+        window.selectSheetCategory = function(catName, btn) {
+            selectedCategoryName = catName ? String(catName).trim() : null;
+            syncCategoryUI(selectedCategoryName);
+        };
+
+        window.applyMobileFiltersAndClose = function() {
+            syncMobilePriceInputs();
+            updateMobileFilterCountBadge();
+            closeMobileFilterSheet();
+            applyFilters();
+            
+            const target = document.getElementById('listingsContainer');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        };
+
+        window.resetMobileFilters = function() {
+            const mMin = document.getElementById('mMinPrice');
+            const mMax = document.getElementById('mMaxPrice');
+            if (mMin) mMin.value = '';
+            if (mMax) mMax.value = '';
+            
+            document.querySelectorAll('.sheet-cond-pill').forEach((b, i) => b.classList.toggle('active', i === 0));
+            resetFilters();
+            updateMobileFilterCountBadge();
+            closeMobileFilterSheet();
+        };
+
+        window.updateMobileFilterCountBadge = function() {
+            let count = 0;
+            const minP = document.getElementById('minPrice')?.value;
+            const maxP = document.getElementById('maxPrice')?.value;
+            const cond = document.getElementById('conditionFilter')?.value;
+            if (minP || maxP) count++;
+            if (cond) count++;
+            if (selectedCategoryName) count++;
+            
+            const badge = document.getElementById('mobileFilterCountBadge');
+            if (badge) {
+                if (count > 0) {
+                    badge.textContent = count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        };
+
+        window.syncMobileSort = function(val) {
+            const dSort = document.getElementById('sortFilter');
+            if (dSort) dSort.value = val;
+            applyFilters();
+        };
+
+        window.clearMobileSearch = function() {
+            const mSearch = document.getElementById('mobileTopSearchInput');
+            const dSearch = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('mobileTopSearchClear');
+            if (mSearch) mSearch.value = '';
+            if (dSearch) dSearch.value = '';
+            if (clearBtn) clearBtn.style.display = 'none';
+            applyFilters();
+        };
+
+        // Двосторонній зв'язок пошуку
+        const mSearchInput = document.getElementById('mobileTopSearchInput');
+        const mSearchClear = document.getElementById('mobileTopSearchClear');
+        const dSearchInput = document.getElementById('searchInput');
+
+        if (mSearchInput) {
+            mSearchInput.addEventListener('input', function() {
+                const val = this.value;
+                if (dSearchInput) dSearchInput.value = val;
+                if (mSearchClear) mSearchClear.style.display = val.length > 0 ? 'flex' : 'none';
+                applyFilters();
+            });
+        }
 
         loadCategories();
         loadListings();

@@ -267,7 +267,7 @@
         const catalogContainer = document.querySelector('.catalog-container') || document.querySelector('.listings-wrapper') || document.querySelector('.main-layout');
 
         if (!sidebar || !catalogContainer) return;
-        if (document.getElementById('mobileFilterTriggerBar')) return;
+        if (document.getElementById('mobileFilterTriggerBar') || document.getElementById('mobileActionBar')) return;
 
         const filterBar = document.createElement('div');
         filterBar.id = 'mobileFilterTriggerBar';
