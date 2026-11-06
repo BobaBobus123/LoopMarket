@@ -9,4 +9,6 @@ public interface INovaPoshtaService
     Task<List<DeliveryCityDto>> SearchCitiesAsync(string query, int limit = 10);
     Task<List<DeliveryWarehouseDto>> GetWarehousesAsync(string cityRefOrName, string? type = null, int limit = 80);
     List<DeliveryCarrierOptionDto> GetAvailableCarriers();
+    Task<WaybillResultDto> CreateWaybillAsync(CreateWaybillDto dto);
+    Task<TrackingResultDto> TrackWaybillAsync(string ttn);
 }

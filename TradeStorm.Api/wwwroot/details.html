@@ -2021,6 +2021,11 @@
             return html;
         }
 
+        function formatPrice(price) {
+            if (price === 0 || price === '0') return 'Безкоштовно';
+            return (Number(price) || 0).toLocaleString('uk-UA') + ' ₴';
+        }
+
         function updateThemeButton(theme) {
                     const iconEl = document.getElementById('themeIcon');
                     if (iconEl) iconEl.innerHTML = (theme === 'dark') ? ICONS.sun : ICONS.moon;
@@ -2427,31 +2432,35 @@
                     actionButtons.innerHTML = buttonsHtml;
 
                     // Заповнення фіксованої мобільної панелі дій знизу
-                    const stickyBar = document.getElementById('mobileStickyBar');
-                    const stickyPrice = document.getElementById('mobileStickyPrice');
-                    const stickyTitle = document.getElementById('mobileStickyTitle');
-                    const stickyButtons = document.getElementById('mobileStickyButtons');
+                    try {
+                        const stickyBar = document.getElementById('mobileStickyBar');
+                        const stickyPrice = document.getElementById('mobileStickyPrice');
+                        const stickyTitle = document.getElementById('mobileStickyTitle');
+                        const stickyButtons = document.getElementById('mobileStickyButtons');
 
-                    if (stickyBar && stickyPrice && stickyButtons) {
-                        document.body.classList.add('has-sticky-bar');
-                        stickyPrice.innerHTML = formatPrice(item.price);
-                        stickyTitle.innerText = item.title;
+                        if (stickyBar && stickyPrice && stickyButtons) {
+                            document.body.classList.add('has-sticky-bar');
+                            stickyPrice.innerHTML = (typeof formatPrice === 'function') ? formatPrice(item.price) : `${item.price || 0} ₴`;
+                            stickyTitle.innerText = item.title || '';
 
-                        let sButtons = '';
-                        if (isOwner) {
-                            sButtons = `<a href="/edit.html?id=${item.id}" class="btn-sticky-chat">✏️ Редагувати</a>`;
-                        } else if (item.status === 'Sold') {
-                            sButtons = `<span style="font-size:0.85rem; font-weight:800; color:#ef4444; padding: 6px 12px; background: rgba(239,68,68,0.1); border-radius: 8px;">Продано</span>`;
-                        } else {
-                            sButtons = `
-                                <a href="/messages.html?seller=${item.sellerId}&item=${item.id}" class="btn-sticky-chat">💬 Чат</a>
-                                <button type="button" onclick="${isServiceListing ? 'openServiceOrderModal()' : 'openOrderModal()'}" class="btn-sticky-buy" style="${isServiceListing ? 'background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);' : ''}">
-                                    ${isServiceListing ? '🛠 Замовити' : '⚡ Купити'}
-                                </button>
-                            `;
+                            let sButtons = '';
+                            if (isOwner) {
+                                sButtons = `<a href="/edit.html?id=${item.id}" class="btn-sticky-chat">✏️ Редагувати</a>`;
+                            } else if (item.status === 'Sold') {
+                                sButtons = `<span style="font-size:0.85rem; font-weight:800; color:#ef4444; padding: 6px 12px; background: rgba(239,68,68,0.1); border-radius: 8px;">Продано</span>`;
+                            } else {
+                                sButtons = `
+                                    <a href="/messages.html?seller=${item.sellerId}&item=${item.id}" class="btn-sticky-chat">💬 Чат</a>
+                                    <button type="button" onclick="${isServiceListing ? 'openServiceOrderModal()' : 'openOrderModal()'}" class="btn-sticky-buy" style="${isServiceListing ? 'background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);' : ''}">
+                                        ${isServiceListing ? '🛠 Замовити' : '⚡ Купити'}
+                                    </button>
+                                `;
+                            }
+                            stickyButtons.innerHTML = sButtons;
+                            stickyBar.style.display = 'flex';
                         }
-                        stickyButtons.innerHTML = sButtons;
-                        stickyBar.style.display = 'flex';
+                    } catch (stickyErr) {
+                        console.warn('Non-fatal sticky bar error:', stickyErr);
                     }
                 }
 

@@ -996,6 +996,153 @@
             }
         }
 
+        /* --- СТИЛІ ФІКСОВАНОГО МОБІЛЬНОГО ПОШУКУ (ЗАХИСТ ВІД КЛАВІАТУРИ) --- */
+@media (max-width: 768px) {
+    body.mobile-search-active {
+        overflow: hidden !important;
+    }
+
+    body.mobile-search-active .mobile-search-strip {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 100000 !important;
+        background: var(--surface) !important;
+        padding: 6px 12px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+    }
+
+    .mobile-search-back-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-right: 4px;
+        flex-shrink: 0;
+    }
+    .mobile-search-back-btn:active {
+        background: var(--bg-color);
+    }
+
+    .mobile-search-submit-btn {
+        margin-left: 8px;
+        padding: 0 14px;
+        height: 44px;
+        border-radius: 10px;
+        border: none;
+        background: var(--primary-light);
+        color: white;
+        font-weight: 700;
+        font-size: 0.88rem;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .mobile-search-input {
+        font-size: 16px !important; /* КРИТИЧНО для iOS Safari: запобігає небажаному авто-масштабуванню! */
+        height: 44px !important;
+    }
+
+    .mobile-search-overlay {
+        position: fixed !important;
+        top: 56px !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        z-index: 99999 !important;
+        background: var(--bg-color) !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 16px 14px 100px 14px !important;
+    }
+
+    .quick-suggest-chip {
+        padding: 8px 14px;
+        border-radius: 20px;
+        border: 1.5px solid var(--border-color);
+        background: var(--surface);
+        color: var(--text-main);
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.15s;
+    }
+    .quick-suggest-chip:active {
+        background: var(--primary-light);
+        color: white;
+        border-color: var(--primary-light);
+    }
+
+    .quick-cat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 14px;
+        background: var(--surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: var(--text-main);
+        cursor: pointer;
+    }
+    .quick-cat-row:active {
+        background: rgba(16, 185, 129, 0.08);
+        border-color: var(--primary-light);
+    }
+
+    .mobile-suggest-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        background: var(--surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        cursor: pointer;
+        text-decoration: none;
+        color: var(--text-main);
+        transition: 0.15s;
+    }
+    .mobile-suggest-item:active {
+        border-color: var(--primary-light);
+        background: rgba(16, 185, 129, 0.05);
+    }
+    .mobile-suggest-img {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        object-fit: cover;
+        background: var(--border-color);
+        flex-shrink: 0;
+    }
+    .mobile-suggest-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .mobile-suggest-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .mobile-suggest-price {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: var(--primary-light);
+    }
+}
+
         /* -------------------------------------------------------------
            МОБІЛЬНИЙ ПОШУК ТА ПАНЕЛЬ ДІЙ (< 768px)
            ------------------------------------------------------------- */
@@ -1875,12 +2022,75 @@
         </div>
     </header>
 
-    <!-- ВЕРХНІЙ МОБІЛЬНИЙ ПОШУК (ЛИШЕ НА СМАРТФОНАХ < 768px) -->
+    <!-- ВЕРХНІЙ МОБІЛЬНИЙ ПОШУК (ЛИШЕ НА СМАРТФОНАХ < 768px) З ФІКСАЦІЄЮ ВІД ПЕРЕКРИТТЯ КЛАВІАТУРОЮ -->
     <div class="mobile-search-strip" id="mobileSearchStrip">
         <div class="mobile-search-box">
-            <svg class="mobile-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <input type="text" id="mobileTopSearchInput" class="mobile-search-input" placeholder="Пошук серед оголошень..." autocomplete="off">
+            <button type="button" class="mobile-search-back-btn" id="mobileSearchBackBtn" style="display: none;" onclick="exitMobileSearchMode()">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <svg class="mobile-search-icon" id="mobileSearchIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="mobileTopSearchInput" class="mobile-search-input" placeholder="Пошук за назвою чи брендом..." autocomplete="off">
             <button type="button" id="mobileTopSearchClear" class="mobile-search-clear" style="display: none;" onclick="clearMobileSearch()">✕</button>
+            <button type="button" class="mobile-search-submit-btn" id="mobileSearchSubmitBtn" style="display: none;" onclick="submitMobileSearch()">Знайти</button>
+        </div>
+    </div>
+
+    <!-- ПОВНОЕКРАННИЙ ОВЕРЛЕЙ РЕЗУЛЬТАТІВ ТА ПІДКАЗОК МОБІЛЬНОГО ПОШУКУ -->
+    <div class="mobile-search-overlay" id="mobileSearchOverlay" style="display: none;">
+        <!-- Стан 1: Швидкі популярні запити та категорії -->
+        <div id="mobileSearchSuggestionsDefault">
+            <div style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                🔥 Популярні пошуки
+            </div>
+            <div class="quick-suggest-tags" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px;">
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('iPhone')">📱 iPhone</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Ноутбук')">💻 Ноутбук</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Кросівки')">👟 Кросівки</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Куртка')">🧥 Куртка</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Велосипед')">🚲 Велосипед</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Генератор')">⚡ Генератор</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Диван')">🛋️ Диван</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Навушники')">🎧 Навушники</button>
+            </div>
+
+            <div style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                📂 Популярні категорії
+            </div>
+            <div class="quick-cat-list" style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="quick-cat-row" onclick="filterByCategory('1'); exitMobileSearchMode();">
+                    <span>📱 Електроніка та техніка</span>
+                    <span style="color: var(--text-muted); font-size: 1.1rem;">→</span>
+                </div>
+                <div class="quick-cat-row" onclick="filterByCategory('2'); exitMobileSearchMode();">
+                    <span>🚗 Транспорт та автотовари</span>
+                    <span style="color: var(--text-muted); font-size: 1.1rem;">→</span>
+                </div>
+                <div class="quick-cat-row" onclick="filterByCategory('3'); exitMobileSearchMode();">
+                    <span>👕 Мода, одяг та взуття</span>
+                    <span style="color: var(--text-muted); font-size: 1.1rem;">→</span>
+                </div>
+                <div class="quick-cat-row" onclick="filterByCategory('4'); exitMobileSearchMode();">
+                    <span>🏠 Дім, сад та меблі</span>
+                    <span style="color: var(--text-muted); font-size: 1.1rem;">→</span>
+                </div>
+                <div class="quick-cat-row" onclick="filterByCategory('8'); exitMobileSearchMode();">
+                    <span>🛠 Послуги та робота</span>
+                    <span style="color: var(--text-muted); font-size: 1.1rem;">→</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Стан 2: Живі результати при введенні тексту -->
+        <div id="mobileSearchLiveResults" style="display: none;">
+            <div id="mobileSearchLiveCount" style="font-size: 0.84rem; font-weight: 700; color: var(--text-muted); margin-bottom: 12px;">
+                Знайдено в каталозі:
+            </div>
+            <div id="mobileSearchList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            <div id="mobileSearchSeeAllBtn" style="margin-top: 16px; text-align: center;">
+                <button type="button" onclick="submitMobileSearch()" style="width: 100%; padding: 13px; border-radius: 12px; border: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
+                    🔍 Показати всі результати в каталозі
+                </button>
+            </div>
         </div>
     </div>
 
@@ -2924,13 +3134,140 @@
             applyFilters();
         };
 
+        function escapeRegex(str) {
+            return (str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        window.enterMobileSearchMode = function() {
+            if (window.innerWidth > 768) return;
+            document.body.classList.add('mobile-search-active');
+            const overlay = document.getElementById('mobileSearchOverlay');
+            const backBtn = document.getElementById('mobileSearchBackBtn');
+            const icon = document.getElementById('mobileSearchIcon');
+            const submitBtn = document.getElementById('mobileSearchSubmitBtn');
+            const input = document.getElementById('mobileTopSearchInput');
+
+            if (overlay) overlay.style.display = 'block';
+            if (backBtn) backBtn.style.display = 'flex';
+            if (icon) icon.style.display = 'none';
+            if (submitBtn) submitBtn.style.display = 'block';
+
+            updateMobileLiveSearch(input ? input.value : '');
+        };
+
+        window.exitMobileSearchMode = function() {
+            document.body.classList.remove('mobile-search-active');
+            const overlay = document.getElementById('mobileSearchOverlay');
+            const backBtn = document.getElementById('mobileSearchBackBtn');
+            const icon = document.getElementById('mobileSearchIcon');
+            const submitBtn = document.getElementById('mobileSearchSubmitBtn');
+            const input = document.getElementById('mobileTopSearchInput');
+
+            if (overlay) overlay.style.display = 'none';
+            if (backBtn) backBtn.style.display = 'none';
+            if (icon) icon.style.display = 'block';
+            if (submitBtn) submitBtn.style.display = 'none';
+            if (input) input.blur();
+        };
+
+        window.submitMobileSearch = function() {
+            exitMobileSearchMode();
+            applyFilters();
+            const grid = document.getElementById('gridTitle') || document.getElementById('listingsContainer');
+            if (grid) {
+                grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        };
+
+        window.applyQuickSearch = function(text) {
+            const mSearch = document.getElementById('mobileTopSearchInput');
+            const dSearch = document.getElementById('searchInput');
+            if (mSearch) mSearch.value = text;
+            if (dSearch) dSearch.value = text;
+            submitMobileSearch();
+        };
+
+        window.updateMobileLiveSearch = function(query) {
+            query = (query || '').trim().toLowerCase();
+            const liveContainer = document.getElementById('mobileSearchLiveResults');
+            const defaultContainer = document.getElementById('mobileSearchSuggestionsDefault');
+            const listEl = document.getElementById('mobileSearchList');
+            const countEl = document.getElementById('mobileSearchLiveCount');
+            const clearBtn = document.getElementById('mobileTopSearchClear');
+
+            if (clearBtn) clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
+
+            if (query.length === 0) {
+                if (defaultContainer) defaultContainer.style.display = 'block';
+                if (liveContainer) liveContainer.style.display = 'none';
+                return;
+            }
+
+            if (defaultContainer) defaultContainer.style.display = 'none';
+            if (liveContainer) liveContainer.style.display = 'block';
+
+            const words = query.split(/\s+/).filter(Boolean);
+            const matches = allListings.filter(item => {
+                const title = (item.title || '').toLowerCase();
+                const desc = (item.description || '').toLowerCase();
+                return words.every(w => title.includes(w) || desc.includes(w));
+            }).sort((a, b) => getSearchRelevance(b, query) - getSearchRelevance(a, query));
+
+            if (countEl) countEl.innerText = `Знайдено оголошень: ${matches.length}`;
+
+            if (matches.length === 0) {
+                if (listEl) {
+                    listEl.innerHTML = `
+                        <div style="text-align: center; padding: 30px 10px; color: var(--text-muted); background: var(--surface); border-radius: 12px; border: 1px dashed var(--border-color);">
+                            <div style="font-size: 1.8rem; margin-bottom: 6px;">🔍</div>
+                            <div style="font-weight: 700;">Нічого не знайдено за запитом "${escapeHtml(query)}"</div>
+                            <div style="font-size: 0.85rem; margin-top: 4px;">Спробуйте інше слово або перевірте правопис</div>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            const previewItems = matches.slice(0, 8);
+            if (listEl) {
+                listEl.innerHTML = previewItems.map(item => {
+                    const img = (item.imageUrls && item.imageUrls[0]) || item.imageUrl || 'https://placehold.co/100x100?text=Loop';
+                    const price = formatPrice(item.price);
+                    const city = item.location || 'Україна';
+                    
+                    let titleHtml = escapeHtml(item.title);
+                    words.forEach(w => {
+                        const regex = new RegExp(`(${escapeRegex(w)})`, 'gi');
+                        titleHtml = titleHtml.replace(regex, '<span style="color: var(--primary-light); font-weight: 800; background: rgba(16,185,129,0.12); padding: 0 2px; border-radius: 3px;">$1</span>');
+                    });
+
+                    return `
+                        <a href="/details.html?id=${item.id}" class="mobile-suggest-item" onclick="saveScrollPosition()">
+                            <img src="${img}" class="mobile-suggest-img" alt="${escapeHtml(item.title)}" loading="lazy">
+                            <div class="mobile-suggest-info">
+                                <div class="mobile-suggest-title">${titleHtml}</div>
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span class="mobile-suggest-price">${price}</span>
+                                    <span style="font-size: 0.76rem; color: var(--text-muted);">📍 ${escapeHtml(city)}</span>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+            }
+        };
+
         window.clearMobileSearch = function() {
             const mSearch = document.getElementById('mobileTopSearchInput');
             const dSearch = document.getElementById('searchInput');
             const clearBtn = document.getElementById('mobileTopSearchClear');
-            if (mSearch) mSearch.value = '';
+            if (mSearch) {
+                mSearch.value = '';
+                mSearch.focus();
+            }
             if (dSearch) dSearch.value = '';
             if (clearBtn) clearBtn.style.display = 'none';
+            updateMobileLiveSearch('');
             applyFilters();
         };
 
@@ -2940,11 +3277,24 @@
         const dSearchInput = document.getElementById('searchInput');
 
         if (mSearchInput) {
+            mSearchInput.addEventListener('focus', function() {
+                enterMobileSearchMode();
+            });
+
             mSearchInput.addEventListener('input', function() {
                 const val = this.value;
                 if (dSearchInput) dSearchInput.value = val;
-                if (mSearchClear) mSearchClear.style.display = val.length > 0 ? 'flex' : 'none';
-                applyFilters();
+                updateMobileLiveSearch(val);
+                debouncedSearch();
+            });
+
+            mSearchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    submitMobileSearch();
+                } else if (e.key === 'Escape') {
+                    exitMobileSearchMode();
+                }
             });
         }
 

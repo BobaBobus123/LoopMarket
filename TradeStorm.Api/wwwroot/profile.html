@@ -1403,6 +1403,10 @@
                 </span>
             </div>
 
+            <button type="button" id="btnAutoGenerateTtn" onclick="autoGenerateNovaPoshtaTtn()" style="width: 100%; margin-bottom: 12px; padding: 10px 14px; border-radius: 10px; border: 1.5px dashed #ef4444; background: rgba(239, 68, 68, 0.08); color: #ef4444; font-weight: 800; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;">
+                ⚡ Створити ТТН автоматично через API Нової Пошти
+            </button>
+
             <div style="position: relative; margin-bottom: 12px;">
                 <input type="text" id="shipTtnInput" placeholder="20450912345678" oninput="onTtnInputChange(this.value)" style="width: 100%; box-sizing: border-box; padding: 13px 16px; border-radius: 12px; border: 1.5px solid var(--border-color); background: var(--bg-color); color: var(--text-main); font-size: 1.15rem; font-weight: 800; letter-spacing: 1px; outline: none; transition: all 0.2s;">
             </div>
@@ -1417,6 +1421,31 @@
                 <button type="button" id="btnSubmitShipping" onclick="submitShippingAction()" style="flex: 1.4; padding: 13px 16px; border-radius: 10px; border: none; background: linear-gradient(135deg, #10b981 0%, #2563eb 100%); color: white; font-weight: 800; font-size: 0.92rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);">
                     🚀 Підтвердити та відправити
                 </button>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- МОДАЛЬНЕ ВІКНО ВІДСТЕЖЕННЯ ТТН НОВОЇ ПОШТИ -->
+    <div class="modal-overlay" id="trackingModal">
+        <div class="modal-box" style="max-width: 480px; text-align: left; padding: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(239, 68, 68, 0.12); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                        📦
+                    </div>
+                    <div>
+                        <h3 class="modal-title" style="margin: 0; font-size: 1.15rem;">Відстеження Нова Пошта</h3>
+                        <div style="font-size: 0.82rem; color: var(--text-muted);" id="trackModalTtn">ТТН: ...</div>
+                    </div>
+                </div>
+                <button type="button" onclick="closeTrackingModal()" style="background: transparent; border: none; font-size: 1.3rem; color: var(--text-muted); cursor: pointer; padding: 4px 8px;">✕</button>
+            </div>
+            <div id="trackingContent" style="padding: 10px 0;">
+                <div style="text-align: center; padding: 20px; color: var(--text-muted);">Завантаження даних...</div>
+            </div>
+            <div class="modal-actions" style="margin-top: 16px;">
+                <button type="button" class="btn-primary" onclick="closeTrackingModal()" style="width: 100%;">Зрозуміло</button>
             </div>
         </div>
     </div>
@@ -2119,7 +2148,7 @@
                                     <div><strong>${o.isService ? '⏱ Обсяг робіт:' : '🏢 Відділення / адреса:'}</strong> ${o.deliveryBranch}</div>
                                     <div><strong>💳 Оплата:</strong> ${o.paymentMethod}</div>
                                     ${o.comment ? `<div><strong>💬 Коментар:</strong> <em>${o.comment}</em></div>` : ''}
-                                    ${o.trackingNumber ? `<div><strong>🏷 Номер ТТН:</strong> <code style="background: var(--bg-color); padding: 2px 6px; border-radius: 4px; font-weight: bold;">${o.trackingNumber}</code></div>` : ''}
+                                    ${o.trackingNumber ? `<div><strong>🏷 Номер ТТН:</strong> <code style="background: var(--bg-color); padding: 2px 6px; border-radius: 4px; font-weight: bold;">${o.trackingNumber}</code> <button type="button" onclick="trackNovaPoshtaTtn('${o.trackingNumber}')" style="margin-left: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; border-radius: 6px; border: 1px solid #ef4444; background: rgba(239,68,68,0.1); color: #ef4444; cursor: pointer;">📦 Відстежити ТТН</button></div>` : ''}
                                 </div>
                             </div>
 
@@ -2370,6 +2399,103 @@
                 btn.disabled = false;
                 btn.innerText = oldText;
             }
+        };
+
+        
+        window.autoGenerateNovaPoshtaTtn = async function() {
+            if (!currentShipOrderId) return;
+            const btn = document.getElementById('btnAutoGenerateTtn');
+            const valBox = document.getElementById('shipValidationBox');
+            const originalText = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Створення ТТН у Новій Пошті...';
+            valBox.style.background = 'rgba(37,99,235,0.08)';
+            valBox.style.borderColor = 'rgba(37,99,235,0.25)';
+            valBox.style.color = 'var(--text-main)';
+            valBox.innerHTML = '🔄 Відправка запиту до API Нової Пошти...';
+
+            try {
+                const token = localStorage.getItem('loopToken');
+                const res = await fetch('/api/delivery/novaposhta/waybill', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        orderId: currentShipOrderId
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success && data.ttnNumber) {
+                    document.getElementById('shipTtnInput').value = data.ttnNumber;
+                    onTtnInputChange(data.ttnNumber);
+
+                    closeShippingModal();
+                    loadUserOrders(currentOrderSubTab);
+                    if (typeof loadMyServicesStats === 'function') loadMyServicesStats();
+                    showToast('🎉 ТТН Створено!', `Накладну Нової Пошти №${data.ttnNumber} успішно сформовано! Замовлення позначено як відправлене.`, '📦');
+                } else {
+                    valBox.style.background = 'rgba(239, 68, 68, 0.1)';
+                    valBox.style.borderColor = 'rgba(239, 68, 68, 0.35)';
+                    valBox.style.color = '#ef4444';
+                    valBox.innerHTML = `❌ Помилка створення ТТН: ${data.error || 'Перевірте адресу або введіть номер вручну'}`;
+                }
+            } catch (err) {
+                valBox.style.background = 'rgba(239, 68, 68, 0.1)';
+                valBox.style.borderColor = 'rgba(239, 68, 68, 0.35)';
+                valBox.style.color = '#ef4444';
+                valBox.innerHTML = `❌ Помилка зв'язку з API Нової Пошти`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        };
+
+        window.trackNovaPoshtaTtn = async function(ttn) {
+            const modal = document.getElementById('trackingModal');
+            const titleEl = document.getElementById('trackModalTtn');
+            const contentEl = document.getElementById('trackingContent');
+            if (!modal) return;
+            
+            titleEl.innerText = `ТТН: ${ttn}`;
+            contentEl.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-muted);">⏳ Отримання інформації від сервера Нової Пошти...</div>`;
+            modal.classList.add('active');
+            
+            try {
+                const res = await fetch(`/api/delivery/novaposhta/track/${encodeURIComponent(ttn)}`);
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    contentEl.innerHTML = `
+                        <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+                            <div style="font-size: 0.78rem; text-transform: uppercase; color: #10b981; font-weight: 800; margin-bottom: 4px;">Поточний статус доставки</div>
+                            <div style="font-size: 1.05rem; font-weight: 800; color: var(--text-main);">${data.status || 'Інформація оновлюється'}</div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: var(--text-main);">
+                            ${data.citySender ? `<div><strong>📍 Звідки:</strong> ${data.citySender}</div>` : ''}
+                            ${data.cityRecipient ? `<div><strong>🏁 Куди:</strong> ${data.cityRecipient}${data.warehouseRecipient ? ` (${data.warehouseRecipient})` : ''}</div>` : ''}
+                            ${data.scheduledDeliveryDate ? `<div><strong>📅 Очікувана доставка:</strong> ${data.scheduledDeliveryDate}</div>` : ''}
+                            ${data.actualDeliveryDate ? `<div><strong>✅ Фактично доставлено:</strong> ${data.actualDeliveryDate}</div>` : ''}
+                            ${data.documentCost ? `<div><strong>💰 Вартість доставки:</strong> ${data.documentCost} ₴</div>` : ''}
+                        </div>
+                    `;
+                } else {
+                    contentEl.innerHTML = `
+                        <div style="padding: 16px; background: rgba(239,68,68,0.1); border-radius: 10px; color: #ef4444; font-size: 0.9rem;">
+                            ❌ ${data.error || 'Не вдалося знайти інформацію про вказану накладну'}
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                contentEl.innerHTML = `<div style="padding: 16px; color: #ef4444;">Помилка зв'язку з сервером</div>`;
+            }
+        };
+
+        window.closeTrackingModal = function() {
+            const modal = document.getElementById('trackingModal');
+            if (modal) modal.classList.remove('active');
         };
 
         // 2. ПІДТВЕРДЖЕННЯ ВИКОНАННЯ ПОСЛУГИ
