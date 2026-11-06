@@ -1037,6 +1037,99 @@
             overflow-y: auto;
         }
 
+    
+        /* 📱 ФІКСОВАНА МОБІЛЬНА ПАНЕЛЬ ДІЙ ЗНИЗУ ДЛЯ СМАРТФОНІВ (< 768px) */
+        .mobile-sticky-action-bar {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-sticky-action-bar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: calc(64px + env(safe-area-inset-bottom, 0px));
+                padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0px)) 14px;
+                background: var(--surface);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                border-top: 1.5px solid var(--border-color);
+                z-index: 9999;
+                display: flex !important;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                box-shadow: 0 -6px 24px rgba(0,0,0,0.12);
+            }
+
+            .sticky-price-wrap {
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                max-width: 42%;
+            }
+
+            .sticky-price {
+                font-size: 1.15rem;
+                font-weight: 800;
+                color: var(--text-main);
+                white-space: nowrap;
+                line-height: 1.2;
+            }
+
+            .sticky-title {
+                font-size: 0.72rem;
+                color: var(--text-muted);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .sticky-buttons-wrap {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-grow: 1;
+                justify-content: flex-end;
+            }
+
+            .btn-sticky-chat {
+                padding: 10px 14px;
+                border-radius: 10px;
+                font-size: 0.85rem;
+                font-weight: 700;
+                text-decoration: none;
+                background: var(--bg-color);
+                border: 1.5px solid var(--border-color);
+                color: var(--text-main);
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                white-space: nowrap;
+            }
+
+            .btn-sticky-buy {
+                padding: 10px 18px;
+                border-radius: 10px;
+                font-size: 0.88rem;
+                font-weight: 800;
+                color: white;
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                border: none;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                white-space: nowrap;
+                box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            }
+
+            body.has-sticky-bar {
+                padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+            }
+        }
+
     </style>
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
@@ -1198,6 +1291,15 @@
                 </div>
             </div>
         </div>
+
+        <!-- ФІКСОВАНА ПАНЕЛЬ ДІЙ ВНИЗУ ЕКРАНА ДЛЯ СМАРТФОНІВ (< 768px) -->
+    <div class="mobile-sticky-action-bar" id="mobileStickyBar" style="display: none;">
+        <div class="sticky-price-wrap">
+            <div class="sticky-price" id="mobileStickyPrice"></div>
+            <div class="sticky-title" id="mobileStickyTitle"></div>
+        </div>
+        <div class="sticky-buttons-wrap" id="mobileStickyButtons"></div>
+    </div>
 
     <!-- Модальне вікно оформлення замовлення (Широкий, симетричний 2-колонковий дизайн 1100px) -->
     <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 2000;">
@@ -2323,6 +2425,34 @@
                         }
                     }
                     actionButtons.innerHTML = buttonsHtml;
+
+                    // Заповнення фіксованої мобільної панелі дій знизу
+                    const stickyBar = document.getElementById('mobileStickyBar');
+                    const stickyPrice = document.getElementById('mobileStickyPrice');
+                    const stickyTitle = document.getElementById('mobileStickyTitle');
+                    const stickyButtons = document.getElementById('mobileStickyButtons');
+
+                    if (stickyBar && stickyPrice && stickyButtons) {
+                        document.body.classList.add('has-sticky-bar');
+                        stickyPrice.innerHTML = formatPrice(item.price);
+                        stickyTitle.innerText = item.title;
+
+                        let sButtons = '';
+                        if (isOwner) {
+                            sButtons = `<a href="/edit.html?id=${item.id}" class="btn-sticky-chat">✏️ Редагувати</a>`;
+                        } else if (item.status === 'Sold') {
+                            sButtons = `<span style="font-size:0.85rem; font-weight:800; color:#ef4444; padding: 6px 12px; background: rgba(239,68,68,0.1); border-radius: 8px;">Продано</span>`;
+                        } else {
+                            sButtons = `
+                                <a href="/messages.html?seller=${item.sellerId}&item=${item.id}" class="btn-sticky-chat">💬 Чат</a>
+                                <button type="button" onclick="${isServiceListing ? 'openServiceOrderModal()' : 'openOrderModal()'}" class="btn-sticky-buy" style="${isServiceListing ? 'background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);' : ''}">
+                                    ${isServiceListing ? '🛠 Замовити' : '⚡ Купити'}
+                                </button>
+                            `;
+                        }
+                        stickyButtons.innerHTML = sButtons;
+                        stickyBar.style.display = 'flex';
+                    }
                 }
 
                 const content = document.getElementById('productContent');

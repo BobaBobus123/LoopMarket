@@ -1757,6 +1757,57 @@
             overflow-y: auto;
         }
 
+    
+        /* ШВИДКІ ТЕГИ-ФІЛЬТРИ В 1 КЛІК */
+        .quick-tags-container {
+            padding-top: 2px;
+            padding-bottom: 6px;
+        }
+
+        .quick-tags-scroller {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 2px 2px 6px 2px;
+        }
+
+        .quick-tags-scroller::-webkit-scrollbar {
+            display: none;
+        }
+
+        .quick-tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: var(--surface);
+            border: 1.5px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+
+        .quick-tag-pill:hover {
+            border-color: var(--primary-light);
+            color: var(--text-main);
+            transform: translateY(-1px);
+        }
+
+        .quick-tag-pill.active {
+            background: var(--primary-soft);
+            border-color: var(--primary-light);
+            color: var(--primary-light);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+            font-weight: 800;
+        }
+
     </style>
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
@@ -1849,6 +1900,17 @@
             </div>
 
     <!-- МОБІЛЬНА ПАНЕЛЬ ШВИДКИХ ДІЙ (РЕЖИМИ, ФІЛЬТРИ, СОРТУВАННЯ) -->
+    
+    <!-- ШВИДКІ ТЕГИ-ФІЛЬТРИ В 1 КЛІК (БЕЗ ЗАЙВИХ КНОПОК) -->
+    <div class="container quick-tags-container">
+        <div class="quick-tags-scroller" id="quickTagsScroller">
+            <button type="button" class="quick-tag-pill" id="qtagNew" onclick="toggleQuickTag('new', this)">✨ Тільки нове</button>
+            <button type="button" class="quick-tag-pill" id="qtagShipping" onclick="toggleQuickTag('shipping', this)">📦 З доставкою</button>
+            <button type="button" class="quick-tag-pill" id="qtagPrice" onclick="toggleQuickTag('price', this)">🏷️ До 1 000 ₴</button>
+            <button type="button" class="quick-tag-pill" id="qtagVip" onclick="toggleQuickTag('vip', this)">⭐ ТОП-оголошення</button>
+        </div>
+    </div>
+
     <div class="container mobile-action-bar-container" style="padding-top: 0; padding-bottom: 4px;">
         <div class="mobile-action-bar" id="mobileActionBar">
             <div class="mobile-mode-tabs">
@@ -1882,7 +1944,7 @@
 
             <div class="search-box" style="position: relative;">
                 <span class="search-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
-                <input type="text" id="searchInput" class="search-input" placeholder="Пошук оголошень..." autocomplete="off">
+                <input type="text" id="searchInput" class="search-input" placeholder="Пошук за назвою... (натисніть /)" autocomplete="off">
                 <div id="searchAutocompleteDropdown" class="search-autocomplete-dropdown" style="display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 12px; box-shadow: 0 16px 36px rgba(0,0,0,0.25); z-index: 500; overflow: hidden;"></div>
             </div>
 
@@ -2388,14 +2450,14 @@
 
             return `
                 <div class="card ${isSold ? 'card-sold' : ''}" style="animation-delay: ${delayIndex * 0.03}s;">
-                    <div class="card-img-wrapper" onclick="window.location.href='/details.html?id=${item.id}'">
+                    <div class="card-img-wrapper" onclick="saveListingScrollPosition(); window.location.href='/details.html?id=${item.id}'">
                         <img src="${imgUrl}" class="card-img" alt="${item.title}" loading="lazy" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
                         ${isSold ? '<span class="card-badge badge-sold">Продано</span>' : (item.isFeatured ? '<span class="card-badge" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; font-weight: 800; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);">⭐ ТОП</span>' : (isService ? '<span class="card-badge" style="background:#2563eb; color:white;">🛠 Послуга</span>' : (isNew ? '<span class="card-badge badge-new">Нове</span>' : '')))}
                         <button onclick="toggleFavorite(${item.id}, event)" class="btn-fav" title="Додати в обране">${favIcon}</button>
                     </div>
                     <div class="card-content">
                         <div class="card-category" style="${isService ? 'color: #2563eb; font-weight: 700;' : ''}">${categoryDisplay}</div>
-                        <div class="card-title" title="${item.title}" onclick="window.location.href='/details.html?id=${item.id}'">${item.title}</div>
+                        <div class="card-title" title="${item.title}" onclick="saveListingScrollPosition(); window.location.href='/details.html?id=${item.id}'">${item.title}</div>
                         <div class="card-price-row">
                             <div class="card-price">${priceDisplay}</div>
                             ${serviceTag}
@@ -2496,6 +2558,71 @@
             return item.categoryId === 8 || (item.title && item.title.toLowerCase().includes('послуг')) || (item.condition && item.condition.includes('Послуга'));
         }
 
+        // ==========================================
+        // 🔍 РОЗУМНИЙ ПОШУК ЗА НАЗВОЮ ТА РЕЛЕВАНТНІСТЮ
+        // ==========================================
+        function getSearchRelevance(item, query) {
+            if (!query) return 1;
+            const title = (item.title || '').toLowerCase().trim();
+            const category = (item.categoryName || '').toLowerCase().trim();
+            const desc = (item.description || '').toLowerCase().trim();
+            
+            // 1. Точний повний збіг за назвою
+            if (title === query) return 1000;
+
+            // 2. Назва починається з шуканого запиту (напр. "iPhone 15" для "iph")
+            if (title.startsWith(query)) return 800;
+
+            // 3. Окреме слово в назві починається з шуканого слова
+            const titleWords = title.split(/[\s,.\-!?"'«»()]+/);
+            if (titleWords.some(w => w.startsWith(query))) return 600;
+
+            // 4. Назва містить фрагмент всередині
+            if (title.includes(query)) return 400;
+
+            // 5. Всі окремі слова запиту (напр. "apple 13") є в назві
+            const queryTokens = query.split(/\s+/).filter(Boolean);
+            if (queryTokens.length > 1 && queryTokens.every(tok => title.includes(tok))) return 350;
+
+            // 6. Збіг за категорією товару
+            if (category.includes(query)) return 200;
+
+            // 7. Пошук в описі: ТІЛЬКИ якщо запит має 3+ символів і є окремим словом!
+            // (Виключає випадковий збіг по 1 літері в описі)
+            if (query.length >= 3) {
+                const descWords = desc.split(/[\s,.\-!?"'«»()]+/);
+                if (descWords.some(w => w.startsWith(query))) return 50;
+                if (desc.includes(query)) return 20;
+            }
+
+            return 0; // Не відповідає запиту
+        }
+
+        // Швидкі фільтри в 1 клік
+        let activeQuickTags = {
+            onlyNew: false,
+            shipping: false,
+            under1000: false,
+            vip: false
+        };
+
+        window.toggleQuickTag = function(type, btn) {
+            if (type === 'new') {
+                activeQuickTags.onlyNew = !activeQuickTags.onlyNew;
+                btn.classList.toggle('active', activeQuickTags.onlyNew);
+            } else if (type === 'shipping') {
+                activeQuickTags.shipping = !activeQuickTags.shipping;
+                btn.classList.toggle('active', activeQuickTags.shipping);
+            } else if (type === 'price') {
+                activeQuickTags.under1000 = !activeQuickTags.under1000;
+                btn.classList.toggle('active', activeQuickTags.under1000);
+            } else if (type === 'vip') {
+                activeQuickTags.vip = !activeQuickTags.vip;
+                btn.classList.toggle('active', activeQuickTags.vip);
+            }
+            applyFilters();
+        };
+
         function applyFilters() {
             const query = document.getElementById('searchInput').value.toLowerCase().trim();
             const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
@@ -2508,14 +2635,34 @@
                 if (catalogMode === 'goods' && isService) return false;
                 if (catalogMode === 'services' && !isService) return false;
 
-                const matchesSearch = !query || item.title.toLowerCase().includes(query) || (item.description && item.description.toLowerCase().includes(query));
+                // 1. Розумний пошук за назвою (пріоритет)
+                if (query) {
+                    const rel = getSearchRelevance(item, query);
+                    if (rel <= 0) return false;
+                }
+
+                // 2. Категорія
                 const matchesCategory = !selectedCategoryName || item.categoryName === selectedCategoryName;
-                const matchesPrice = item.price >= minPrice && item.price <= maxPrice;
-                const matchesCondition = !condition || item.condition === condition;
-                return matchesSearch && matchesCategory && matchesPrice && matchesCondition;
+                if (!matchesCategory) return false;
+
+                // 3. Діапазон цін
+                if (item.price < minPrice || item.price > maxPrice) return false;
+                if (activeQuickTags.under1000 && item.price > 1000) return false;
+
+                // 4. Стан товару
+                if (activeQuickTags.onlyNew && item.condition !== 'Нове') return false;
+                if (condition && item.condition !== condition) return false;
+
+                // 5. Швидкий фільтр доставки
+                if (activeQuickTags.shipping && !item.isShippingAvailable) return false;
+
+                // 6. Швидкий фільтр ТОП
+                if (activeQuickTags.vip && !item.isFeatured) return false;
+
+                return true;
             });
 
-            const isAnyFilterActive = query || selectedCategoryName || document.getElementById('minPrice').value || document.getElementById('maxPrice').value || condition;
+            const isAnyFilterActive = query || selectedCategoryName || document.getElementById('minPrice').value || document.getElementById('maxPrice').value || condition || activeQuickTags.onlyNew || activeQuickTags.shipping || activeQuickTags.under1000 || activeQuickTags.vip;
             const hasVipProducts = allListings.some(item => item.isFeatured && !isItemService(item));
             const isVipVisible = (catalogMode !== 'services' && !isAnyFilterActive && hasVipProducts);
 
@@ -2530,7 +2677,13 @@
                 displayListings = filtered.filter(item => !(item.isFeatured && !isItemService(item)));
             }
 
+            // Сортування: якщо є пошуковий запит — показувати найбільш точні збіги в назві НАЙПЕРШИМИ
             displayListings.sort((a, b) => {
+                if (query) {
+                    const scoreA = getSearchRelevance(a, query);
+                    const scoreB = getSearchRelevance(b, query);
+                    if (scoreA !== scoreB) return scoreB - scoreA;
+                }
                 if (!isVipVisible) {
                     const featA = a.isFeatured ? 1 : 0;
                     const featB = b.isFeatured ? 1 : 0;
@@ -2615,16 +2768,26 @@
 
         window.resetFilters = function() {
             document.getElementById('searchInput').value = '';
+            const mSearch = document.getElementById('mobileTopSearchInput');
+            if (mSearch) mSearch.value = '';
+            const mClear = document.getElementById('mobileTopSearchClear');
+            if (mClear) mClear.style.display = 'none';
+
             document.getElementById('minPrice').value = '';
             document.getElementById('maxPrice').value = '';
             document.getElementById('conditionFilter').value = '';
             if (document.getElementById('sortFilter')) document.getElementById('sortFilter').value = 'newest';
+            
+            // Скидаємо швидкі теги
+            activeQuickTags = { onlyNew: false, shipping: false, under1000: false, vip: false };
+            document.querySelectorAll('.quick-tag-pill').forEach(b => b.classList.remove('active'));
+
             selectedCategoryName = null;
             syncCategoryUI(null);
             applyFilters();
         };
 
-        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('searchInput').addEventListener('input', debouncedSearch);
         document.getElementById('minPrice').addEventListener('input', applyFilters);
         document.getElementById('maxPrice').addEventListener('input', applyFilters);
         document.getElementById('conditionFilter').addEventListener('change', applyFilters);
@@ -2792,6 +2955,76 @@
             setTimeout(() => setCatalogMode('services'), 100);
         }
 
+    
+        // ==========================================
+        // ⌨️ ГАРЯЧІ КЛАВІШІ (ДЕСКТОП/НОУТБУК) ТА СКРОЛ
+        // ==========================================
+        let liveSearchTimer = null;
+        function debouncedSearch() {
+            clearTimeout(liveSearchTimer);
+            liveSearchTimer = setTimeout(applyFilters, 130);
+        }
+
+        // Обробка клавіші / або Ctrl+K для миттєвого пошуку
+        document.addEventListener('keydown', function(e) {
+            const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+            const isInput = tag === 'input' || tag === 'textarea' || tag === 'select';
+            
+            if (e.key === '/' && !isInput) {
+                e.preventDefault();
+                const targetInput = (window.innerWidth < 768) ? document.getElementById('mobileTopSearchInput') : document.getElementById('searchInput');
+                if (targetInput) {
+                    targetInput.focus();
+                    targetInput.select();
+                }
+            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                const targetInput = (window.innerWidth < 768) ? document.getElementById('mobileTopSearchInput') : document.getElementById('searchInput');
+                if (targetInput) {
+                    targetInput.focus();
+                    targetInput.select();
+                }
+            } else if (e.key === 'Escape') {
+                if (window.closeMobileFilterSheet) closeMobileFilterSheet();
+                const search = document.getElementById('searchInput');
+                if (search && document.activeElement === search) search.blur();
+            }
+        });
+
+        // Запам'ятовування позиції скролу при переході на картку товару
+        window.saveListingScrollPosition = function() {
+            try {
+                sessionStorage.setItem('loop_catalog_scroll', window.scrollY);
+            } catch(e) {}
+        };
+
+        // Відновлення скролу при поверненні назад
+        window.addEventListener('load', function() {
+            try {
+                const savedScroll = sessionStorage.getItem('loop_catalog_scroll');
+                if (savedScroll) {
+                    setTimeout(() => {
+                        window.scrollTo({ top: parseInt(savedScroll), behavior: 'smooth' });
+                        sessionStorage.removeItem('loop_catalog_scroll');
+                    }, 260);
+                }
+            } catch(e) {}
+        });
+
+        // Заміна подій input на debouncedSearch
+        ['searchInput', 'mobileTopSearchInput'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        clearTimeout(liveSearchTimer);
+                        applyFilters();
+                        this.blur();
+                    }
+                });
+            }
+        });
+
     </script>
     <!-- Realtime In-App Push Notifications -->
     <script src="/js/push-notifications.js"></script>
@@ -2903,7 +3136,7 @@
                 const priceFormatted = item.price > 0 ? `${item.price.toLocaleString('uk-UA')} ₴` : 'Договірна';
 
                 return `
-                    <div class="suggest-item" onclick="window.location.href='/details.html?id=${item.id}'" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background 0.15s;">
+                    <div class="suggest-item" onclick="saveListingScrollPosition(); window.location.href='/details.html?id=${item.id}'" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background 0.15s;">
                         <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
                             <img src="${img}" style="width: 38px; height: 38px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-color); flex-shrink: 0;" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
                             <div style="min-width: 0;">
