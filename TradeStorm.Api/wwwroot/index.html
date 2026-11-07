@@ -2196,10 +2196,12 @@
         }
 
         /* ОЧИЩЕННЯ ТА СПРОЩЕННЯ ФІЛЬТРІВ НА ГОЛОВНІЙ */
-        @media (max-width: 768px) {
+        @media (max-width: 860px) {
             .mobile-menu-btn {
                 display: flex !important;
+                flex-shrink: 0 !important;
             }
+            .btn-create-top,
             .btn-create-mobile {
                 display: none !important; /* Прибираємо з тісної шапки, оскільки є в нижній навігації та в меню */
             }
@@ -3860,27 +3862,35 @@
     <script src="/js/cookie-consent.js"></script>
     <script>
         // ==================== БОКОВЕ МЕНЮ "ТРИ ПОЛОСКИ" ====================
-        window.toggleMobileNavDrawer = function() {
-            const drawer = document.getElementById('mobileNavDrawer');
-            const backdrop = document.getElementById('mobileDrawerBackdrop');
-            if (!drawer || !backdrop) return;
-            const isOpen = drawer.classList.contains('active');
-            if (isOpen) {
-                closeMobileNavDrawer();
+        window.toggleMobileNavDrawer = function(e) {
+            if (window.toggleMobileDrawer) {
+                window.toggleMobileDrawer(e);
             } else {
-                renderDrawerUserInfo();
-                drawer.classList.add('active');
-                backdrop.classList.add('active');
-                document.body.style.overflow = 'hidden';
+                const drawer = document.getElementById('mobileNavDrawer');
+                const backdrop = document.getElementById('mobileDrawerBackdrop');
+                if (!drawer || !backdrop) return;
+                const isOpen = drawer.classList.contains('active');
+                if (isOpen) {
+                    closeMobileNavDrawer();
+                } else {
+                    renderDrawerUserInfo();
+                    drawer.classList.add('active');
+                    backdrop.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
             }
         };
 
-        window.closeMobileNavDrawer = function() {
-            const drawer = document.getElementById('mobileNavDrawer');
-            const backdrop = document.getElementById('mobileDrawerBackdrop');
-            if (drawer) drawer.classList.remove('active');
-            if (backdrop) backdrop.classList.remove('active');
-            document.body.style.overflow = '';
+        window.closeMobileNavDrawer = function(e) {
+            if (window.closeMobileDrawer) {
+                window.closeMobileDrawer(e);
+            } else {
+                const drawer = document.getElementById('mobileNavDrawer');
+                const backdrop = document.getElementById('mobileDrawerBackdrop');
+                if (drawer) drawer.classList.remove('active');
+                if (backdrop) backdrop.classList.remove('active');
+                document.body.style.overflow = '';
+            }
         };
 
         function renderDrawerUserInfo() {

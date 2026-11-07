@@ -10,6 +10,7 @@ using TradeStorm.Api.Data;
 using TradeStorm.Api.Hubs;
 using TradeStorm.Api.Repositories;
 using TradeStorm.Api.Services;
+using Microsoft.AspNetCore.ResponseCompression;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -228,6 +229,17 @@ builder.Services.AddSignalR(options =>
 builder.Services.AddSingleton<TelegramBotService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<TelegramBotService>());
 
+// Фоновий сервіс для запобігання засинання Render та збереження теплого з'єднання з Neon PostgreSQL
+builder.Services.AddHostedService<KeepAliveWorker>();
+
+// Стиснення відповідей (Brotli + Gzip) для миттєвого завантаження на телефонах
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
+
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "DefaultSecretKeyForDevelopmentOnly123456!";
 builder.Services.AddAuthentication(options =>
 {
@@ -323,14 +335,33 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+// Оптимізація швидкості: Активація Brotli/Gzip стиснення
+app.UseResponseCompression();
+
 app.UseDefaultFiles();
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = ctx =>
     {
-        ctx.Context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
-        ctx.Context.Response.Headers["Pragma"] = "no-cache";
-        ctx.Context.Response.Headers["Expires"] = "0";
+        var fileName = ctx.File.Name.ToLowerInvariant();
+        if (fileName.EndsWith(".html"))
+        {
+            // HTML-сторінки завжди свіжі, але з валідацією ETag/304
+            ctx.Context.Response.Headers["Cache-Control"] = "no-cache, must-revalidate";
+        }
+        else if (fileName.EndsWith(".js") || fileName.EndsWith(".css") ||
+                 fileName.EndsWith(".svg") || fileName.EndsWith(".png") ||
+                 fileName.EndsWith(".jpg") || fileName.EndsWith(".jpeg") ||
+                 fileName.EndsWith(".webp") || fileName.EndsWith(".woff2") ||
+                 fileName.EndsWith(".ico"))
+        {
+            // Статичні стилі, скрипти та зображення кешуються браузером на 7 днів (швидке повторне відкриття)
+            ctx.Context.Response.Headers["Cache-Control"] = "public, max-age=604800, stale-while-revalidate=86400";
+        }
+        else
+        {
+            ctx.Context.Response.Headers["Cache-Control"] = "no-cache";
+        }
     }
 });
 app.UseAuthentication();

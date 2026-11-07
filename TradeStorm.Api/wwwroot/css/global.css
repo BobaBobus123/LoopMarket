@@ -1258,21 +1258,30 @@ header {
     background: rgba(255, 255, 255, 0.08);
 }
 
-.mobile-drawer-backdrop, .mobile-nav-overlay {
+/* ==========================================================================
+   UNIVERSAL MOBILE DRAWER & BACKDROP SYSTEM (ALL PAGES)
+   ========================================================================== */
+.mobile-drawer-backdrop,
+.mobile-nav-overlay {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
+    height: 100dvh !important;
     background: rgba(0, 0, 0, 0.65) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-    z-index: 99998 !important;
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
+    z-index: 100000 !important;
+    display: none !important;
     opacity: 0 !important;
     pointer-events: none !important;
-    transition: opacity 0.28s ease !important;
+    transition: opacity 0.25s ease !important;
 }
-.mobile-drawer-backdrop.active, .mobile-nav-overlay.active {
+
+.mobile-drawer-backdrop.active,
+.mobile-nav-overlay.active {
+    display: block !important;
     opacity: 1 !important;
     pointer-events: auto !important;
 }
@@ -1280,38 +1289,115 @@ header {
 .mobile-nav-drawer {
     position: fixed !important;
     top: 0 !important;
-    right: -320px !important;
+    right: -340px !important;
     width: min(320px, 86vw) !important;
     height: 100vh !important;
+    height: 100dvh !important;
     background: var(--surface) !important;
     border-left: 1px solid var(--border-color) !important;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.35) !important;
-    z-index: 99999 !important;
+    box-shadow: -10px 0 35px rgba(0, 0, 0, 0.45) !important;
+    z-index: 100001 !important;
     display: flex !important;
     flex-direction: column !important;
-    transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: right 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
     padding: 20px !important;
     overflow-y: auto !important;
+    box-sizing: border-box !important;
 }
+
 .mobile-nav-drawer.active {
     right: 0 !important;
 }
 
-@media (max-width: 860px) {
-    .mobile-menu-btn, .btn-mobile-menu-toggle {
-        display: inline-flex !important;
-    }
+/* ==========================================================================
+   UNIVERSAL HEADER MOBILE RULES (<= 992px)
+   Prevents header overflow and guarantees hamburger button is always visible!
+   ========================================================================== */
+@media (max-width: 992px) {
+    /* Hide desktop 'Create' / 'Sell' buttons in header to prevent pushing ☰ off screen */
     .btn-create-top,
     .btn-create-mobile,
     .header-create-btn,
+    #headerCreateBtn,
     .btn-primary.header-create,
     header .btn-create,
-    header a[href*="create.html"] {
+    header a[href*="create.html"],
+    header a[href*="create"] {
         display: none !important;
     }
-    #btnLogoutHeader {
+
+    #btnLogoutHeader, .btn-logout-header {
         display: none !important;
     }
+
+    /* Guarantee Hamburger button is ALWAYS visible in header */
+    .mobile-menu-btn,
+    .btn-mobile-menu-toggle,
+    #mobileMenuBtn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        border-radius: 10px !important;
+        background: var(--surface-hover, rgba(255,255,255,0.06)) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-main) !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+    }
+
+    header {
+        padding: 0 12px !important;
+        overflow-x: clip !important;
+    }
+    header .header-content {
+        max-width: 100% !important;
+        overflow: hidden !important;
+        gap: 8px !important;
+    }
+    header .nav-actions, header .header-right {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        flex-shrink: 0 !important;
+    }
+}
+
+/* ==========================================================================
+   CHAT VIEWPORT & BOTTOM BAR PROTECTION
+   Never let bottom navigation bar cover the message input bar!
+   ========================================================================== */
+body.in-chat-conversation #mobileBottomBar,
+body.in-chat-conversation .mobile-bottom-bar,
+body.in-chat-conversation .mobile-bottom-app-bar,
+body:has(.messenger-card.chat-active) #mobileBottomBar,
+body:has(.messenger-card.chat-active) .mobile-bottom-bar,
+body:has(.messenger-card.chat-active) .mobile-bottom-app-bar,
+.messenger-card.chat-active ~ #mobileBottomBar,
+.messenger-card.chat-active ~ .mobile-bottom-bar {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ==========================================================================
+   PRODUCT DETAILS STICKY BAR PROTECTION
+   Never overlap with bottom nav bar on details.html
+   ========================================================================== */
+body.has-sticky-bar #mobileBottomBar,
+body.has-sticky-bar .mobile-bottom-bar {
+    display: none !important;
+}
+
+.btn-sticky-chat, .btn-sticky-chat:hover, .btn-sticky-chat:visited, .btn-sticky-chat:focus {
+    text-decoration: none !important;
+    border-bottom: 1.5px solid var(--border-color) !important;
 }
 
 /* ==========================================================================

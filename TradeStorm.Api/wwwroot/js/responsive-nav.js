@@ -78,22 +78,20 @@
         }
 
         const existingMenuBtn = document.getElementById('mobileMenuBtn') || document.querySelector('.mobile-menu-btn');
-        if (existingMenuBtn) {
-            existingMenuBtn.addEventListener('click', toggleMobileDrawer);
-        } else if (navActions) {
+        if (!existingMenuBtn && navActions) {
             const menuBtn = document.createElement('button');
             menuBtn.id = 'mobileMenuBtn';
+            menuBtn.type = 'button';
             menuBtn.className = 'btn-mobile-menu-toggle mobile-menu-btn';
             menuBtn.setAttribute('aria-label', 'Меню навігації');
             menuBtn.innerHTML = `
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="6" x2="20" y2="6"></line>
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                    <line x1="4" y1="18" x2="20" y2="18"></line>
                 </svg>
             `;
             navActions.appendChild(menuBtn);
-            menuBtn.addEventListener('click', toggleMobileDrawer);
         }
 
         // 2. Build Slide-out Mobile Navigation Drawer & Overlay
@@ -235,13 +233,27 @@
                 </div>
             `;
             document.body.appendChild(bottomBar);
+
+            // Якщо ми у активному чаті або на сторінці товару зі sticky-кнопкою — ховаємо одразу
+            if (document.body.classList.contains('in-chat-conversation') || 
+                document.body.classList.contains('has-sticky-bar') ||
+                document.querySelector('.messenger-card.chat-active')) {
+                bottomBar.style.display = 'none';
+            }
         }
 
         // 4. Mobile Filters Collapsible Toggle for index.html
         setupMobileFilters();
     }
 
-    function toggleMobileDrawer() {
+    let drawerDebounceTimer = null;
+
+    function toggleMobileDrawer(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        if (e && e.stopPropagation) e.stopPropagation();
+        if (drawerDebounceTimer) return;
+        drawerDebounceTimer = setTimeout(() => { drawerDebounceTimer = null; }, 220);
+
         const drawer = document.getElementById('mobileNavDrawer');
         const overlay = document.getElementById('mobileNavOverlay') || document.getElementById('mobileDrawerBackdrop');
         if (!drawer) return;
@@ -250,13 +262,26 @@
         if (isOpen) {
             closeMobileDrawer();
         } else {
-            drawer.classList.add('active');
-            if (overlay) overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
+            openMobileDrawer();
         }
     }
 
-    function closeMobileDrawer() {
+    function openMobileDrawer() {
+        const drawer = document.getElementById('mobileNavDrawer');
+        const overlay = document.getElementById('mobileNavOverlay') || document.getElementById('mobileDrawerBackdrop');
+        if (!drawer) return;
+
+        if (typeof window.renderDrawerUserInfo === 'function') {
+            try { window.renderDrawerUserInfo(); } catch(err) {}
+        }
+
+        drawer.classList.add('active');
+        if (overlay) overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileDrawer(e) {
+        if (e && e.stopPropagation) e.stopPropagation();
         const drawer = document.getElementById('mobileNavDrawer');
         const overlay = document.getElementById('mobileNavOverlay') || document.getElementById('mobileDrawerBackdrop');
         if (drawer) drawer.classList.remove('active');
@@ -266,9 +291,34 @@
 
     // Expose drawer controls globally
     window.toggleMobileDrawer = toggleMobileDrawer;
+    window.openMobileDrawer = openMobileDrawer;
     window.closeMobileDrawer = closeMobileDrawer;
     window.toggleMobileNavDrawer = toggleMobileDrawer;
     window.closeMobileNavDrawer = closeMobileDrawer;
+
+    // Document-level event delegation for all drawer triggers across all pages
+    if (!window._loopNavDelegationAttached) {
+        window._loopNavDelegationAttached = true;
+        document.addEventListener('click', function(e) {
+            const toggleBtn = e.target.closest('#mobileMenuBtn, .mobile-menu-btn, .btn-mobile-menu-toggle');
+            if (toggleBtn) {
+                toggleMobileDrawer(e);
+                return;
+            }
+
+            const closeBtn = e.target.closest('.mobile-drawer-close, .btn-drawer-close, #mobileDrawerCloseBtn');
+            if (closeBtn) {
+                closeMobileDrawer(e);
+                return;
+            }
+
+            const backdrop = e.target.closest('#mobileNavOverlay, #mobileDrawerBackdrop, .mobile-nav-overlay, .mobile-drawer-backdrop');
+            if (backdrop) {
+                closeMobileDrawer(e);
+                return;
+            }
+        }, true);
+    }
 
     function setupMobileFilters() {
         const sidebar = document.querySelector('.sidebar');
