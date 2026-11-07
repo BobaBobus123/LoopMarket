@@ -1172,18 +1172,6 @@
                             </select>
                         </div>
 
-                        <div class="form-group" id="subcategoryGroup" style="display: none;">
-                            <div class="form-label-row">
-                                <label for="subcategorySelect" class="form-label">
-                                    🏷️ Підкатегорія
-                                </label>
-                            </div>
-                            <select id="subcategorySelect" class="modern-input">
-                                <option value="">Вся категорія загалом</option>
-                            </select>
-                        </div>
-                    </div>
-
                         <div class="form-group">
                             <div class="form-label-row">
                                 <label for="priceInput" class="form-label" id="priceLabel">
@@ -1196,6 +1184,18 @@
                                 <span class="currency-tag" id="currencyTag">₴ UAH</span>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- SUBCATEGORY -->
+                    <div class="form-group" id="subcategoryGroup" style="display: none; margin-top: 14px;">
+                        <div class="form-label-row">
+                            <label for="subcategorySelect" class="form-label">
+                                🏷️ Підкатегорія <span style="color: var(--text-muted); font-size: 0.78rem; font-weight: 600;">(для точного пошуку)</span>
+                            </label>
+                        </div>
+                        <select id="subcategorySelect" class="modern-input">
+                            <option value="">Вся категорія загалом</option>
+                        </select>
                     </div>
 
                     <!-- SERVICE SPECIFIC TARIFFS & FORMATS -->
