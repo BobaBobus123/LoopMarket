@@ -1,10 +1,97 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
+    <script>
+        // Негайне та безперервне видалення нижньої панелі в чаті
+        function purgeChatBottomNav() {
+            document.querySelectorAll('#mobileBottomBar, .mobile-bottom-bar, .mobile-bottom-app-bar').forEach(el => el.remove());
+        }
+        purgeChatBottomNav();
+        document.addEventListener('DOMContentLoaded', purgeChatBottomNav);
+        setInterval(purgeChatBottomNav, 400);(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <style>
+        /* ПОВНА ЗАБОРОНА НИЖНЬОЇ ПАНЕЛІ НАВІГАЦІЇ НА СТОРІНЦІ ЧАТУ */
+        #mobileBottomBar, .mobile-bottom-bar, .mobile-bottom-app-bar {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            height: 0 !important;
+            width: 0 !important;
+            max-height: 0 !important;
+            opacity: 0 !important;
+            position: fixed !important;
+            bottom: -9999px !important;
+            left: -9999px !important;
+            z-index: -99999 !important;
+        }
+
+        .chat-input-bar {
+            background: var(--surface) !important;
+            border-top: 1.5px solid var(--border-color) !important;
+            padding: 10px 14px !important;
+            padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            position: sticky !important;
+            bottom: 0 !important;
+            z-index: 9999 !important;
+            flex-shrink: 0 !important;
+            box-sizing: border-box !important;
+            width: 100% !important;
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .main-msg-input {
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
+            background: var(--bg-color) !important;
+            border: 1.5px solid var(--border-color) !important;
+            border-radius: 14px !important;
+            padding: 11px 14px !important;
+            font-size: 0.95rem !important;
+            color: var(--text-main) !important;
+            outline: none !important;
+            transition: all 0.2s !important;
+        }
+
+        .main-msg-input:focus {
+            border-color: #2563eb !important;
+            background: var(--surface) !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+        }
+
+        @media (max-width: 600px) {
+            .btn-send-message span {
+                display: none !important;
+            }
+            .btn-send-message {
+                padding: 0 !important;
+                width: 44px !important;
+                min-width: 44px !important;
+                height: 44px !important;
+                border-radius: 12px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                flex-shrink: 0 !important;
+            }
+            .btn-input-tool {
+                width: 36px !important;
+                min-width: 36px !important;
+                height: 36px !important;
+                flex-shrink: 0 !important;
+            }
+            .chat-input-bar {
+                padding: 8px 10px !important;
+                padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+                gap: 6px !important;
+            }
+        }
+    </style>
     <title>Повідомлення | Loop Market</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><path d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -2957,7 +3044,7 @@
     </script>
     <!-- Realtime In-App Push Notifications -->
     <script src="/js/push-notifications.js"></script>
-    <script src="/js/responsive-nav.js" defer></script>
+    <script src="/js/responsive-nav.js?v=2.6" defer></script>
     <script src="/js/loop-dialogs.js"></script>
     <script>
         // ==================== ПОЗНАЧЕННЯ ВСІХ ПОВІДОМЛЕНЬ ПРОЧИТАНИМИ ====================

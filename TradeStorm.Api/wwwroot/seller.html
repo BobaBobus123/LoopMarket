@@ -1073,27 +1073,17 @@
             }
 
             try {
-                // 1. Отримуємо публічні дані про користувача
-                let sellerInfo = null;
-                try {
-                    const uRes = await fetch(`/api/users/public/${targetSellerId}`);
-                    if (uRes.ok) {
-                        sellerInfo = await uRes.json();
-                    }
-                } catch(e) {}
+                // Виконуємо запити паралельно для швидкого завантаження профілю
+                const [uData, lData] = await Promise.all([
+                    fetch(`/api/users/public/${targetSellerId}`).then(r => r.ok ? r.json() : null).catch(() => null),
+                    fetch(`/api/listings?sellerId=${targetSellerId}&pageSize=100`).then(r => r.ok ? r.json() : null).catch(() => null)
+                ]);
 
-                // 2. Отримуємо оголошення цього продавця
-                let sellerListings = [];
-                try {
-                    const lRes = await fetch(`/api/listings?sellerId=${targetSellerId}`);
-                    if (lRes.ok) {
-                        const lData = await lRes.json();
-                        sellerListings = Array.isArray(lData) ? lData : (lData.listings || []);
-                        if (!sellerInfo && sellerListings.length > 0 && sellerListings[0].seller) {
-                            sellerInfo = sellerListings[0].seller;
-                        }
-                    }
-                } catch(e) {}
+                let sellerInfo = uData;
+                let sellerListings = lData ? (Array.isArray(lData) ? lData : (lData.listings || [])) : [];
+                if (!sellerInfo && sellerListings.length > 0 && sellerListings[0].seller) {
+                    sellerInfo = sellerListings[0].seller;
+                }
 
                 // 3. Заповнюємо інформацію про продавця
                 const sFirst = sellerInfo ? (sellerInfo.firstName || 'Користувач') : 'Користувач';
@@ -1200,12 +1190,12 @@
                                 <img src="${(r.listing.imageUrl ? r.listing.imageUrl.split(';')[0] : '') || 'https://placehold.co/50x50'}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover;" onerror="this.onerror=null; this.src='https://placehold.co/50x50';">
                                 <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ICONS.package} ${safeListingTitle}</span>
                             </a>
-                        ` : ''}`;
-                })
+                        ` : ''}
 
                         <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; display: block;">${new Date(r.createdAt || Date.now()).toLocaleDateString('uk-UA')}</span>
                     </div>
-                `).join('');
+                `;
+                }).join('');
             } catch (e) { console.error(e); }
         }
 

@@ -674,7 +674,7 @@ public class UsersController : ControllerBase
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
 
-        var user = await _context.Users.FindAsync(userId);
+        var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null) return NotFound();
 
         return Ok(new
@@ -686,6 +686,7 @@ public class UsersController : ControllerBase
             role = user.Role,
             avatarUrl = user.AvatarUrl,
             bio = user.Bio,
+            phoneNumber = user.PhoneNumber,
             telegramChatId = user.TelegramChatId,
             receiveTelegramNotifications = user.ReceiveTelegramNotifications
         });
@@ -716,12 +717,12 @@ public class UsersController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetPublicProfile(int id)
     {
-        var user = await _context.Users.FindAsync(id);
+        var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
         if (user == null) return NotFound(new { error = "Користувача не знайдено" });
 
         var completedServices = await _context.Orders
-            .CountAsync(o => o.SellerId == id && o.Status == "Completed" && 
-                (o.Listing != null && (o.Listing.CategoryId == 8 || o.Listing.Title.Contains("Послуг"))));
+            .AsNoTracking()
+            .CountAsync(o => o.SellerId == id && o.Status == "Completed");
 
         return Ok(new
         {
@@ -731,6 +732,7 @@ public class UsersController : ControllerBase
             role = user.Role,
             avatarUrl = user.AvatarUrl,
             bio = user.Bio,
+            phoneNumber = user.PhoneNumber,
             isPhoneVerified = user.IsPhoneVerified,
             completedServicesCount = completedServices
         });

@@ -1960,15 +1960,13 @@
 
                 async function loadAllListings() {
                     try {
-                        const response = await fetch('/api/listings');
+                        const response = await fetch(`/api/listings?sellerId=${currentUserId}&pageSize=100`);
                         const data = await response.json();
                         allListingsData = data.listings || [];
 
-                        // Обновляем счетчики в новых виджетах статистики
-                        const myListings = allListingsData.filter(l => l.sellerId === currentUserId);
                         const widgetMy = document.getElementById('statMyCount');
                         const widgetFav = document.getElementById('statFavCount');
-                        if (widgetMy) widgetMy.innerText = myListings.length;
+                        if (widgetMy) widgetMy.innerText = allListingsData.length;
                         if (widgetFav) widgetFav.innerText = getFavorites().length;
 
                         renderMyListings();

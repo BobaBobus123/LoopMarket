@@ -194,7 +194,11 @@
         }
 
         // 3. Inject App-like Mobile Bottom Navigation Bar (< 768px)
-        if (!document.getElementById('mobileBottomBar') && !document.getElementById('mobileBottomAppBar')) {
+        // НА СТОРІНЦІ ЧАТУ (MESSAGES) НІКОЛИ НЕ СТВОРЮЄМО НИЖНЮ ПАНЕЛЬ, ЩОБ ВОНА НЕ ПЕРЕКРИВАЛА ВВЕДЕННЯ ТЕКСТУ
+        if (currentPath.includes('messages')) {
+            const oldBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar') || document.getElementById('mobileBottomAppBar');
+            if (oldBar) oldBar.remove();
+        } else if (!document.getElementById('mobileBottomBar') && !document.getElementById('mobileBottomAppBar')) {
             const bottomBar = document.createElement('nav');
             bottomBar.id = 'mobileBottomBar';
             bottomBar.className = 'mobile-bottom-bar';
@@ -234,10 +238,7 @@
             `;
             document.body.appendChild(bottomBar);
 
-            // Якщо ми у активному чаті або на сторінці товару зі sticky-кнопкою — ховаємо одразу
-            if (document.body.classList.contains('in-chat-conversation') || 
-                document.body.classList.contains('has-sticky-bar') ||
-                document.querySelector('.messenger-card.chat-active')) {
+            if (document.body.classList.contains('has-sticky-bar')) {
                 bottomBar.style.display = 'none';
             }
         }
