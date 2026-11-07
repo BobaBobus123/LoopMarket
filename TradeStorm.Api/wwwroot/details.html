@@ -810,6 +810,27 @@
                 width: 96%;
             }
         }
+        @media (max-width: 768px) {
+            #orderModal, #serviceOrderModal {
+                align-items: flex-end !important;
+                padding: 0 !important;
+            }
+            .order-modal-container {
+                padding: 20px 16px calc(28px + env(safe-area-inset-bottom, 0px)) 16px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                max-height: 92vh !important;
+                border-radius: 22px 22px 0 0 !important;
+                border-bottom: none !important;
+            }
+            .order-name-phone-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+            #orderModal input, #orderModal select, #serviceOrderModal input, #serviceOrderModal select {
+                font-size: 16px !important; /* КРИТИЧНО для iOS: запобігає небажаному авто-масштабуванню */
+            }
+        }
         .carrier-card {
             background: var(--bg-color);
             border: 2px solid var(--border-color);
@@ -1315,7 +1336,7 @@
     </div>
 
     <!-- Модальне вікно оформлення замовлення (Широкий, симетричний 2-колонковий дизайн 1100px) -->
-    <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 2000;">
+    <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 100000;">
         <div class="order-modal-container">
             <!-- Верхня панель: Заголовок та кнопка закриття -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border-color);">
@@ -1361,7 +1382,7 @@
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                 1. Дані отримувача
                             </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="order-name-phone-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                                 <div>
                                     <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 5px;">ПІБ отримувача *</label>
                                     <input type="text" id="orderBuyerName" required placeholder="Шевченко Тарас" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 11px 14px; color: var(--text-main); font-size: 0.92rem; outline: none;">
@@ -2487,6 +2508,28 @@
                 const content = document.getElementById('productContent');
                 if (content) content.style.display = 'grid';
 
+                // Автоматичне відновлення модального вікна замовлення після повернення з авторизації
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('action') === 'buy' && localStorage.getItem('loopToken')) {
+                    setTimeout(() => {
+                        if (typeof openOrderModal === 'function') {
+                            openOrderModal();
+                            if (window.LoopToast) {
+                                LoopToast.success('✨ Ласкаво просимо! Продовжуємо оформлення замовлення.');
+                            }
+                        }
+                    }, 400);
+                } else if (urlParams.get('action') === 'service_order' && localStorage.getItem('loopToken')) {
+                    setTimeout(() => {
+                        if (typeof openServiceOrderModal === 'function') {
+                            openServiceOrderModal();
+                            if (window.LoopToast) {
+                                LoopToast.success('✨ Ласкаво просимо! Продовжуємо бронювання послуги.');
+                            }
+                        }
+                    }, 400);
+                }
+
             } catch (error) {
                 console.error('Error loading listing:', error);
                 const container = document.getElementById('productContent');
@@ -2947,8 +2990,15 @@
         window.openOrderModal = function() {
             let token = localStorage.getItem('loopToken');
             if (!token) {
-                LoopToast.info('Щоб оформити замовлення, увійдіть у свій акаунт.');
-                window.location.href = '/login.html';
+                if (window.LoopToast) {
+                    LoopToast.info('Щоб оформити замовлення, будь ласка, увійдіть або зареєструйтесь.');
+                }
+                const currentSearch = window.location.search || '';
+                const sep = currentSearch ? (currentSearch.includes('?') ? '&' : '?') : '?';
+                const returnUrl = encodeURIComponent(window.location.pathname + currentSearch + (currentSearch.includes('action=buy') ? '' : sep + 'action=buy'));
+                setTimeout(() => {
+                    window.location.href = '/login.html?returnUrl=' + returnUrl;
+                }, 500);
                 return;
             }
 
@@ -3016,6 +3066,9 @@
                 selectPayment('Накладений платіж (при отриманні)');
                 loadWarehousesForCity(cityInput.value, 'Branch');
 
+                const mobSticky = document.getElementById('mobileStickyBar');
+                if (mobSticky) mobSticky.style.display = 'none';
+
                 modal.style.display = 'flex';
                 const mapBox = document.getElementById('serviceOrderMapBox');
                 const badge = document.getElementById('serviceOrderMapBadge');
@@ -3033,6 +3086,10 @@
         window.closeOrderModal = function() {
             document.getElementById('orderModal').style.display = 'none';
             document.getElementById('citySuggestionsDropdown').style.display = 'none';
+            const mobSticky = document.getElementById('mobileStickyBar');
+            if (mobSticky && window.innerWidth <= 768) {
+                mobSticky.style.display = 'flex';
+            }
         };
 
         // Автоматична спроба оновлення токена (Refresh Token Rotation - Етап 5)
@@ -3300,10 +3357,19 @@
         window.openServiceOrderModal = function() {
             let token = localStorage.getItem('loopToken');
             if (!token) {
-                LoopToast.info('Щоб оформити послугу, увійдіть у свій акаунт.');
-                window.location.href = '/login.html';
+                if (window.LoopToast) {
+                    LoopToast.info('Щоб замовити послугу, будь ласка, увійдіть або зареєструйтесь.');
+                }
+                const currentSearch = window.location.search || '';
+                const sep = currentSearch ? (currentSearch.includes('?') ? '&' : '?') : '?';
+                const returnUrl = encodeURIComponent(window.location.pathname + currentSearch + (currentSearch.includes('action=service_order') ? '' : sep + 'action=service_order'));
+                setTimeout(() => {
+                    window.location.href = '/login.html?returnUrl=' + returnUrl;
+                }, 500);
                 return;
             }
+            const mobSticky = document.getElementById('mobileStickyBar');
+            if (mobSticky) mobSticky.style.display = 'none';
 
             let currentUserId = null;
             try {
@@ -3430,6 +3496,10 @@
         window.closeServiceOrderModal = function() {
             const modal = document.getElementById('serviceOrderModal');
             if (modal) modal.style.display = 'none';
+            const mobSticky = document.getElementById('mobileStickyBar');
+            if (mobSticky && window.innerWidth <= 768) {
+                mobSticky.style.display = 'flex';
+            }
         };
 
         window.changeServiceHours = function(delta) {

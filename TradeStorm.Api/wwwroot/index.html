@@ -1965,6 +1965,90 @@
             font-weight: 800;
         }
 
+
+        .btn-create-mobile {
+            display: none;
+        }
+        .mobile-bottom-app-bar {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .btn-create-mobile {
+                display: inline-flex !important;
+                align-items: center;
+                gap: 5px;
+                padding: 7px 12px;
+                border-radius: 10px;
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                color: white !important;
+                font-weight: 800;
+                font-size: 0.82rem;
+                text-decoration: none;
+                box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+                flex-shrink: 0;
+            }
+            body {
+                padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+            }
+            .mobile-bottom-app-bar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: calc(58px + env(safe-area-inset-bottom, 0px));
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+                background: var(--surface);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-top: 1px solid var(--border-color);
+                display: flex;
+                align-items: center;
+                justify-content: space-around;
+                z-index: 9998;
+                box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+            }
+            .bottom-nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2px;
+                color: var(--text-muted);
+                text-decoration: none;
+                font-size: 0.72rem;
+                font-weight: 700;
+                padding: 4px 8px;
+                border-radius: 8px;
+                min-width: 52px;
+                transition: color 0.2s;
+            }
+            .bottom-nav-item.active {
+                color: #10b981;
+            }
+            .bottom-nav-item:active {
+                transform: scale(0.94);
+            }
+            .bottom-nav-sell {
+                position: relative;
+                top: -12px;
+            }
+            .bottom-nav-sell-circle {
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
+                margin-bottom: 2px;
+                transition: transform 0.2s;
+            }
+            .bottom-nav-sell:active .bottom-nav-sell-circle {
+                transform: scale(0.92);
+            }
+        }
     </style>
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
@@ -2013,6 +2097,10 @@
                 <a href="/create.html" class="btn-create-top">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
                     Створити
+                </a>
+                <a href="/create.html" class="btn-create-mobile" title="Подати оголошення">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>Продати</span>
                 </a>
 
                 <button class="btn-icon" id="btnLogoutHeader" onclick="showLogoutModal()" title="Вийти з акаунта" style="color: #ef4444; display: none;">
@@ -2403,6 +2491,10 @@
             const userName = user ? (user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "Профіль") : "Профіль";
             const profText = document.getElementById('navProfileText');
             if (profText) profText.innerText = userName.split(' ')[0] || "Профіль";
+            const bProf = document.getElementById('bnavProfile');
+            const bProfText = document.getElementById('bnavProfileText');
+            if (bProf) bProf.href = '/profile.html';
+            if (bProfText) bProfText.innerText = 'Профіль';
             const btnLogout = document.getElementById('btnLogoutHeader');
             if (btnLogout) btnLogout.style.display = 'inline-flex';
         } else {
@@ -2410,6 +2502,10 @@
             if (profLink) profLink.href = '/login.html';
             const profText = document.getElementById('navProfileText');
             if (profText) profText.innerText = 'Увійти';
+            const bProf = document.getElementById('bnavProfile');
+            const bProfText = document.getElementById('bnavProfileText');
+            if (bProf) bProf.href = '/login.html';
+            if (bProfText) bProfText.innerText = 'Вхід';
             const btnLogout = document.getElementById('btnLogoutHeader');
             if (btnLogout) btnLogout.style.display = 'none';
         }
@@ -3530,5 +3626,32 @@
 
     </script>
     <script src="/js/cookie-consent.js"></script>
+
+    <!-- MOBILE BOTTOM NAVIGATION (Швидка навігація для смартфонів) -->
+    <nav class="mobile-bottom-app-bar" id="mobileBottomAppBar">
+        <a href="/index.html" class="bottom-nav-item active" id="bnavHome">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            <span>Головна</span>
+        </a>
+        <a href="javascript:void(0)" onclick="openMobileSearchMode()" class="bottom-nav-item" id="bnavSearch">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <span>Пошук</span>
+        </a>
+        <a href="/create.html" class="bottom-nav-item bottom-nav-sell" id="bnavSell" title="Подати оголошення">
+            <div class="bottom-nav-sell-circle">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+            <span>Продати</span>
+        </a>
+        <a href="/messages.html" class="bottom-nav-item" id="bnavChat">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Чат</span>
+        </a>
+        <a href="/profile.html" class="bottom-nav-item" id="bnavProfile">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span id="bnavProfileText">Профіль</span>
+        </a>
+    </nav>
+
 </body>
 </html>

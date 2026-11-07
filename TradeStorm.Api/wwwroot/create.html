@@ -1007,6 +1007,16 @@
         }
 
         @media (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px !important; /* КРИТИЧНО для iOS Safari: запобігає авто-зуму форми */
+            }
+            .btn-remove-photo {
+                width: 34px !important;
+                height: 34px !important;
+                font-size: 16px !important;
+                top: 4px !important;
+                right: 4px !important;
+            }
             .type-selector-grid, .two-cols, .three-cols {
                 grid-template-columns: 1fr;
             }
@@ -1087,6 +1097,20 @@
                 <p class="page-subtitle" id="pageSubHeading">
                     Опублікуйте свій товар або запропонуйте послугу іншим покупцям та замовникам платформи LoopMarket.
                 </p>
+            </div>
+
+            <!-- DRAFT / GUEST HELPER BANNER -->
+            <div id="guestDraftBanner" style="display: none; margin-bottom: 20px; background: rgba(37, 99, 235, 0.08); border: 1.5px solid rgba(37, 99, 235, 0.25); border-radius: 14px; padding: 14px 18px; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 12px; min-width: 240px; flex: 1;">
+                    <div style="font-size: 1.4rem;">💡</div>
+                    <div style="font-size: 0.88rem; color: var(--text-main); line-height: 1.4;">
+                        <strong id="draftBannerTitle">Ви ще не увійшли в акаунт</strong>
+                        <div id="draftBannerSub" style="color: var(--text-muted); font-size: 0.82rem;">Ви можете спокійно заповнювати форму — система автоматично зберігає чернетку. При публікації ваші тексти та фото не загубляться!</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <a href="/login.html?returnUrl=/create.html?restore=1" class="btn-primary" style="text-decoration: none; padding: 8px 16px; font-size: 0.84rem; border-radius: 8px; white-space: nowrap;">Увійти зараз</a>
+                </div>
             </div>
 
             <!-- STEP 1: TYPE SELECTOR -->
@@ -1602,6 +1626,8 @@
                     selectedFiles.push(f);
                 }
             }
+            const fi = document.getElementById('fileInput');
+            if (fi) fi.value = '';
             renderPreviews();
         }
         window.handleFileSelect = handleFileSelect;
@@ -1819,6 +1845,16 @@
                     return;
                 }
 
+                // Перевірка авторизації перед публікацією із захистом від втрати даних
+                if (!token) {
+                    saveDraftToStorage();
+                    showToast('Потрібен вхід', 'Зберігаємо вашу чернетку та переходимо до авторизації...', '🔐');
+                    setTimeout(() => {
+                        window.location.href = '/login.html?returnUrl=' + encodeURIComponent('/create.html?restore=1');
+                    }, 800);
+                    return;
+                }
+
                 btn.disabled = true;
                 btn.innerHTML = '⏳ Публікація...';
 
@@ -1883,6 +1919,7 @@
 
                     if (response.ok) {
                         const resData = await response.json();
+                        localStorage.removeItem('loop_create_draft');
                         showToast('🎉 Опубліковано!', 'Оголошення успішно розміщено на платформі!', '🚀');
                         setTimeout(() => {
                             if (resData && resData.id) {
@@ -2020,6 +2057,85 @@
     <!-- Realtime In-App Push Notifications -->
     <script src="/js/push-notifications.js"></script>
     <script src="/js/responsive-nav.js" defer></script>
-    <script src="/js/loop-dialogs.js"></script>
+    <script src="/js/loop-dialogs.js">
+        // ==================== АВТОЗБЕРЕЖЕННЯ ТА ВІДНОВЛЕННЯ ЧЕРНЕТКИ ====================
+        function saveDraftToStorage() {
+            try {
+                const draft = {
+                    type: currentListingType,
+                    title: document.getElementById('titleInput')?.value || '',
+                    price: document.getElementById('priceInput')?.value || '',
+                    categoryId: document.getElementById('categorySelect')?.value || '',
+                    description: document.getElementById('descriptionInput')?.value || '',
+                    location: document.getElementById('addressInput')?.value || '',
+                    condition: document.getElementById('conditionValue')?.value || '',
+                    shipping: document.getElementById('chkShipping')?.checked ?? true,
+                    updatedAt: new Date().toISOString()
+                };
+                localStorage.setItem('loop_create_draft', JSON.stringify(draft));
+            } catch(e) {}
+        }
+
+        function restoreDraftFromStorage() {
+            try {
+                const raw = localStorage.getItem('loop_create_draft');
+                if (!raw) return;
+                const draft = JSON.parse(raw);
+                if (draft.type && draft.type !== currentListingType) {
+                    setListingType(draft.type);
+                }
+                if (draft.title && document.getElementById('titleInput')) {
+                    document.getElementById('titleInput').value = draft.title;
+                }
+                if (draft.price && document.getElementById('priceInput')) {
+                    document.getElementById('priceInput').value = draft.price;
+                }
+                if (draft.description && document.getElementById('descriptionInput')) {
+                    document.getElementById('descriptionInput').value = draft.description;
+                }
+                if (draft.location && document.getElementById('addressInput')) {
+                    document.getElementById('addressInput').value = draft.location;
+                }
+                if (draft.condition && document.getElementById('conditionValue')) {
+                    document.getElementById('conditionValue').value = draft.condition;
+                }
+                if (typeof draft.shipping === 'boolean' && document.getElementById('chkShipping')) {
+                    document.getElementById('chkShipping').checked = draft.shipping;
+                }
+                if (draft.categoryId) {
+                    setTimeout(() => {
+                        const cat = document.getElementById('categorySelect');
+                        if (cat) cat.value = draft.categoryId;
+                    }, 500);
+                }
+                showToast('✨ Чернетку відновлено', 'Всі раніше введені дані успішно підставлено у форму.', '📝');
+            } catch(e) {
+                console.debug('Error restoring draft', e);
+            }
+        }
+
+        // Автозбереження кожні кілька секунд при введенні
+        ['titleInput', 'priceInput', 'descriptionInput', 'addressInput'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', saveDraftToStorage);
+        });
+        ['categorySelect', 'chkShipping'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('change', saveDraftToStorage);
+        });
+
+        // Ініціалізація стану гостя / чернетки
+        (function checkGuestAndDraft() {
+            const banner = document.getElementById('guestDraftBanner');
+            if (!token) {
+                if (banner) banner.style.display = 'flex';
+            }
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('restore') === '1' || (!token && localStorage.getItem('loop_create_draft'))) {
+                setTimeout(restoreDraftFromStorage, 300);
+            }
+        })();
+
+    </script>
 </body>
 </html>
