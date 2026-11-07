@@ -340,7 +340,7 @@ using (var scope = app.Services.CreateScope())
 
 // RFC 7807 Exception Handler
 app.UseExceptionHandler();
-app.UseStatusCodePages();
+app.UseStatusCodePagesWithReExecute("/404.html");
 
 // Заголовки безпеки (OWASP Security Headers)
 app.Use(async (context, next) =>
@@ -365,64 +365,6 @@ if (app.Environment.IsDevelopment())
 
 // Оптимізація швидкості: Активація Brotli/Gzip стиснення
 app.UseResponseCompression();
-
-// 🛡️ Захист адмін-панелі від сканерів, хакерів та пошукових роботів:
-// Будь-який запит до /admin.html або /admin без валідної сесії адміністратора повертає 404 Not Found!
-app.Use(async (context, next) =>
-{
-    var path = context.Request.Path.Value ?? string.Empty;
-    if (path.Equals("/admin.html", StringComparison.OrdinalIgnoreCase) ||
-        path.Equals("/admin", StringComparison.OrdinalIgnoreCase))
-    {
-        context.Response.Headers["X-Robots-Tag"] = "noindex, nofollow, noarchive, nosnippet";
-
-        bool isAdmin = false;
-        string? token = null;
-
-        if (context.Request.Cookies.TryGetValue("loop_admin_session", out var cookieToken) && !string.IsNullOrWhiteSpace(cookieToken))
-        {
-            token = cookieToken;
-        }
-        else if (context.Request.Headers.TryGetValue("Authorization", out var authHeader) &&
-                 authHeader.ToString().StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-        {
-            token = authHeader.ToString().Substring(7).Trim();
-        }
-
-        if (!string.IsNullOrWhiteSpace(token))
-        {
-            try
-            {
-                var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-                if (handler.CanReadToken(token))
-                {
-                    var jwt = handler.ReadJwtToken(token);
-                    var roleClaim = jwt.Claims.FirstOrDefault(c =>
-                        c.Type == ClaimTypes.Role ||
-                        c.Type == "role" ||
-                        c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
-
-                    if (string.Equals(roleClaim, TradeStorm.Api.Models.UserRoles.Admin, StringComparison.OrdinalIgnoreCase) &&
-                        jwt.ValidTo > DateTime.UtcNow)
-                    {
-                        isAdmin = true;
-                    }
-                }
-            }
-            catch { }
-        }
-
-        if (!isAdmin)
-        {
-            context.Response.StatusCode = StatusCodes.Status404NotFound;
-            context.Response.ContentType = "text/html; charset=utf-8";
-            await context.Response.WriteAsync("<!DOCTYPE html><html><head><meta name=\"robots\" content=\"noindex\"><title>404 Not Found</title></head><body style=\"font-family:sans-serif;text-align:center;padding:50px;\"><h1>404 Not Found</h1><p>Сторінку не знайдено.</p><a href=\"/\">На головну</a></body></html>");
-            return;
-        }
-    }
-
-    await next();
-});
 
 app.UseDefaultFiles();
 app.UseStaticFiles(new StaticFileOptions

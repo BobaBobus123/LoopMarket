@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — Сторінку не знайдено | LoopMarket</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --404-accent: #10b981;
+            --404-blue: #3b82f6;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header-simple {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 28px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 800;
+            font-size: 1.25rem;
+        }
+
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .theme-btn:hover {
+            border-color: var(--404-accent);
+            transform: scale(1.05);
+        }
+
+        .main-container {
+            flex: 1;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 20px 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* 404 GLOW BADGE */
+        .error-badge-wrap {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .error-glow-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, rgba(59, 130, 246, 0.15) 50%, transparent 70%);
+            filter: blur(28px);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .error-number {
+            font-size: clamp(5rem, 14vw, 8.5rem);
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 50%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-title {
+            font-size: clamp(1.4rem, 4vw, 2rem);
+            font-weight: 800;
+            margin: 0 0 12px 0;
+            color: var(--text-main);
+        }
+
+        .error-desc {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            max-width: 580px;
+            line-height: 1.55;
+            margin: 0 0 32px 0;
+        }
+
+        /* SEARCH BAR */
+        .search-box {
+            width: 100%;
+            max-width: 540px;
+            margin-bottom: 36px;
+            display: flex;
+            gap: 8px;
+            background: var(--surface);
+            padding: 6px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            outline: none;
+            font-family: inherit;
+        }
+
+        .search-btn {
+            background: var(--404-accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 0 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .search-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        /* QUICK NAVIGATION CARDS */
+        .quick-nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            width: 100%;
+            max-width: 780px;
+            margin-bottom: 40px;
+        }
+
+        .nav-card {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 18px 16px;
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 8px;
+            transition: 0.2s ease;
+        }
+
+        .nav-card:hover {
+            border-color: var(--404-accent);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.12);
+        }
+
+        .nav-card-icon {
+            font-size: 1.8rem;
+        }
+
+        .nav-card-title {
+            font-weight: 700;
+            font-size: 0.98rem;
+        }
+
+        .nav-card-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.35;
+        }
+
+        /* ACTIONS ROW */
+        .actions-row {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-action-main {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--404-accent);
+            color: white;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-muted);
+            transform: translateY(-2px);
+        }
+
+        /* FOOTER SUPPORT */
+        .support-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .support-link {
+            color: var(--404-accent);
+            text-decoration: none;
+            font-weight: 700;
+        }
+        .support-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-simple">
+        <a href="/index.html" class="brand-logo">
+            <div class="brand-icon">L</div>
+            <span>LoopMarket</span>
+        </a>
+        <div class="header-actions">
+            <button class="theme-btn" id="themeToggleBtn" title="Змінити тему" onclick="toggleTheme()">
+                🌙
+            </button>
+            <a href="/index.html" class="btn-action-main btn-secondary" style="padding: 8px 14px; font-size: 0.88rem;">
+                Головна
+            </a>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="error-badge-wrap">
+            <div class="error-glow-bg"></div>
+            <div class="error-number">404</div>
+        </div>
+
+        <h1 class="error-title">Ой, схоже, що цієї сторінки не існує</h1>
+        <p class="error-desc">
+            Сторінка, яку ви шукаєте, могла бути перенесена, видалена або її адресу вказано з помилкою.
+            Скористайтеся швидким пошуком або оберіть потрібний розділ нижче:
+        </p>
+
+        <!-- ПОШУК -->
+        <form class="search-box" action="/index.html" method="GET">
+            <input type="text" name="search" class="search-input" placeholder="Пошук товарів або послуг на LoopMarket..." autocomplete="off">
+            <button type="submit" class="search-btn">
+                <span>Знайти</span>
+            </button>
+        </form>
+
+        <!-- ШВИДКА НАВІГАЦІЯ -->
+        <div class="quick-nav-grid">
+            <a href="/index.html" class="nav-card">
+                <span class="nav-card-icon">🛍</span>
+                <span class="nav-card-title">Каталог товарів</span>
+                <span class="nav-card-desc">Електроніка, одяг, дім, авто та інші популярні категорії</span>
+            </a>
+
+            <a href="/index.html?type=service" class="nav-card">
+                <span class="nav-card-icon">🛠</span>
+                <span class="nav-card-title">Послуги майстрів</span>
+                <span class="nav-card-desc">Ремонт, сантехніка, електрика, клінінг та послуги фахівців</span>
+            </a>
+
+            <a href="/messages.html" class="nav-card">
+                <span class="nav-card-icon">💬</span>
+                <span class="nav-card-title">Повідомлення</span>
+                <span class="nav-card-desc">Ваші діалоги з продавцями та замовниками платформи</span>
+            </a>
+
+            <a href="/profile.html" class="nav-card">
+                <span class="nav-card-icon">👤</span>
+                <span class="nav-card-title">Особистий кабінет</span>
+                <span class="nav-card-desc">Ваші замовлення, покупки, оголошення та профіль</span>
+            </a>
+        </div>
+
+        <div class="actions-row">
+            <a href="/index.html" class="btn-action-main btn-primary">
+                ← Повернутися на головну
+            </a>
+            <a href="https://t.me/LoopMarketSupport" target="_blank" class="btn-action-main btn-secondary">
+                🆘 Підтримка: @LoopMarketSupport
+            </a>
+        </div>
+
+        <div class="support-footer">
+            <span>LoopMarket © 2026. Платформа безпечних покупок та послуг в Україні.</span>
+            <span>•</span>
+            <a href="/login.html" class="support-link">Увійти в акаунт</a>
+        </div>
+    </main>
+
+    <script>
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('loopTheme', next);
+            updateThemeBtnIcon(next);
+        }
+
+        function updateThemeBtnIcon(theme) {
+            const btn = document.getElementById('themeToggleBtn');
+            if (btn) btn.innerText = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        (function() {
+            const theme = document.documentElement.getAttribute('data-theme') || 'light';
+            updateThemeBtnIcon(theme);
+        })();
+    </script>
+</body>
+</html>

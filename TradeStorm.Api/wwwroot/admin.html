@@ -6,35 +6,17 @@
     <script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
     <script>
         (function() {
-            function cloak404() {
-                try {
-                    document.documentElement.innerHTML = '<!DOCTYPE html><html><head><meta name="robots" content="noindex"><title>404 Not Found</title></head><body style="font-family:sans-serif;text-align:center;padding:50px;background:#0b1120;color:#94a3b8;"><h1 style="color:#f8fafc;font-size:3rem;margin:0 0 10px 0;">404</h1><p>Сторінку не знайдено.</p><a href="/" style="color:#38bdf8;">На головну</a></body></html>';
-                    window.location.replace('/');
-                } catch(e) {
-                    window.location.replace('/');
-                }
-            }
             try {
                 const token = localStorage.getItem('loopToken') || localStorage.getItem('token');
-                if (!token) {
-                    cloak404();
-                    return;
-                }
-                const base64Url = token.split('.')[1];
-                if (!base64Url) { cloak404(); return; }
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const payload = JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
-                const role = localStorage.getItem('loopUserRole') || (payload ? (payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]) : null);
-                if (role !== 'Admin') {
-                    cloak404();
+                const role = localStorage.getItem('loopUserRole');
+                if (!token || role !== 'Admin') {
+                    // Сторонні користувачі перенаправляються на 404 сторінку
+                    window.location.replace('/404.html');
                     return;
                 }
                 document.documentElement.classList.add('admin-authorized');
-                if (!document.cookie.includes('loop_admin_session')) {
-                    document.cookie = "loop_admin_session=" + encodeURIComponent(token) + "; path=/; max-age=86400; SameSite=Lax";
-                }
             } catch(e) {
-                cloak404();
+                window.location.replace('/404.html');
             }
         })();
     </script>

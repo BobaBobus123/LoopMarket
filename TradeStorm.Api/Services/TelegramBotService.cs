@@ -27,6 +27,7 @@ public class TelegramBotService : BackgroundService
     public static long MasterSupportChatId { get; set; } = 0;
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<long, List<DateTime>> RateLimitTracker = new();
     public static readonly System.Collections.Concurrent.ConcurrentDictionary<long, bool> UserSupportState = new();
+    public static readonly System.Collections.Concurrent.ConcurrentDictionary<long, bool> AdminBroadcastState = new();
 
     private readonly TelegramBotClient? _botClient;
     private readonly IServiceScopeFactory _scopeFactory;
@@ -160,6 +161,103 @@ public class TelegramBotService : BackgroundService
         }
         catch { }
 
+        // 🛡️ АДМІН-КОЛБЕКИ (ВИРІШЕННЯ ТІКЕТІВ ТА БАН)
+        if (data.StartsWith("adm_res_") && int.TryParse(data.Substring(8), out int resId))
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var complaint = await db.Complaints.Include(c => c.Reporter).FirstOrDefaultAsync(c => c.Id == resId, cancellationToken);
+            if (complaint != null)
+            {
+                complaint.Status = ComplaintStatus.Resolved;
+                complaint.ResolutionNotes = "Вирішено адміністратором через Telegram @LoopMarketSupport";
+                await db.SaveChangesAsync(cancellationToken);
+
+                try { await botClient.AnswerCallbackQuery(callback.Id, "✅ Тікет успішно вирішено!", cancellationToken: cancellationToken); } catch {}
+                if (callback.Message != null)
+                {
+                    try
+                    {
+                        await botClient.EditMessageText(
+                            chatId: chatId,
+                            messageId: callback.Message.MessageId,
+                            text: (callback.Message.Text ?? "") + "\n\n━━━━━━━━━━━━━━━━━━\n✅ <b>ВИРІШЕНО АДМІНІСТРАТОРОМ @LoopMarketSupport</b>",
+                            parseMode: ParseMode.Html,
+                            cancellationToken: cancellationToken);
+                    } catch {}
+                }
+
+                if (complaint.Reporter?.TelegramChatId != null && complaint.Reporter.TelegramChatId != 0 && complaint.Reporter.TelegramChatId != chatId)
+                {
+                    try
+                    {
+                        await botClient.SendMessage(
+                            chatId: complaint.Reporter.TelegramChatId,
+                            text: $"✅ <b>Ваше звернення {complaint.Reason} успішно розглянуто та вирішено адміністратором!</b>\n\nДякуємо за звернення до Loop Market.",
+                            parseMode: ParseMode.Html,
+                            cancellationToken: cancellationToken);
+                    } catch {}
+                }
+            }
+            return;
+        }
+
+        if (data.StartsWith("adm_dsm_") && int.TryParse(data.Substring(8), out int dsmId))
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var complaint = await db.Complaints.FindAsync(new object[] { dsmId }, cancellationToken);
+            if (complaint != null)
+            {
+                complaint.Status = ComplaintStatus.Dismissed;
+                complaint.ResolutionNotes = "Відхилено адміністратором через Telegram";
+                await db.SaveChangesAsync(cancellationToken);
+
+                try { await botClient.AnswerCallbackQuery(callback.Id, "❌ Тікет відхилено", cancellationToken: cancellationToken); } catch {}
+                if (callback.Message != null)
+                {
+                    try
+                    {
+                        await botClient.EditMessageText(
+                            chatId: chatId,
+                            messageId: callback.Message.MessageId,
+                            text: (callback.Message.Text ?? "") + "\n\n━━━━━━━━━━━━━━━━━━\n❌ <b>ВІДХИЛЕНО АДМІНІСТРАТОРОМ</b>",
+                            parseMode: ParseMode.Html,
+                            cancellationToken: cancellationToken);
+                    } catch {}
+                }
+            }
+            return;
+        }
+
+        if (data.StartsWith("adm_ban_") && int.TryParse(data.Substring(8), out int banId))
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var targetUser = await db.Users.FindAsync(new object[] { banId }, cancellationToken);
+            if (targetUser != null)
+            {
+                targetUser.IsBanned = true;
+                await db.SaveChangesAsync(cancellationToken);
+
+                try { await botClient.AnswerCallbackQuery(callback.Id, $"🚫 Користувача {targetUser.FirstName} заблоковано!", cancellationToken: cancellationToken); } catch {}
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: $"🚫 <b>Користувача #{targetUser.Id} ({targetUser.FirstName} {targetUser.LastName}, {targetUser.Email}) успішно ЗАБЛОКОВАНО!</b>",
+                    parseMode: ParseMode.Html,
+                    cancellationToken: cancellationToken);
+            }
+            return;
+        }
+
+        if (data == "adm_tickets")
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            await HandleAdminMessageAsync(botClient, callback.Message ?? new Telegram.Bot.Types.Message(), "/tickets", "/tickets", chatId, db, null, cancellationToken);
+            return;
+        }
+
         switch (data)
         {
             case "faq_orders":
@@ -267,17 +365,23 @@ public class TelegramBotService : BackgroundService
         // Автоматична реєстрація чату головного адміністратора @LoopMarketSupport
         if (message.Chat.Username?.Equals("LoopMarketSupport", StringComparison.OrdinalIgnoreCase) == true)
         {
-            if (MasterSupportChatId != chatId)
+            MasterSupportChatId = chatId;
+        }
+
+        // Перевіряємо, чи є користувач адміністратором
+        using (var authScope = _scopeFactory.CreateScope())
+        {
+            var authDb = authScope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var authUser = await authDb.Users.FirstOrDefaultAsync(u => u.TelegramChatId == chatId, cancellationToken);
+            bool isAdminChat = (message.Chat.Username?.Equals("LoopMarketSupport", StringComparison.OrdinalIgnoreCase) == true)
+                               || (MasterSupportChatId != 0 && MasterSupportChatId == chatId)
+                               || (authUser != null && authUser.Role == UserRoles.Admin);
+
+            // Якщо пише адміністратор — обслуговуємо виключно його адмін-функціями (без клієнтських меню)
+            if (isAdminChat)
             {
-                MasterSupportChatId = chatId;
-                Console.WriteLine($"[Telegram Admin] Головний чат підтримки підключено: @LoopMarketSupport (ChatId: {chatId})");
-                await botClient.SendMessage(
-                    chatId: chatId,
-                    text: "🛡️ <b>Вітаємо, Адміністраторе!</b>\n\n" +
-                          "Ваш акаунт <b>@LoopMarketSupport</b> успішно активовано як головну лінію підтримки платформи Loop Market.\n" +
-                          "Усі звернення користувачів, запити на допомогу та скарги на шахраїв надходитимуть сюди в реальному часі.",
-                    parseMode: ParseMode.Html,
-                    cancellationToken: cancellationToken);
+                await HandleAdminMessageAsync(botClient, message, rawText, lowerText, chatId, authDb, authUser, cancellationToken);
+                return;
             }
         }
 
@@ -1085,6 +1189,439 @@ public class TelegramBotService : BackgroundService
             new[] { InlineKeyboardButton.WithCallbackData("🆘 Написати в підтримку", "btn_start_support") },
             new[] { InlineKeyboardButton.WithUrl("💬 Написати адміну: @LoopMarketSupport", "https://t.me/LoopMarketSupport") }
         });
+    }
+
+    // ==========================================
+    // 🛡️ ЕКСКЛЮЗИВНИЙ АДМІНІСТРАТИВНИЙ КОКПІТ В TELEGRAM
+    // ==========================================
+    private async Task HandleAdminMessageAsync(
+        ITelegramBotClient botClient,
+        Telegram.Bot.Types.Message message,
+        string rawText,
+        string lowerText,
+        long chatId,
+        AppDbContext db,
+        TradeStorm.Api.Models.User? adminUser,
+        CancellationToken cancellationToken)
+    {
+        // 1. Скасування розсилки або повернення в меню
+        if (rawText.Equals("❌ Скасувати розсилку", StringComparison.OrdinalIgnoreCase) ||
+            rawText.Equals("« Головне меню адміна", StringComparison.OrdinalIgnoreCase) ||
+            rawText.Equals("/cancel", StringComparison.OrdinalIgnoreCase) ||
+            lowerText == "скасувати" || lowerText == "відміна")
+        {
+            AdminBroadcastState.TryRemove(chatId, out _);
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: "❌ <b>Дію скасовано.</b> Ви повернулися до панелі керування адміністратора.",
+                parseMode: ParseMode.Html,
+                replyMarkup: GetAdminKeyboard(),
+                cancellationToken: cancellationToken);
+            return;
+        }
+
+        // 2. Виконання масової розсилки
+        if (AdminBroadcastState.TryGetValue(chatId, out bool inBroadcast) && inBroadcast)
+        {
+            if (rawText.Length < 3)
+            {
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: "⚠️ Будь ласка, введіть змістовне повідомлення для розсилки або натисніть «❌ Скасувати розсилку».",
+                    replyMarkup: GetAdminCancelKeyboard(),
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
+            AdminBroadcastState.TryRemove(chatId, out _);
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: "⏳ <i>Розсилку запущено, надсилаємо користувачам...</i>",
+                parseMode: ParseMode.Html,
+                cancellationToken: cancellationToken);
+
+            var allUsers = await db.Users.ToListAsync(cancellationToken);
+            int inAppCount = 0;
+            int tgCount = 0;
+
+            foreach (var u in allUsers)
+            {
+                var notif = new Notification
+                {
+                    UserId = u.Id,
+                    Title = "📢 Оголошення LoopMarket",
+                    Message = rawText,
+                    Link = "/index.html",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                };
+                db.Notifications.Add(notif);
+                inAppCount++;
+
+                if (u.TelegramChatId != 0 && u.ReceiveTelegramNotifications && u.TelegramChatId != chatId)
+                {
+                    try
+                    {
+                        var pushText = $"📢 <b>ОГОЛОШЕННЯ ВІД LOOP MARKET</b>\n━━━━━━━━━━━━━━━━━━\n{System.Net.WebUtility.HtmlEncode(rawText)}\n\n<i>З повагою, команда платформи Loop Market</i>";
+                        await botClient.SendMessage(
+                            chatId: u.TelegramChatId,
+                            text: pushText,
+                            parseMode: ParseMode.Html,
+                            cancellationToken: cancellationToken);
+                        tgCount++;
+                    }
+                    catch { }
+                }
+            }
+
+            await db.SaveChangesAsync(cancellationToken);
+
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: $"✅ <b>Масову розсилку успішно завершено!</b>\n\n" +
+                      $"📨 Внутрішніх сповіщень створено: <b>{inAppCount}</b>\n" +
+                      $"📱 Telegram-повідомлень доставлено: <b>{tgCount}</b>",
+                parseMode: ParseMode.Html,
+                replyMarkup: GetAdminKeyboard(),
+                cancellationToken: cancellationToken);
+            return;
+        }
+
+        // 3. 📊 Статистика платформи
+        if (lowerText.Contains("статистик") || lowerText == "/stats")
+        {
+            var totalUsers = await db.Users.CountAsync(cancellationToken);
+            var verifiedUsers = await db.Users.CountAsync(u => u.IsPhoneVerified, cancellationToken);
+            var bannedUsers = await db.Users.CountAsync(u => u.IsBanned, cancellationToken);
+
+            var totalListings = await db.Listings.CountAsync(cancellationToken);
+            var featuredListings = await db.Listings.CountAsync(l => l.IsFeatured, cancellationToken);
+            var servicesCount = await db.Listings.CountAsync(l => l.CategoryId == 8, cancellationToken);
+            var productsCount = totalListings - servicesCount;
+
+            var totalOrders = await db.Orders.CountAsync(cancellationToken);
+            var pendingOrders = await db.Orders.CountAsync(o => o.Status == OrderStatus.Pending, cancellationToken);
+            var shippedOrders = await db.Orders.CountAsync(o => o.Status == OrderStatus.Shipped, cancellationToken);
+            var completedOrders = await db.Orders.CountAsync(o => o.Status == OrderStatus.Completed, cancellationToken);
+            var totalVolume = await db.Orders.Where(o => o.Status == OrderStatus.Completed).SumAsync(o => (decimal?)o.TotalPrice, cancellationToken) ?? 0m;
+
+            var pendingComplaints = await db.Complaints.CountAsync(c => c.Status == ComplaintStatus.Pending, cancellationToken);
+            var resolvedComplaints = await db.Complaints.CountAsync(c => c.Status == ComplaintStatus.Resolved, cancellationToken);
+
+            var statsMsg = "📊 <b>ЗВОДКА ТА СТАТИСТИКА LOOP MARKET:</b>\n" +
+                           "━━━━━━━━━━━━━━━━━━\n" +
+                           "👥 <b>Користувачі:</b>\n" +
+                           $"• Зареєстровано: <b>{totalUsers}</b>\n" +
+                           $"• Верифіковані: <b>{verifiedUsers}</b>\n" +
+                           $"• Заблоковано: <b>{bannedUsers}</b>\n\n" +
+                           "📦 <b>Оголошення:</b>\n" +
+                           $"• Всього на сайті: <b>{totalListings}</b> (Товари: {productsCount}, Послуги: {servicesCount})\n" +
+                           $"• Закріплені ТОП: <b>{featuredListings}</b>\n\n" +
+                           "🚚 <b>Угоди та Замовлення:</b>\n" +
+                           $"• Всього замовлень: <b>{totalOrders}</b>\n" +
+                           $"• Очікують підтвердження: <b>{pendingOrders}</b>\n" +
+                           $"• Відправлено (в дорозі): <b>{shippedOrders}</b>\n" +
+                           $"• Успішно завершено: <b>{completedOrders}</b>\n" +
+                           $"• Оборот завершених угод: <b>{totalVolume:N0} ₴</b>\n\n" +
+                           "🚨 <b>Безпека та Тікети:</b>\n" +
+                           $"• Очікують розгляду: <b>{pendingComplaints}</b>\n" +
+                           $"• Вирішено модерацією: <b>{resolvedComplaints}</b>\n" +
+                           "━━━━━━━━━━━━━━━━━━";
+
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: statsMsg,
+                parseMode: ParseMode.Html,
+                replyMarkup: new InlineKeyboardMarkup(new[]
+                {
+                    new[] { InlineKeyboardButton.WithCallbackData("🚨 Переглянути активні тікети", "adm_tickets") },
+                    new[] { InlineKeyboardButton.WithUrl("🌐 Повна веб-панель", "https://loopmarket-x0uo.onrender.com/admin.html") }
+                }),
+                cancellationToken: cancellationToken);
+            return;
+        }
+
+        // 4. 🚨 Активні звернення та тікети
+        if (lowerText.Contains("тікет") || lowerText.Contains("скарг") || lowerText == "/tickets")
+        {
+            var pending = await db.Complaints
+                .Include(c => c.Reporter)
+                .Include(c => c.TargetUser)
+                .Where(c => c.Status == ComplaintStatus.Pending)
+                .OrderByDescending(c => c.CreatedAt)
+                .Take(5)
+                .ToListAsync(cancellationToken);
+
+            if (pending.Count == 0)
+            {
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: "✅ <b>Всі тікети та скарги опрацьовано!</b>\n\nНових нерозглянутих звернень немає. Платформа працює в штатному режимі.",
+                    parseMode: ParseMode.Html,
+                    replyMarkup: GetAdminKeyboard(),
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: $"🚨 <b>Знайдено {pending.Count} очікуючих звернень:</b>\n━━━━━━━━━━━━━━━━━━",
+                parseMode: ParseMode.Html,
+                cancellationToken: cancellationToken);
+
+            foreach (var c in pending)
+            {
+                string? tgUser = null;
+                if (!string.IsNullOrWhiteSpace(c.Details))
+                {
+                    var m = System.Text.RegularExpressions.Regex.Match(c.Details, @"@([a-zA-Z0-9_]{3,32})");
+                    if (m.Success) tgUser = m.Groups[1].Value;
+                }
+
+                var repName = c.Reporter != null ? $"{c.Reporter.FirstName} {c.Reporter.LastName}".Trim() : "Користувач";
+                var repPhone = c.Reporter?.PhoneNumber ?? "Не вказано";
+
+                var card = $"🎫 <b>Тікет #{c.Id} • {System.Net.WebUtility.HtmlEncode(c.Reason)}</b>\n" +
+                           $"👤 Заявник: <b>{System.Net.WebUtility.HtmlEncode(repName)}</b> (тел: <code>{repPhone}</code>)\n" +
+                           $"🕒 Час: {c.CreatedAt:dd.MM.yyyy HH:mm}\n" +
+                           (!string.IsNullOrWhiteSpace(c.Details) ? $"\n📝 <i>{System.Net.WebUtility.HtmlEncode(c.Details)}</i>\n" : "");
+
+                var buttons = new List<InlineKeyboardButton>();
+                if (!string.IsNullOrWhiteSpace(tgUser))
+                {
+                    buttons.Add(InlineKeyboardButton.WithUrl("💬 Написати в TG", $"https://t.me/{tgUser}"));
+                }
+                buttons.Add(InlineKeyboardButton.WithCallbackData("✅ Вирішити", $"adm_res_{c.Id}"));
+                buttons.Add(InlineKeyboardButton.WithCallbackData("❌ Відхилити", $"adm_dsm_{c.Id}"));
+                if (c.TargetUserId > 0)
+                {
+                    buttons.Add(InlineKeyboardButton.WithCallbackData("🚫 Бан", $"adm_ban_{c.TargetUserId}"));
+                }
+
+                var markup = new InlineKeyboardMarkup(new[]
+                {
+                    buttons.Take(2).ToArray(),
+                    buttons.Skip(2).ToArray()
+                });
+
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: card,
+                    parseMode: ParseMode.Html,
+                    replyMarkup: markup,
+                    cancellationToken: cancellationToken);
+            }
+            return;
+        }
+
+        // 5. 🚚 Останні замовлення платформи
+        if (lowerText.Contains("замовленн") || lowerText.Contains("угод") || lowerText == "/orders")
+        {
+            var orders = await db.Orders
+                .Include(o => o.Listing)
+                .Include(o => o.Buyer)
+                .Include(o => o.Seller)
+                .OrderByDescending(o => o.CreatedAt)
+                .Take(5)
+                .ToListAsync(cancellationToken);
+
+            if (orders.Count == 0)
+            {
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: "📦 На платформі поки немає створених замовлень.",
+                    replyMarkup: GetAdminKeyboard(),
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
+            var msg = "🚚 <b>ОСТАННІ ЗАМОВЛЕННЯ ПЛАТФОРМИ LOOP MARKET:</b>\n━━━━━━━━━━━━━━━━━━\n\n";
+            foreach (var o in orders)
+            {
+                var buyerName = o.Buyer != null ? $"{o.Buyer.FirstName} {o.Buyer.LastName}".Trim() : "Покупець";
+                var sellerName = o.Seller != null ? $"{o.Seller.FirstName} {o.Seller.LastName}".Trim() : "Продавець";
+                var statusUk = o.Status switch
+                {
+                    OrderStatus.Pending => "⏳ Очікує",
+                    OrderStatus.Confirmed => "✅ Підтверджено",
+                    OrderStatus.Shipped => "🚚 Відправлено",
+                    OrderStatus.Completed => "🎉 Завершено",
+                    OrderStatus.Cancelled => "❌ Скасовано",
+                    _ => o.Status
+                };
+
+                msg += $"• <b>{o.GetDisplayCode()}</b> ({statusUk})\n" +
+                       $"  🏷 {System.Net.WebUtility.HtmlEncode(o.Listing?.Title ?? "Оголошення")} — <b>{o.TotalPrice:N0} ₴</b>\n" +
+                       $"  🛒 {buyerName} (<code>{o.Buyer?.PhoneNumber}</code>) ➡️ 🏷 {sellerName}\n" +
+                       $"  📍 {o.DeliveryCity}, {o.DeliveryBranch}\n" +
+                       (!string.IsNullOrWhiteSpace(o.TrackingNumber) ? $"  ТТН: <code>{o.TrackingNumber}</code>\n" : "") +
+                       $"  🕒 {o.CreatedAt:dd.MM.yyyy HH:mm}\n\n";
+            }
+            msg += "━━━━━━━━━━━━━━━━━━";
+
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: msg,
+                parseMode: ParseMode.Html,
+                replyMarkup: new InlineKeyboardMarkup(new[]
+                {
+                    new[] { InlineKeyboardButton.WithUrl("🌐 Арбітраж угод в адмінці", "https://loopmarket-x0uo.onrender.com/admin.html#orders") }
+                }),
+                cancellationToken: cancellationToken);
+            return;
+        }
+
+        // 6. 👥 Останні зареєстровані користувачі
+        if (lowerText.Contains("користувач") || lowerText == "/users")
+        {
+            var users = await db.Users
+                .OrderByDescending(u => u.Id)
+                .Take(5)
+                .ToListAsync(cancellationToken);
+
+            var msg = "👥 <b>ОСТАННІ ЗАРЕЄСТРОВАНІ КОРИСТУВАЧІ:</b>\n━━━━━━━━━━━━━━━━━━\n\n";
+            foreach (var u in users)
+            {
+                var status = u.IsBanned ? "🚫 ЗАБЛОКОВАНО" : "🟢 Активний";
+                var verified = u.IsPhoneVerified ? "✅ Підтверджено" : "❌ Не підтверджено";
+                msg += $"• <b>#{u.Id}: {System.Net.WebUtility.HtmlEncode(u.FirstName)} {System.Net.WebUtility.HtmlEncode(u.LastName)}</b>\n" +
+                       $"  📧 {System.Net.WebUtility.HtmlEncode(u.Email)} | 📱 <code>{u.PhoneNumber ?? "немає"}</code>\n" +
+                       $"  Роль: <b>{u.Role}</b> | Верифікація: {verified}\n" +
+                       $"  Статус: <b>{status}</b>\n\n";
+            }
+            msg += "━━━━━━━━━━━━━━━━━━";
+
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: msg,
+                parseMode: ParseMode.Html,
+                replyMarkup: new InlineKeyboardMarkup(new[]
+                {
+                    new[] { InlineKeyboardButton.WithUrl("🌐 Керування в адмінці", "https://loopmarket-x0uo.onrender.com/admin.html#users") }
+                }),
+                cancellationToken: cancellationToken);
+            return;
+        }
+
+        // 7. 📢 Режим розсилки
+        if (lowerText.Contains("розсилк") || lowerText == "/broadcast")
+        {
+            AdminBroadcastState[chatId] = true;
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: "📢 <b>РЕЖИМ МАСОВОЇ СИСТЕМНОЇ РОЗСИЛКИ</b>\n" +
+                      "━━━━━━━━━━━━━━━━━━\n" +
+                      "Надішліть текст оголошення наступним повідомленням у цей чат.\n\n" +
+                      "Воно буде доставлено усім зареєстрованим користувачам платформи (в особистий кабінет на сайті та в Telegram).\n\n" +
+                      "<i>Для скасування натисніть «❌ Скасувати розсилку» нижче:</i>",
+                parseMode: ParseMode.Html,
+                replyMarkup: GetAdminCancelKeyboard(),
+                cancellationToken: cancellationToken);
+            return;
+        }
+
+        // 8. 🌐 Відкрити веб-адмінку
+        if (lowerText.Contains("адмін") || lowerText.Contains("панель") || lowerText == "/admin")
+        {
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: "🌐 <b>Офіційна панель оператора безпеки Loop Market:</b>\n\n" +
+                      "https://loopmarket-x0uo.onrender.com/admin.html\n\n" +
+                      "<i>Панель оптимізована для мобільних телефонів та комп'ютерів.</i>",
+                parseMode: ParseMode.Html,
+                replyMarkup: new InlineKeyboardMarkup(new[]
+                {
+                    new[] { InlineKeyboardButton.WithUrl("🚀 Відкрити панель на сайті", "https://loopmarket-x0uo.onrender.com/admin.html") }
+                }),
+                cancellationToken: cancellationToken);
+            return;
+        }
+
+        // 9. Перевірка замовлення адміністратором (Повні незамасковані дані)
+        var orderCode = ExtractOrderCodeCandidate(rawText);
+        if (orderCode != null)
+        {
+            var foundOrder = await db.Orders
+                .Include(o => o.Listing)
+                .Include(o => o.Seller)
+                .Include(o => o.Buyer)
+                .FirstOrDefaultAsync(o => o.OrderCode == orderCode || o.Id.ToString() == orderCode, cancellationToken);
+
+            if (foundOrder != null)
+            {
+                var buyerName = foundOrder.Buyer != null ? $"{foundOrder.Buyer.FirstName} {foundOrder.Buyer.LastName}".Trim() : "Покупець";
+                var sellerName = foundOrder.Seller != null ? $"{foundOrder.Seller.FirstName} {foundOrder.Seller.LastName}".Trim() : "Продавець";
+
+                var adminOrderMsg = $"📦 <b>ДЕТАЛІ ЗАМОВЛЕННЯ {foundOrder.GetDisplayCode()} (АДМІН-РЕЖИМ):</b>\n" +
+                                    $"━━━━━━━━━━━━━━━━━━\n" +
+                                    $"🏷 <b>Оголошення:</b> {System.Net.WebUtility.HtmlEncode(foundOrder.Listing?.Title ?? "Товар")}\n" +
+                                    $"💰 <b>Сума:</b> {foundOrder.TotalPrice:N0} ₴ | Оплата: {foundOrder.PaymentMethod}\n" +
+                                    $"⚡ <b>Статус:</b> <b>{foundOrder.Status}</b>\n\n" +
+                                    $"🛒 <b>Покупець:</b> {buyerName}\n" +
+                                    $"   Телефон: <code>{foundOrder.Buyer?.PhoneNumber ?? "немає"}</code> | Email: {foundOrder.Buyer?.Email}\n\n" +
+                                    $"🏷 <b>Продавець:</b> {sellerName}\n" +
+                                    $"   Телефон: <code>{foundOrder.Seller?.PhoneNumber ?? "немає"}</code> | Email: {foundOrder.Seller?.Email}\n\n" +
+                                    $"📍 <b>Доставка:</b> {foundOrder.DeliveryCity}, {foundOrder.DeliveryBranch}\n" +
+                                    (!string.IsNullOrWhiteSpace(foundOrder.TrackingNumber) ? $"🚚 <b>ТТН:</b> <code>{foundOrder.TrackingNumber}</code>\n" : "") +
+                                    $"━━━━━━━━━━━━━━━━━━";
+
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: adminOrderMsg,
+                    parseMode: ParseMode.Html,
+                    replyMarkup: new InlineKeyboardMarkup(new[]
+                    {
+                        new[] { InlineKeyboardButton.WithUrl("🌐 Відкрити в адмінці", "https://loopmarket-x0uo.onrender.com/admin.html#orders") }
+                    }),
+                    cancellationToken: cancellationToken);
+                return;
+            }
+        }
+
+        // 10. Дефолтне адмін-меню
+        {
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: "🛡️ <b>ЦЕНТР КЕРУВАННЯ АДМІНІСТРАТОРА LOOP MARKET</b>\n" +
+                      "━━━━━━━━━━━━━━━━━━\n" +
+                      "Вітаємо, <b>@LoopMarketSupport</b>!\n" +
+                      "Ви увійшли в режим оперативного керування та безпеки платформи.\n\n" +
+                      "⚡ <b>Доступні швидкі функції:</b>\n" +
+                      "• 📊 <b>Статистика:</b> огляд користувачів, замовлень та обороту\n" +
+                      "• 🚨 <b>Тікети та скарги:</b> моніторинг звернень та вирішення\n" +
+                      "• 🚚 <b>Замовлення:</b> останні угоди по всій платформі\n" +
+                      "• 👥 <b>Користувачі:</b> нові реєстрації та модерація\n" +
+                      "• 📢 <b>Розсилка:</b> надсилання масових сповіщень\n" +
+                      "• 🌐 <b>Веб-панель:</b> повна панель оператора безпеки\n\n" +
+                      "<i>Оберіть потрібну дію на панелі нижче:</i>",
+                parseMode: ParseMode.Html,
+                replyMarkup: GetAdminKeyboard(),
+                cancellationToken: cancellationToken);
+        }
+    }
+
+    private static ReplyKeyboardMarkup GetAdminKeyboard()
+    {
+        return new ReplyKeyboardMarkup(new[]
+        {
+            new[] { new KeyboardButton("📊 Статистика платформи"), new KeyboardButton("🚨 Активні звернення та тікети") },
+            new[] { new KeyboardButton("🚚 Останні замовлення"), new KeyboardButton("👥 Останні користувачі") },
+            new[] { new KeyboardButton("📢 Надіслати розсилку"), new KeyboardButton("🌐 Відкрити веб-адмінку") }
+        })
+        {
+            ResizeKeyboard = true
+        };
+    }
+
+    private static ReplyKeyboardMarkup GetAdminCancelKeyboard()
+    {
+        return new ReplyKeyboardMarkup(new[]
+        {
+            new[] { new KeyboardButton("❌ Скасувати розсилку"), new KeyboardButton("« Головне меню адміна") }
+        })
+        {
+            ResizeKeyboard = true
+        };
     }
 
     private Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)

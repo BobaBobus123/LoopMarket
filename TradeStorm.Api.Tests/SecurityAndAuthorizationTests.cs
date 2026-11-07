@@ -87,16 +87,20 @@ public class SecurityAndAuthorizationTests : IClassFixture<CustomWebApplicationF
     }
 
     [Fact]
-    public async Task AdminPage_UnauthorizedVisitor_ShouldReturnNotFound404AndNoIndexHeader()
+    public async Task AdminApi_UnauthenticatedVisitor_ShouldReturnUnauthorized401()
     {
         var client = _factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = null;
 
-        // Будь-який сканер чи хакер, який намагається відкрити /admin.html без адмін-сесії, отримує 404 Not Found
-        var response = await client.GetAsync("/admin.html");
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        var response = await client.GetAsync("/api/admin/audit-logs");
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
 
-        // Перевірка анти-індексації пошуковими роботами
-        Assert.True(response.Headers.Contains("X-Robots-Tag"));
+    [Fact]
+    public async Task NotFoundPage_ShouldBeAccessible()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync("/404.html");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 }
