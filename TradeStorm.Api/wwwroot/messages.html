@@ -1099,10 +1099,10 @@
             flex: 1 1 0;
             overflow-y: auto;
             overflow-x: hidden;
-            padding: 16px 20px;
+            padding: 14px 18px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
             min-height: 0;
             scrollbar-width: thin;
             scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
@@ -1216,17 +1216,26 @@
 
         /* MESSAGE BUBBLES */
         .msg-bubble {
-            max-width: min(480px, 76%); /* Compact, comfortable reading width */
-            padding: 8px 13px;
+            max-width: min(520px, 78%);
+            padding: 6px 11px 5px 11px;
             border-radius: 14px;
-            font-size: 0.88rem;
-            line-height: 1.42;
+            font-size: 0.90rem;
+            line-height: 1.36;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+            animation: popMsg 0.16s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            display: inline-flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            word-break: break-word;
+        }
+
+        .msg-bubble .msg-text {
+            white-space: pre-wrap;
             word-wrap: break-word;
             word-break: break-word;
-            white-space: pre-wrap;
-            position: relative;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-            animation: popMsg 0.18s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            line-height: 1.36;
+            color: inherit;
         }
 
         .msg-bubble.has-order-card {
@@ -1401,13 +1410,16 @@
         }
 
         .msg-time-row {
-            display: flex;
+            display: inline-flex;
             justify-content: flex-end;
             align-items: center;
+            align-self: flex-end;
             gap: 4px;
-            margin-top: 4px;
-            font-size: 0.72rem;
-            opacity: 0.85;
+            margin-top: 1px;
+            font-size: 0.69rem;
+            opacity: 0.82;
+            line-height: 1;
+            user-select: none;
         }
 
         .msg-sent .msg-time-row {
@@ -1720,7 +1732,7 @@
             line-height: 1;
         }
     </style>
-    <link rel="stylesheet" href="/css/global.css?v=3.0">
+    <link rel="stylesheet" href="/css/global.css?v=3.1">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
 </head>
 <body class="messages-page in-chat-conversation">
@@ -1751,8 +1763,8 @@
                     Профіль
                 </a>
 
-                <button class="btn-icon" id="notifBtn" onclick="toggleNotifications()" title="Сповіщення">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                <button class="btn-icon" id="notifBtn" onclick="toggleNotifications()" title="Сповіщення" aria-label="Сповіщення">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                     <span class="notif-badge" id="notifBadge" style="display: none;"></span>
                 </button>
 
@@ -3001,15 +3013,7 @@
 
             const statusHtml = (type === 'sent') ? checkIcon : '';
 
-            const bubbleHtml = `
-                <div class="msg-bubble msg-${type} ${isOrderCard ? 'has-order-card' : ''}" ${msgId ? `data-msg-id="${msgId}"` : ''}>
-                    <div>${contentHtml}</div>
-                    <div class="msg-time-row">
-                        <span>${time}</span>
-                        ${statusHtml}
-                    </div>
-                </div>
-            `;
+            const bubbleHtml = `<div class="msg-bubble msg-${type} ${isOrderCard ? 'has-order-card' : ''}" ${msgId ? `data-msg-id="${msgId}"` : ''}><div class="msg-text">${contentHtml}</div><div class="msg-time-row"><span>${time}</span>${statusHtml}</div></div>`;
 
             chatArea.insertAdjacentHTML('beforeend', bubbleHtml);
 
