@@ -28,6 +28,7 @@ public class TelegramBotService : BackgroundService
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<long, List<DateTime>> RateLimitTracker = new();
     public static readonly System.Collections.Concurrent.ConcurrentDictionary<long, bool> UserSupportState = new();
     public static readonly System.Collections.Concurrent.ConcurrentDictionary<long, bool> AdminBroadcastState = new();
+    public static readonly System.Collections.Concurrent.ConcurrentDictionary<long, int> AdminReplyingToTicketState = new();
 
     private readonly TelegramBotClient? _botClient;
     private readonly IServiceScopeFactory _scopeFactory;
@@ -162,6 +163,22 @@ public class TelegramBotService : BackgroundService
         catch { }
 
         // 🛡️ АДМІН-КОЛБЕКИ (ВИРІШЕННЯ ТІКЕТІВ ТА БАН)
+        if (data.StartsWith("adm_rep_") && int.TryParse(data.Substring(8), out int repId))
+        {
+            AdminReplyingToTicketState[chatId] = repId;
+            await botClient.AnswerCallbackQuery(callback.Id, "Введіть текст офіційної відповіді", cancellationToken: cancellationToken);
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: $"✍️ <b>Офіційна відповідь служби підтримки по тікету #{repId}</b>\n\n" +
+                      "Введіть повідомлення наступним повідомленням у цей чат.\n\n" +
+                      "Воно надійде користувачеві у внутрішній чат сайту та офіційний Telegram-бот платформи без розкриття ваших особистих контактів.\n\n" +
+                      "<i>Для скасування надішліть /cancel або натисніть «❌ Скасувати розсилку»</i>",
+                parseMode: ParseMode.Html,
+                replyMarkup: GetAdminCancelKeyboard(),
+                cancellationToken: cancellationToken);
+            return;
+        }
+
         if (data.StartsWith("adm_res_") && int.TryParse(data.Substring(8), out int resId))
         {
             using var scope = _scopeFactory.CreateScope();
@@ -1211,9 +1228,128 @@ public class TelegramBotService : BackgroundService
             lowerText == "скасувати" || lowerText == "відміна")
         {
             AdminBroadcastState.TryRemove(chatId, out _);
+            AdminReplyingToTicketState.TryRemove(chatId, out _);
             await botClient.SendMessage(
                 chatId: chatId,
                 text: "❌ <b>Дію скасовано.</b> Ви повернулися до панелі керування адміністратора.",
+                parseMode: ParseMode.Html,
+                replyMarkup: GetAdminKeyboard(),
+                cancellationToken: cancellationToken);
+            return;
+        }
+
+        // 1.5. Офіційна відповідь на тікет підтримки
+        if (AdminReplyingToTicketState.TryGetValue(chatId, out int replyTicketId))
+        {
+            if (rawText.Length < 2)
+            {
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: "⚠️ Будь ласка, введіть змістовний текст відповіді або скасуйте дію.",
+                    replyMarkup: GetAdminCancelKeyboard(),
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
+            AdminReplyingToTicketState.TryRemove(chatId, out _);
+
+            var complaint = await db.Complaints
+                .Include(c => c.Reporter)
+                .Include(c => c.TargetUser)
+                .FirstOrDefaultAsync(c => c.Id == replyTicketId, cancellationToken);
+
+            if (complaint == null)
+            {
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: "⚠️ Тікет не знайдено або вже видалено.",
+                    replyMarkup: GetAdminKeyboard(),
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
+            var targetUser = complaint.Reporter ?? complaint.TargetUser;
+            if (targetUser == null)
+            {
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: "⚠️ Не вдалося визначити одержувача відповіді.",
+                    replyMarkup: GetAdminKeyboard(),
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
+            int adminId = adminUser?.Id ?? 1;
+
+            // 1. Повідомлення у внутрішній чат сайту
+            var chatMsg = new TradeStorm.Api.Models.Message
+            {
+                SenderId = adminId,
+                ReceiverId = targetUser.Id,
+                Text = $"🛡️ [Служба підтримки Loop Market • {complaint.Reason}]\n\n{rawText.Trim()}\n\nЗ повагою, команда платформи Loop Market",
+                SentAt = DateTime.UtcNow,
+                IsRead = false
+            };
+            db.Messages.Add(chatMsg);
+
+            // 2. Внутрішнє системне сповіщення
+            var notif = new Notification
+            {
+                UserId = targetUser.Id,
+                Title = $"💬 Відповідь підтримки на {complaint.Reason}",
+                Message = rawText.Trim(),
+                Link = "/messages.html",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            };
+            db.Notifications.Add(notif);
+
+            // 3. Офіційне сповіщення через бота користувачеві
+            if (targetUser.TelegramChatId != 0 && targetUser.ReceiveTelegramNotifications)
+            {
+                try
+                {
+                    var userPush = "🛡️ <b>ВІДПОВІДЬ СЛУЖБИ ПІДТРИМКИ LOOP MARKET</b>\n" +
+                                   "━━━━━━━━━━━━━━━━━━\n" +
+                                   $"По вашому зверненню <i>«{System.Net.WebUtility.HtmlEncode(complaint.Reason)}»</i>:\n\n" +
+                                   $"{System.Net.WebUtility.HtmlEncode(rawText.Trim())}\n\n" +
+                                   "━━━━━━━━━━━━━━━━━━\n" +
+                                   "💬 <i>Ви також можете відповісти в чаті платформи на сайті.</i>";
+
+                    await botClient.SendMessage(
+                        chatId: targetUser.TelegramChatId,
+                        text: userPush,
+                        parseMode: ParseMode.Html,
+                        cancellationToken: cancellationToken);
+                }
+                catch { }
+            }
+
+            // 4. Оновлення статусу тікета
+            complaint.Status = ComplaintStatus.Resolved;
+            complaint.ResolutionNotes = $"Офіційна відповідь: {rawText.Trim()}";
+            
+            // 5. Журнал аудиту дій
+            var audit = new AdminAuditLog
+            {
+                AdminId = adminId,
+                AdminEmail = adminUser?.Email ?? "telegram_admin@loopmarket.com",
+                Action = "ReplyComplaint",
+                TargetType = "Complaint",
+                TargetId = complaint.Id,
+                Details = $"Відповідь користувачу {targetUser.Email}: {rawText.Trim()}",
+                CreatedAt = DateTime.UtcNow
+            };
+            db.AdminAuditLogs.Add(audit);
+
+            await db.SaveChangesAsync(cancellationToken);
+
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: $"✅ <b>Офіційну відповідь успішно надіслано!</b>\n\n" +
+                      $"🎫 Тікет #{complaint.Id} позначено як <b>Вирішено</b>.\n" +
+                      $"👤 Одержувач: <b>{targetUser.FirstName} {targetUser.LastName}</b> ({targetUser.Email})\n" +
+                      "💬 Доставлено у внутрішній чат сайту та офіційний Telegram-бот користувача.",
                 parseMode: ParseMode.Html,
                 replyMarkup: GetAdminKeyboard(),
                 cancellationToken: cancellationToken);
@@ -1386,12 +1522,11 @@ public class TelegramBotService : BackgroundService
                            $"🕒 Час: {c.CreatedAt:dd.MM.yyyy HH:mm}\n" +
                            (!string.IsNullOrWhiteSpace(c.Details) ? $"\n📝 <i>{System.Net.WebUtility.HtmlEncode(c.Details)}</i>\n" : "");
 
-                var buttons = new List<InlineKeyboardButton>();
-                if (!string.IsNullOrWhiteSpace(tgUser))
+                var buttons = new List<InlineKeyboardButton>
                 {
-                    buttons.Add(InlineKeyboardButton.WithUrl("💬 Написати в TG", $"https://t.me/{tgUser}"));
-                }
-                buttons.Add(InlineKeyboardButton.WithCallbackData("✅ Вирішити", $"adm_res_{c.Id}"));
+                    InlineKeyboardButton.WithCallbackData("💬 Відповісти в системі", $"adm_rep_{c.Id}"),
+                    InlineKeyboardButton.WithCallbackData("✅ Вирішити", $"adm_res_{c.Id}")
+                };
                 buttons.Add(InlineKeyboardButton.WithCallbackData("❌ Відхилити", $"adm_dsm_{c.Id}"));
                 if (c.TargetUserId > 0)
                 {

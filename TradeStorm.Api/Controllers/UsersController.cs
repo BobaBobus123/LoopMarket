@@ -329,6 +329,29 @@ public class UsersController : ControllerBase
     /// </summary>
     [HttpPatch("admin/{id}/ban")]
     [Authorize(Roles = UserRoles.Admin)]
+        private async Task LogAuditAsync(string action, string? targetType = null, int? targetId = null, string? details = null)
+    {
+        try
+        {
+            var adminIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int.TryParse(adminIdStr, out int adminId);
+            var adminEmail = User.FindFirstValue(ClaimTypes.Email) ?? "admin@loopmarket.com";
+            var log = new AdminAuditLog
+            {
+                AdminId = adminId > 0 ? adminId : 1,
+                AdminEmail = adminEmail,
+                Action = action,
+                TargetType = targetType,
+                TargetId = targetId,
+                Details = details,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.AdminAuditLogs.Add(log);
+            await _context.SaveChangesAsync();
+        }
+        catch { }
+    }
+
     public async Task<IActionResult> BanUser(int id, [FromBody] BanUserDto dto)
     {
         var user = await _context.Users.FindAsync(id);
@@ -349,6 +372,7 @@ public class UsersController : ControllerBase
         }
 
         await _context.SaveChangesAsync();
+        await LogAuditAsync(dto.IsBanned ? "BanUser" : "UnbanUser", "User", user.Id, $"Причина: {user.BanReason ?? "Не вказано"}");
 
         return Ok(new
         {
@@ -451,6 +475,7 @@ public class UsersController : ControllerBase
 
         user.Role = dto.Role;
         await _context.SaveChangesAsync();
+        await LogAuditAsync("ChangeRole", "User", user.Id, $"Нова роль: {user.Role}");
 
         return Ok(new { message = $"Роль користувача {user.Email} змінено на {user.Role}" });
     }
@@ -498,6 +523,7 @@ public class UsersController : ControllerBase
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
+        await LogAuditAsync("CreateUser", "User", user.Id, $"Створено {user.Email} ({user.Role})");
 
         return Ok(new
         {
@@ -531,6 +557,7 @@ public class UsersController : ControllerBase
         }
 
         await _context.SaveChangesAsync();
+        await LogAuditAsync(user.IsPhoneVerified ? "VerifyPhone" : "UnverifyPhone", "User", user.Id, $"Телефон: {user.PhoneNumber}");
         return Ok(new
         {
             id = user.Id,
@@ -579,6 +606,7 @@ public class UsersController : ControllerBase
         }
 
         await _context.SaveChangesAsync();
+        await LogAuditAsync("SendNotification", "User", user.Id, $"Тема: {notif.Title}");
 
         return Ok(new
         {
@@ -628,9 +656,35 @@ public class UsersController : ControllerBase
 
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();
+        await LogAuditAsync("DeleteUser", "User", id, $"Видалено користувача {user.Email}");
 
         return Ok(new { message = $"Користувача {user.FirstName} {user.LastName} (#{id}) успішно видалено з системи" });
     }
+
+    /// <summary>
+    /// Адміністрування: скидання паролю користувача
+    /// </summary>
+    [HttpPatch("admin/{id}/reset-password")]
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> AdminResetPassword(int id, [FromBody] AdminResetPasswordDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.NewPassword) || dto.NewPassword.Trim().Length < 6)
+        {
+            return BadRequest(new { error = "Новий пароль повинен містити щонайменше 6 символів" });
+        }
+
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return NotFound(new { error = "Користувача не знайдено" });
+
+        user.PasswordHash = _passwordHasher.HashPassword(user, dto.NewPassword.Trim());
+        user.RefreshToken = null;
+        await _context.SaveChangesAsync();
+
+        await LogAuditAsync("ResetPassword", "User", user.Id, $"Скинуто пароль користувача {user.Email}");
+
+        return Ok(new { message = $"Пароль для користувача {user.Email} успішно змінено!" });
+    }
+
 
     [HttpGet("telegram-status/{userId}")]
     [Authorize]

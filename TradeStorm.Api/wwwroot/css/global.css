@@ -970,14 +970,31 @@ header {
 }
 
 @media (max-width: 768px) {
-    .mobile-bottom-bar {
+    body:not(.messages-page):not(.in-chat-conversation) .mobile-bottom-bar {
         display: block !important;
     }
     
     /* Ensure content is not hidden behind the fixed bottom bar on phones */
-    body {
+    body:not(.messages-page):not(.in-chat-conversation) {
         padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
     }
+}
+
+body.messages-page .mobile-bottom-bar,
+body.messages-page #mobileBottomBar,
+body.messages-page .mobile-bottom-app-bar,
+body.in-chat-conversation .mobile-bottom-bar,
+body.in-chat-conversation #mobileBottomBar,
+body.in-chat-conversation .mobile-bottom-app-bar {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    position: fixed !important;
+    bottom: -9999px !important;
+    left: -9999px !important;
+    opacity: 0 !important;
 }
 
 /* ==========================================================================

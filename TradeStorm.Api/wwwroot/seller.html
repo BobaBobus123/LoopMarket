@@ -681,7 +681,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/global.css?v=3.0">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
 </head>
 <body>
@@ -1074,9 +1074,11 @@
 
             try {
                 // Виконуємо запити паралельно для швидкого завантаження профілю
-                const [uData, lData] = await Promise.all([
+                const [uData, lData, rData, sData] = await Promise.all([
                     fetch(`/api/users/public/${targetSellerId}`).then(r => r.ok ? r.json() : null).catch(() => null),
-                    fetch(`/api/listings?sellerId=${targetSellerId}&pageSize=100`).then(r => r.ok ? r.json() : null).catch(() => null)
+                    fetch(`/api/listings?sellerId=${targetSellerId}&pageSize=60`).then(r => r.ok ? r.json() : null).catch(() => null),
+                    fetch(`/api/reviews/user/${targetSellerId}`).then(r => r.ok ? r.json() : null).catch(() => null),
+                    fetch(`/api/users/${targetSellerId}/services-stats`).then(r => r.ok ? r.json() : null).catch(() => null)
                 ]);
 
                 let sellerInfo = uData;
@@ -1130,8 +1132,12 @@
                 renderListings(sellerListings);
 
                 // Відгуки та статистика виконаних послуг
-                loadSellerReviews(targetSellerId);
-                loadSellerServicesStats(targetSellerId);
+                                // Відгуки та послуги
+                if (rData) renderSellerReviewsData(rData);
+                else loadSellerReviews(targetSellerId);
+
+                if (sData) renderSellerServicesStatsData(sData);
+                else loadSellerServicesStats(targetSellerId);
 
             } catch (error) {
                 console.error("Error loading seller profile:", error);
@@ -1152,6 +1158,58 @@
             const p = document.createElement('p');
             p.textContent = str;
             return p.innerHTML;
+        }
+
+        
+        function renderSellerReviewsData(data) {
+            const avgRating = data.averageRating || 0;
+            const totalRev = data.totalReviews || (data.reviews ? data.reviews.length : 0);
+
+            document.getElementById('sellerAvgRating').innerText = Number(avgRating).toFixed(1);
+            document.getElementById('sellerTotalReviews').innerText = totalRev;
+            document.getElementById('sellerStars').innerHTML = renderStars(avgRating);
+
+            const container = document.getElementById('sellerReviewsList');
+            if (!container) return;
+            if (!data.reviews || !data.reviews.length) {
+                container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem; padding: 12px 0;">У цього користувача ще немає відгуків.</p>';
+                return;
+            }
+
+            container.innerHTML = data.reviews.map(r => {
+                const authorName = r.author ? `${r.author.firstName} ${r.author.lastName || ''}`.trim() : 'Користувач';
+                const safeComment = r.comment ? escapeHtml(r.comment) : 'Без коментаря';
+                const safeListingTitle = r.listing ? escapeHtml(r.listing.title) : '';
+                return `
+                <div class="review-card">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center;">
+                        <b style="font-size: 0.95rem;">${escapeHtml(authorName)}</b>
+                        <span style="display:inline-flex;align-items:center;gap:2px;">${renderStars(r.rating)}</span>
+                    </div>
+                    <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 8px;">${safeComment}</p>
+                    ${r.listing ? `
+                        <a href="/details.html?id=${r.listing.code || r.listing.id}" style="display: flex; align-items: center; gap: 10px; background: var(--surface); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color); text-decoration: none; margin-top: 8px;">
+                            <img src="${(r.listing.imageUrl ? r.listing.imageUrl.split(';')[0] : '') || '/images/placeholder.svg'}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover;" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
+                            <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ICONS.package} ${safeListingTitle}</span>
+                        </a>
+                    ` : ''}
+                    <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; display: block;">${new Date(r.createdAt || Date.now()).toLocaleDateString('uk-UA')}</span>
+                </div>
+            `;
+            }).join('');
+        }
+
+        function renderSellerServicesStatsData(stats) {
+            const box = document.getElementById('sellerServicesBadgeBox');
+            const text = document.getElementById('sellerCompletedServicesText');
+            if (box && text && (stats.completedServicesCount > 0 || stats.activeServicesCount > 0)) {
+                box.style.display = 'flex';
+                if (stats.completedServicesCount > 0) {
+                    text.innerText = `${stats.completedServicesCount} виконано`;
+                } else {
+                    text.innerText = `${stats.activeServicesCount} активних послуг`;
+                }
+            }
         }
 
         async function loadSellerReviews(sellerId) {
@@ -1293,7 +1351,7 @@
     </script>
     <!-- Realtime In-App Push Notifications -->
     <script src="/js/push-notifications.js"></script>
-    <script src="/js/responsive-nav.js" defer></script>
+    <script src="/js/responsive-nav.js?v=3.0" defer></script>
     <script src="/js/loop-dialogs.js"></script>
 </body>
 </html>

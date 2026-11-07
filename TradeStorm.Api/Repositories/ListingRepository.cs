@@ -33,6 +33,7 @@ public class ListingRepository : Repository<Listing>, IListingRepository
         int? pageSize)
     {
         var query = _dbSet
+            .AsNoTracking()
             .Include(l => l.Seller)
             .Include(l => l.Category)
             .AsQueryable();

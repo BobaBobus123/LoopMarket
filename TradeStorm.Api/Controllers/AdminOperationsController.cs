@@ -43,6 +43,43 @@ public class AdminOperationsController : ControllerBase
         return User.FindFirstValue(ClaimTypes.Email) ?? "admin@loopmarket.com";
     }
 
+    private bool IsAdminAuthenticated(string? queryToken = null)
+    {
+        if (User.IsInRole(UserRoles.Admin)) return true;
+
+        var token = queryToken;
+        if (string.IsNullOrWhiteSpace(token) && Request.Cookies.TryGetValue("loop_admin_session", out var cookieTok))
+        {
+            token = cookieTok;
+        }
+
+        if (string.IsNullOrWhiteSpace(token) && Request.Headers.TryGetValue("Authorization", out var authHeader) &&
+            authHeader.ToString().StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        {
+            token = authHeader.ToString().Substring(7).Trim();
+        }
+
+        if (string.IsNullOrWhiteSpace(token)) return false;
+
+        try
+        {
+            var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            if (handler.CanReadToken(token))
+            {
+                var jwt = handler.ReadJwtToken(token);
+                var roleClaim = jwt.Claims.FirstOrDefault(c =>
+                    c.Type == ClaimTypes.Role ||
+                    c.Type == "role" ||
+                    c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+
+                return string.Equals(roleClaim, UserRoles.Admin, StringComparison.OrdinalIgnoreCase) && jwt.ValidTo > DateTime.UtcNow;
+            }
+        }
+        catch { }
+
+        return false;
+    }
+
     private async Task LogAuditAsync(string action, string? targetType = null, int? targetId = null, string? details = null)
     {
         try
@@ -352,41 +389,163 @@ public class AdminOperationsController : ControllerBase
         return Ok(new { message = "Категорію видалено" });
     }
 
-    // 10. ЖУРНАЛ ДІЙ ОПЕРАТОРІВ (AUDIT LOGS)
+    // 10. ОФІЦІЙНА ВІДПОВІДЬ НА СКАРГУ / ТІКЕТ ПІДТРИМКИ
+    [HttpPost("complaints/{id}/reply")]
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> ReplyToComplaint(int id, [FromBody] ReplyComplaintDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Message))
+        {
+            return BadRequest(new { error = "Повідомлення не може бути порожнім" });
+        }
+
+        var complaint = await _context.Complaints
+            .Include(c => c.Reporter)
+            .Include(c => c.TargetUser)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (complaint == null) return NotFound(new { error = "Тікет / скаргу не знайдено" });
+
+        var targetUser = complaint.Reporter ?? complaint.TargetUser;
+        if (targetUser == null)
+        {
+            return BadRequest(new { error = "Одержувача звернення не знайдено в базі даних" });
+        }
+
+        int adminId = GetAdminId();
+        string adminEmail = GetAdminEmail();
+
+        // 1. Повідомлення у внутрішній чат сайту (messages.html)
+        if (dto.SendInternalChat)
+        {
+            var chatMsg = new Message
+            {
+                SenderId = adminId,
+                ReceiverId = targetUser.Id,
+                Text = $"🛡️ [Служба підтримки Loop Market • {complaint.Reason}]\n\n{dto.Message.Trim()}\n\nЗ повагою, команда платформи Loop Market",
+                SentAt = DateTime.UtcNow,
+                IsRead = false
+            };
+            _context.Messages.Add(chatMsg);
+
+            try
+            {
+                await _hubContext.Clients.User(targetUser.Id.ToString()).SendAsync("ReceiveMessage", new
+                {
+                    id = chatMsg.Id,
+                    senderId = adminId,
+                    senderName = "Служба підтримки Loop Market",
+                    text = chatMsg.Text,
+                    sentAt = chatMsg.SentAt
+                });
+            }
+            catch { }
+        }
+
+        // 2. Внутрішнє системне сповіщення (Notifications)
+        var notif = new Notification
+        {
+            UserId = targetUser.Id,
+            Title = $"💬 Відповідь підтримки на {complaint.Reason}",
+            Message = dto.Message.Trim(),
+            Link = "/messages.html",
+            IsRead = false,
+            CreatedAt = DateTime.UtcNow
+        };
+        _context.Notifications.Add(notif);
+
+        // 3. Офіційне сповіщення через Telegram-бота (без передачі приватних контактів адміна!)
+        if (dto.SendTelegram && targetUser.TelegramChatId != 0)
+        {
+            try
+            {
+                string tgText = $"💬 <b>ОФІЦІЙНА ВІДПОВІДЬ ПІДТРИМКИ LOOP MARKET</b>\n" +
+                                $"━━━━━━━━━━━━━━━━━━\n" +
+                                $"🎫 <b>Звернення:</b> <code>{complaint.Reason}</code>\n\n" +
+                                $"{System.Net.WebUtility.HtmlEncode(dto.Message.Trim())}\n\n" +
+                                $"━━━━━━━━━━━━━━━━━━\n" +
+                                $"<i>Ви можете продовжити діалог у внутрішньому чаті на сайті: https://loopmarket-x0uo.onrender.com/messages.html</i>";
+
+                await _telegramService.SendNotificationAsync(targetUser.TelegramChatId, tgText);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Support Reply TG Error] {ex.Message}");
+            }
+        }
+
+        // 4. Оновлюємо статус тікета
+        if (dto.MarkResolved)
+        {
+            complaint.Status = ComplaintStatus.Resolved;
+        }
+        complaint.ResolutionNotes = $"Офіційна відповідь {adminEmail}: {dto.Message.Trim()}";
+        await _context.SaveChangesAsync();
+
+        await LogAuditAsync("ReplyComplaint", "Complaint", id, $"Офіційна відповідь {targetUser.Email}: {dto.Message.Trim()}");
+
+        return Ok(new
+        {
+            message = "Офіційну відповідь успішно доставлено користувачеві!",
+            complaintId = id,
+            status = complaint.Status
+        });
+    }
+
+    // 11. ЖУРНАЛ ДІЙ ОПЕРАТОРІВ (AUDIT LOGS) З ФІЛЬТРАЦІЄЮ ТА ПОШУКОМ
     [HttpGet("audit-logs")]
     [Authorize(Roles = UserRoles.Admin)]
-    public async Task<IActionResult> GetAuditLogs()
+    public async Task<IActionResult> GetAuditLogs([FromQuery] string? action, [FromQuery] string? search)
     {
-        var logs = await _context.AdminAuditLogs
+        var query = _context.AdminAuditLogs.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(action) && action != "All")
+        {
+            query = query.Where(l => l.Action == action);
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var s = search.Trim().ToLower();
+            query = query.Where(l => l.AdminEmail.ToLower().Contains(s) ||
+                                     l.Action.ToLower().Contains(s) ||
+                                     (l.Details != null && l.Details.ToLower().Contains(s)));
+        }
+
+        var logs = await query
             .OrderByDescending(l => l.CreatedAt)
-            .Take(100)
+            .Take(150)
             .ToListAsync();
 
         return Ok(logs);
     }
 
-    // 11. ЕКСПОРТ ДАНИХ У CSV
+    // 12. ЕКСПОРТ ДАНИХ У CSV (ПІДТРИМКА БРАУЗЕРНОГО ЗАВАНТАЖЕННЯ З UTF-8 BOM ДЛЯ EXCEL)
     [HttpGet("export/users")]
-    [Authorize(Roles = UserRoles.Admin)]
-    public async Task<IActionResult> ExportUsersCsv()
+    [AllowAnonymous]
+    public async Task<IActionResult> ExportUsersCsv([FromQuery] string? token)
     {
+        if (!IsAdminAuthenticated(token)) return Unauthorized(new { error = "Необхідні права адміністратора" });
+
         var users = await _context.Users.OrderBy(u => u.Id).ToListAsync();
         var sb = new StringBuilder();
-        sb.AppendLine("ID;Ім'я;Прізвище;Email;Телефон;Роль;Верифікований;Заблокований");
+        sb.AppendLine("ID;Ім'я;Прізвище;Email;Телефон;Роль;Верифікований;Заблокований;TelegramChatId");
 
         foreach (var u in users)
         {
-            sb.AppendLine($"{u.Id};{u.FirstName};{u.LastName};{u.Email};{u.PhoneNumber};{u.Role};{u.IsPhoneVerified};{u.IsBanned}");
+            sb.AppendLine($"{u.Id};{u.FirstName};{u.LastName};{u.Email};{u.PhoneNumber};{u.Role};{u.IsPhoneVerified};{u.IsBanned};{u.TelegramChatId}");
         }
 
         var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
-        return File(bytes, "text/csv", $"loopmarket_users_{DateTime.UtcNow:yyyyMMdd}.csv");
+        return File(bytes, "text/csv; charset=utf-8", $"loopmarket_users_{DateTime.UtcNow:yyyyMMdd}.csv");
     }
 
     [HttpGet("export/orders")]
-    [Authorize(Roles = UserRoles.Admin)]
-    public async Task<IActionResult> ExportOrdersCsv()
+    [AllowAnonymous]
+    public async Task<IActionResult> ExportOrdersCsv([FromQuery] string? token)
     {
+        if (!IsAdminAuthenticated(token)) return Unauthorized(new { error = "Необхідні права адміністратора" });
+
         var orders = await _context.Orders
             .Include(o => o.Buyer)
             .Include(o => o.Seller)
@@ -395,17 +554,80 @@ public class AdminOperationsController : ControllerBase
             .ToListAsync();
 
         var sb = new StringBuilder();
-        sb.AppendLine("ID;Товар;Покупець;Продавець;Сума;Статус;ТТН;Дата");
+        sb.AppendLine("ID;Код_Замовлення;Товар;Покупець;Телефон_Покупця;Продавець;Телефон_Продавця;Сума_Грн;Оплата;Місто;Відділення;Статус;ТТН;Дата");
 
         foreach (var o in orders)
         {
             string buyer = o.Buyer != null ? $"{o.Buyer.FirstName} {o.Buyer.LastName}" : "Покупець";
+            string buyerPhone = o.Buyer?.PhoneNumber ?? "";
             string seller = o.Seller != null ? $"{o.Seller.FirstName} {o.Seller.LastName}" : "Продавець";
-            string title = o.Listing?.Title ?? "Товар";
-            sb.AppendLine($"{o.Id};{title};{buyer};{seller};{o.TotalPrice};{o.Status};{o.TrackingNumber};{o.CreatedAt:yyyy-MM-dd HH:mm}");
+            string sellerPhone = o.Seller?.PhoneNumber ?? "";
+            string title = (o.Listing?.Title ?? "Товар").Replace(";", ",");
+            string city = (o.DeliveryCity ?? "").Replace(";", ",");
+            string branch = (o.DeliveryBranch ?? "").Replace(";", ",");
+            sb.AppendLine($"{o.Id};{o.GetDisplayCode()};{title};{buyer};{buyerPhone};{seller};{sellerPhone};{o.TotalPrice};{o.PaymentMethod};{city};{branch};{o.Status};{o.TrackingNumber};{o.CreatedAt:yyyy-MM-dd HH:mm}");
         }
 
         var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
-        return File(bytes, "text/csv", $"loopmarket_orders_{DateTime.UtcNow:yyyyMMdd}.csv");
+        return File(bytes, "text/csv; charset=utf-8", $"loopmarket_orders_{DateTime.UtcNow:yyyyMMdd}.csv");
+    }
+
+    [HttpGet("export/listings")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ExportListingsCsv([FromQuery] string? token)
+    {
+        if (!IsAdminAuthenticated(token)) return Unauthorized(new { error = "Необхідні права адміністратора" });
+
+        var listings = await _context.Listings
+            .Include(l => l.Seller)
+            .Include(l => l.Category)
+            .OrderByDescending(l => l.CreatedAt)
+            .ToListAsync();
+
+        var sb = new StringBuilder();
+        sb.AppendLine("ID;Назва;Категорія;Ціна_Грн;Тип;ТОП;Продавець;Email;Телефон;Місто;Дата");
+
+        foreach (var l in listings)
+        {
+            string seller = l.Seller != null ? $"{l.Seller.FirstName} {l.Seller.LastName}" : "Продавець";
+            string cat = l.Category?.Name ?? "Категорія";
+            string type = l.CategoryId == 8 ? "Послуга" : "Товар";
+            string title = l.Title.Replace(";", ",");
+            string loc = (l.Location ?? "").Replace(";", ",");
+            sb.AppendLine($"{l.Id};{title};{cat};{l.Price};{type};{l.IsFeatured};{seller};{l.Seller?.Email};{l.Seller?.PhoneNumber};{loc};{l.CreatedAt:yyyy-MM-dd HH:mm}");
+        }
+
+        var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
+        return File(bytes, "text/csv; charset=utf-8", $"loopmarket_listings_{DateTime.UtcNow:yyyyMMdd}.csv");
+    }
+
+    [HttpGet("export/complaints")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ExportComplaintsCsv([FromQuery] string? token)
+    {
+        if (!IsAdminAuthenticated(token)) return Unauthorized(new { error = "Необхідні права адміністратора" });
+
+        var complaints = await _context.Complaints
+            .Include(c => c.Reporter)
+            .Include(c => c.TargetUser)
+            .OrderByDescending(c => c.CreatedAt)
+            .ToListAsync();
+
+        var sb = new StringBuilder();
+        sb.AppendLine("ID;Причина;Статус;Заявник;Телефон_Заявника;Відповідач;Деталі;Рішення;Дата");
+
+        foreach (var c in complaints)
+        {
+            string rep = c.Reporter != null ? $"{c.Reporter.FirstName} {c.Reporter.LastName}" : "Заявник";
+            string repPhone = c.Reporter?.PhoneNumber ?? "";
+            string tgt = c.TargetUser != null ? $"{c.TargetUser.FirstName} {c.TargetUser.LastName}" : "Користувач";
+            string cleanDetails = (c.Details ?? "").Replace("\n", " ").Replace(";", ",");
+            string cleanNotes = (c.ResolutionNotes ?? "").Replace("\n", " ").Replace(";", ",");
+            string reason = c.Reason.Replace(";", ",");
+            sb.AppendLine($"{c.Id};{reason};{c.Status};{rep};{repPhone};{tgt};{cleanDetails};{cleanNotes};{c.CreatedAt:yyyy-MM-dd HH:mm}");
+        }
+
+        var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
+        return File(bytes, "text/csv; charset=utf-8", $"loopmarket_tickets_{DateTime.UtcNow:yyyyMMdd}.csv");
     }
 }

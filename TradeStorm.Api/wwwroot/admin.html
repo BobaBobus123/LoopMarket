@@ -27,7 +27,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Панель оператора безпеки — LoopMarket</title>
-    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/global.css?v=3.0">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -915,9 +915,25 @@
 
         <!-- TAB 7: AUDIT LOG -->
         <section id="panel-audit" class="tab-panel">
-            <div class="panel-toolbar">
+            <div class="panel-toolbar" style="flex-wrap: wrap; gap: 12px;">
                 <div style="font-weight: 800; font-size: 1.15rem;">📜 Журнал дій операторів (Audit Trail)</div>
-                <button class="btn-action primary" onclick="loadAuditLogs()">🔄 Оновити журнал</button>
+                <div style="display: flex; align-items: center; gap: 10px; margin-left: auto; flex-wrap: wrap;">
+                    <select id="auditFilterAction" class="admin-form-input" onchange="loadAuditLogs()" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
+                        <option value="">Всі дії операторів</option>
+                        <option value="BanUser">Блокування користувача</option>
+                        <option value="UnbanUser">Розблокування</option>
+                        <option value="ChangeRole">Зміна ролі</option>
+                        <option value="ResetPassword">Скидання паролю</option>
+                        <option value="ForceUpdateOrder">Зміна замовлення</option>
+                        <option value="ReplyComplaint">Офіційна відповідь на тікет</option>
+                        <option value="Broadcast">Масова розсилка</option>
+                        <option value="SetAnnouncement">Банер оголошення</option>
+                        <option value="DeleteListing">Видалення товару</option>
+                        <option value="DeleteUser">Видалення користувача</option>
+                    </select>
+                    <input type="text" id="auditSearchInput" class="admin-form-input" placeholder="Пошук по деталях/email..." oninput="debounceAuditSearch()" style="width: 220px; padding: 6px 12px; font-size: 0.85rem;">
+                    <button class="btn-action primary" onclick="loadAuditLogs()">🔄 Оновити</button>
+                </div>
             </div>
 
             <div class="admin-card">
@@ -943,32 +959,128 @@
         <!-- TAB 8: EXPORT & ANALYTICS -->
         <section id="panel-export" class="tab-panel">
             <div class="panel-toolbar">
-                <div style="font-weight: 800; font-size: 1.15rem;">📊 Експорт звітів та даних платформи</div>
+                <div style="font-weight: 800; font-size: 1.15rem;">📊 Експорт звітів та даних платформи (CSV з підтримкою Excel)</div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
-                <div class="admin-card" style="padding: 24px;">
-                    <h3 style="margin-top: 0;">👥 База користувачів</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-                        Вивантаження повного списку користувачів із контактами, статусом блокування та верифікації у форматі CSV (Excel).
-                    </p>
-                    <a href="/api/admin/export/users" class="btn-action primary" download style="padding: 10px 16px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                <div class="admin-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="font-size: 1.8rem; margin-bottom: 8px;">👥</div>
+                        <h3 style="margin-top: 0; margin-bottom: 8px;">База користувачів</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                            Повний реєстр акаунтів, контакти, ролі (Admin/Seller/Buyer), статус верифікації телефону, блокування та Telegram ID.
+                        </p>
+                    </div>
+                    <button type="button" class="btn-action primary" onclick="downloadCsv('users')" style="padding: 10px 16px; justify-content: center; width: 100%;">
                         📥 Завантажити CSV користувачів
-                    </a>
+                    </button>
                 </div>
 
-                <div class="admin-card" style="padding: 24px;">
-                    <h3 style="margin-top: 0;">📦 База угод та замовлень</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-                        Вивантаження історії замовлень, сум, статусів оплати та номерів накладних Нової Пошти.
-                    </p>
-                    <a href="/api/admin/export/orders" class="btn-action success" download style="padding: 10px 16px;">
+                <div class="admin-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="font-size: 1.8rem; margin-bottom: 8px;">📦</div>
+                        <h3 style="margin-top: 0; margin-bottom: 8px;">База замовлень</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                            Історія угод, унікальні коди (LP-XXXXXX), дані покупця та продавця, суми, статус доставки та ТТН Нової Пошти.
+                        </p>
+                    </div>
+                    <button type="button" class="btn-action success" onclick="downloadCsv('orders')" style="padding: 10px 16px; justify-content: center; width: 100%;">
                         📥 Завантажити CSV замовлень
-                    </a>
+                    </button>
+                </div>
+
+                <div class="admin-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="font-size: 1.8rem; margin-bottom: 8px;">🏷️</div>
+                        <h3 style="margin-top: 0; margin-bottom: 8px;">База оголошень</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                            Всі активні товари та послуги, ціни, категорії, закріплення ТОП, продавці з їхніми контактами та містом.
+                        </p>
+                    </div>
+                    <button type="button" class="btn-action neutral" onclick="downloadCsv('listings')" style="padding: 10px 16px; justify-content: center; width: 100%;">
+                        📥 Завантажити CSV оголошень
+                    </button>
+                </div>
+
+                <div class="admin-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="font-size: 1.8rem; margin-bottom: 8px;">🚨</div>
+                        <h3 style="margin-top: 0; margin-bottom: 8px;">Скарги та Тікети</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                            Повний реєстр звернень у підтримку, причин, контактів заявника, описів проблеми та винесених рішень модерації.
+                        </p>
+                    </div>
+                    <button type="button" class="btn-action danger" onclick="downloadCsv('complaints')" style="padding: 10px 16px; justify-content: center; width: 100%;">
+                        📥 Завантажити CSV тікетів
+                    </button>
                 </div>
             </div>
         </section>
     </main>
+
+    <!-- MODAL: REPLY TO COMPLAINT / SUPPORT TICKET -->
+    <div class="admin-modal-overlay" id="replyComplaintModal">
+        <div class="admin-modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="margin: 0; font-size: 1.25rem;">💬 Офіційна відповідь служби підтримки</h3>
+                <button onclick="closeReplyModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+            </div>
+            <form id="replyComplaintForm" onsubmit="submitComplaintReply(event)">
+                <input type="hidden" id="replyComplaintId">
+                <div style="margin-bottom: 14px; padding: 12px; background: rgba(37,99,235,0.06); border-radius: 10px; font-size: 0.88rem;">
+                    <div>👤 <b>Одержувач:</b> <span id="replyRecipientName">—</span></div>
+                    <div style="margin-top: 4px;">🎫 <b>Тема звернення:</b> <span id="replyTicketReason">—</span></div>
+                </div>
+                <div class="admin-form-group">
+                    <label>Текст офіційної відповіді користувачу *</label>
+                    <textarea id="replyMessageText" class="admin-form-input" rows="5" placeholder="Введіть текст офіційної відповіді. Вона надійде користувачеві у внутрішній чат сайту та офіційний Telegram-бот платформи без розкриття ваших особистих контактів..." required style="resize: vertical;"></textarea>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; font-size: 0.88rem;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="replySendInternalChat" checked>
+                        <span>💬 Надіслати у внутрішній чат сайту (messages.html)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="replySendTelegram" checked>
+                        <span>✈️ Надіслати офіційним Telegram-ботом платформи</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="replyMarkResolved" checked>
+                        <span>✅ Позначити тікет як вирішений</span>
+                    </label>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn-action neutral" onclick="closeReplyModal()">Скасувати</button>
+                    <button type="submit" class="btn-action primary" id="btnSubmitReply">🚀 Надіслати офіційну відповідь</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: RESET PASSWORD -->
+    <div class="admin-modal-overlay" id="resetPasswordModal">
+        <div class="admin-modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="margin: 0; font-size: 1.25rem;">🔑 Скидання паролю користувача</h3>
+                <button onclick="closeResetPasswordModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+            </div>
+            <form id="resetPasswordForm" onsubmit="submitResetPassword(event)">
+                <input type="hidden" id="resetPasswordUserId">
+                <div style="margin-bottom: 14px; padding: 12px; background: var(--bg-color); border-radius: 10px; font-size: 0.88rem;">
+                    Користувач: <b id="resetPasswordUserEmail">—</b>
+                </div>
+                <div class="admin-form-group">
+                    <label>Новий пароль (мінімум 6 символів) *</label>
+                    <input type="text" id="resetPasswordNewValue" class="admin-form-input" placeholder="Введіть новий пароль" required minlength="6">
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn-action neutral" onclick="closeResetPasswordModal()">Скасувати</button>
+                    <button type="submit" class="btn-action primary">💾 Зберегти новий пароль</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <!-- MODAL: CREATE USER -->
     <div class="admin-modal-overlay" id="createUserModal">
@@ -1558,11 +1670,9 @@
                             </div>` : ''}
 
                         <div class="complaint-actions">
-                            ${tgUsername ? `
-                                <a href="https://t.me/${tgUsername}" target="_blank" class="btn-action primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-                                    💬 Відповісти @${escapeHtml(tgUsername)} ↗
-                                </a>
-                            ` : ''}
+                            <button class="btn-action primary" onclick="openReplyModal(${c.id}, '${escapeHtml(c.reporterName || c.reporterEmail || 'Користувач')}', '${escapeHtml(c.reason)}')">
+                                💬 Відповісти в системі
+                            </button>
                             ${!isSupportTicket ? `
                                 <button class="btn-action primary" onclick="openChatAudit(${c.id})" title="Переглянути листування між учасниками">
                                     🔍 Аудит листування
@@ -1784,6 +1894,9 @@
                         <td style="text-align: right; white-space: nowrap;">
                             <button class="btn-action primary" onclick="openSendNotificationModal(${u.id}, '${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}')" title="Надіслати сповіщення на акаунт">
                                 🔔
+                            </button>
+                            <button class="btn-action neutral" onclick="openResetPasswordModal(${u.id}, '${escapeHtml(u.email)}')" title="Скинути пароль">
+                                🔑
                             </button>
                             <button class="btn-action neutral" onclick="openEditUserModal(${u.id})" title="Редагувати профіль">
                                 ✏️
@@ -2304,10 +2417,23 @@
         }
 
         // TAB 7: AUDIT LOGS
+        let auditDebounceTimer = null;
+        function debounceAuditSearch() {
+            clearTimeout(auditDebounceTimer);
+            auditDebounceTimer = setTimeout(loadAuditLogs, 300);
+        }
+
         async function loadAuditLogs() {
             const tbody = document.getElementById('auditTableBody');
+            const action = document.getElementById('auditFilterAction')?.value || '';
+            const search = document.getElementById('auditSearchInput')?.value || '';
+
             try {
-                const res = await adminFetch('/api/admin/audit-logs', {
+                let url = '/api/admin/audit-logs?';
+                if (action) url += `action=${encodeURIComponent(action)}&`;
+                if (search) url += `search=${encodeURIComponent(search)}&`;
+
+                const res = await adminFetch(url, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!res.ok) {
@@ -2316,23 +2442,162 @@
                 }
                 const logs = await res.json();
                 if (logs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Записів аудиту поки немає</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding: 30px;">Записів аудиту за заданими критеріями не знайдено</td></tr>';
                     return;
                 }
                 tbody.innerHTML = logs.map(l => {
                     const date = new Date(l.createdAt).toLocaleString('uk-UA');
                     return `
                         <tr>
-                            <td style="font-size:0.8rem; color:var(--text-muted);">${date}</td>
+                            <td style="font-size:0.8rem; color:var(--text-muted); white-space: nowrap;">${date}</td>
                             <td><code>${escapeHtml(l.adminEmail)}</code></td>
-                            <td><b>${escapeHtml(l.action)}</b></td>
-                            <td><span class="status-badge user">${escapeHtml(l.targetType || '—')} #${l.targetId || ''}</span></td>
+                            <td><span class="status-badge user">${escapeHtml(l.action)}</span></td>
+                            <td><b>${escapeHtml(l.targetType || '—')} #${l.targetId || ''}</b></td>
                             <td style="font-size:0.85rem;">${escapeHtml(l.details || '—')}</td>
                         </tr>
                     `;
                 }).join('');
             } catch (e) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#ef4444;">Помилка</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#ef4444;">Помилка з'єднання</td></tr>';
+            }
+        }
+
+        // ==================== CSV EXPORT FUNCTION ====================
+        async function downloadCsv(type) {
+            try {
+                const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
+                const res = await fetch(`/api/admin/export/${type}?token=${encodeURIComponent(curToken || '')}`, {
+                    headers: curToken ? { 'Authorization': 'Bearer ' + curToken } : {}
+                });
+                if (!res.ok) {
+                    if (window.LoopToast) LoopToast.error(`Помилка експорту (${res.status}): перевірте права адміністратора`);
+                    else alert('Помилка завантаження експорту');
+                    return;
+                }
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `loopmarket_${type}_${new Date().toISOString().slice(0, 10)}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+                if (window.LoopToast) LoopToast.success(`Файл ${type}.csv успішно сформовано та завантажено`);
+            } catch(err) {
+                console.error(err);
+                if (window.LoopToast) LoopToast.error('Помилка при завантаженні CSV файлу');
+            }
+        }
+
+        // ==================== REPLY TO COMPLAINT MODAL ====================
+        function openReplyModal(id, recipient, reason) {
+            document.getElementById('replyComplaintId').value = id;
+            document.getElementById('replyRecipientName').innerText = recipient || 'Користувач';
+            document.getElementById('replyTicketReason').innerText = reason || 'Звернення';
+            document.getElementById('replyMessageText').value = '';
+            document.getElementById('replyComplaintModal').classList.add('active');
+        }
+
+        function closeReplyModal() {
+            document.getElementById('replyComplaintModal').classList.remove('active');
+        }
+
+        async function submitComplaintReply(e) {
+            e.preventDefault();
+            const id = document.getElementById('replyComplaintId').value;
+            const message = document.getElementById('replyMessageText').value.trim();
+            const markResolved = document.getElementById('replyMarkResolved').checked;
+            const sendInternalChat = document.getElementById('replySendInternalChat').checked;
+            const sendTelegram = document.getElementById('replySendTelegram').checked;
+
+            if (!message) return;
+
+            const btn = document.getElementById('btnSubmitReply');
+            btn.disabled = true;
+            btn.innerText = '⏳ Надсилання...';
+
+            try {
+                const res = await adminFetch(`/api/admin/complaints/${id}/reply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        message,
+                        markResolved,
+                        sendInternalChat,
+                        sendTelegram
+                    })
+                });
+
+                if (res.ok) {
+                    closeReplyModal();
+                    loadComplaints();
+                    loadAuditLogs();
+                    if (window.LoopToast) LoopToast.success('Офіційну відповідь надіслано в чат та Telegram-бот користувача!');
+                    else alert('Офіційну відповідь успішно надіслано!');
+                } else {
+                    const err = await res.json();
+                    if (window.LoopToast) LoopToast.error(err.error || 'Помилка при надсиланні');
+                    else alert(err.error || 'Помилка при надсиланні');
+                }
+            } catch (err) {
+                console.error(err);
+                if (window.LoopToast) LoopToast.error('Помилка з'єднання з сервером');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '🚀 Надіслати офіційну відповідь';
+            }
+        }
+
+        // ==================== RESET PASSWORD MODAL ====================
+        function openResetPasswordModal(userId, email) {
+            document.getElementById('resetPasswordUserId').value = userId;
+            document.getElementById('resetPasswordUserEmail').innerText = email || `ID #${userId}`;
+            document.getElementById('resetPasswordNewValue').value = '';
+            document.getElementById('resetPasswordModal').classList.add('active');
+        }
+
+        function closeResetPasswordModal() {
+            document.getElementById('resetPasswordModal').classList.remove('active');
+        }
+
+        async function submitResetPassword(e) {
+            e.preventDefault();
+            const userId = document.getElementById('resetPasswordUserId').value;
+            const newPassword = document.getElementById('resetPasswordNewValue').value.trim();
+
+            if (!newPassword || newPassword.length < 6) {
+                if (window.LoopToast) LoopToast.warning('Пароль повинен містити щонайменше 6 символів');
+                return;
+            }
+
+            try {
+                const res = await adminFetch(`/api/users/admin/${userId}/reset-password`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ newPassword })
+                });
+
+                if (res.ok) {
+                    closeResetPasswordModal();
+                    loadAuditLogs();
+                    if (window.LoopToast) LoopToast.success('Пароль користувача успішно скинуто!');
+                    else alert('Пароль успішно змінено!');
+                } else {
+                    const err = await res.json();
+                    if (window.LoopToast) LoopToast.error(err.error || 'Помилка скидання паролю');
+                    else alert(err.error || 'Помилка скидання паролю');
+                }
+            } catch(err) {
+                console.error(err);
+                if (window.LoopToast) LoopToast.error('Помилка з'єднання');
             }
         }
 

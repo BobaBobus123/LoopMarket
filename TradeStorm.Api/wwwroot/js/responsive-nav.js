@@ -320,6 +320,11 @@
                 closeMobileDrawer(e);
                 return;
             }
+
+            const drawerLink = e.target.closest('#mobileNavDrawer a, .mobile-nav-drawer a');
+            if (drawerLink) {
+                closeMobileDrawer(e);
+            }
         }, true);
     }
 

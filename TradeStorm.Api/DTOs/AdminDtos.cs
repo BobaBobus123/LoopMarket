@@ -32,6 +32,19 @@ public class ResolveComplaintDto
     public string? BanReason { get; set; }
 }
 
+public class ReplyComplaintDto
+{
+    public string Message { get; set; } = string.Empty;
+    public bool MarkResolved { get; set; } = true;
+    public bool SendInternalChat { get; set; } = true;
+    public bool SendTelegram { get; set; } = true;
+}
+
+public class AdminResetPasswordDto
+{
+    public string NewPassword { get; set; } = string.Empty;
+}
+
 public class AdminStatsDto
 {
     public int TotalUsers { get; set; }

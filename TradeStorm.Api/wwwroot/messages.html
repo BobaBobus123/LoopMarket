@@ -91,6 +91,31 @@
                 gap: 6px !important;
             }
         }
+    
+        @media (max-width: 480px) {
+            .btn-send-message span {
+                display: none !important;
+            }
+            .btn-send-message {
+                width: 42px !important;
+                height: 42px !important;
+                min-width: 42px !important;
+                padding: 0 !important;
+                justify-content: center !important;
+                border-radius: 50% !important;
+                flex-shrink: 0 !important;
+            }
+            .main-msg-input {
+                padding: 10px 14px !important;
+                font-size: 0.95rem !important;
+            }
+            .chat-input-bar {
+                padding: 8px 10px !important;
+                padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+                gap: 6px !important;
+            }
+        }
+
     </style>
     <title>Повідомлення | Loop Market</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><path d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/></svg>">
@@ -1695,10 +1720,10 @@
             line-height: 1;
         }
     </style>
-    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/global.css?v=3.0">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
 </head>
-<body>
+<body class="messages-page in-chat-conversation">
 
     <!-- ==================== HEADER ==================== -->
     <header>
@@ -3259,7 +3284,7 @@
     </script>
     <!-- Realtime In-App Push Notifications -->
     <script src="/js/push-notifications.js"></script>
-    <script src="/js/responsive-nav.js?v=2.6" defer></script>
+    <script src="/js/responsive-nav.js?v=3.0" defer></script>
     <script src="/js/loop-dialogs.js"></script>
     <script>
         // ==================== ПОЗНАЧЕННЯ ВСІХ ПОВІДОМЛЕНЬ ПРОЧИТАНИМИ ====================
