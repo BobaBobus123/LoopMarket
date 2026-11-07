@@ -210,6 +210,29 @@ public class MessagesController : ControllerBase
         return Ok(new { success = true });
     }
 
+    // ПОЗНАЧИТИ ВСІ ПОВІДОМЛЕННЯ ЯК ПРОЧИТАНІ
+    [HttpPost("mark-all-read")]
+    public async Task<IActionResult> MarkAllAsRead()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
+
+        var unreadMessages = await _context.Messages
+            .Where(m => m.ReceiverId == userId && !m.IsRead)
+            .ToListAsync();
+
+        if (unreadMessages.Any())
+        {
+            foreach (var msg in unreadMessages)
+            {
+                msg.IsRead = true;
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        return Ok(new { success = true, markedCount = unreadMessages.Count });
+    }
+
     // ВИДАЛЕННЯ ЧАТУ
     [HttpDelete("dialogs/{partnerId}")]
     public async Task<IActionResult> DeleteChat(int partnerId)

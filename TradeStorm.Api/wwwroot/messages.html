@@ -1353,6 +1353,43 @@
                 display: none !important;
             }
         }
+
+        .btn-mark-all-read {
+            background: rgba(37, 99, 235, 0.09);
+            color: #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.22);
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .btn-mark-all-read:hover {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+        .badge-count {
+            background: #ef4444;
+            color: white;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 12px;
+            min-width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
+            border: 1.5px solid var(--surface);
+            line-height: 1;
+        }
     </style>
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
@@ -1422,12 +1459,17 @@
             <!-- ЛІВА КОЛОНКА: ДІАЛОГИ -->
             <div class="messenger-sidebar" id="sidebarPane">
                 <div class="sidebar-top">
-                    <div class="sidebar-headline">
-                        <h2>
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                            Діалоги
-                        </h2>
-                        <span class="dialog-unread-pill" id="totalDialogsCount">0</span>
+                    <div class="sidebar-headline" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h2>
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                Діалоги
+                            </h2>
+                            <span class="dialog-unread-pill" id="totalDialogsCount" style="display: none;">0</span>
+                        </div>
+                        <button type="button" class="btn-mark-all-read" id="btnMarkAllMessagesRead" onclick="markAllMessagesAsRead()" title="Позначити всі повідомлення як прочитані">
+                            ✓✓ Прочитати всі
+                        </button>
                     </div>
 
                     <div class="search-box-wrap">
@@ -2763,6 +2805,82 @@
     <!-- Realtime In-App Push Notifications -->
     <script src="/js/push-notifications.js"></script>
     <script src="/js/responsive-nav.js" defer></script>
-    <script src="/js/loop-dialogs.js"></script>
+    <script src="/js/loop-dialogs.js">
+        // ==================== ПОЗНАЧЕННЯ ВСІХ ПОВІДОМЛЕНЬ ПРОЧИТАНИМИ ====================
+        window.markAllMessagesAsRead = async function() {
+            const token = localStorage.getItem('loopToken');
+            if (!token) return;
+
+            const btn = document.getElementById('btnMarkAllMessagesRead');
+            if (btn) btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/messages/mark-all-read', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (res.ok) {
+                    // Прибираємо цифри з бейджів
+                    const totalPill = document.getElementById('totalDialogsCount');
+                    if (totalPill) totalPill.style.display = 'none';
+
+                    ['navChatBadge', 'bnavChatBadge', 'drawerChatBadge'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.style.display = 'none';
+                    });
+
+                    // Знімаємо позначки непрочитаних у списку діалогів
+                    if (window.dialogsList && Array.isArray(window.dialogsList)) {
+                        window.dialogsList.forEach(p => { p.unreadCount = 0; });
+                        if (typeof renderDialogsList === 'function') {
+                            renderDialogsList(window.dialogsList);
+                        }
+                    }
+
+                    document.querySelectorAll('.chat-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+                        const b = item.querySelector('.unread-msg-badge');
+                        if (b) b.remove();
+                    });
+
+                    if (window.LoopToast) {
+                        LoopToast.success('✨ Всі повідомлення позначено як прочитані');
+                    } else if (typeof showToast === 'function') {
+                        showToast('Успіх', 'Всі повідомлення прочитано', '✓');
+                    }
+                }
+            } catch(e) {
+                console.error('Failed to mark all messages as read', e);
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        };
+
+        // Оновлення лічильника непрочитаних діалогів
+        function updateDialogsBadgeCount(count) {
+            const totalPill = document.getElementById('totalDialogsCount');
+            if (totalPill) {
+                if (count > 0) {
+                    totalPill.innerText = count > 99 ? '99+' : count;
+                    totalPill.style.display = 'inline-flex';
+                } else {
+                    totalPill.style.display = 'none';
+                }
+            }
+            ['navChatBadge', 'bnavChatBadge', 'drawerChatBadge'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (count > 0) {
+                        el.innerText = count > 99 ? '99+' : count;
+                        el.style.display = 'inline-flex';
+                    } else {
+                        el.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+    </script>
 </body>
 </html>

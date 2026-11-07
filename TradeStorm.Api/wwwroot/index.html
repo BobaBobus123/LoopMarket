@@ -2049,6 +2049,194 @@
                 transform: scale(0.92);
             }
         }
+
+        /* ЗАПОБІГАННЯ ГОРИЗОНТАЛЬНОМУ ПЕРЕПОВНЕННЮ НА ТЕЛЕФОНІ */
+        html, body {
+            overflow-x: hidden !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+        }
+
+        /* КРАСИВІ БЕЙДЖІ НЕПРОЧИТАНИХ ПОВІДОМЛЕНЬ */
+        .badge-count {
+            background: #ef4444;
+            color: white;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 12px;
+            min-width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
+            border: 1.5px solid var(--surface);
+            line-height: 1;
+        }
+        .bottom-badge {
+            position: absolute;
+            top: 2px;
+            right: 12px;
+        }
+        .header-badge {
+            margin-left: 6px;
+        }
+
+        /* БОКОВЕ МЕНЮ "ТРИ ПОЛОСКИ" */
+        .mobile-drawer-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(6px);
+            z-index: 100000;
+        }
+        .mobile-drawer-backdrop.active {
+            display: block !important;
+        }
+        .mobile-nav-drawer {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 290px;
+            max-width: 85vw;
+            height: 100%;
+            background: var(--surface);
+            border-left: 1px solid var(--border-color);
+            z-index: 100001;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        .mobile-nav-drawer.active {
+            right: 0 !important;
+        }
+        .drawer-header {
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .btn-drawer-close {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .drawer-user-card {
+            padding: 18px 20px;
+            background: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .drawer-links {
+            padding: 14px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-grow: 1;
+        }
+        .drawer-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 0.92rem;
+            transition: all 0.2s;
+        }
+        .drawer-link:hover, .drawer-link.active {
+            background: var(--bg-color);
+            color: #10b981;
+        }
+        .drawer-sell-link {
+            background: rgba(16, 185, 129, 0.12) !important;
+            color: #10b981 !important;
+            border: 1.5px dashed rgba(16, 185, 129, 0.35);
+            margin: 6px 0;
+        }
+        .drawer-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        .btn-drawer-logout {
+            width: 100%;
+            padding: 11px;
+            border-radius: 10px;
+            border: 1.5px solid rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.08);
+            color: #ef4444;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* ОЧИЩЕННЯ ТА СПРОЩЕННЯ ФІЛЬТРІВ НА ГОЛОВНІЙ */
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex !important;
+            }
+            .btn-create-mobile {
+                display: none !important; /* Прибираємо з тісної шапки, оскільки є в нижній навігації та в меню */
+            }
+            #btnLogoutHeader {
+                display: none !important; /* Перенесено в меню "три полоски" */
+            }
+            header .header-content {
+                gap: 8px !important;
+                padding: 0 10px !important;
+            }
+            header .nav-actions {
+                gap: 6px !important;
+            }
+
+            /* ПРИБИРАЄМО НАГРОМАДЖЕННЯ РЯДІВ ФІЛЬТРІВ */
+            .quick-tags-container {
+                display: none !important; /* Прибираємо зайвий ряд тегів з головного екрана */
+            }
+            .mobile-mode-tabs {
+                display: none !important; /* Режими перенесені в основний скролер категорій */
+            }
+            .mobile-action-bar {
+                justify-content: space-between !important;
+                margin-top: 6px !important;
+                margin-bottom: 6px !important;
+            }
+            .mobile-action-bar #btnOpenMobileFilterSheet {
+                flex-grow: 0 !important;
+                padding: 9px 16px !important;
+            }
+            .mobile-action-bar .mobile-sort-select {
+                flex-grow: 0 !important;
+                width: auto !important;
+                min-width: 140px !important;
+            }
+        }
+
     </style>
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
@@ -2070,9 +2258,10 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
                     Послуги
                 </a>
-                <a href="/messages.html" class="nav-link" id="navChat">
+                <a href="/messages.html" class="nav-link" id="navChat" style="position: relative;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    Чат
+                    <span>Чат</span>
+                    <span class="badge-count header-badge" id="navChatBadge" style="display: none;">0</span>
                 </a>
                 <a href="/safety.html" class="nav-link" id="navSafety">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -2105,6 +2294,11 @@
 
                 <button class="btn-icon" id="btnLogoutHeader" onclick="showLogoutModal()" title="Вийти з акаунта" style="color: #ef4444; display: none;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                </button>
+
+                <!-- КНОПКА "ТРИ ПОЛОСКИ" ДЛЯ МОБІЛЬНИХ (HAMBURGER MENU) -->
+                <button type="button" class="btn-icon mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileNavDrawer()" title="Меню платформи">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
                 </button>
             </div>
         </div>
@@ -2374,6 +2568,17 @@
             <button type="button" class="btn-sheet-close" onclick="closeMobileFilterSheet()" aria-label="Закрити">✕</button>
         </div>
         <div class="mobile-filter-sheet-body">
+            <!-- ⚡ Швидкі параметри в 1 клік -->
+            <div class="sheet-group">
+                <div class="sheet-group-title">⚡ Швидкі фільтри</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <button type="button" class="sheet-cond-pill" id="sqtagNew" onclick="toggleQuickTag('new', this)">✨ Тільки нове</button>
+                    <button type="button" class="sheet-cond-pill" id="sqtagShipping" onclick="toggleQuickTag('shipping', this)">📦 З доставкою</button>
+                    <button type="button" class="sheet-cond-pill" id="sqtagPrice" onclick="toggleQuickTag('price', this)">🏷️ До 1 000 ₴</button>
+                    <button type="button" class="sheet-cond-pill" id="sqtagVip" onclick="toggleQuickTag('vip', this)">⭐ ТОП-оголошення</button>
+                </div>
+            </div>
+
             <!-- Ціна -->
             <div class="sheet-group">
                 <div class="sheet-group-title">Ціна (₴)</div>
@@ -2656,7 +2861,11 @@
                 const list = document.getElementById('categoryList');
                 const pillsList = document.getElementById('categoryPillsList');
                 if (pillsList) {
-                    pillsList.innerHTML = `<button type="button" class="cat-pill active" data-category="" onclick="filterByCategory('', this)">✨ Всі товари</button>`;
+                    pillsList.innerHTML = `
+                        <button type="button" class="cat-pill active" data-category="" onclick="filterByCategory('', this)">🌟 Всі</button>
+                        <button type="button" class="cat-pill" data-mode="goods" onclick="setCatalogMode('goods', event)">📦 Товари</button>
+                        <button type="button" class="cat-pill" data-mode="services" onclick="setCatalogMode('services', event)">🛠️ Послуги</button>
+                    `;
                 }
                 const ICONS = {
                     'Електроніка': '📱', 'Одяг': '👕', 'Навчальні': '📚', 'Товари для дому': '🏠',
@@ -3625,7 +3834,118 @@
         }
 
     </script>
-    <script src="/js/cookie-consent.js"></script>
+    <script src="/js/cookie-consent.js">
+        // ==================== БОКОВЕ МЕНЮ "ТРИ ПОЛОСКИ" ====================
+        window.toggleMobileNavDrawer = function() {
+            const drawer = document.getElementById('mobileNavDrawer');
+            const backdrop = document.getElementById('mobileDrawerBackdrop');
+            if (!drawer || !backdrop) return;
+            const isOpen = drawer.classList.contains('active');
+            if (isOpen) {
+                closeMobileNavDrawer();
+            } else {
+                renderDrawerUserInfo();
+                drawer.classList.add('active');
+                backdrop.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        };
+
+        window.closeMobileNavDrawer = function() {
+            const drawer = document.getElementById('mobileNavDrawer');
+            const backdrop = document.getElementById('mobileDrawerBackdrop');
+            if (drawer) drawer.classList.remove('active');
+            if (backdrop) backdrop.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        function renderDrawerUserInfo() {
+            const container = document.getElementById('drawerUserCard');
+            const logoutBtn = document.getElementById('drawerLogoutBtn');
+            const token = localStorage.getItem('loopToken');
+            if (!container) return;
+
+            if (token) {
+                try {
+                    const u = parseJwt(token);
+                    const name = u["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "Користувач";
+                    const email = u["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] || "";
+                    container.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0;">
+                                ${name.charAt(0).toUpperCase()}
+                            </div>
+                            <div style="min-width: 0;">
+                                <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name}</div>
+                                <div style="font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${email}</div>
+                            </div>
+                        </div>
+                    `;
+                    if (logoutBtn) logoutBtn.style.display = 'flex';
+                } catch(e) {
+                    showDrawerGuest();
+                }
+            } else {
+                showDrawerGuest();
+            }
+        }
+
+        function showDrawerGuest() {
+            const container = document.getElementById('drawerUserCard');
+            const logoutBtn = document.getElementById('drawerLogoutBtn');
+            if (container) {
+                container.innerHTML = `
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Вхід у ваш профіль:</div>
+                    <div style="display: flex; gap: 8px;">
+                        <a href="/login.html" class="btn-primary" style="flex: 1; text-decoration: none; text-align: center; padding: 9px 12px; font-size: 0.86rem; border-radius: 10px;">Вхід</a>
+                        <a href="/login.html?tab=register" class="btn-primary" style="flex: 1; text-decoration: none; text-align: center; padding: 9px 12px; font-size: 0.86rem; border-radius: 10px; background: transparent; color: var(--primary-light); border: 1.5px solid var(--border-color);">Реєстрація</a>
+                    </div>
+                `;
+            }
+            if (logoutBtn) logoutBtn.style.display = 'none';
+        }
+
+        // ==================== ОНОВЛЕННЯ БЕЙДЖА ПОВІДОМЛЕНЬ ====================
+        async function updateUnreadChatBadge() {
+            const token = localStorage.getItem('loopToken');
+            if (!token) {
+                ['navChatBadge', 'bnavChatBadge', 'drawerChatBadge'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/messages/unread-count', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const count = data.count || 0;
+                    const text = count > 99 ? '99+' : count.toString();
+                    ['navChatBadge', 'bnavChatBadge', 'drawerChatBadge'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            if (count > 0) {
+                                el.innerText = text;
+                                el.style.display = 'inline-flex';
+                            } else {
+                                el.style.display = 'none';
+                            }
+                        }
+                    });
+                }
+            } catch(e) {
+                console.debug('Failed to load unread messages count', e);
+            }
+        }
+
+        // Періодичне оновлення лічильника кожні 15 секунд
+        updateUnreadChatBadge();
+        setInterval(updateUnreadChatBadge, 15000);
+
+    </script>
 
     <!-- MOBILE BOTTOM NAVIGATION (Швидка навігація для смартфонів) -->
     <nav class="mobile-bottom-app-bar" id="mobileBottomAppBar">
@@ -3643,8 +3963,9 @@
             </div>
             <span>Продати</span>
         </a>
-        <a href="/messages.html" class="bottom-nav-item" id="bnavChat">
+        <a href="/messages.html" class="bottom-nav-item" id="bnavChat" style="position: relative;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span class="badge-count bottom-badge" id="bnavChatBadge" style="display: none;">0</span>
             <span>Чат</span>
         </a>
         <a href="/profile.html" class="bottom-nav-item" id="bnavProfile">
@@ -3652,6 +3973,63 @@
             <span id="bnavProfileText">Профіль</span>
         </a>
     </nav>
+    <!-- MOBILE NAVIGATION DRAWER (Бокове меню "Три полоски") -->
+    <div class="mobile-drawer-backdrop" id="mobileDrawerBackdrop" onclick="closeMobileNavDrawer()"></div>
+    <div class="mobile-nav-drawer" id="mobileNavDrawer">
+        <div class="drawer-header">
+            <div class="logo" style="font-size: 1.2rem;">
+                <div class="logo-circle" style="width: 32px; height: 32px; font-size: 1rem;">L</div>
+                <span>Loop<span style="color: #10b981;">Market</span></span>
+            </div>
+            <button type="button" class="btn-drawer-close" onclick="closeMobileNavDrawer()" aria-label="Закрити">✕</button>
+        </div>
+
+        <div class="drawer-user-card" id="drawerUserCard">
+            <!-- Динамічно заповнюється: аватар + ім'я або кнопки авторизації -->
+        </div>
+
+        <nav class="drawer-links">
+            <a href="/index.html" class="drawer-link active">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                <span>Головна</span>
+            </a>
+            <a href="/create.html" class="drawer-link drawer-sell-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>+ Подати оголошення</span>
+            </a>
+            <a href="/messages.html" class="drawer-link" id="drawerChatLink" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Повідомлення (Чат)</span>
+                </div>
+                <span class="badge-count" id="drawerChatBadge" style="display: none;">0</span>
+            </a>
+            <a href="/index.html#services" onclick="closeMobileNavDrawer(); setCatalogMode('services', event)" class="drawer-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                <span>Послуги та сервіси</span>
+            </a>
+            <a href="/safety.html" class="drawer-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>Правила безпеки</span>
+            </a>
+            <a href="/about.html" class="drawer-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>
+                <span>Про маркетплейс</span>
+            </a>
+            <a href="/profile.html" class="drawer-link" id="drawerProfileLink">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Особистий кабінет</span>
+            </a>
+        </nav>
+
+        <div class="drawer-footer" id="drawerFooter">
+            <button type="button" class="btn-drawer-logout" id="drawerLogoutBtn" onclick="showLogoutModal(); closeMobileNavDrawer();" style="display: none;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                <span>Вийти з акаунта</span>
+            </button>
+        </div>
+    </div>
+
 
 </body>
 </html>
