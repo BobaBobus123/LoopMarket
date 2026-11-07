@@ -56,6 +56,7 @@ public class UpdateOrderPriceDto
 public class OrderDto
 {
     public int Id { get; set; }
+    public string OrderCode { get; set; } = string.Empty;
     public int ListingId { get; set; }
     public string ListingTitle { get; set; } = string.Empty;
     public string? ListingImageUrl { get; set; }

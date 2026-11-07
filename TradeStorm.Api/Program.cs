@@ -302,11 +302,39 @@ using (var scope = app.Services.CreateScope())
     if (db.Database.IsSqlite())
     {
         db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA synchronous=NORMAL;");
+        try
+        {
+            var hasCol = false;
+            using var cmd = db.Database.GetDbConnection().CreateCommand();
+            cmd.CommandText = "PRAGMA table_info(Orders);";
+            db.Database.OpenConnection();
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    if (reader.GetString(1).Equals("OrderCode", StringComparison.OrdinalIgnoreCase))
+                    {
+                        hasCol = true;
+                        break;
+                    }
+                }
+            }
+            if (!hasCol)
+            {
+                db.Database.ExecuteSqlRaw(@"ALTER TABLE Orders ADD COLUMN OrderCode TEXT;");
+            }
+        }
+        catch {}
     }
     else
     {
         // Автоматичне створення структури таблиць у PostgreSQL
         db.Database.EnsureCreated();
+        try
+        {
+            db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""OrderCode"" VARCHAR(30);");
+        }
+        catch {}
     }
 }
 

@@ -49,6 +49,9 @@ public class Order
     [MaxLength(50)]
     public string PaymentMethod { get; set; } = "Накладений платіж";
 
+    [MaxLength(30)]
+    public string? OrderCode { get; set; }
+
     [MaxLength(50)]
     public string? TrackingNumber { get; set; }
 
@@ -56,4 +59,14 @@ public class Order
     public string? Comment { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public string GetDisplayCode()
+    {
+        if (!string.IsNullOrWhiteSpace(OrderCode))
+            return OrderCode;
+
+        // Непослідовний обфускований код для захисту від перебору зловмисниками
+        var hash = (Id * 7919 + 104729) % 900000 + 100000;
+        return $"LP-{hash}";
+    }
 }

@@ -55,35 +55,43 @@ public class TelegramBotService : BackgroundService
             return;
         }
 
-        try
+        while (!stoppingToken.IsCancellationRequested)
         {
-            // Скидаємо старий вебхук для коректної роботи Polling
-            await _botClient.DeleteWebhook(cancellationToken: stoppingToken);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[Telegram Warning] Не вдалося видалити вебхук: {ex.Message}");
-        }
+            try
+            {
+                try
+                {
+                    // Скидаємо старий вебхук для коректної роботи Polling
+                    await _botClient.DeleteWebhook(cancellationToken: stoppingToken);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Telegram Warning] Не вдалося видалити вебхук: {ex.Message}");
+                }
 
-        var receiverOptions = new ReceiverOptions
-        {
-            AllowedUpdates = Array.Empty<UpdateType>() // Слухаємо всі оновлення
-        };
+                var receiverOptions = new ReceiverOptions
+                {
+                    AllowedUpdates = Array.Empty<UpdateType>() // Слухаємо всі оновлення
+                };
 
-        _botClient.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOptions, stoppingToken);
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+                _botClient.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOptions, linkedCts.Token);
 
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("\n[Telegram] Бот успішно запущений і слухає повідомлення!\n");
-        Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("\n[Telegram] Бот успішно запущений і слухає повідомлення!\n");
+                Console.ResetColor();
 
-        // Тримаємо фоновий процес активним протягом усього часу роботи сервера
-        try
-        {
-            await Task.Delay(Timeout.Infinite, stoppingToken);
-        }
-        catch (OperationCanceledException)
-        {
-            // Graceful stop
+                await Task.Delay(Timeout.Infinite, stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Помилка в циклі Telegram бота: {ex.Message}. Перезапуск polling через 5 секунд...");
+                try { await Task.Delay(5000, stoppingToken); } catch { break; }
+            }
         }
     }
 
@@ -119,6 +127,8 @@ public class TelegramBotService : BackgroundService
 
     private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
+        try
+        {
         Console.WriteLine($"[Telegram Update] Отримано оновлення типу: {update.Type}");
 
         if (update.Message is not { } message) return;
@@ -305,6 +315,11 @@ public class TelegramBotService : BackgroundService
 
                 Console.WriteLine($"[Telegram Error] Номер {cleanTelegramPhone} не знайдено в базі.");
             }
+        }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ [Telegram Update Error]: {ex.Message}");
         }
     }
 

@@ -1215,6 +1215,83 @@
             display: none;
         }
 
+        @media (min-width: 769px) {
+            .mobile-sticky-action-bar,
+            #mobileStickyBar {
+                display: none !important;
+            }
+        }
+
+        .sticky-price-wrap {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            max-width: 44%;
+        }
+
+        .sticky-price {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text-main);
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+
+        .sticky-title {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sticky-buttons-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-grow: 1;
+            justify-content: flex-end;
+        }
+
+        .btn-sticky-chat {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none !important;
+            background: var(--surface) !important;
+            border: 1.5px solid var(--border-color) !important;
+            color: var(--text-main) !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            outline: none;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            transition: all 0.2s ease;
+        }
+        .btn-sticky-chat:hover, .btn-sticky-chat:focus, .btn-sticky-chat:visited {
+            text-decoration: none !important;
+            color: var(--text-main) !important;
+        }
+
+        .btn-sticky-buy {
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: white !important;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            transition: all 0.2s ease;
+        }
+
         @media (max-width: 768px) {
             .mobile-sticky-action-bar {
                 position: fixed;
@@ -1233,73 +1310,6 @@
                 justify-content: space-between;
                 gap: 12px;
                 box-shadow: 0 -6px 24px rgba(0,0,0,0.12);
-            }
-
-            .sticky-price-wrap {
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-                max-width: 42%;
-            }
-
-            .sticky-price {
-                font-size: 1.15rem;
-                font-weight: 800;
-                color: var(--text-main);
-                white-space: nowrap;
-                line-height: 1.2;
-            }
-
-            .sticky-title {
-                font-size: 0.72rem;
-                color: var(--text-muted);
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .sticky-buttons-wrap {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                flex-grow: 1;
-                justify-content: flex-end;
-            }
-
-            .btn-sticky-chat {
-                padding: 10px 14px;
-                border-radius: 10px;
-                font-size: 0.85rem;
-                font-weight: 700;
-                text-decoration: none !important;
-                background: var(--bg-color);
-                border: 1.5px solid var(--border-color) !important;
-                color: var(--text-main);
-                display: inline-flex;
-                align-items: center;
-                gap: 5px;
-                white-space: nowrap;
-                outline: none;
-            }
-            .btn-sticky-chat:hover, .btn-sticky-chat:focus, .btn-sticky-chat:visited {
-                text-decoration: none !important;
-                color: var(--text-main);
-            }
-
-            .btn-sticky-buy {
-                padding: 10px 18px;
-                border-radius: 10px;
-                font-size: 0.88rem;
-                font-weight: 800;
-                color: white;
-                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                border: none;
-                cursor: pointer;
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                white-space: nowrap;
-                box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
             }
 
             body.has-sticky-bar {
@@ -1347,7 +1357,7 @@
             height: 100%;
             background: rgba(0,0,0,0.65);
             backdrop-filter: blur(6px);
-            z-index: 100000;
+            z-index: 199999 !important;
         }
         .mobile-drawer-backdrop.active {
             display: block !important;
@@ -1361,7 +1371,7 @@
             height: 100%;
             background: var(--surface);
             border-left: 1px solid var(--border-color);
-            z-index: 100001;
+            z-index: 200000 !important;
             box-shadow: -10px 0 30px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;

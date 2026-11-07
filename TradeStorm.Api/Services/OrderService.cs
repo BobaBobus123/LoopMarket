@@ -43,8 +43,11 @@ public class OrderService : IOrderService
             ? dto.CustomTotalPrice.Value
             : listing.Price;
 
+        // Генерація захищеного непослідовного коду замовлення
+        var orderCode = GenerateOrderCode();
         var order = new Order
         {
+            OrderCode = orderCode,
             ListingId = listing.Id,
             BuyerId = buyerId,
             SellerId = listing.SellerId,
@@ -67,10 +70,12 @@ public class OrderService : IOrderService
         _context.Orders.Add(order);
         await _context.SaveChangesAsync(); // Зберігаємо спочатку для отримання дійсного ID замовлення
 
-        var notifTitle = isService ? "🛠 Нове замовлення послуги!" : "📦 Нове замовлення!";
+        var displayCode = order.GetDisplayCode();
+
+        var notifTitle = isService ? $"🛠 Замовлення {displayCode}" : $"📦 Замовлення {displayCode}";
         var notifMessage = isService
-            ? $"Отримано замовлення на послугу '{listing.Title}' від {dto.BuyerName}. Сума: {totalPrice:N0} грн. {dto.DeliveryBranch}"
-            : $"Отримано замовлення на '{listing.Title}' від {dto.BuyerName}. Сума: {totalPrice:N0} грн.";
+            ? $"Послуга «{listing.Title}» • {totalPrice:N0} ₴ • Замовник: {dto.BuyerName}"
+            : $"Товар «{listing.Title}» • {totalPrice:N0} ₴ • Покупець: {dto.BuyerName} ({dto.DeliveryCity})";
 
         var notif = new Notification
         {
@@ -82,10 +87,24 @@ public class OrderService : IOrderService
         };
         _context.Notifications.Add(notif);
 
-        // Автоматичне повідомлення в чат сайту між покупцем і продавцем (чистий текст без зайвих сирих HTML-тегів)
+        // Структуроване, красиве та інформативне повідомлення в чат між покупцем і продавцем
         var chatMsgText = isService
-            ? $"🛠 Замовлення послуги #{order.Id}!\nПослуга: {listing.Title}\nСума: {totalPrice:N0} грн\nДеталі: {dto.DeliveryBranch}\nЛокація: {dto.DeliveryCity}\nОплата: {order.PaymentMethod}" + (!string.IsNullOrWhiteSpace(dto.Comment) ? $"\nКоментар: {dto.Comment}" : "")
-            : $"📦 Замовлення товару #{order.Id}!\nТовар: {listing.Title}\nСума: {totalPrice:N0} грн\nДоставка: {dto.DeliveryCity}, {dto.DeliveryBranch}\nОплата: {order.PaymentMethod}" + (!string.IsNullOrWhiteSpace(dto.Comment) ? $"\nКоментар: {dto.Comment}" : "");
+            ? $"🛠 ЗАМОВЛЕННЯ ПОСЛУГИ {displayCode}\n\n" +
+              $"• Послуга: {listing.Title}\n" +
+              $"• Вартість: {totalPrice:N0} ₴\n" +
+              $"• Замовник: {dto.BuyerName}\n" +
+              $"• Локація: {dto.DeliveryCity}\n" +
+              $"• Деталі: {dto.DeliveryBranch}\n" +
+              $"• Оплата: {order.PaymentMethod}" +
+              (!string.IsNullOrWhiteSpace(dto.Comment) ? $"\n• Коментар: {dto.Comment}" : "")
+            : $"📦 ЗАМОВЛЕННЯ ТОВАРУ {displayCode}\n\n" +
+              $"• Товар: {listing.Title}\n" +
+              $"• Вартість: {totalPrice:N0} ₴\n" +
+              $"• Покупець: {dto.BuyerName}\n" +
+              $"• Доставка: {dto.DeliveryCity}\n" +
+              $"• Відділення: {dto.DeliveryBranch}\n" +
+              $"• Оплата: {order.PaymentMethod}" +
+              (!string.IsNullOrWhiteSpace(dto.Comment) ? $"\n• Коментар: {dto.Comment}" : "");
 
         var chatMsg = new Message
         {
@@ -98,14 +117,13 @@ public class OrderService : IOrderService
         _context.Messages.Add(chatMsg);
 
         await _context.SaveChangesAsync();
-
         if (listing.Seller != null && listing.Seller.TelegramChatId != 0 && listing.Seller.ReceiveTelegramNotifications)
         {
             var chatId = listing.Seller.TelegramChatId;
             string text;
             if (isService)
             {
-                text = $"🛠 <b>Нове замовлення ПОСЛУГИ на Loop Market!</b>\n\n" +
+                text = $"🛠 <b>Нове замовлення послуги на Loop Market!</b>\n━━━━━━━━━━━━━━━━━━\n" + $"🆔 Код замовлення: <code>{displayCode}</code>\n" +
                        $"🛠 Послуга: <b>{System.Net.WebUtility.HtmlEncode(listing.Title)}</b>\n" +
                        $"💰 Сума: <b>{totalPrice:N0} грн</b>\n" +
                        $"👤 Замовник: {System.Net.WebUtility.HtmlEncode(dto.BuyerName)} ({System.Net.WebUtility.HtmlEncode(dto.BuyerPhone)})\n" +
@@ -117,7 +135,7 @@ public class OrderService : IOrderService
             }
             else
             {
-                text = $"🎉 <b>Нове замовлення на Loop Market!</b>\n\n" +
+                text = $"🎉 <b>Нове замовлення на Loop Market!</b>\n━━━━━━━━━━━━━━━━━━\n" + $"🆔 Код замовлення: <code>{displayCode}</code>\n" +
                        $"📦 Товар: <b>{System.Net.WebUtility.HtmlEncode(listing.Title)}</b>\n" +
                        $"💰 Сума: <b>{totalPrice:N0} грн</b>\n" +
                        $"👤 Покупець: {System.Net.WebUtility.HtmlEncode(dto.BuyerName)} ({System.Net.WebUtility.HtmlEncode(dto.BuyerPhone)})\n" +
@@ -234,8 +252,19 @@ public class OrderService : IOrderService
             order.Listing.Status = "Active";
         }
 
-        string notifTitle = "📦 Оновлення замовлення";
-        string notifMessage = $"Статус замовлення #{order.Id} змінено на: {newStatus}.";
+        var dispCode = order.GetDisplayCode();
+        string ukrStatus = newStatus switch
+        {
+            OrderStatus.Pending => "Очікує підтвердження",
+            OrderStatus.Confirmed => "Підтверджено продавцем",
+            OrderStatus.Shipped => "Відправлено",
+            OrderStatus.Completed => "Успішно завершено",
+            OrderStatus.Cancelled => "Скасовано",
+            _ => newStatus
+        };
+
+        string notifTitle = $"📦 Оновлення замовлення {dispCode}";
+        string notifMessage = $"Статус замовлення {dispCode} змінено на: {ukrStatus}.";
         if (!string.IsNullOrWhiteSpace(order.TrackingNumber))
         {
             notifMessage += $" Номер ТТН: {order.TrackingNumber}";
@@ -253,6 +282,21 @@ public class OrderService : IOrderService
 
         await _context.SaveChangesAsync();
 
+        if (order.Buyer != null && order.Buyer.TelegramChatId != 0 && order.Buyer.ReceiveTelegramNotifications)
+        {
+            var buyerText = $"📦 <b>Оновлення вашого замовлення {dispCode}!</b>\n" +
+                            $"━━━━━━━━━━━━━━━━━━\n" +
+                            $"📦 Товар: <b>{System.Net.WebUtility.HtmlEncode(order.Listing?.Title ?? "Товар")}</b>\n" +
+                            $"⚡ Новий статус: <b>{ukrStatus}</b>\n" +
+                            (!string.IsNullOrWhiteSpace(order.TrackingNumber) ? $"🚚 ТТН Нової Пошти: <code>{order.TrackingNumber}</code>\n" : "") +
+                            $"━━━━━━━━━━━━━━━━━━\n" +
+                            $"<i>Дякуємо, що обираєте Loop Market!</i>";
+
+            await _taskQueue.QueueBackgroundWorkItemAsync(async token =>
+            {
+                await _botService.SendNotificationAsync(order.Buyer.TelegramChatId, buyerText);
+            });
+        }
         return MapToDto(
             order,
             order.Listing?.Title ?? "Товар видалено",
@@ -272,11 +316,18 @@ public class OrderService : IOrderService
         o.Listing?.CategoryId == 8 || (o.Listing?.Title ?? "").Contains("Послуг", StringComparison.OrdinalIgnoreCase) || (o.DeliveryBranch != null && o.DeliveryBranch.Contains("год"))
     );
 
+    private static string GenerateOrderCode()
+    {
+        var code = Random.Shared.Next(100000, 999999);
+        return $"LP-{code}";
+    }
+
     private static OrderDto MapToDto(Order o, string listingTitle, string? listingImageUrl, string sellerName, string? sellerPhone = null, bool isService = false)
     {
         return new OrderDto
         {
             Id = o.Id,
+            OrderCode = o.GetDisplayCode(),
             ListingId = o.ListingId,
             ListingTitle = listingTitle,
             ListingImageUrl = listingImageUrl,

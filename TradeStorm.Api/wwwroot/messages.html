@@ -1198,9 +1198,161 @@
             line-height: 1.42;
             word-wrap: break-word;
             word-break: break-word;
+            white-space: pre-wrap;
             position: relative;
             box-shadow: 0 1px 3px rgba(0,0,0,0.06);
             animation: popMsg 0.18s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        .msg-bubble.has-order-card {
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            max-width: min(520px, 94%) !important;
+            width: 100% !important;
+        }
+
+        /* 📦 СТРУКТУРОВАНА ТА ІНФОРМАТИВНА КАРТКА ЗАМОВЛЕННЯ В ЧАТІ */
+        .chat-order-card {
+            background: var(--surface);
+            border: 1.5px solid rgba(16, 185, 129, 0.4);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin: 4px 0;
+            width: 100%;
+            box-sizing: border-box;
+            color: var(--text-main);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+            text-align: left;
+        }
+
+        [data-theme="dark"] .chat-order-card {
+            background: #1e293b;
+            border-color: rgba(16, 185, 129, 0.45);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+        }
+
+        .chat-order-card.service-order-card {
+            border-color: rgba(37, 99, 235, 0.45);
+        }
+
+        .coc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .coc-badge {
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #059669;
+            background: rgba(16, 185, 129, 0.14);
+            padding: 3px 9px;
+            border-radius: 7px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chat-order-card.service-order-card .coc-badge {
+            color: #2563eb;
+            background: rgba(37, 99, 235, 0.14);
+        }
+
+        .coc-code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: var(--bg-color);
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            letter-spacing: 0.5px;
+        }
+
+        .coc-title {
+            font-weight: 800;
+            font-size: 1.02rem;
+            line-height: 1.35;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .coc-price {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+
+        .chat-order-card.service-order-card .coc-price {
+            color: #3b82f6;
+        }
+
+        .coc-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 10px 0;
+            border: none;
+        }
+
+        .coc-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.86rem;
+        }
+
+        .coc-row {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            line-height: 1.4;
+        }
+
+        .coc-label {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.82rem;
+            white-space: nowrap;
+            min-width: 90px;
+        }
+
+        .coc-val {
+            color: var(--text-main);
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .coc-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 12px;
+            width: 100%;
+            padding: 9px 14px;
+            border-radius: 10px;
+            background: var(--primary-gradient);
+            color: #ffffff !important;
+            text-decoration: none !important;
+            font-weight: 700;
+            font-size: 0.86rem;
+            box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .coc-btn:hover {
+            opacity: 0.93;
+            transform: translateY(-1px);
         }
 
         @keyframes popMsg {
@@ -2067,10 +2219,7 @@
             const card = document.querySelector('.messenger-card');
             if (card) card.classList.remove('chat-active');
             document.body.classList.remove('in-chat-conversation');
-            const bottomBars = document.querySelectorAll('#mobileBottomBar, .mobile-bottom-bar, .mobile-bottom-app-bar');
-            bottomBars.forEach(b => {
-                b.style.removeProperty('display');
-            });
+            purgeChatBottomNav();
             document.querySelectorAll('.chat-item.active').forEach(el => el.classList.remove('active'));
             if (window.history && window.history.replaceState) {
                 window.history.replaceState({}, '', '/messages.html');
@@ -2733,16 +2882,82 @@
             }
         }
 
+        // РЕНДЕРИНГ КРАСИВОЇ, СТРУКТУРОВАНОЇ КАРТКИ ЗАМОВЛЕННЯ В ЧАТІ
+        function renderOrderCardInChat(rawText) {
+            if (!rawText) return null;
+            const isOrder = rawText.includes('ЗАМОВЛЕННЯ') || rawText.includes('Замовлення') || rawText.includes('замовлення');
+            if (!isOrder) return null;
+
+            const isService = rawText.includes('ПОСЛУГ') || rawText.includes('послуг') || rawText.includes('🛠');
+
+            // Extract Order Code
+            let orderCode = '';
+            const codeMatch = rawText.match(/LP-[0-9A-Za-z_-]+/i) || rawText.match(/#(\d+)/i);
+            if (codeMatch) {
+                orderCode = codeMatch[0];
+            }
+
+            function extractField(patterns) {
+                for (const p of patterns) {
+                    const m = rawText.match(p);
+                    if (m && m[1]) return m[1].trim();
+                }
+                return '';
+            }
+
+            const title = extractField([/•\s*(?:Товар|Послуга):\s*([^\n]+)/i, /(?:Товар|Послуга):\s*([^\n]+?)(?=\s+(?:Сума|Вартість|Доставка|Локація|Оплата|$))/i]);
+            const price = extractField([/•\s*(?:Вартість|Сума):\s*([^\n]+)/i, /(?:Сума|Вартість):\s*([^\n]+?)(?=\s+(?:Доставка|Локація|Покупець|Замовник|Оплата|$))/i]);
+            const buyer = extractField([/•\s*(?:Покупець|Замовник):\s*([^\n]+)/i, /(?:Покупець|Замовник):\s*([^\n]+?)(?=\s+(?:Доставка|Локація|Відділення|Оплата|$))/i]);
+            const delivery = extractField([/•\s*(?:Доставка|Локація):\s*([^\n]+)/i, /(?:Доставка|Локація):\s*([^\n]+?)(?=\s+(?:Відділення|Деталі|Оплата|$))/i]);
+            const branch = extractField([/•\s*(?:Відділення|Деталі):\s*([^\n]+)/i, /(?:Відділення|Деталі):\s*([^\n]+?)(?=\s+(?:Оплата|Коментар|$))/i]);
+            const payment = extractField([/•\s*Оплата:\s*([^\n]+)/i, /Оплата:\s*([^\n]+?)(?=\s+(?:Коментар|$))/i]);
+            const comment = extractField([/•\s*Коментар:\s*([^\n]+)/i, /Коментар:\s*([^\n]+)$/i]);
+
+            if (!title && !price) return null;
+
+            return `
+            <div class="chat-order-card ${isService ? 'service-order-card' : ''}">
+                <div class="coc-header">
+                    <span class="coc-badge">${isService ? '🛠 ЗАМОВЛЕННЯ ПОСЛУГИ' : '📦 ЗАМОВЛЕННЯ ТОВАРУ'}</span>
+                    ${orderCode ? `<span class="coc-code">${escapeHtml(orderCode)}</span>` : ''}
+                </div>
+                ${title ? `<div class="coc-title">${escapeHtml(title)}</div>` : ''}
+                ${price ? `<div class="coc-price">${escapeHtml(price)}</div>` : ''}
+                <hr class="coc-divider">
+                <div class="coc-grid">
+                    ${buyer ? `<div class="coc-row"><span class="coc-label">👤 ${isService ? 'Замовник' : 'Покупець'}:</span><span class="coc-val">${escapeHtml(buyer)}</span></div>` : ''}
+                    ${delivery ? `<div class="coc-row"><span class="coc-label">📍 ${isService ? 'Локація' : 'Доставка'}:</span><span class="coc-val">${escapeHtml(delivery)}</span></div>` : ''}
+                    ${branch ? `<div class="coc-row"><span class="coc-label">🏢 ${isService ? 'Деталі' : 'Відділення'}:</span><span class="coc-val">${escapeHtml(branch)}</span></div>` : ''}
+                    ${payment ? `<div class="coc-row"><span class="coc-label">💳 Оплата:</span><span class="coc-val">${escapeHtml(payment)}</span></div>` : ''}
+                    ${comment ? `<div class="coc-row"><span class="coc-label">💬 Коментар:</span><span class="coc-val">${escapeHtml(comment)}</span></div>` : ''}
+                </div>
+                <a href="/profile.html#orders" class="coc-btn">
+                    <span>Деталі замовлення в кабінеті</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+            </div>
+            `;
+        }
+
         // ДОДАВАННЯ ПОВІДОМЛЕННЯ В СТРІЧКУ
         function appendMessage(text, type, timeString, isRead = false, autoUpdateCount = true, msgId = null) {
             const chatArea = document.getElementById('chatArea');
             const emptyEl = chatArea.querySelector('.chat-empty-state');
             if (emptyEl) chatArea.innerHTML = '';
 
-            let contentHtml = escapeHtml(text);
-            const isSafeImage = /^data:image\/(png|jpeg|jpg|webp|gif|bmp);base64,[A-Za-z0-9+/=]+$/.test(text);
-            if (isSafeImage) {
-                contentHtml = `<img src="${text}" class="msg-photo-thumb" onclick="openPhotoModal(this.src)">`;
+            let contentHtml = '';
+            let isOrderCard = false;
+            const orderCardHtml = renderOrderCardInChat(text);
+            if (orderCardHtml) {
+                contentHtml = orderCardHtml;
+                isOrderCard = true;
+            } else {
+                const isSafeImage = /^data:image\/(png|jpeg|jpg|webp|gif|bmp);base64,[A-Za-z0-9+/=]+$/.test(text);
+                if (isSafeImage) {
+                    contentHtml = `<img src="${text}" class="msg-photo-thumb" onclick="openPhotoModal(this.src)">`;
+                } else {
+                    contentHtml = escapeHtml(text);
+                }
             }
 
             const time = new Date(timeString || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -2762,7 +2977,7 @@
             const statusHtml = (type === 'sent') ? checkIcon : '';
 
             const bubbleHtml = `
-                <div class="msg-bubble msg-${type}" ${msgId ? `data-msg-id="${msgId}"` : ''}>
+                <div class="msg-bubble msg-${type} ${isOrderCard ? 'has-order-card' : ''}" ${msgId ? `data-msg-id="${msgId}"` : ''}>
                     <div>${contentHtml}</div>
                     <div class="msg-time-row">
                         <span>${time}</span>

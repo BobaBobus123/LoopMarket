@@ -198,6 +198,7 @@
         if (currentPath.includes('messages')) {
             const oldBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar') || document.getElementById('mobileBottomAppBar');
             if (oldBar) oldBar.remove();
+            return; // На сторінці повідомлень ніколи не створюємо нижню панель
         } else if (!document.getElementById('mobileBottomBar') && !document.getElementById('mobileBottomAppBar')) {
             const bottomBar = document.createElement('nav');
             bottomBar.id = 'mobileBottomBar';

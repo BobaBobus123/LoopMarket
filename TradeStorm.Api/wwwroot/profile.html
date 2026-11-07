@@ -2146,7 +2146,7 @@
                     <div style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 20px; margin-bottom: 16px; transition: 0.2s;">
                         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-weight: 800; font-size: 1.05rem; color: var(--text-main);">Замовлення #${o.id}</span>
+                                <span style="font-weight: 800; font-size: 1.05rem; color: var(--text-main);">Замовлення ${o.orderCode || ('#' + o.id)}</span>
                                 <span style="font-size: 0.8rem; color: var(--text-muted);">${createdDate}</span>
                                 <span style="background: ${o.isService ? 'rgba(99, 102, 241, 0.12)' : 'rgba(16, 185, 129, 0.1)'}; color: ${o.isService ? '#6366f1' : 'var(--primary-light)'}; padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 0.72rem; text-transform: uppercase;">
                                     ${o.isService ? '🛠 Послуга' : '📦 Товар'}
@@ -2199,18 +2199,18 @@
                         <div style="display: flex; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-color); flex-wrap: wrap; justify-content: flex-end;">
                             ${subTab === 'sales' ? `
                                 ${(o.status === 'Pending' || o.status === 'PendingConfirmation') ? `
-                                    <button type="button" onclick="openGeneralStatusConfirm(${o.id}, 'Confirmed')" style="padding: 8px 16px; background: var(--primary-light); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
+                                    <button type="button" onclick="openGeneralStatusConfirm(${o.id}, 'Confirmed', '${o.orderCode || ""}')" style="padding: 8px 16px; background: var(--primary-light); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
                                         ✓ Підтвердити
                                     </button>
-                                    <button type="button" onclick="openGeneralStatusConfirm(${o.id}, 'Cancelled')" style="padding: 8px 16px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
+                                    <button type="button" onclick="openGeneralStatusConfirm(${o.id}, 'Cancelled', '${o.orderCode || ""}')" style="padding: 8px 16px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
                                         ✕ Відхилити
                                     </button>
                                 ` : ''}
                                 ${o.status === 'Confirmed' ? `
-                                    <button type="button" onclick="openShipOrderModal(${o.id}, ${o.isService}, ${o.totalPrice})" style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
+                                    <button type="button" onclick="openShipOrderModal(${o.id}, ${o.isService}, ${o.totalPrice}, '${o.orderCode || ""}')" style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
                                         ${o.isService ? `✅ Позначити як виконано (+${o.totalPrice} ₴)` : '🚚 Вказати ТТН / Відправлено'}
                                     </button>
-                                    <button type="button" onclick="openGeneralStatusConfirm(${o.id}, 'Cancelled')" style="padding: 8px 16px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
+                                    <button type="button" onclick="openGeneralStatusConfirm(${o.id}, 'Cancelled', '${o.orderCode || ""}')" style="padding: 8px 16px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
                                         ✕ Скасувати
                                     </button>
                                 ` : ''}
@@ -2219,7 +2219,7 @@
                                 </a>
                             ` : `
                                 ${(o.status === 'Pending' || o.status === 'PendingConfirmation') ? `
-                                    <button type="button" onclick="openGeneralStatusConfirm(${o.id}, 'Cancelled')" style="padding: 8px 16px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
+                                    <button type="button" onclick="openGeneralStatusConfirm(${o.id}, 'Cancelled', '${o.orderCode || ""}')" style="padding: 8px 16px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
                                         ✕ Скасувати замовлення
                                     </button>
                                 ` : ''}
@@ -2273,7 +2273,7 @@
             }
 
             currentShipOrderId = orderId;
-            document.getElementById('shipModalSubtitle').innerText = `Замовлення #${orderId}`;
+            document.getElementById('shipModalSubtitle').innerText = `Замовлення ${currentShipOrderCode}`;
             const input = document.getElementById('shipTtnInput');
             input.value = '';
             selectCarrier('novaposhta');
@@ -2401,7 +2401,7 @@
                     closeShippingModal();
                     loadUserOrders(currentOrderSubTab);
                     if (typeof loadMyServicesStats === 'function') loadMyServicesStats();
-                    showToast('📦 Відправлено!', `Замовлення #${currentShipOrderId} відправлено (${carrierTitle}). Покупцю надіслано ТТН (${digits}) в чат!`, '🚀');
+                    showToast('📦 Відправлено!', `Замовлення ${currentShipOrderCode || ('#' + currentShipOrderId)} відправлено (${carrierTitle}). Покупцю надіслано ТТН (${digits}) в чат!`, '🚀');
                 } else {
                     const data = await res.json();
                     const valBox = document.getElementById('shipValidationBox');
@@ -2544,7 +2544,8 @@
         };
 
         // 3. УНІВЕРСАЛЬНЕ ПІДТВЕРДЖЕННЯ (Confirmed / Cancelled)
-        window.openGeneralStatusConfirm = function(orderId, newStatus) {
+        window.openGeneralStatusConfirm = function(orderId, newStatus, orderCode = '') {
+            const dispCode = orderCode || ('#' + orderId);
             currentGeneralAction = { orderId, newStatus };
             const iconEl = document.getElementById('generalConfirmIcon');
             const titleEl = document.getElementById('generalConfirmTitle');
@@ -2555,21 +2556,21 @@
                 iconEl.innerText = '✓';
                 iconEl.style.color = '#10b981';
                 titleEl.innerText = 'Підтвердити замовлення?';
-                msgEl.innerText = `Ви підтверджуєте замовлення #${orderId}. Покупець отримає сповіщення.`;
+                msgEl.innerText = `Ви підтверджуєте замовлення ${dispCode}. Покупець отримає сповіщення.`;
                 btnEl.innerText = '✓ Підтвердити';
                 btnEl.style.background = '#10b981';
             } else if (newStatus === 'Cancelled') {
                 iconEl.innerText = '✕';
                 iconEl.style.color = '#ef4444';
                 titleEl.innerText = 'Скасувати замовлення?';
-                msgEl.innerText = `Ви впевнені, що бажаєте скасувати замовлення #${orderId}? Цю дію не можна скасувати.`;
+                msgEl.innerText = `Ви впевнені, що бажаєте скасувати замовлення ${dispCode}? Цю дію не можна скасувати.`;
                 btnEl.innerText = '✕ Скасувати замовлення';
                 btnEl.style.background = '#ef4444';
             } else {
                 iconEl.innerText = '⚡';
                 iconEl.style.color = '#2563eb';
                 titleEl.innerText = 'Зміна статусу';
-                msgEl.innerText = `Змінити статус замовлення #${orderId} на '${newStatus}'?`;
+                msgEl.innerText = `Змінити статус замовлення ${dispCode} на '${newStatus}'?`;
                 btnEl.innerText = 'Підтвердити';
                 btnEl.style.background = '#2563eb';
             }
@@ -2577,7 +2578,7 @@
             btnEl.onclick = async () => {
                 closeGeneralConfirmModal();
                 const successTitle = (newStatus === 'Confirmed') ? '✓ Підтверджено!' : '✕ Скасовано';
-                const successMsg = (newStatus === 'Confirmed') ? `Замовлення #${orderId} підтверджено.` : `Замовлення #${orderId} скасовано.`;
+                const successMsg = (newStatus === 'Confirmed') ? `Замовлення ${dispCode} підтверджено.` : `Замовлення ${dispCode} скасовано.`;
                 await executeOrderStatusUpdate(orderId, newStatus, null, successTitle, successMsg);
             };
 
@@ -2590,9 +2591,10 @@
         };
 
         // 4. РЕДАГУВАННЯ ЗАРОБІТКУ / СУМИ
-        window.openEditPriceModal = function(orderId, currentPrice) {
+        window.openEditPriceModal = function(orderId, currentPrice, orderCode = '') {
+            const dispCode = orderCode || ('#' + orderId);
             currentEditPriceOrderId = orderId;
-            document.getElementById('editPriceSubtitle').innerText = `Вкажіть точний заробіток / суму для замовлення #${orderId}:`;
+            document.getElementById('editPriceSubtitle').innerText = `Вкажіть точний заробіток / суму для замовлення ${dispCode}:`;
             const input = document.getElementById('editPriceInput');
             input.value = currentPrice || 0;
             document.getElementById('editPriceModal').classList.add('active');
