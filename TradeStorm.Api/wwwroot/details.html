@@ -54,29 +54,37 @@
         body {
             background-color: var(--bg-color);
             background-image: 
-                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37, 99, 235, 0.07), transparent 60%),
-                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(16, 185, 129, 0.04), transparent 50%),
-                url('/images/bg_tech_constellation.svg');
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-image: url('/images/bg_tech_constellation.svg');
-            background-repeat: repeat;
-            background-size: 800px auto;
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37, 99, 235, 0.08), transparent 70%),
+                radial-gradient(ellipse 60% 50% at 100% 100%, rgba(16, 185, 129, 0.06), transparent 60%),
+                radial-gradient(ellipse 50% 40% at 0% 50%, rgba(99, 102, 241, 0.04), transparent 60%),
+                url('/images/bg_tech_constellation_light.svg');
+            background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+            background-size: 100% 800px, 100% 800px, 100% 800px, 800px auto;
             background-attachment: fixed;
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        [data-theme="dark"] body {
+            background-color: #0b0f19;
+            background-image: 
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37, 99, 235, 0.14), transparent 70%),
+                radial-gradient(ellipse 60% 50% at 100% 100%, rgba(16, 185, 129, 0.08), transparent 60%),
+                radial-gradient(ellipse 50% 40% at 0% 50%, rgba(99, 102, 241, 0.06), transparent 60%),
+                url('/images/bg_tech_constellation.svg');
+            background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+            background-size: 100% 800px, 100% 800px, 100% 800px, 800px auto;
+            background-attachment: fixed;
         }
 
         header {
-            background: rgba(11, 15, 25, 0.94) !important;
+            background: rgba(255, 255, 255, 0.90) !important;
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color) !important;
             padding: 0.8rem 4%;
             display: grid;
             grid-template-columns: 1fr auto 1fr;
@@ -84,6 +92,11 @@
             position: sticky;
             top: 0;
             z-index: 100;
+        }
+
+        [data-theme="dark"] header {
+            background: rgba(11, 15, 25, 0.94) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
         }
 
         .header-left {
@@ -2138,13 +2151,14 @@
                 }
                 return;
             }
-            currentListingId = parseInt(idParam);
+            const lookupId = idParam.trim();
 
+            const token = localStorage.getItem('loopToken') || localStorage.getItem('token');
             const activeUser = getJwtUserData(token);
             const currentUserId = activeUser ? activeUser.id : null;
 
             try {
-                const response = await fetch(`/api/listings/${currentListingId}`);
+                const response = await fetch(`/api/listings/${encodeURIComponent(lookupId)}`);
                 if (!response.ok) {
                     const container = document.getElementById('productContent');
                     if (container) {
@@ -2159,6 +2173,7 @@
                     return;
                 }
                 const item = await response.json();
+                currentListingId = item.id;
                 window.currentItem = item;
                 window.currentListingData = item;
 
@@ -2445,19 +2460,24 @@
 
                             let sButtons = '';
                             if (isOwner) {
-                                sButtons = `<a href="/edit.html?id=${item.id}" class="btn-sticky-chat">✏️ Редагувати</a>`;
+                                sButtons = `
+                                    <a href="/edit.html?id=${item.code || item.id}" class="btn-sticky-chat">✏️ Редагувати</a>
+                                    <button type="button" onclick="deleteListing('${item.code || item.id}')" class="btn-sticky-chat" style="color: #ef4444 !important; border-color: rgba(239,68,68,0.3);">🗑️ Видалити</button>
+                                `;
                             } else if (item.status === 'Sold') {
                                 sButtons = `<span style="font-size:0.85rem; font-weight:800; color:#ef4444; padding: 6px 12px; background: rgba(239,68,68,0.1); border-radius: 8px;">Продано</span>`;
                             } else {
                                 sButtons = `
-                                    <a href="/messages.html?seller=${item.sellerId}&item=${item.id}" class="btn-sticky-chat">💬 Чат</a>
+                                    <a href="/messages.html?seller=${item.sellerId}&item=${item.code || item.id}" class="btn-sticky-chat">💬 Чат</a>
                                     <button type="button" onclick="${isServiceListing ? 'openServiceOrderModal()' : 'openOrderModal()'}" class="btn-sticky-buy" style="${isServiceListing ? 'background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);' : ''}">
                                         ${isServiceListing ? '🛠 Замовити' : '⚡ Купити'}
                                     </button>
                                 `;
                             }
                             stickyButtons.innerHTML = sButtons;
-                            stickyBar.style.display = 'flex';
+                            if (window.innerWidth <= 768) {
+                                stickyBar.style.display = 'flex';
+                            }
                         }
                     } catch (stickyErr) {
                         console.warn('Non-fatal sticky bar error:', stickyErr);
@@ -2517,7 +2537,7 @@
                                 <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 6px; line-height: 1.4;">${r.comment || 'Без коментаря'}</p>
 
                                 ${r.listing ? `
-                                    <a href="/details.html?id=${r.listing.id}" style="display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); text-decoration: none; margin-top: 6px;">
+                                    <a href="/details.html?id=${r.listing.code || r.listing.id}" style="display: flex; align-items: center; gap: 8px; background: var(--bg-color); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); text-decoration: none; margin-top: 6px;">
                                         <img src="${r.listing.imageUrl || 'https://placehold.co/40x40'}" style="width: 24px; height: 24px; border-radius: 4px; object-fit: cover;">
                                         <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ICONS.package} ${r.listing.title}</span>
                                     </a>
@@ -3722,5 +3742,6 @@
     <script src="/js/push-notifications.js"></script>
     <script src="/js/responsive-nav.js" defer></script>
     <script src="/js/loop-dialogs.js"></script>
+    <script src="/js/cookie-consent.js"></script>
 </body>
 </html>

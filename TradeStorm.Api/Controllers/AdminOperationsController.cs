@@ -14,6 +14,7 @@ namespace TradeStorm.Api.Controllers;
 
 [ApiController]
 [Route("api/admin")]
+[Authorize(Roles = UserRoles.Admin)]
 public class AdminOperationsController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -33,7 +34,8 @@ public class AdminOperationsController : ControllerBase
     private int GetAdminId()
     {
         var idStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        return int.TryParse(idStr, out int id) ? id : 1;
+        if (int.TryParse(idStr, out int id)) return id;
+        throw new System.UnauthorizedAccessException("Адміністратор не авторизований");
     }
 
     private string GetAdminEmail()

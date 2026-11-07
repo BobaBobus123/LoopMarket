@@ -1,10 +1,19 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using TradeStorm.Api.Services;
 
 namespace TradeStorm.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
+[EnableRateLimiting("CreateListingLimit")]
 public class ImagesController : ControllerBase
 {
     private readonly IWebHostEnvironment _environment;
@@ -15,22 +24,16 @@ public class ImagesController : ControllerBase
     }
 
     [HttpPost]
-    [AllowAnonymous]
-    [RequestSizeLimit(35 * 1024 * 1024)]
+    [RequestSizeLimit(30 * 1024 * 1024)]
     public async Task<IActionResult> UploadImage(IFormFile file)
     {
-        if (file == null || file.Length == 0)
-            return BadRequest(new { error = "Файл не вибрано" });
+        var (isValid, errorMessage) = FileUploadValidator.ValidateImage(file);
+        if (!isValid)
+        {
+            return BadRequest(new { error = errorMessage });
+        }
 
-        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".jfif", ".bmp", ".gif", ".avif", ".heic" };
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-
-        if (!allowedExtensions.Contains(extension))
-            return BadRequest(new { error = "Недопустимий формат файлу. Використовуйте JPG, PNG, WEBP, GIF, JFIF або BMP." });
-
-        if (file.Length > 25 * 1024 * 1024)
-            return BadRequest(new { error = "Розмір файлу не має перевищувати 25 МБ" });
-
         var webRoot = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
         var uploadsFolder = Path.Combine(webRoot, "uploads");
         if (!Directory.Exists(uploadsFolder))

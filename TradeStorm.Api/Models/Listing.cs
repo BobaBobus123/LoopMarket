@@ -6,6 +6,9 @@ public class Listing
 {
     public int Id { get; set; }
 
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public string Code => TradeStorm.Api.Services.ListingIdEncoder.Encode(Id);
+
     [Required]
     [MaxLength(100)]
     public string Title { get; set; } = string.Empty;

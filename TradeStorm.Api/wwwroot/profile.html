@@ -48,12 +48,29 @@
         body {
             background-color: var(--bg-color);
             background-image: 
-                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37, 99, 235, 0.07), transparent 60%),
-                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(16, 185, 129, 0.04), transparent 50%),
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37, 99, 235, 0.08), transparent 70%),
+                radial-gradient(ellipse 60% 50% at 100% 100%, rgba(16, 185, 129, 0.06), transparent 60%),
+                radial-gradient(ellipse 50% 40% at 0% 50%, rgba(99, 102, 241, 0.04), transparent 60%),
+                url('/images/bg_tech_constellation_light.svg');
+            background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+            background-size: 100% 800px, 100% 800px, 100% 800px, 800px auto;
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        [data-theme="dark"] body {
+            background-color: #0b0f19;
+            background-image: 
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37, 99, 235, 0.14), transparent 70%),
+                radial-gradient(ellipse 60% 50% at 100% 100%, rgba(16, 185, 129, 0.08), transparent 60%),
+                radial-gradient(ellipse 50% 40% at 0% 50%, rgba(99, 102, 241, 0.06), transparent 60%),
                 url('/images/bg_tech_constellation.svg');
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
+            background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+            background-size: 100% 800px, 100% 800px, 100% 800px, 800px auto;
             background-attachment: fixed;
             background-image: url('/images/bg_tech_constellation.svg');
             background-repeat: repeat;
@@ -66,7 +83,13 @@
         }
 
         header {
+            background: rgba(255, 255, 255, 0.90) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+
+        [data-theme="dark"] header {
             background: rgba(11, 15, 25, 0.94) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.07);
@@ -1885,7 +1908,7 @@
                                 <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 8px;">${r.comment || 'Без коментаря'}</p>
 
                                 ${r.listing ? `
-                                    <a href="/details.html?id=${r.listing.id}" style="display: flex; align-items: center; gap: 10px; background: var(--surface); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color); text-decoration: none; margin-top: 8px;">
+                                    <a href="/details.html?id=${r.listing.code || r.listing.id}" style="display: flex; align-items: center; gap: 10px; background: var(--surface); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color); text-decoration: none; margin-top: 8px;">
                                         <img src="${r.listing.imageUrl || 'https://placehold.co/50x50'}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover;">
                                         <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ICONS.package} ${r.listing.title}</span>
                                     </a>
@@ -1984,13 +2007,13 @@
                     container.innerHTML = myListings.map(item => `
                         <div class="card">
                             <div class="card-img-wrapper">
-                                <img src="${(item.imageUrl ? item.imageUrl.split(';')[0] : '') || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
+                                <img src="${(item.imageUrl ? item.imageUrl.split(';')[0] : '') || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.code || item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
                             </div>
                             <div class="card-content">
                                 <div class="card-title">${item.title}</div>
                                 <div class="card-price">${item.price} ₴</div>
                                 <div class="card-actions">
-                                    <a href="/edit.html?id=${item.id}" class="btn-edit">${ICONS.edit} Змінити</a>
+                                    <a href="/edit.html?id=${item.code || item.id}" class="btn-edit">${ICONS.edit} Змінити</a>
                                     <button onclick="deleteListing(${item.id})" class="btn-delete">${ICONS.trash} Видалити</button>
                                 </div>
                             </div>
@@ -2009,7 +2032,7 @@
                     container.innerHTML = favoriteItems.map(item => `
                         <div class="card">
                             <div class="card-img-wrapper">
-                                <img src="${(item.imageUrl ? item.imageUrl.split(';')[0] : '') || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
+                                <img src="${(item.imageUrl ? item.imageUrl.split(';')[0] : '') || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.code || item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
                                 <button onclick="toggleFavorite(${item.id}, event)" class="btn-fav" title="Видалити з обраного">${ICONS.heartFilled}</button>
                             </div>
                             <div class="card-content">
@@ -2768,7 +2791,7 @@
                                     </div>
                                     <img src="${item.imageUrl || '/images/placeholder.svg'}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0;" onerror="this.src='/images/placeholder.svg'">
                                     <div style="min-width: 0;">
-                                        <a href="/details.html?id=${item.id}" style="font-weight: 700; font-size: 0.92rem; color: var(--text-main); text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <a href="/details.html?id=${item.code || item.id}" style="font-weight: 700; font-size: 0.92rem; color: var(--text-main); text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                             ${item.title}
                                         </a>
                                         <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
@@ -2863,7 +2886,7 @@
                                     <!-- Кнопки дій -->
                                     <div style="display: flex; gap: 8px; align-items: center;">
                                         <a href="/details.html?id=${s.id}" class="nav-pill" style="text-decoration: none; padding: 8px 12px; font-size: 0.82rem;">Переглянути</a>
-                                        <a href="/edit.html?id=${s.id}" class="nav-pill" style="text-decoration: none; padding: 8px 12px; font-size: 0.82rem; border-color: #2563eb; color: #2563eb;">Налаштувати</a>
+                                        <a href="/edit.html?id=${s.code || s.id}" class="nav-pill" style="text-decoration: none; padding: 8px 12px; font-size: 0.82rem; border-color: #2563eb; color: #2563eb;">Налаштувати</a>
                                         <button onclick="deleteListing(${s.id})" class="btn-delete" style="padding: 6px 10px; font-size: 0.82rem;" title="Видалити послугу">${ICONS.trash}</button>
                                     </div>
                                 </div>
@@ -2905,5 +2928,6 @@
     <script src="/js/push-notifications.js"></script>
     <script src="/js/responsive-nav.js" defer></script>
     <script src="/js/loop-dialogs.js"></script>
+    <script src="/js/cookie-consent.js"></script>
 </body>
 </html>

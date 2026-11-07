@@ -12,6 +12,7 @@ namespace TradeStorm.Api.Controllers;
 [Authorize]
 [Route("api/messages")]
 [ApiController]
+[Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("GlobalApiLimit")]
 public class MessagesController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -24,6 +25,7 @@ public class MessagesController : ControllerBase
     // Отримати історію повідомлень між поточним користувачем та співрозмовником
         // Відправка повідомлення через REST API
     [HttpPost("send")]
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("MessagesLimit")]
     public async Task<IActionResult> SendMessage([FromBody] SendMessageDto dto, [FromServices] IHubContext<ChatHub> hubContext)
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -31,6 +33,21 @@ public class MessagesController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(dto.Text))
             return BadRequest(new { error = "Повідомлення не може бути порожнім" });
+
+        if (dto.Text.Length > 2000)
+            return BadRequest(new { error = "Повідомлення занадто довге (максимум 2000 символів)" });
+
+        if (senderId == dto.ReceiverId)
+            return BadRequest(new { error = "Неможливо надіслати повідомлення самому собі" });
+
+        var sender = await _context.Users.FindAsync(senderId);
+        if (sender != null)
+        {
+            if (sender.IsBanned)
+                return StatusCode(403, new { error = "Ваш акаунт заблоковано адміністратором" });
+            if (sender.MutedUntil.HasValue && sender.MutedUntil > DateTime.UtcNow)
+                return StatusCode(403, new { error = $"Вам обмежено відправку повідомлень до {sender.MutedUntil:yyyy-MM-dd HH:mm}" });
+        }
 
         var receiver = await _context.Users.FindAsync(dto.ReceiverId);
         if (receiver == null)
@@ -65,7 +82,8 @@ public class MessagesController : ControllerBase
         });
     }
 
-    // Отримати історію повідомлень
+    // Отримати історію повідомлень
+
     [HttpGet("history/{partnerId}")]
     public async Task<IActionResult> GetMessageHistory(int partnerId)
     {

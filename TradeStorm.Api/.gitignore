@@ -482,3 +482,22 @@ $RECYCLE.BIN/
 *.swp
 appsettings.Development.json
 .env
+# ------------------------------------------------------------------
+# SECURITY: Databases, SQL dumps, and Environment Secrets
+# ------------------------------------------------------------------
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.sql
+loopmarket.db
+TradeStorm.Api/loopmarket.db
+loopmarket_postgres_dump.sql
+
+# Environment configs & secrets
+.env
+.env.*
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Local.json

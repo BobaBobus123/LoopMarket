@@ -22,6 +22,6 @@ public interface IListingService
     Task<Listing?> GetListingByIdAsync(int id);
     Task<Listing> CreateListingAsync(int sellerId, CreateListingDto dto);
     Task<(bool Success, string? Error, Listing? Listing)> UpdateListingAsync(int listingId, int userId, UpdateListingDto dto, bool isAdmin = false);
-    Task<(bool Success, string? Error)> UpdateListingStatusAsync(int listingId, int userId, string status);
-    Task<(bool Success, string? Error)> DeleteListingAsync(int listingId, int userId);
+    Task<(bool Success, string? Error)> UpdateListingStatusAsync(int listingId, int userId, string status, bool isAdmin = false);
+    Task<(bool Success, string? Error)> DeleteListingAsync(int listingId, int userId, bool isAdmin = false);
 }

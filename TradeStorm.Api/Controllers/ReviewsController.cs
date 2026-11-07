@@ -9,6 +9,7 @@ namespace TradeStorm.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("GlobalApiLimit")]
 public class ReviewsController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -113,6 +114,7 @@ public class ReviewsController : ControllerBase
 
     [HttpPost]
     [Authorize]
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("CreateListingLimit")]
     public async Task<IActionResult> CreateReview([FromBody] CreateReviewDto dto)
     {
         try
@@ -135,6 +137,11 @@ public class ReviewsController : ControllerBase
             if (dto.Rating < 1 || dto.Rating > 5)
             {
                 return BadRequest(new { error = "Оцінка має бути від 1 до 5 зірок" });
+            }
+
+            if (!string.IsNullOrEmpty(dto.Comment) && dto.Comment.Length > 1000)
+            {
+                return BadRequest(new { error = "Відгук не може перевищувати 1000 символів" });
             }
 
             if (dto.ListingId.HasValue)

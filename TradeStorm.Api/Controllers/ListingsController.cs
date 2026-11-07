@@ -17,6 +17,7 @@ namespace TradeStorm.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("GlobalApiLimit")]
 public class ListingsController : ControllerBase
 {
     private readonly IListingService _listingService;
@@ -86,9 +87,14 @@ public class ListingsController : ControllerBase
 
     [HttpGet("{id}")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetListingById(int id)
+    public async Task<IActionResult> GetListingById(string id)
     {
-        var l = await _listingService.GetListingByIdAsync(id);
+        if (!ListingIdEncoder.TryDecode(id, out int numericId))
+        {
+            return NotFound(new { error = "Оголошення не знайдено" });
+        }
+
+        var l = await _listingService.GetListingByIdAsync(numericId);
         if (l == null)
         {
             return NotFound(new { error = "Оголошення не знайдено" });
@@ -104,6 +110,8 @@ public class ListingsController : ControllerBase
         var result = new
         {
             id = l.Id,
+            code = ListingIdEncoder.Encode(l.Id),
+            publicId = ListingIdEncoder.Encode(l.Id),
             title = l.Title,
             description = l.Description,
             price = l.Price,
@@ -134,6 +142,7 @@ public class ListingsController : ControllerBase
 
     [HttpPost]
     [Authorize]
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("CreateListingLimit")]
     public async Task<IActionResult> CreateListing([FromBody] CreateListingDto dto)
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -153,8 +162,13 @@ public class ListingsController : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize]
-    public async Task<IActionResult> UpdateListing(int id, [FromBody] UpdateListingDto dto)
+    public async Task<IActionResult> UpdateListing(string id, [FromBody] UpdateListingDto dto)
     {
+        if (!ListingIdEncoder.TryDecode(id, out int numericId))
+        {
+            return NotFound(new { error = "Оголошення не знайдено" });
+        }
+
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdString, out int userId))
         {
@@ -167,7 +181,7 @@ public class ListingsController : ControllerBase
         }
 
         bool isAdmin = User.IsInRole("Admin");
-        var (success, error, listing) = await _listingService.UpdateListingAsync(id, userId, dto, isAdmin);
+        var (success, error, listing) = await _listingService.UpdateListingAsync(numericId, userId, dto, isAdmin);
         if (!success)
         {
             if (error == "Оголошення не знайдено")
@@ -181,15 +195,20 @@ public class ListingsController : ControllerBase
 
     [HttpPatch("{id}/status")]
     [Authorize]
-    public async Task<IActionResult> UpdateListingStatus(int id, [FromBody] UpdateStatusDto dto)
+    public async Task<IActionResult> UpdateListingStatus(string id, [FromBody] UpdateStatusDto dto)
     {
+        if (!ListingIdEncoder.TryDecode(id, out int numericId))
+        {
+            return NotFound(new { error = "Оголошення не знайдено" });
+        }
+
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdString, out int userId))
         {
             return Unauthorized();
         }
 
-        var (success, error) = await _listingService.UpdateListingStatusAsync(id, userId, dto.Status);
+        var (success, error) = await _listingService.UpdateListingStatusAsync(numericId, userId, dto.Status);
         if (!success)
         {
             if (error == "Оголошення не знайдено")
@@ -203,15 +222,21 @@ public class ListingsController : ControllerBase
 
     [HttpDelete("{id}")]
     [Authorize]
-    public async Task<IActionResult> DeleteListing(int id)
+    public async Task<IActionResult> DeleteListing(string id)
     {
+        if (!ListingIdEncoder.TryDecode(id, out int numericId))
+        {
+            return NotFound(new { error = "Оголошення не знайдено" });
+        }
+
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdString, out int userId))
         {
             return Unauthorized();
         }
 
-        var (success, error) = await _listingService.DeleteListingAsync(id, userId);
+        bool isAdmin = User.IsInRole("Admin");
+        var (success, error) = await _listingService.DeleteListingAsync(numericId, userId, isAdmin);
         if (!success)
         {
             if (error == "Оголошення не знайдено")
@@ -269,7 +294,7 @@ public class ListingsController : ControllerBase
             return NotFound(new { error = "Оголошення не знайдено" });
         }
 
-        await _listingService.DeleteListingAsync(id, listing.SellerId);
+        await _listingService.DeleteListingAsync(id, 0, isAdmin: true);
         return Ok(new { message = "Оголошення успішно видалено адміністратором платформи" });
     }
 
@@ -326,7 +351,8 @@ public class ListingsController : ControllerBase
     }
 
     [HttpPost("upload-multiple")]
-    [AllowAnonymous]
+    [Authorize]
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("CreateListingLimit")]
     [RequestSizeLimit(100 * 1024 * 1024)]
     public async Task<IActionResult> UploadMultipleImages([FromForm] List<IFormFile> files)
     {
@@ -342,22 +368,22 @@ public class ListingsController : ControllerBase
             Directory.CreateDirectory(uploadsFolder);
         }
 
-        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".jfif", ".bmp", ".gif", ".avif", ".heic" };
         var uploadedUrls = new List<string>();
 
         foreach (var file in files)
         {
             if (file.Length > 0)
             {
-                var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-                if (!allowedExtensions.Contains(extension))
+                var (isValid, err) = FileUploadValidator.ValidateImage(file);
+                if (!isValid)
                 {
-                    continue; // Пропускаємо непідтримувані формати
+                    continue; // Пропускаємо небезпечні або непідтримувані файли
                 }
 
-                if (file.Length > 25 * 1024 * 1024)
+                var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+                if (!isValid)
                 {
-                    continue; // Пропускаємо файли більше 25 МБ
+                    continue; // Пропускаємо небезпечні або непідтримувані файли
                 }
 
                 var cleanName = System.Text.RegularExpressions.Regex.Replace(Path.GetFileNameWithoutExtension(file.FileName), @"[^a-zA-Z0-9_\-]", "");

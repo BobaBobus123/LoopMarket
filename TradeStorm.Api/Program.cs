@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,20 +15,27 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Конфігурація EF Core (Підтримка SQLite та PostgreSQL)
-var dbProvider = builder.Configuration["DatabaseProvider"] ?? "Sqlite";
+// Конфігурація EF Core (Підтримка SQLite та PostgreSQL / Neon Cloud)
+var pgEnvUrl = Environment.GetEnvironmentVariable("DATABASE_URL") ?? builder.Configuration["DATABASE_URL"];
+var dbProvider = builder.Configuration["DatabaseProvider"] ?? (string.IsNullOrEmpty(pgEnvUrl) ? "Sqlite" : "PostgreSQL");
 var isPostgres = dbProvider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase) ||
-                 dbProvider.Equals("Postgres", StringComparison.OrdinalIgnoreCase);
+                 dbProvider.Equals("Postgres", StringComparison.OrdinalIgnoreCase) ||
+                 !string.IsNullOrEmpty(pgEnvUrl);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     if (isPostgres)
     {
-        var pgConn = builder.Configuration.GetConnectionString("PostgreSqlConnection");
+        var pgConn = pgEnvUrl;
+        if (string.IsNullOrWhiteSpace(pgConn))
+        {
+            pgConn = builder.Configuration.GetConnectionString("PostgreSqlConnection");
+        }
         if (string.IsNullOrWhiteSpace(pgConn))
         {
             pgConn = builder.Configuration.GetConnectionString("DefaultConnection");
         }
+        pgConn = NormalizePostgresConnectionString(pgConn);
         options.UseNpgsql(pgConn);
     }
     else
@@ -91,19 +99,46 @@ builder.Services.AddScoped<IExternalAuthService, ExternalAuthService>();
 builder.Services.AddHealthChecks()
     .AddCheck<DbHealthCheck>("database");
 
-// Політика CORS для клієнта (Етап 6)
+// Політика CORS для клієнта: захищена від wildcard зі збереженням credentials (безпека від CSRF/data theft)
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new[]
+{
+    "http://localhost:5000",
+    "https://localhost:5001",
+    "http://localhost:5285",
+    "http://localhost:65083",
+    "https://localhost:65083",
+    "http://127.0.0.1:5000",
+    "http://127.0.0.1:65083"
+};
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClientApps", policy =>
     {
-        policy.AllowAnyHeader()
+        policy.WithOrigins(allowedOrigins)
+              .SetIsOriginAllowed(origin =>
+              {
+                  if (string.IsNullOrEmpty(origin)) return false;
+                  try
+                  {
+                      var uri = new Uri(origin);
+                      return uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) ||
+                             uri.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase) ||
+                             uri.Host.EndsWith(".onrender.com", StringComparison.OrdinalIgnoreCase) ||
+                             allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase);
+                  }
+                  catch
+                  {
+                      return false;
+                  }
+              })
+              .AllowAnyHeader()
               .AllowAnyMethod()
-              .SetIsOriginAllowed(origin => true) // Підтримка веб-клієнта на будь-якому порту/хості
               .AllowCredentials();
     });
 });
 
-// Захист від Brute-Force та DoS атак через Rate Limiting (Етап 6)
+// Захист від Brute-Force, спаму та DoS через ASP.NET Core Rate Limiting
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -115,25 +150,54 @@ builder.Services.AddRateLimiter(options =>
             type = "https://tools.ietf.org/html/rfc6585#section-4",
             title = "Забагато запитів (Too Many Requests)",
             status = 429,
-            detail = "Перевищено ліміт запитів. Спробуйте повторити запит пізніше."
+            detail = "Перевищено допустиму частоту запитів. Будь ласка, зачекайте 1 хвилину перед повторною спробою."
         }, cancellationToken: token);
     };
 
-    options.AddFixedWindowLimiter("AuthRateLimit", opt =>
-    {
-        opt.PermitLimit = 30;
-        opt.Window = TimeSpan.FromMinutes(1);
-        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 0;
-    });
+    // Обмеження для автентифікації та реєстрації (15 запитів на хвилину на IP)
+    options.AddPolicy("AuthRateLimit", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 15,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
 
-    options.AddSlidingWindowLimiter("GlobalApiLimit", opt =>
-    {
-        opt.PermitLimit = 200;
-        opt.Window = TimeSpan.FromMinutes(1);
-        opt.SegmentsPerWindow = 6;
-        opt.QueueLimit = 10;
-    });
+    // Обмеження для створення оголошень та завантаження фото (15 запитів на хвилину)
+    options.AddPolicy("CreateListingLimit", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 15,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+
+    // Обмеження для відправки повідомлень у чаті (60 повідомлень на хвилину)
+    options.AddPolicy("MessagesLimit", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 60,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 2
+            }));
+
+    // Глобальне обмеження для захисту від DDoS та скрапінгу (150 запитів на хвилину на IP)
+    options.AddPolicy("GlobalApiLimit", httpContext =>
+        RateLimitPartition.GetSlidingWindowLimiter(
+            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = 150,
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 6,
+                QueueLimit = 10
+            }));
 });
 
 // Валідація моделей DTO за стандартом RFC 7807 (Етап 7)
@@ -186,7 +250,7 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.FromMinutes(5)
     };
 
-    // Підтримка передачі JWT через WebSocket Query String для SignalR
+    // Підтримка передачі JWT через WebSocket Query String для SignalR та захищених HttpOnly Cookies
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
@@ -196,6 +260,14 @@ builder.Services.AddAuthentication(options =>
             if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chathub"))
             {
                 context.Token = accessToken;
+            }
+            else if (string.IsNullOrEmpty(context.Token))
+            {
+                // Захищений доступ через HttpOnly Cookie для веб-браузерів (захист від XSS-крадіжки токенів)
+                if (context.Request.Cookies.TryGetValue("loopToken", out var cookieToken) && !string.IsNullOrEmpty(cookieToken))
+                {
+                    context.Token = cookieToken;
+                }
             }
             return Task.CompletedTask;
         }
@@ -230,13 +302,14 @@ using (var scope = app.Services.CreateScope())
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
-// Заголовки безпеки (OWASP Security Headers) (Етап 6)
+// Заголовки безпеки (OWASP Security Headers)
 app.Use(async (context, next) =>
 {
     context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
     context.Response.Headers.Append("X-Frame-Options", "DENY");
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
     context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+    context.Response.Headers.Append("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
     await next();
 });
 
@@ -347,6 +420,14 @@ app.MapHub<ChatHub>("/chathub");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    try
+    {
+        db.Database.EnsureCreated();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database initialization notice: {ex.Message}");
+    }
     if (!db.Categories.Any())
     {
         db.Categories.AddRange(
@@ -379,7 +460,35 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+
+// Допоміжна функція нормалізації PostgreSQL рядка підключення (підтримка Neon, Render DATABASE_URL, PgBouncer)
+static string NormalizePostgresConnectionString(string? connStr)
+{
+    if (string.IsNullOrWhiteSpace(connStr)) return string.Empty;
+    if (connStr.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
+        connStr.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+    {
+        try
+        {
+            var uri = new Uri(connStr);
+            var userInfo = uri.UserInfo.Split(':');
+            var username = userInfo.Length > 0 ? Uri.UnescapeDataString(userInfo[0]) : "";
+            var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
+            var host = uri.Host;
+            var port = uri.Port > 0 ? uri.Port : 5432;
+            var database = uri.AbsolutePath.TrimStart('/');
+            return $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true;";
+        }
+        catch
+        {
+            return connStr;
+        }
+    }
+    return connStr;
+}
+
 app.Run();
+
 
 // Робимо клас Program публічним для інтеграційних тестів WebApplicationFactory (Етап 3)
 public partial class Program { }

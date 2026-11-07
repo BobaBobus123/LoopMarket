@@ -62,12 +62,29 @@
         body {
             background-color: var(--bg-color);
             background-image: 
-                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37, 99, 235, 0.07), transparent 60%),
-                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(16, 185, 129, 0.04), transparent 50%),
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37, 99, 235, 0.08), transparent 70%),
+                radial-gradient(ellipse 60% 50% at 100% 100%, rgba(16, 185, 129, 0.06), transparent 60%),
+                radial-gradient(ellipse 50% 40% at 0% 50%, rgba(99, 102, 241, 0.04), transparent 60%),
+                url('/images/bg_tech_constellation_light.svg');
+            background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+            background-size: 100% 800px, 100% 800px, 100% 800px, 800px auto;
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        [data-theme="dark"] body {
+            background-color: #0b0f19;
+            background-image: 
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37, 99, 235, 0.14), transparent 70%),
+                radial-gradient(ellipse 60% 50% at 100% 100%, rgba(16, 185, 129, 0.08), transparent 60%),
+                radial-gradient(ellipse 50% 40% at 0% 50%, rgba(99, 102, 241, 0.06), transparent 60%),
                 url('/images/bg_tech_constellation.svg');
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
+            background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+            background-size: 100% 800px, 100% 800px, 100% 800px, 800px auto;
             background-attachment: fixed;
             color: var(--text-main);
             min-height: 100vh;
@@ -77,7 +94,13 @@
 
         /* HEADER */
         header {
+            background: rgba(255, 255, 255, 0.90) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+
+        [data-theme="dark"] header {
             background: rgba(11, 15, 25, 0.94) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.07);
@@ -1133,6 +1156,14 @@
             initSellerPage();
         }
 
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            const p = document.createElement('p');
+            p.textContent = str;
+            return p.innerHTML;
+        }
+
         async function loadSellerReviews(sellerId) {
             try {
                 const res = await fetch(`/api/reviews/user/${sellerId}`);
@@ -1152,20 +1183,25 @@
                     return;
                 }
 
-                container.innerHTML = data.reviews.map(r => `
+                container.innerHTML = data.reviews.map(r => {
+                    const authorName = r.author ? `${r.author.firstName} ${r.author.lastName || ''}`.trim() : 'Користувач';
+                    const safeComment = r.comment ? escapeHtml(r.comment) : 'Без коментаря';
+                    const safeListingTitle = r.listing ? escapeHtml(r.listing.title) : '';
+                    return `
                     <div class="review-card">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center;">
-                            <b style="font-size: 0.95rem;">${r.author ? (r.author.firstName + ' ' + (r.author.lastName || '')) : 'Користувач'}</b>
+                            <b style="font-size: 0.95rem;">${escapeHtml(authorName)}</b>
                             <span style="display:inline-flex;align-items:center;gap:2px;">${renderStars(r.rating)}</span>
                         </div>
-                        <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 8px;">${r.comment || 'Без коментаря'}</p>
+                        <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 8px;">${safeComment}</p>
 
                         ${r.listing ? `
-                            <a href="/details.html?id=${r.listing.id}" style="display: flex; align-items: center; gap: 10px; background: var(--surface); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color); text-decoration: none; margin-top: 8px;">
+                            <a href="/details.html?id=${r.listing.code || r.listing.id}" style="display: flex; align-items: center; gap: 10px; background: var(--surface); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color); text-decoration: none; margin-top: 8px;">
                                 <img src="${(r.listing.imageUrl ? r.listing.imageUrl.split(';')[0] : '') || 'https://placehold.co/50x50'}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover;" onerror="this.onerror=null; this.src='https://placehold.co/50x50';">
-                                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ICONS.package} ${r.listing.title}</span>
+                                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ICONS.package} ${safeListingTitle}</span>
                             </a>
-                        ` : ''}
+                        ` : ''}`;
+                })
 
                         <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; display: block;">${new Date(r.createdAt || Date.now()).toLocaleDateString('uk-UA')}</span>
                     </div>
@@ -1230,7 +1266,7 @@
                 return `
                     <div class="card">
                         <div class="card-img-wrapper">
-                            <img src="${imgUrl}" class="card-img" onclick="window.location.href='/details.html?id=${item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
+                            <img src="${imgUrl}" class="card-img" onclick="window.location.href='/details.html?id=${item.code || item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
                             <button onclick="toggleFavorite(${item.id}, event)" class="btn-fav" title="Додати в обране">${favIcon}</button>
                             ${isService ? '<span style="position: absolute; top: 10px; left: 10px; background: #2563eb; color: white; font-size: 0.72rem; font-weight: 800; padding: 4px 8px; border-radius: 6px;">🛠 Послуга</span>' : ''}
                         </div>
@@ -1239,7 +1275,7 @@
                             <div class="card-price">${item.price} ₴</div>
                             <div class="card-footer">
                                 <span>${ICONS.pin} ${locationText}</span>
-                                <a href="/details.html?id=${item.id}" class="btn-view">${isService ? 'Замовити' : 'Огляд'}</a>
+                                <a href="/details.html?id=${item.code || item.id}" class="btn-view">${isService ? 'Замовити' : 'Огляд'}</a>
                             </div>
                         </div>
                     </div>`;

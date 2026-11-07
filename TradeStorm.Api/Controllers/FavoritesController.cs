@@ -56,8 +56,13 @@ public class FavoritesController : ControllerBase
     /// </summary>
     [HttpPost("toggle/{listingId}")]
     [HttpPost("{listingId}")]
-    public async Task<IActionResult> ToggleFavorite(int listingId)
+    public async Task<IActionResult> ToggleFavorite(string listingId)
     {
+        if (!ListingIdEncoder.TryDecode(listingId, out int numericId))
+        {
+            return NotFound(new { error = "Оголошення не знайдено" });
+        }
+
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdString, out int userId))
         {
@@ -66,7 +71,7 @@ public class FavoritesController : ControllerBase
 
         try
         {
-            var result = await _favoriteService.ToggleFavoriteAsync(userId, listingId);
+            var result = await _favoriteService.ToggleFavoriteAsync(userId, numericId);
             return Ok(new { isFavorited = result.IsFavorited, message = result.Message });
         }
         catch (KeyNotFoundException ex)

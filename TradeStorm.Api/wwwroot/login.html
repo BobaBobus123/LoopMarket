@@ -570,7 +570,7 @@
 
         let pollVerificationInterval = null;
 
-        function showVerificationScreen(userId, titleText, descText) {
+        function showVerificationScreen(userId, titleText, descText, ticket = "") {
             document.getElementById('authContainer').style.display = 'none';
             const screen = document.getElementById('successScreen');
             screen.style.display = 'block';
@@ -583,7 +583,7 @@
                 tgBtn.href = `https://t.me/LoopMarket_Verify_bot?start=verify_${userId}`;
             }
 
-            startVerificationPolling(userId);
+            startVerificationPolling(userId, ticket);
         }
 
         function cancelVerification() {
@@ -597,12 +597,13 @@
         }
 
         // АВТОМАТИЧНЕ ОПИТУВАННЯ СТАТУСУ ВЕРИФІКАЦІЇ В ТЕЛЕГРАМ (БЕЗ НАТИСКАННЯ КНОПОК)
-        function startVerificationPolling(userId) {
+        function startVerificationPolling(userId, ticket = "") {
             if (pollVerificationInterval) clearInterval(pollVerificationInterval);
 
             pollVerificationInterval = setInterval(async () => {
                 try {
-                    const res = await fetch(`/api/users/verify-status?userId=${userId}`);
+                    const ticketParam = ticket ? `&ticket=${encodeURIComponent(ticket)}` : '';
+                    const res = await fetch(`/api/users/verify-status?userId=${userId}${ticketParam}`);
                     if (!res.ok) return;
 
                     const data = await res.json();
@@ -669,7 +670,8 @@
                         showVerificationScreen(
                             data.userId,
                             "Підтвердіть номер у Telegram",
-                            "Ваш акаунт очікує верифікації номера телефону через Telegram-бота для безпеки угод."
+                            "Ваш акаунт очікує верифікації номера телефону через Telegram-бота для безпеки угод.",
+                            data.verificationTicket || ""
                         );
                     } else {
                         // Успішний вхід
@@ -721,7 +723,8 @@
                     showVerificationScreen(
                         data.id,
                         "Майже готово! Підтвердіть номер",
-                        `Вітаємо, ${firstName}! Щоб активувати акаунт та уникнути шахрайства, підтвердіть номер ${phoneNumber} через нашого бота.`
+                        `Вітаємо, ${firstName}! Щоб активувати акаунт та уникнути шахрайства, підтвердіть номер ${phoneNumber} через нашого бота.`,
+                        data.verificationTicket || ""
                     );
                 } else {
                     errorDiv.innerText = data.error || 'Помилка реєстрації. Перевірте дані.';
@@ -869,5 +872,6 @@
             if (modal) modal.style.display = 'none';
         }
     </script>
+    <script src="/js/cookie-consent.js"></script>
 </body>
 </html>

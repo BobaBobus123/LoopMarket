@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.RateLimiting;
 using TradeStorm.Api.Data;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -9,8 +11,50 @@ namespace TradeStorm.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[EnableRateLimiting("AuthRateLimit")]
 public class AuthController : ControllerBase
 {
+    private void SetAuthCookies(string? token, string? refreshToken)
+    {
+        if (string.IsNullOrEmpty(token)) return;
+        try
+        {
+            var isHttps = Request.IsHttps;
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = isHttps,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddMinutes(60),
+                Path = "/"
+            };
+            Response.Cookies.Append("loopToken", token, cookieOptions);
+
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                var refreshOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = isHttps,
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.UtcNow.AddDays(7),
+                    Path = "/"
+                };
+                Response.Cookies.Append("loopRefreshToken", refreshToken, refreshOptions);
+            }
+        }
+        catch { }
+    }
+
+    private void ClearAuthCookies()
+    {
+        try
+        {
+            Response.Cookies.Delete("loopToken", new CookieOptions { Path = "/" });
+            Response.Cookies.Delete("loopRefreshToken", new CookieOptions { Path = "/" });
+        }
+        catch { }
+    }
     private readonly IExternalAuthService _externalAuthService;
 
     public AuthController(IExternalAuthService externalAuthService)
@@ -61,6 +105,7 @@ public class AuthController : ControllerBase
             });
         }
 
+        SetAuthCookies(accessToken, refreshToken);
         return Ok(new
         {
             isPhoneVerified = true,
@@ -100,6 +145,7 @@ public class AuthController : ControllerBase
             });
         }
 
+        SetAuthCookies(accessToken, refreshToken);
         return Ok(new
         {
             isPhoneVerified = true,
@@ -140,6 +186,7 @@ public class AuthController : ControllerBase
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await db.SaveChangesAsync();
 
+        SetAuthCookies(newAccessToken, newRefreshToken);
         return Ok(new
         {
             token = newAccessToken,

@@ -92,7 +92,7 @@ public class ListingRepository : Repository<Listing>, IListingRepository
         int p = (page.HasValue && page.Value > 0) ? page.Value : 1;
         int ps = (pageSize.HasValue && pageSize.Value > 0) ? pageSize.Value : 50;
 
-        var items = await query
+        var rawItems = await query
             .Skip((p - 1) * ps)
             .Take(ps)
             .Select(l => new
@@ -122,6 +122,28 @@ public class ListingRepository : Repository<Listing>, IListingRepository
                 } : null
             })
             .ToListAsync();
+
+        var items = rawItems.Select(l => (object)new
+        {
+            id = l.id,
+            code = TradeStorm.Api.Services.ListingIdEncoder.Encode(l.id),
+            publicId = TradeStorm.Api.Services.ListingIdEncoder.Encode(l.id),
+            l.title,
+            l.description,
+            l.price,
+            l.imageUrl,
+            l.condition,
+            l.location,
+            l.isShippingAvailable,
+            l.isFeatured,
+            l.status,
+            l.createdAt,
+            l.categoryName,
+            l.categoryId,
+            l.sellerId,
+            l.viewsCount,
+            l.seller
+        }).ToList();
 
         return (totalCount, items);
     }

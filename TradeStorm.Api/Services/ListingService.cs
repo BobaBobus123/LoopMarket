@@ -97,7 +97,7 @@ public class ListingService : IListingService
         return (true, null, listing);
     }
 
-    public async Task<(bool Success, string? Error)> UpdateListingStatusAsync(int listingId, int userId, string status)
+    public async Task<(bool Success, string? Error)> UpdateListingStatusAsync(int listingId, int userId, string status, bool isAdmin = false)
     {
         var listing = await _listingRepository.GetByIdAsync(listingId);
         if (listing == null)
@@ -105,7 +105,7 @@ public class ListingService : IListingService
             return (false, "Оголошення не знайдено");
         }
 
-        if (listing.SellerId != userId)
+        if (listing.SellerId != userId && !isAdmin)
         {
             return (false, "Ви не маєте права змінювати статус чужого оголошення");
         }
@@ -121,7 +121,7 @@ public class ListingService : IListingService
         return (true, null);
     }
 
-    public async Task<(bool Success, string? Error)> DeleteListingAsync(int listingId, int userId)
+    public async Task<(bool Success, string? Error)> DeleteListingAsync(int listingId, int userId, bool isAdmin = false)
     {
         var listing = await _listingRepository.GetByIdAsync(listingId);
         if (listing == null)
@@ -129,7 +129,7 @@ public class ListingService : IListingService
             return (false, "Оголошення не знайдено");
         }
 
-        if (listing.SellerId != userId)
+        if (listing.SellerId != userId && !isAdmin)
         {
             return (false, "Ви не можете видалити чуже оголошення");
         }

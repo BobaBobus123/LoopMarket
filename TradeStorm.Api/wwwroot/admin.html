@@ -1960,7 +1960,7 @@
                             </div>
                         </td>
                         <td>
-                            <a href="/details.html?id=${l.id}" target="_blank" style="font-weight: 700; color: var(--text-main); text-decoration: underline;">
+                            <a href="/details.html?id=${l.code || l.id}" target="_blank" style="font-weight: 700; color: var(--text-main); text-decoration: underline;">
                                 ${escapeHtml(l.title)}
                             </a>
                         </td>
@@ -1976,7 +1976,7 @@
                             <button class="btn-action ${isFeatured ? 'warning' : 'neutral'}" onclick="toggleFeaturedListing(${l.id})" title="Закріпити в ТОП / зняти">
                                 ⭐
                             </button>
-                            <a href="/details.html?id=${l.id}" target="_blank" class="btn-action neutral" title="Переглянути">
+                            <a href="/details.html?id=${l.code || l.id}" target="_blank" class="btn-action neutral" title="Переглянути">
                                 👁️
                             </a>
                             <a href="/edit.html?id=${l.id}" target="_blank" class="btn-action primary" title="Редагувати оголошення">

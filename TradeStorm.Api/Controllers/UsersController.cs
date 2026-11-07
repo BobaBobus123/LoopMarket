@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using Microsoft.AspNetCore.RateLimiting;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -15,8 +17,41 @@ namespace TradeStorm.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[EnableRateLimiting("AuthRateLimit")]
 public class UsersController : ControllerBase
 {
+    private static readonly ConcurrentDictionary<int, (string Ticket, DateTime Expiry)> _verificationTickets = new();
+
+    private void SetAuthCookies(string token, string? refreshToken)
+    {
+        try
+        {
+            var isHttps = Request.IsHttps;
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = isHttps,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddMinutes(60),
+                Path = "/"
+            };
+            Response.Cookies.Append("loopToken", token, cookieOptions);
+
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                var refreshOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = isHttps,
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.UtcNow.AddDays(7),
+                    Path = "/"
+                };
+                Response.Cookies.Append("loopRefreshToken", refreshToken, refreshOptions);
+            }
+        }
+        catch { }
+    }
     private readonly AppDbContext _context;
     private readonly ITokenService _tokenService;
     private readonly TelegramBotService _telegramService;
@@ -63,6 +98,9 @@ public class UsersController : ControllerBase
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
+        var ticket = Guid.NewGuid().ToString("N");
+        _verificationTickets[user.Id] = (ticket, DateTime.UtcNow.AddMinutes(15));
+
         return Ok(new
         {
             id = user.Id,
@@ -71,7 +109,8 @@ public class UsersController : ControllerBase
             email = user.Email,
             phoneNumber = user.PhoneNumber,
             role = user.Role,
-            isPhoneVerified = false
+            isPhoneVerified = false,
+            verificationTicket = ticket
         });
     }
 
@@ -81,8 +120,17 @@ public class UsersController : ControllerBase
     /// </summary>
     [HttpGet("verify-status")]
     [AllowAnonymous]
-    public async Task<IActionResult> CheckVerifyStatus([FromQuery] int userId)
+    public async Task<IActionResult> CheckVerifyStatus([FromQuery] int userId, [FromQuery] string? ticket)
     {
+        // Захист від IDOR та несанкціонованого отримання токенів
+        if (string.IsNullOrWhiteSpace(ticket) ||
+            !_verificationTickets.TryGetValue(userId, out var entry) ||
+            entry.Expiry < DateTime.UtcNow ||
+            entry.Ticket != ticket)
+        {
+            return Unauthorized(new { error = "Недійсний або прострочений квиток верифікації" });
+        }
+
         var user = await _context.Users.FindAsync(userId);
         if (user == null) return NotFound(new { error = "Користувача не знайдено" });
 
@@ -91,12 +139,16 @@ public class UsersController : ControllerBase
             return Ok(new { isVerified = false });
         }
 
+        _verificationTickets.TryRemove(userId, out _);
+
         var accessToken = _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
         user.RefreshToken = refreshToken;
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await _context.SaveChangesAsync();
+
+        SetAuthCookies(accessToken, refreshToken);
 
         return Ok(new
         {
@@ -167,6 +219,8 @@ public class UsersController : ControllerBase
                 error = "Номер телефону не підтверджено в Telegram"
             });
         }
+
+        SetAuthCookies(accessToken, refreshToken);
 
         return Ok(new
         {
