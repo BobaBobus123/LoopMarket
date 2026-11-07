@@ -1335,21 +1335,80 @@
         /* RESPONSIVE */
         @media (max-width: 860px) {
             main {
-                padding: 6px;
-                height: calc(100vh - 64px);
-                max-height: calc(100vh - 64px);
+                padding: 0 !important;
+                margin: 0 !important;
+                height: calc(100dvh - 58px) !important;
+                max-height: calc(100dvh - 58px) !important;
             }
             .messenger-card {
-                grid-template-columns: 1fr;
-                border-radius: 14px;
+                display: flex !important;
+                flex-direction: column !important;
+                grid-template-columns: none !important;
+                border-radius: 0 !important;
+                border: none !important;
+                height: 100% !important;
+                max-height: 100% !important;
+                width: 100% !important;
             }
-            .btn-back-dialogs {
-                display: inline-flex;
+            /* STATE A: Default mobile view (Dialogs list full width) */
+            .messenger-sidebar {
+                display: flex !important;
+                flex-direction: column !important;
+                width: 100% !important;
+                height: 100% !important;
+                border-right: none !important;
+                flex: 1 1 auto !important;
             }
-            .messenger-sidebar.mobile-hide {
+            .messenger-chat-pane {
+                display: none !important;
+                width: 100% !important;
+                height: 100% !important;
+                flex: 1 1 auto !important;
+            }
+
+            /* STATE B: Active chat view (.chat-active on .messenger-card) */
+            .messenger-card.chat-active .messenger-sidebar {
                 display: none !important;
             }
-            .messenger-chat-pane.mobile-hide {
+            .messenger-card.chat-active .messenger-chat-pane {
+                display: flex !important;
+                flex-direction: column !important;
+                width: 100% !important;
+                height: 100% !important;
+                flex: 1 1 auto !important;
+            }
+
+            .btn-back-dialogs {
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+                background: var(--bg-subtle, rgba(255,255,255,0.06));
+                border: 1px solid var(--border-color);
+                color: var(--text-main);
+                cursor: pointer;
+                margin-right: 8px;
+                flex-shrink: 0;
+            }
+            .chat-pane-header {
+                padding: 10px 12px !important;
+            }
+            .chat-stream-area {
+                padding: 12px 10px !important;
+            }
+            .chat-input-bar {
+                padding: 8px 10px !important;
+            }
+            .btn-create-top, .btn-create-mobile {
+                display: none !important;
+            }
+            .mobile-menu-btn {
+                display: inline-flex !important;
+            }
+            /* Hide bottom app bar while in active chat so keyboard & messages have full screen */
+            .messenger-card.chat-active ~ .mobile-bottom-app-bar {
                 display: none !important;
             }
         }
@@ -1434,8 +1493,13 @@
                     Створити
                 </a>
 
-                <button class="btn-icon" onclick="showLogoutModal()" title="Вийти з акаунта" style="color: #ef4444;">
+                <button class="btn-icon" id="btnLogoutHeader" onclick="showLogoutModal()" title="Вийти з акаунта" style="color: #ef4444;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                </button>
+
+                <!-- КНОПКА "ТРИ ПОЛОСКИ" ДЛЯ МОБІЛЬНИХ (HAMBURGER MENU) -->
+                <button type="button" class="btn-icon mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileNavDrawer()" title="Меню платформи">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
                 </button>
             </div>
         </div>
@@ -1896,19 +1960,22 @@
         let unreadCountWhileScrolled = 0;
 
         function adaptMobilePaneOnSelect() {
-            if (window.innerWidth <= 860) {
-                const sidebar = document.getElementById('sidebarPane');
-                const chatPane = document.getElementById('chatPane');
-                if (sidebar) sidebar.classList.add('mobile-hide');
-                if (chatPane) chatPane.classList.remove('mobile-hide');
-            }
+            const card = document.querySelector('.messenger-card');
+            if (card) card.classList.add('chat-active');
+            const bottomBar = document.querySelector('.mobile-bottom-app-bar');
+            if (bottomBar) bottomBar.style.display = 'none';
         }
 
         function showDialogsListMobile() {
-            const sidebar = document.getElementById('sidebarPane');
-            const chatPane = document.getElementById('chatPane');
-            if (sidebar) sidebar.classList.remove('mobile-hide');
-            if (chatPane) chatPane.classList.add('mobile-hide');
+            activeReceiverId = null;
+            const card = document.querySelector('.messenger-card');
+            if (card) card.classList.remove('chat-active');
+            const bottomBar = document.querySelector('.mobile-bottom-app-bar');
+            if (bottomBar) bottomBar.style.display = 'flex';
+            document.querySelectorAll('.chat-item.active').forEach(el => el.classList.remove('active'));
+            if (window.history && window.history.replaceState) {
+                window.history.replaceState({}, '', '/messages.html');
+            }
         }
 
         function handleChatScroll() {
@@ -2053,7 +2120,8 @@
                 const isCurrent = p.id === activeReceiverId;
                 const timeStr = p.lastMessageTime ? formatTime(p.lastMessageTime) : '';
                 const fullName = `${p.firstName || 'Користувач'} ${p.lastName || ''}`.trim();
-                const showBadge = p.isWaiting && !isCurrent;
+                const showBadge = (p.isWaiting || (p.unreadCount && p.unreadCount > 0)) && !isCurrent;
+                const badgeText = (p.unreadCount && p.unreadCount > 0) ? (p.unreadCount > 99 ? '99+' : p.unreadCount) : '•';
                 return `
                     <div class="chat-item ${isCurrent ? 'active' : ''} ${showBadge ? 'unread' : ''}" data-user-id="${p.id}" onclick="selectDialog(${p.id})">
                         <div class="chat-avatar-box">
@@ -2067,7 +2135,7 @@
                             </div>
                             <div class="chat-item-snippet-row">
                                 <span class="chat-item-last-msg">${p.isDraft ? '<span class="new-draft-pill">Новий діалог</span>' : (p.lastMessage || 'Натисніть для листування')}</span>
-                                ${showBadge ? '<span class="unread-msg-badge">•</span>' : ''}
+                                ${showBadge ? `<span class="unread-msg-badge">${badgeText}</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -2251,11 +2319,18 @@
             const msgInput = document.getElementById('messageInput');
             setTimeout(() => { msgInput.focus(); }, 100);
 
-            // 7. Позначаємо як прочитані на бекенді
-            fetch(`/api/messages/mark-read/${partnerId}`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            }).catch(() => {});
+            // 7. Позначаємо як прочитані на бекенді та оновлюємо бейджі
+            const readToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
+            if (readToken) {
+                fetch(`/api/messages/mark-read/${partnerId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${readToken}` }
+                }).then(() => {
+                    if (typeof refreshUnreadBadges === 'function') {
+                        refreshUnreadBadges();
+                    }
+                }).catch(() => {});
+            }
 
             // 8. Завантажуємо історію повідомлень
             await loadChatHistory(partnerId, partnerFullName);
@@ -2518,8 +2593,17 @@
 
             const time = new Date(timeString || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const checkIcon = isRead ? 
-                '<span title="Прочитано" style="color: #60a5fa;">✓✓</span>' : 
-                '<span title="Надіслано" style="opacity: 0.8;">✓</span>';
+                `<span class="msg-status-icon read" title="Прочитано" aria-label="Прочитано">
+                    <svg width="17" height="13" viewBox="0 0 18 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1.5 7.5L5 11L12.5 3.5"/>
+                        <path d="M6.5 7.5L10 11L17.5 3.5"/>
+                    </svg>
+                </span>` : 
+                `<span class="msg-status-icon sent" title="Надіслано" aria-label="Надіслано">
+                    <svg width="15" height="13" viewBox="0 0 15 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 7.5L5.5 11L13 3.5"/>
+                    </svg>
+                </span>`;
 
             const statusHtml = (type === 'sent') ? checkIcon : '';
 
@@ -2805,7 +2889,8 @@
     <!-- Realtime In-App Push Notifications -->
     <script src="/js/push-notifications.js"></script>
     <script src="/js/responsive-nav.js" defer></script>
-    <script src="/js/loop-dialogs.js">
+    <script src="/js/loop-dialogs.js"></script>
+    <script>
         // ==================== ПОЗНАЧЕННЯ ВСІХ ПОВІДОМЛЕНЬ ПРОЧИТАНИМИ ====================
         window.markAllMessagesAsRead = async function() {
             const token = localStorage.getItem('loopToken');
@@ -2830,11 +2915,14 @@
                         if (el) el.style.display = 'none';
                     });
 
-                    // Знімаємо позначки непрочитаних у списку діалогів
-                    if (window.dialogsList && Array.isArray(window.dialogsList)) {
-                        window.dialogsList.forEach(p => { p.unreadCount = 0; });
-                        if (typeof renderDialogsList === 'function') {
-                            renderDialogsList(window.dialogsList);
+                    // Знімаємо позначки непрочитаних у кеші діалогів та оновлюємо список
+                    if (typeof allDialogsCache !== 'undefined' && Array.isArray(allDialogsCache)) {
+                        allDialogsCache.forEach(p => {
+                            p.isWaiting = false;
+                            p.unreadCount = 0;
+                        });
+                        if (typeof renderDialogs === 'function') {
+                            renderDialogs(allDialogsCache);
                         }
                     }
 
@@ -2879,6 +2967,24 @@
                     }
                 }
             });
+        }
+
+    
+        async function refreshUnreadBadges() {
+            const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
+            if (!curToken) return;
+            try {
+                const res = await fetch('/api/messages/unread-count', {
+                    headers: { 'Authorization': `Bearer ${curToken}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const count = data.count || 0;
+                    if (typeof updateDialogsBadgeCount === 'function') {
+                        updateDialogsBadgeCount(count);
+                    }
+                }
+            } catch(e) {}
         }
 
     </script>

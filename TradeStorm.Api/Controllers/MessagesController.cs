@@ -143,7 +143,11 @@ public class MessagesController : ControllerBase
                     .OrderByDescending(m => m.SentAt)
                     .FirstOrDefaultAsync();
 
-                bool isWaiting = lastMessage != null && lastMessage.SenderId == partnerId;
+                var unreadCount = await _context.Messages
+                    .Where(m => m.SenderId == partnerId && m.ReceiverId == currentUserId && !m.IsRead)
+                    .CountAsync();
+
+                bool isWaiting = unreadCount > 0;
 
                 dialogsList.Add(new DialogDto
                 {
@@ -154,7 +158,8 @@ public class MessagesController : ControllerBase
                     PhoneNumber = partner.PhoneNumber,
                     LastMessage = lastMessage != null ? lastMessage.Text : "Немає повідомлень",
                     LastMessageTime = lastMessage?.SentAt ?? DateTime.MinValue,
-                    IsWaiting = isWaiting
+                    IsWaiting = isWaiting,
+                    UnreadCount = unreadCount
                 });
             }
 
@@ -271,4 +276,5 @@ public class DialogDto
     public string LastMessage { get; set; } = string.Empty;
     public DateTime LastMessageTime { get; set; }
     public bool IsWaiting { get; set; }
+    public int UnreadCount { get; set; }
 }

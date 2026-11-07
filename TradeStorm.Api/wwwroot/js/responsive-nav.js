@@ -77,10 +77,13 @@
             navActions.prepend(adminLink);
         }
 
-        if (navActions && !document.getElementById('mobileMenuBtn')) {
+        const existingMenuBtn = document.getElementById('mobileMenuBtn') || document.querySelector('.mobile-menu-btn');
+        if (existingMenuBtn) {
+            existingMenuBtn.addEventListener('click', toggleMobileDrawer);
+        } else if (navActions) {
             const menuBtn = document.createElement('button');
             menuBtn.id = 'mobileMenuBtn';
-            menuBtn.className = 'btn-mobile-menu-toggle';
+            menuBtn.className = 'btn-mobile-menu-toggle mobile-menu-btn';
             menuBtn.setAttribute('aria-label', 'Меню навігації');
             menuBtn.innerHTML = `
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -90,7 +93,6 @@
                 </svg>
             `;
             navActions.appendChild(menuBtn);
-
             menuBtn.addEventListener('click', toggleMobileDrawer);
         }
 
@@ -241,26 +243,32 @@
 
     function toggleMobileDrawer() {
         const drawer = document.getElementById('mobileNavDrawer');
-        const overlay = document.getElementById('mobileNavOverlay');
-        if (!drawer || !overlay) return;
+        const overlay = document.getElementById('mobileNavOverlay') || document.getElementById('mobileDrawerBackdrop');
+        if (!drawer) return;
 
         const isOpen = drawer.classList.contains('active');
         if (isOpen) {
             closeMobileDrawer();
         } else {
             drawer.classList.add('active');
-            overlay.classList.add('active');
+            if (overlay) overlay.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
     }
 
     function closeMobileDrawer() {
         const drawer = document.getElementById('mobileNavDrawer');
-        const overlay = document.getElementById('mobileNavOverlay');
+        const overlay = document.getElementById('mobileNavOverlay') || document.getElementById('mobileDrawerBackdrop');
         if (drawer) drawer.classList.remove('active');
         if (overlay) overlay.classList.remove('active');
         document.body.style.overflow = '';
     }
+
+    // Expose drawer controls globally
+    window.toggleMobileDrawer = toggleMobileDrawer;
+    window.closeMobileDrawer = closeMobileDrawer;
+    window.toggleMobileNavDrawer = toggleMobileDrawer;
+    window.closeMobileNavDrawer = closeMobileDrawer;
 
     function setupMobileFilters() {
         const sidebar = document.querySelector('.sidebar');

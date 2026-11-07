@@ -1236,3 +1236,84 @@ header {
         min-height: 44px;
     }
 }
+
+
+/* ==========================================================================
+   16. MOBILE MENU & HEADER RESPONSIVENESS
+   ========================================================================== */
+.mobile-menu-btn, .btn-mobile-menu-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+    flex-shrink: 0;
+}
+.mobile-menu-btn:hover, .btn-mobile-menu-toggle:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.mobile-drawer-backdrop, .mobile-nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.mobile-drawer-backdrop.active, .mobile-nav-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@media (max-width: 860px) {
+    .mobile-menu-btn, .btn-mobile-menu-toggle {
+        display: inline-flex !important;
+    }
+    .btn-create-top,
+    .btn-create-mobile,
+    .header-create-btn,
+    .btn-primary.header-create,
+    header .btn-create,
+    header a[href*="create.html"] {
+        display: none !important;
+    }
+    #btnLogoutHeader {
+        display: none !important;
+    }
+}
+
+/* ==========================================================================
+   17. BEAUTIFUL MESSAGE STATUS CHECKMARKS (SENT vs READ)
+   ========================================================================== */
+.msg-status-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    vertical-align: middle;
+    line-height: 1;
+}
+.msg-status-icon.sent {
+    color: rgba(255, 255, 255, 0.55);
+}
+.msg-status-icon.read {
+    color: #38bdf8; /* Telegram Sky Blue */
+}
+[data-theme="light"] .msg-status-icon.sent {
+    color: rgba(0, 0, 0, 0.45);
+}
+[data-theme="light"] .msg-status-icon.read {
+    color: #0284c7;
+}
