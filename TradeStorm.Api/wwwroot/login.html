@@ -439,6 +439,22 @@
                             <label>Пароль</label>
                             <input type="password" id="regPassword" class="modern-input" required minlength="6" placeholder="Мінімум 6 символів">
                         </div>
+
+                        <!-- BotShield: Захист від ботів та спамерів -->
+                        <div class="form-group" id="regCaptchaBox" style="margin-top: 14px; margin-bottom: 16px;">
+                            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem;">
+                                <span>🛡️ Захист від ботів (сума чисел)</span>
+                                <button type="button" onclick="loadRegisterCaptcha()" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:0.78rem; font-weight:700;">🔄 Оновити</button>
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 6px;">
+                                <div id="captchaSvgContainer" style="flex-shrink: 0; min-height: 42px;"></div>
+                                <input type="number" id="regCaptchaAnswer" class="modern-input" required placeholder="?" style="max-width: 100px; text-align: center; font-weight: 800; font-size: 1.1rem;">
+                            </div>
+                            <input type="hidden" id="regCaptchaToken" value="">
+                            <!-- Honeypot trap: невидима пастка для ботів -->
+                            <input type="text" id="regHoneypot" name="trap_security" style="display:none !important; position:absolute; left:-9999px;" tabindex="-1" autocomplete="off">
+                        </div>
+
                         <button type="submit" id="btnRegisterSubmit" class="btn-submit">Створити акаунт</button>
 
                         <div style="display: flex; align-items: center; gap: 10px; margin: 20px 0 14px;">
@@ -565,7 +581,23 @@
                 document.getElementById('tabLogin').classList.remove('active');
                 document.getElementById('registerForm').style.display = 'block';
                 document.getElementById('loginForm').style.display = 'none';
+                loadRegisterCaptcha();
             }
+        }
+
+        async function loadRegisterCaptcha() {
+            try {
+                const res = await fetch('/api/auth/captcha');
+                if (res.ok) {
+                    const data = await res.json();
+                    const container = document.getElementById('captchaSvgContainer');
+                    const tokenInput = document.getElementById('regCaptchaToken');
+                    const answerInput = document.getElementById('regCaptchaAnswer');
+                    if (container) container.innerHTML = data.svg;
+                    if (tokenInput) tokenInput.value = data.token;
+                    if (answerInput) answerInput.value = '';
+                }
+            } catch (e) {}
         }
 
         let pollVerificationInterval = null;
@@ -718,10 +750,23 @@
             submitBtn.disabled = true;
 
             try {
+                const captchaToken = document.getElementById('regCaptchaToken')?.value || '';
+                const captchaAnswer = document.getElementById('regCaptchaAnswer')?.value || '';
+                const honeypotTrap = document.getElementById('regHoneypot')?.value || '';
+
                 const res = await fetch('/api/users', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ firstName, lastName, email, phoneNumber, password })
+                    body: JSON.stringify({ 
+                        firstName, 
+                        lastName, 
+                        email, 
+                        phoneNumber, 
+                        password,
+                        captchaToken,
+                        captchaAnswer,
+                        honeypotTrap
+                    })
                 });
                 const data = await res.json();
 
@@ -734,9 +779,11 @@
                     );
                 } else {
                     errorDiv.innerText = data.error || 'Помилка реєстрації. Перевірте дані.';
+                    loadRegisterCaptcha();
                 }
             } catch (err) {
                 errorDiv.innerText = "Помилка з'єднання з сервером";
+                loadRegisterCaptcha();
             } finally {
                 submitBtn.disabled = false;
             }

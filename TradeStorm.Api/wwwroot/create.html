@@ -1172,6 +1172,18 @@
                             </select>
                         </div>
 
+                        <div class="form-group" id="subcategoryGroup" style="display: none;">
+                            <div class="form-label-row">
+                                <label for="subcategorySelect" class="form-label">
+                                    🏷️ Підкатегорія
+                                </label>
+                            </div>
+                            <select id="subcategorySelect" class="modern-input">
+                                <option value="">Вся категорія загалом</option>
+                            </select>
+                        </div>
+                    </div>
+
                         <div class="form-group">
                             <div class="form-label-row">
                                 <label for="priceInput" class="form-label" id="priceLabel">
@@ -1329,6 +1341,9 @@
 
                 <!-- SUBMIT CARD -->
                 <div class="publish-card" style="margin-top: 24px;">
+                    <!-- BotShield Honeypot trap -->
+                    <input type="text" id="listingHoneypot" name="trap_website" style="display:none !important; position:absolute; left:-9999px;" tabindex="-1" autocomplete="off">
+
                     <button type="submit" id="btnPublish" class="btn-publish-main">
                         🚀 Опублікувати оголошення
                     </button>
@@ -1679,17 +1694,20 @@
         }
         window.removePhoto = removePhoto;
 
+        window.categoriesTree = [];
+
         // ==================== КАТЕГОРІЇ З БЕКЕНДУ ====================
         async function loadCategories() {
             try {
-                const res = await fetch('/api/listings/categories');
+                const res = await fetch('/api/categories');
                 if (res.ok) {
                     const list = await res.json();
+                    window.categoriesTree = list || [];
                     const select = document.getElementById('categorySelect');
                     if (select) {
                         select.innerHTML = '<option value="" disabled selected>Оберіть категорію зі списку...</option>';
                         list.forEach(c => {
-                            select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+                            select.innerHTML += `<option value="${c.id}">${c.icon || '🏷️'} ${c.name}</option>`;
                         });
 
                         // Default selection if requested via URL param ?type=service
@@ -1707,11 +1725,29 @@
         function onCategoryChanged() {
             const select = document.getElementById('categorySelect');
             if (!select) return;
+            const catId = parseInt(select.value);
             const text = select.options[select.selectedIndex]?.text.toLowerCase() || '';
+
             if (select.value === '8' || text.includes('послуг')) {
                 if (currentListingType !== 'service') setListingType('service');
             } else {
                 if (currentListingType === 'service') setListingType('product');
+            }
+
+            // Оновлюємо підкатегорії
+            const subGroup = document.getElementById('subcategoryGroup');
+            const subSelect = document.getElementById('subcategorySelect');
+            const found = (window.categoriesTree || []).find(c => c.id === catId);
+
+            if (found && found.subcategories && found.subcategories.length > 0) {
+                if (subGroup) subGroup.style.display = 'block';
+                if (subSelect) {
+                    subSelect.innerHTML = `<option value="">Вся категорія «${found.name}»</option>` +
+                        found.subcategories.map(s => `<option value="${s.id}">${s.icon || '🏷️'} ${s.name}</option>`).join('');
+                }
+            } else {
+                if (subGroup) subGroup.style.display = 'none';
+                if (subSelect) subSelect.innerHTML = '<option value="">Вся категорія загалом</option>';
             }
         }
         window.onCategoryChanged = onCategoryChanged;
@@ -1823,7 +1859,9 @@
                 const btn = document.getElementById('btnPublish');
                 const titleVal = (document.getElementById('titleInput')?.value || '').trim();
                 const priceVal = parseFloat(document.getElementById('priceInput')?.value || '0');
-                const catVal = parseInt(document.getElementById('categorySelect')?.value || '0');
+                const subVal = parseInt(document.getElementById('subcategorySelect')?.value || '0');
+                const catVal = (subVal > 0) ? subVal : parseInt(document.getElementById('categorySelect')?.value || '0');
+                const honeypotVal = document.getElementById('listingHoneypot')?.value || '';
                 const descVal = (document.getElementById('descriptionInput')?.value || '').trim();
                 let locVal = (document.getElementById('addressInput')?.value || '').trim();
 
@@ -1905,7 +1943,8 @@
                         imageUrls: finalImageUrls,
                         condition: conditionVal,
                         location: locVal || 'Кременчук',
-                        isShippingAvailable: isShipping
+                        isShippingAvailable: isShipping,
+                        honeypotTrap: honeypotVal
                     };
 
                     const response = await fetch('/api/listings', {

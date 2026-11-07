@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace TradeStorm.Api.DTOs;
 
@@ -9,4 +9,9 @@ public class CreateUserDto
     [Required, EmailAddress] public string Email { get; set; } = string.Empty;
     [Required] public string PhoneNumber { get; set; } = string.Empty;
     [Required] public string Password { get; set; } = string.Empty;
+
+    // BotShield anti-bot protection
+    public string? HoneypotTrap { get; set; }
+    public string? CaptchaToken { get; set; }
+    public string? CaptchaAnswer { get; set; }
 }

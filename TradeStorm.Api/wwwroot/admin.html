@@ -8,15 +8,28 @@
         (function() {
             try {
                 const token = localStorage.getItem('loopToken') || localStorage.getItem('token');
-                const role = localStorage.getItem('loopUserRole');
-                if (!token || role !== 'Admin') {
-                    // Сторонні користувачі перенаправляються на 404 сторінку
+                let role = localStorage.getItem('loopUserRole');
+                if (!role && token) {
+                    try {
+                        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+                        role = payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+                        if (role) localStorage.setItem('loopUserRole', role);
+                    } catch(e) {}
+                }
+
+                if (!token) {
+                    window.location.replace('/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search));
+                    return;
+                }
+
+                if (role !== 'Admin') {
                     window.location.replace('/404.html');
                     return;
                 }
+
                 document.documentElement.classList.add('admin-authorized');
             } catch(e) {
-                window.location.replace('/404.html');
+                window.location.replace('/login.html');
             }
         })();
     </script>
@@ -2458,7 +2471,7 @@
                     `;
                 }).join('');
             } catch (e) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#ef4444;">Помилка з'єднання</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style=\"text-align:center; color:#ef4444;\">Помилка з\'єднання</td></tr>';
             }
         }
 
@@ -2546,7 +2559,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                if (window.LoopToast) LoopToast.error('Помилка з'єднання з сервером');
+                if (window.LoopToast) LoopToast.error("Помилка з'єднання з сервером");
             } finally {
                 btn.disabled = false;
                 btn.innerText = '🚀 Надіслати офіційну відповідь';
@@ -2597,7 +2610,7 @@
                 }
             } catch(err) {
                 console.error(err);
-                if (window.LoopToast) LoopToast.error('Помилка з'єднання');
+                if (window.LoopToast) LoopToast.error("Помилка з'єднання");
             }
         }
 

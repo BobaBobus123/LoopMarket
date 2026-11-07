@@ -95,6 +95,7 @@ builder.Services.AddHostedService<QueuedHostedService>();
 
 // Зовнішня автентифікація OAuth 2.0 (Етап 7)
 builder.Services.AddScoped<IExternalAuthService, ExternalAuthService>();
+builder.Services.AddSingleton<ICaptchaService, CaptchaService>();
 
 // Стандартний ASP.NET Core Health Check (Етап 1)
 builder.Services.AddHealthChecks()
@@ -323,6 +324,8 @@ using (var scope = app.Services.CreateScope())
             {
                 db.Database.ExecuteSqlRaw(@"ALTER TABLE Orders ADD COLUMN OrderCode TEXT;");
             }
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Categories ADD COLUMN Icon TEXT;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Categories ADD COLUMN ParentId INTEGER;"); } catch {}
         }
         catch {}
     }
@@ -333,6 +336,8 @@ using (var scope = app.Services.CreateScope())
         try
         {
             db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""OrderCode"" VARCHAR(30);");
+            db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""Icon"" VARCHAR(100);");
+            db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""ParentId"" INTEGER;");
         }
         catch {}
     }
@@ -487,22 +492,14 @@ using (var scope = app.Services.CreateScope())
     {
         Console.WriteLine($"Database initialization notice: {ex.Message}");
     }
-    if (!db.Categories.Any())
+    try
     {
-        db.Categories.AddRange(
-            new TradeStorm.Api.Models.Category { Name = "Електроніка та гаджети" },
-            new TradeStorm.Api.Models.Category { Name = "Одяг, взуття та аксесуари" },
-            new TradeStorm.Api.Models.Category { Name = "Навчальні матеріали та книги" },
-            new TradeStorm.Api.Models.Category { Name = "Товари для дому та затишку" },
-            new TradeStorm.Api.Models.Category { Name = "Спорт, хобі та відпочинок" },
-            new TradeStorm.Api.Models.Category { Name = "Зоотовари" },
-            new TradeStorm.Api.Models.Category { Name = "Транспорт та запчастини" },
-            new TradeStorm.Api.Models.Category { Name = "Послуги та робота" },
-            new TradeStorm.Api.Models.Category { Name = "Безкоштовно та обмін" },
-            new TradeStorm.Api.Models.Category { Name = "Інше" }
-        );
-        db.SaveChanges();
-        Console.WriteLine("✅ Початкові категорії успішно додані в базу!");
+        TradeStorm.Api.Data.CategorySeeder.SeedHierarchicalCategories(db);
+        Console.WriteLine("✅ Початкові категорії та підкатегорії успішно оновлені в базі!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Category seeding notice: {ex.Message}");
     }
 
     // Переконуємось, що є хоча б один Admin для перевірки RBAC

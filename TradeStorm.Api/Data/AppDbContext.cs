@@ -29,6 +29,15 @@ public class AppDbContext : DbContext
             .IsUnique();
 
         // Індекси для прискорення фільтрації та пошуку (Етап 2 та 4)
+        modelBuilder.Entity<Category>()
+            .HasIndex(c => c.ParentId);
+
+        modelBuilder.Entity<Category>()
+            .HasOne(c => c.Parent)
+            .WithMany(c => c.Subcategories)
+            .HasForeignKey(c => c.ParentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<Listing>()
             .HasIndex(l => l.CategoryId);
 

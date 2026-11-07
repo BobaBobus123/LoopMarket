@@ -1871,13 +1871,26 @@
 
         .notif-badge {
             position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 8px;
-            height: 8px;
-            background: #ef4444;
-            border-radius: 50%;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #ffffff;
+            font-size: 0.68rem;
+            font-weight: 800;
+            line-height: 16px;
+            text-align: center;
+            border-radius: 999px;
             border: 2px solid var(--surface);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
+            box-sizing: border-box;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 5;
         }
 
         .notif-dropdown {
@@ -2401,7 +2414,13 @@
             <div class="categories-scroll-list" id="categoryPillsList">
                 <button type="button" class="cat-pill active" data-category="" onclick="filterByCategory('', this)">✨ Всі товари</button>
             </div>
+        </div>
+        <!-- ДИНАМІЧНИЙ РЯДОК ПІДКАТЕГОРІЙ -->
+        <div class="subcategory-chips-wrapper" id="subcategoryChipsWrapper" style="display: none; padding: 6px 0 6px 0; overflow-x: auto; white-space: nowrap; scrollbar-width: none;">
+            <div class="subcategory-chips-list" id="subcategoryChipsList" style="display: flex; gap: 8px; align-items: center;">
             </div>
+        </div>
+    </div>
 
     <!-- МОБІЛЬНА ПАНЕЛЬ ШВИДКИХ ДІЙ (РЕЖИМИ, ФІЛЬТРИ, СОРТУВАННЯ) -->
     
@@ -2856,10 +2875,14 @@
             }
         };
 
+        window.allCategoriesTree = [];
+        let selectedSubcategoryName = null;
+
         async function loadCategories() {
             try {
-                const res = await fetch('/api/listings/categories');
+                const res = await fetch('/api/categories');
                 const categories = await res.json();
+                window.allCategoriesTree = categories || [];
                 const list = document.getElementById('categoryList');
                 const pillsList = document.getElementById('categoryPillsList');
                 if (pillsList) {
@@ -2869,11 +2892,7 @@
                         <button type="button" class="cat-pill" data-mode="services" onclick="setCatalogMode('services', event)">🛠️ Послуги</button>
                     `;
                 }
-                const ICONS = {
-                    'Електроніка': '📱', 'Одяг': '👕', 'Навчальні': '📚', 'Товари для дому': '🏠',
-                    'Спорт': '⚽', 'Зоотовари': '🐾', 'Транспорт': '🚲', 'Послуги': '💼',
-                    'Безкоштовно': '🎁', 'Інше': '📦'
-                };
+
                 const sheetCatList = document.getElementById('mobileSheetCategoryList');
                 if (sheetCatList) {
                     sheetCatList.innerHTML = `<button type="button" class="sheet-cat-item active" data-category="" onclick="selectSheetCategory('', this)"><span>✨ Всі категорії</span><span>✓</span></button>`;
@@ -2881,9 +2900,8 @@
 
                 categories.forEach(c => {
                     const safeName = c.name.replace(/'/g, "\\'");
-                    if (list) list.innerHTML += `<li class="category-item" data-category="${c.name}" onclick="filterByCategory('${safeName}', this)">${c.name}</li>`;
-                    let icon = '🏷️';
-                    for (let k in ICONS) { if (c.name.includes(k)) { icon = ICONS[k]; break; } }
+                    const icon = c.icon || '🏷️';
+                    if (list) list.innerHTML += `<li class="category-item" data-category="${c.name}" onclick="filterByCategory('${safeName}', this)">${icon} ${c.name}</li>`;
                     if (pillsList) {
                         pillsList.innerHTML += `<button type="button" class="cat-pill" data-category="${c.name}" onclick="filterByCategory('${safeName}', this)">${icon} ${c.name}</button>`;
                     }
@@ -2894,6 +2912,43 @@
                 syncCategoryUI(selectedCategoryName);
             } catch (e) { }
         }
+
+        function renderSubcategoriesBar(categoryName) {
+            const wrap = document.getElementById('subcategoryChipsWrapper');
+            const list = document.getElementById('subcategoryChipsList');
+            if (!wrap || !list) return;
+
+            if (!categoryName) {
+                wrap.style.display = 'none';
+                list.innerHTML = '';
+                selectedSubcategoryName = null;
+                return;
+            }
+
+            const current = (window.allCategoriesTree || []).find(c => c.name.trim().toLowerCase() === categoryName.trim().toLowerCase());
+            if (!current || !current.subcategories || current.subcategories.length === 0) {
+                wrap.style.display = 'none';
+                list.innerHTML = '';
+                selectedSubcategoryName = null;
+                return;
+            }
+
+            wrap.style.display = 'block';
+            list.innerHTML = `
+                <button type="button" class="subcat-chip ${!selectedSubcategoryName ? 'active' : ''}" onclick="filterBySubcategory(null, this)">✨ Всі ${current.name}</button>
+            ` + current.subcategories.map(s => {
+                const safeSub = s.name.replace(/'/g, "\\'");
+                const isActive = selectedSubcategoryName === s.name ? 'active' : '';
+                return `<button type="button" class="subcat-chip ${isActive}" onclick="filterBySubcategory('${safeSub}', this)">${s.icon || '🏷️'} ${s.name}</button>`;
+            }).join('');
+        }
+
+        window.filterBySubcategory = function(subName, element) {
+            selectedSubcategoryName = subName;
+            document.querySelectorAll('.subcat-chip').forEach(b => b.classList.remove('active'));
+            if (element) element.classList.add('active');
+            applyFilters();
+        };
 
         
         // ==================== ВАЛЮТНА КОНВЕРТАЦІЯ (Етап 4) ====================
@@ -3168,8 +3223,22 @@
                     if (rel <= 0) return false;
                 }
 
-                // 2. Категорія
-                const matchesCategory = !selectedCategoryName || item.categoryName === selectedCategoryName;
+                // 2. Категорія та підкатегорія (ієрархічна фільтрація)
+                let matchesCategory = true;
+                if (selectedSubcategoryName) {
+                    matchesCategory = item.categoryName === selectedSubcategoryName;
+                } else if (selectedCategoryName) {
+                    if (item.categoryName === selectedCategoryName) {
+                        matchesCategory = true;
+                    } else {
+                        const rootCat = (window.allCategoriesTree || []).find(c => c.name.trim().toLowerCase() === selectedCategoryName.trim().toLowerCase());
+                        if (rootCat && rootCat.subcategories) {
+                            matchesCategory = rootCat.subcategories.some(s => s.name === item.categoryName);
+                        } else {
+                            matchesCategory = false;
+                        }
+                    }
+                }
                 if (!matchesCategory) return false;
 
                 // 3. Діапазон цін
@@ -3310,6 +3379,8 @@
             document.querySelectorAll('.quick-tag-pill').forEach(b => b.classList.remove('active'));
 
             selectedCategoryName = null;
+            selectedSubcategoryName = null;
+            renderSubcategoriesBar(null);
             syncCategoryUI(null);
             applyFilters();
         };
@@ -3328,7 +3399,9 @@
             } else {
                 selectedCategoryName = cat;
             }
+            selectedSubcategoryName = null;
 
+            renderSubcategoriesBar(selectedCategoryName);
             syncCategoryUI(selectedCategoryName);
             applyFilters();
         };

@@ -145,6 +145,12 @@ public class ListingsController : ControllerBase
     [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("CreateListingLimit")]
     public async Task<IActionResult> CreateListing([FromBody] CreateListingDto dto)
     {
+        // BotShield Honeypot trap check
+        if (!string.IsNullOrWhiteSpace(dto.HoneypotTrap))
+        {
+            return BadRequest(new { error = "Спам-фільтр: автоматизоване оголошення заблоковано" });
+        }
+
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdString, out int userId))
         {

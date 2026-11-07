@@ -1387,6 +1387,9 @@ body.in-chat-conversation .mobile-bottom-app-bar {
    CHAT VIEWPORT & BOTTOM BAR PROTECTION
    Never let bottom navigation bar cover the message input bar!
    ========================================================================== */
+body.messages-page #mobileBottomBar,
+body.messages-page .mobile-bottom-bar,
+body.messages-page .mobile-bottom-app-bar,
 body.in-chat-conversation #mobileBottomBar,
 body.in-chat-conversation .mobile-bottom-bar,
 body.in-chat-conversation .mobile-bottom-app-bar,
@@ -1439,4 +1442,96 @@ body.has-sticky-bar .mobile-bottom-bar {
 }
 [data-theme="light"] .msg-status-icon.read {
     color: #0284c7;
+}
+
+
+/* ==========================================================================
+   BEAUTIFUL NOTIFICATION BELL & BADGE SYSTEM
+   ========================================================================== */
+#notifBtn, .btn-notif {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    border-radius: 10px !important;
+    background: var(--surface) !important;
+    border: 1.5px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+#notifBtn:hover, .btn-notif:hover {
+    border-color: #2563eb !important;
+    background: var(--surface-hover) !important;
+    transform: translateY(-1px) !important;
+}
+
+#notifBtn svg {
+    width: 20px !important;
+    height: 20px !important;
+    transition: transform 0.2s ease !important;
+}
+
+#notifBtn:hover svg {
+    transform: rotate(15deg) scale(1.05) !important;
+}
+
+.notif-badge {
+    position: absolute !important;
+    top: -4px !important;
+    right: -4px !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    padding: 0 5px !important;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: #ffffff !important;
+    font-size: 0.68rem !important;
+    font-weight: 800 !important;
+    line-height: 16px !important;
+    text-align: center !important;
+    border-radius: 999px !important;
+    border: 2px solid var(--surface) !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45) !important;
+    box-sizing: border-box !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: none !important;
+    z-index: 5 !important;
+}
+
+/* ==========================================================================
+   SIDEBAR & SEARCH INPUT ALIGNMENT (PREVENTS ICON OVERLAPPING TEXT)
+   ========================================================================== */
+.search-box {
+    position: relative !important;
+    width: 100% !important;
+    margin-bottom: 16px !important;
+}
+
+.search-box .search-icon {
+    position: absolute !important;
+    left: 14px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: var(--text-muted) !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+}
+
+.search-box .search-input,
+.search-wrap .search-input,
+.search-input-wrap .search-input,
+#searchInput {
+    padding-left: 44px !important;
+    box-sizing: border-box !important;
 }

@@ -25,4 +25,9 @@ public class CreateListingDto
     public string? Location { get; set; }
 
     public bool IsShippingAvailable { get; set; }
+
+    // BotShield anti-bot protection
+    public string? HoneypotTrap { get; set; }
+    public string? CaptchaToken { get; set; }
+    public string? CaptchaAnswer { get; set; }
 }

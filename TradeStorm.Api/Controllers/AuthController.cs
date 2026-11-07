@@ -56,10 +56,44 @@ public class AuthController : ControllerBase
         catch { }
     }
     private readonly IExternalAuthService _externalAuthService;
+    private readonly ICaptchaService _captchaService;
 
-    public AuthController(IExternalAuthService externalAuthService)
+    public AuthController(IExternalAuthService externalAuthService, ICaptchaService captchaService)
     {
         _externalAuthService = externalAuthService;
+        _captchaService = captchaService;
+    }
+
+    /// <summary>
+    /// Генерація криптографічного завдання капчі (BotShield)
+    /// </summary>
+    [HttpGet("captcha")]
+    public IActionResult GetCaptcha()
+    {
+        var (token, svg, question) = _captchaService.GenerateCaptcha();
+        return Ok(new
+        {
+            token,
+            svg,
+            question
+        });
+    }
+
+    public class VerifyCaptchaDto
+    {
+        public string? Token { get; set; }
+        public string? Answer { get; set; }
+    }
+
+    /// <summary>
+    /// Валідація відповіді користувача на капчу
+    /// </summary>
+    [HttpPost("verify-captcha")]
+    public IActionResult VerifyCaptcha([FromBody] VerifyCaptchaDto dto)
+    {
+        bool isValid = _captchaService.ValidateCaptcha(dto.Token, dto.Answer);
+        if (!isValid) return BadRequest(new { valid = false, error = "Неправильна відповідь або час дії капчі минув" });
+        return Ok(new { valid = true });
     }
 
     /// <summary>

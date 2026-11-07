@@ -55,19 +55,32 @@ public class UsersController : ControllerBase
     private readonly AppDbContext _context;
     private readonly ITokenService _tokenService;
     private readonly TelegramBotService _telegramService;
+    private readonly ICaptchaService? _captchaService;
     private readonly PasswordHasher<User> _passwordHasher = new();
 
-    public UsersController(AppDbContext context, ITokenService tokenService, TelegramBotService telegramService)
+    public UsersController(AppDbContext context, ITokenService tokenService, TelegramBotService telegramService, ICaptchaService? captchaService = null)
     {
         _context = context;
         _tokenService = tokenService;
         _telegramService = telegramService;
+        _captchaService = captchaService;
     }
 
     [HttpPost]
     [HttpPost("register")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto)
     {
+        // BotShield: Перевірка прихованої пастки для ботів (Honeypot)
+        if (!string.IsNullOrWhiteSpace(dto.HoneypotTrap))
+            return BadRequest(new { error = "Спам-фільтр: автоматизований запит заблоковано" });
+
+        // BotShield: Перевірка капчі (якщо надіслано токен)
+        if (!string.IsNullOrWhiteSpace(dto.CaptchaToken) && _captchaService != null)
+        {
+            if (!_captchaService.ValidateCaptcha(dto.CaptchaToken, dto.CaptchaAnswer))
+                return BadRequest(new { error = "Неправильна відповідь перевірки на бота або час капчі минув" });
+        }
+
         if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
             return BadRequest(new { error = "Email вже використовується іншим користувачем" });
 
@@ -799,11 +812,14 @@ public class UsersController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetUserServicesStats(int id)
     {
-        var user = await _context.Users.FindAsync(id);
+        var user = await _context.Users.AsNoTracking()
+            .Select(u => new { u.Id, u.FirstName, u.LastName })
+            .FirstOrDefaultAsync(u => u.Id == id);
         if (user == null) return NotFound(new { error = "Користувача не знайдено" });
 
         // Всі послуги користувача
         var userServices = await _context.Listings
+            .AsNoTracking()
             .Where(l => l.SellerId == id && (l.CategoryId == 8 || l.Title.Contains("Послуг")))
             .Select(l => new
             {
@@ -822,6 +838,7 @@ public class UsersController : ControllerBase
 
         // Замовлення, отримані на послуги користувача
         var receivedOrders = await _context.Orders
+            .AsNoTracking()
             .Where(o => o.SellerId == id && (serviceListingIds.Contains(o.ListingId) || (o.Listing != null && (o.Listing.CategoryId == 8 || o.Listing.Title.Contains("Послуг")))))
             .Select(o => new
             {
@@ -882,11 +899,12 @@ public class UsersController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetUserAnalytics(int id)
     {
-        var user = await _context.Users.FindAsync(id);
-        if (user == null) return NotFound(new { error = "Користувача не знайдено" });
+        var userExists = await _context.Users.AsNoTracking().AnyAsync(u => u.Id == id);
+        if (!userExists) return NotFound(new { error = "Користувача не знайдено" });
 
         // 1. Оголошення продавця
         var listings = await _context.Listings
+            .AsNoTracking()
             .Where(l => l.SellerId == id)
             .ToListAsync();
 
@@ -899,6 +917,7 @@ public class UsersController : ControllerBase
 
         // 3. Завершені угоди (АНТИФРОД: тільки успішно закриті замовлення без самовикупу BuyerId != SellerId)
         var completedOrders = await _context.Orders
+            .AsNoTracking()
             .Where(o => o.SellerId == id && o.Status == "Completed" && o.BuyerId != id)
             .ToListAsync();
 
@@ -907,6 +926,7 @@ public class UsersController : ControllerBase
 
         // 4. Рейтинг та відгуки
         var reviews = await _context.Reviews
+            .AsNoTracking()
             .Where(r => r.TargetUserId == id)
             .ToListAsync();
 

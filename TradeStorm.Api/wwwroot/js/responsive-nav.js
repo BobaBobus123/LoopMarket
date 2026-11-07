@@ -196,9 +196,18 @@
 
         // 3. Inject App-like Mobile Bottom Navigation Bar (< 768px)
         // НА СТОРІНЦІ ЧАТУ (MESSAGES) НІКОЛИ НЕ СТВОРЮЄМО НИЖНЮ ПАНЕЛЬ, ЩОБ ВОНА НЕ ПЕРЕКРИВАЛА ВВЕДЕННЯ ТЕКСТУ
-        if (currentPath.includes('messages')) {
-            const oldBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar') || document.getElementById('mobileBottomAppBar');
-            if (oldBar) oldBar.remove();
+        const isChatPage = currentPath.includes('messages') || 
+                           window.location.pathname.toLowerCase().includes('messages') ||
+                           document.body.classList.contains('messages-page') ||
+                           document.body.classList.contains('in-chat-conversation');
+
+        if (isChatPage) {
+            const purge = () => {
+                document.querySelectorAll('#mobileBottomBar, .mobile-bottom-bar, .mobile-bottom-app-bar').forEach(el => el.remove());
+            };
+            purge();
+            setTimeout(purge, 100);
+            setTimeout(purge, 500);
             return; // На сторінці повідомлень ніколи не створюємо нижню панель
         } else if (!document.getElementById('mobileBottomBar') && !document.getElementById('mobileBottomAppBar')) {
             const bottomBar = document.createElement('nav');
@@ -249,16 +258,26 @@
         setupMobileFilters();
     }
 
-    let drawerDebounceTimer = null;
+    let lastDrawerToggleTimestamp = 0;
 
     function toggleMobileDrawer(e) {
-        if (e && e.preventDefault) e.preventDefault();
-        if (e && e.stopPropagation) e.stopPropagation();
-        if (drawerDebounceTimer) return;
-        drawerDebounceTimer = setTimeout(() => { drawerDebounceTimer = null; }, 220);
+        if (e) {
+            if (e.preventDefault) e.preventDefault();
+            if (e.stopPropagation) e.stopPropagation();
+        }
+        const now = Date.now();
+        if (now - lastDrawerToggleTimestamp < 260) {
+            return;
+        }
+        lastDrawerToggleTimestamp = now;
 
-        const drawer = document.getElementById('mobileNavDrawer');
-        const overlay = document.getElementById('mobileNavOverlay') || document.getElementById('mobileDrawerBackdrop');
+        let drawer = document.getElementById('mobileNavDrawer');
+        let overlay = document.getElementById('mobileNavOverlay') || document.getElementById('mobileDrawerBackdrop');
+        if (!drawer) {
+            initResponsiveNav();
+            drawer = document.getElementById('mobileNavDrawer');
+            overlay = document.getElementById('mobileNavOverlay') || document.getElementById('mobileDrawerBackdrop');
+        }
         if (!drawer) return;
 
         const isOpen = drawer.classList.contains('active');
@@ -270,8 +289,13 @@
     }
 
     function openMobileDrawer() {
-        const drawer = document.getElementById('mobileNavDrawer');
-        const overlay = document.getElementById('mobileNavOverlay') || document.getElementById('mobileDrawerBackdrop');
+        let drawer = document.getElementById('mobileNavDrawer');
+        let overlay = document.getElementById('mobileNavOverlay') || document.getElementById('mobileDrawerBackdrop');
+        if (!drawer) {
+            initResponsiveNav();
+            drawer = document.getElementById('mobileNavDrawer');
+            overlay = document.getElementById('mobileNavOverlay') || document.getElementById('mobileDrawerBackdrop');
+        }
         if (!drawer) return;
 
         if (typeof window.renderDrawerUserInfo === 'function') {
@@ -302,7 +326,7 @@
     // Document-level event delegation for all drawer triggers across all pages
     if (!window._loopNavDelegationAttached) {
         window._loopNavDelegationAttached = true;
-        document.addEventListener('click', function(e) {
+        const handleDrawerAction = function(e) {
             const toggleBtn = e.target.closest('#mobileMenuBtn, .mobile-menu-btn, .btn-mobile-menu-toggle');
             if (toggleBtn) {
                 toggleMobileDrawer(e);
@@ -325,7 +349,15 @@
             if (drawerLink) {
                 closeMobileDrawer(e);
             }
-        }, true);
+        };
+
+        document.addEventListener('click', handleDrawerAction);
+        document.addEventListener('touchend', function(e) {
+            const toggleBtn = e.target.closest('#mobileMenuBtn, .mobile-menu-btn, .btn-mobile-menu-toggle');
+            if (toggleBtn) {
+                toggleMobileDrawer(e);
+            }
+        }, { passive: false });
     }
 
     function setupMobileFilters() {
@@ -524,9 +556,9 @@
         badges.forEach(badge => {
             if (unreadCount > 0) {
                 badge.innerText = unreadCount > 99 ? '99+' : unreadCount;
-                badge.style.display = 'inline-block';
+                badge.style.setProperty('display', 'inline-flex', 'important');
             } else {
-                badge.style.display = 'none';
+                badge.style.setProperty('display', 'none', 'important');
             }
         });
 
