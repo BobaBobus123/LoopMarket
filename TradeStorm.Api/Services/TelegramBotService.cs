@@ -24,6 +24,8 @@ public class TelegramLoginSession
 public class TelegramBotService : BackgroundService
 {
     public static readonly System.Collections.Concurrent.ConcurrentDictionary<string, TelegramLoginSession> LoginSessions = new();
+    public static long MasterSupportChatId { get; set; } = 0;
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<long, List<DateTime>> RateLimitTracker = new();
 
     private readonly TelegramBotClient? _botClient;
     private readonly IServiceScopeFactory _scopeFactory;
@@ -199,7 +201,7 @@ public class TelegramBotService : BackgroundService
                           "✅ Справжній Loop Market <b>НІКОЛИ</b> не просить вводити CVV чи залишок коштів на картці!\n" +
                           "✅ Оплата при отриманні — це ваш найнадійніший захист. Перевіряйте вміст посилки перед сплатою!\n" +
                           "✅ Ведіть діалоги тільки через офіційний сайт <code>https://loopmarket-x0uo.onrender.com</code>.\n\n" +
-                          "<i>Якщо натрапили на підозрілого співрозмовника — натисніть «💬 Зв'язатися з підтримкою» нижче.</i>",
+                          "<i>Якщо натрапили на підозрілого співрозмовника — напишіть адміністратору: @LoopMarketSupport.</i>",
                     parseMode: ParseMode.Html,
                     replyMarkup: GetInlineFaqNavigation(),
                     cancellationToken: cancellationToken);
@@ -209,10 +211,11 @@ public class TelegramBotService : BackgroundService
                 await botClient.SendMessage(
                     chatId: chatId,
                     text: "🔍 <b>Перевірка статусу замовлення:</b>\n\n" +
-                          "Просто надішліть у цей чат ваш код замовлення, наприклад:\n" +
-                          "👉 <code>LP-782194</code>\n" +
-                          "👉 або <code>#14</code>\n\n" +
-                          "Я миттєво знайду інформацію в базі даних та надішлю актуальний статус і ТТН доставки!",
+                          "Ви можете надіслати просто 6 цифр номера замовлення, наприклад:\n" +
+                          "👉 <code>782194</code>\n" +
+                          "👉 або повний код <code>LP-782194</code>\n" +
+                          "👉 або старий номер <code>#14</code>\n\n" +
+                          "Я миттєво знайду інформацію в системі та покажу актуальний статус посилки й номер ТТН!",
                     parseMode: ParseMode.Html,
                     cancellationToken: cancellationToken);
                 break;
@@ -220,13 +223,18 @@ public class TelegramBotService : BackgroundService
             case "support_contact":
                 await botClient.SendMessage(
                     chatId: chatId,
-                    text: "🆘 <b>Служба турботи та підтримки користувачів:</b>\n\n" +
-                          "• 👨‍💻 Прямий контакт з черговим оператором: <b>@LoopMarketSupport</b>\n" +
+                    text: "🆘 <b>Служба турботи та підтримки користувачів Loop Market:</b>\n\n" +
+                          "• 👨‍💻 Головний черговий адміністратор: <b>@LoopMarketSupport</b>\n" +
                           "• ✉️ Офіційна пошта: <code>support@loopmarket.ua</code>\n" +
-                          "• 🌐 Центр підтримки на сайті: <a href=\"https://loopmarket-x0uo.onrender.com/about.html\">Про платформу</a>\n\n" +
+                          "• 🕒 Графік роботи: щодня з 08:00 до 22:00\n\n" +
                           "💬 <b>Потрібна допомога прямо зараз?</b>\n" +
-                          "Опишіть вашу ситуацію або питання прямо в цей чат — повідомлення буде зареєстровано в системі підтримки!",
+                          "Натисніть кнопку нижче, щоб написати адміністратору в Telegram, або просто опишіть питання в цей чат — ми зареєструємо звернення!",
                     parseMode: ParseMode.Html,
+                    replyMarkup: new InlineKeyboardMarkup(new[]
+                    {
+                        new[] { InlineKeyboardButton.WithUrl("💬 Написати адміну: @LoopMarketSupport", "https://t.me/LoopMarketSupport") },
+                        new[] { InlineKeyboardButton.WithUrl("🌐 Центр допомоги на сайті", "https://loopmarket-x0uo.onrender.com/about.html") }
+                    }),
                     cancellationToken: cancellationToken);
                 break;
 
@@ -240,6 +248,23 @@ public class TelegramBotService : BackgroundService
         var rawText = message.Text?.Trim() ?? string.Empty;
         var lowerText = rawText.ToLowerInvariant();
         var chatId = message.Chat.Id;
+
+        // Автоматична реєстрація чату головного адміністратора @LoopMarketSupport
+        if (message.Chat.Username?.Equals("LoopMarketSupport", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            if (MasterSupportChatId != chatId)
+            {
+                MasterSupportChatId = chatId;
+                Console.WriteLine($"[Telegram Admin] Головний чат підтримки підключено: @LoopMarketSupport (ChatId: {chatId})");
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: "🛡️ <b>Вітаємо, Адміністраторе!</b>\n\n" +
+                          "Ваш акаунт <b>@LoopMarketSupport</b> успішно активовано як головну лінію підтримки платформи Loop Market.\n" +
+                          "Усі звернення користувачів, запити на допомогу та скарги на шахраїв надходитимуть сюди в реальному часі.",
+                    parseMode: ParseMode.Html,
+                    cancellationToken: cancellationToken);
+            }
+        }
 
         // 0. Авторизація через Telegram-бота: /start login_XYZ
         if (System.Text.RegularExpressions.Regex.IsMatch(rawText, @"^/start\s+(login_[a-zA-Z0-9_]+)$"))
@@ -407,41 +432,68 @@ public class TelegramBotService : BackgroundService
                       "3. 📦 Усі замовлення на платформі здійснюються через офіційний сайт <code>https://loopmarket-x0uo.onrender.com</code>.\n" +
                       "4. 🚚 Доставка працює через <b>Накладений платіж Нової Пошти</b> — ви сплачуєте лише після фізичного огляду посилки у відділенні!\n" +
                       "5. 💬 Спілкуйтеся тільки у внутрішньому чаті сайту. Відмовтеся від пропозицій переходити у Viber або WhatsApp.\n\n" +
-                      "<i>Якщо вам надіслав це посилання інший користувач — надішліть звернення до підтримки нижче:</i>",
+                      "<i>Якщо вам надіслав це посилання інший користувач — надішліть звернення черговому адміністратору @LoopMarketSupport:</i>",
                 parseMode: ParseMode.Html,
                 replyMarkup: new InlineKeyboardMarkup(new[]
                 {
-                    new[] { InlineKeyboardButton.WithCallbackData("🆘 Зв'язатися з підтримкою", "support_contact") },
+                    new[] { InlineKeyboardButton.WithUrl("💬 Зв'язатися з адміном @LoopMarketSupport", "https://t.me/LoopMarketSupport") },
                     new[] { InlineKeyboardButton.WithCallbackData("🛡️ Детальні правила безпеки", "faq_safety") }
                 }),
                 cancellationToken: cancellationToken);
             return;
         }
 
-        // 4. 🔍 ПЕРЕВІРКА ЗАМОВЛЕННЯ ЗА КОДОМ (LP-XXXXXX або #15)
-        var orderCodeRegex = System.Text.RegularExpressions.Regex.Match(rawText, @"(?:LP-[0-9A-Za-z_-]+|#\d+)");
-        if (orderCodeRegex.Success || (rawText.Length >= 4 && rawText.StartsWith("LP-", StringComparison.OrdinalIgnoreCase)))
+        // 4. 🔍 ГНУЧКА ТА БЕЗПЕЧНА ПЕРЕВІРКА ЗАМОВЛЕННЯ
+        // Користувач може ввести: 6 цифр (782194), або LP-782194, або lp 782194, або #14
+        string? extractedOrderCode = ExtractOrderCodeCandidate(rawText);
+        if (extractedOrderCode != null)
         {
-            var codeQuery = orderCodeRegex.Success ? orderCodeRegex.Value : rawText;
+            // Захист від брутфорсу (перебору номерів): максимум 6 перевірок за хвилину
+            if (IsRateLimited(chatId))
+            {
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: "⚠️ <b>Забагато запитів перевірки замовлень!</b>\n\nЗ міркувань безпеки, будь ласка, зачекайте 1 хвилину перед наступною спробою.",
+                    parseMode: ParseMode.Html,
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
             Order? foundOrder = null;
-            if (codeQuery.StartsWith("LP-", StringComparison.OrdinalIgnoreCase))
+            if (extractedOrderCode.StartsWith("LP-", StringComparison.OrdinalIgnoreCase))
             {
                 foundOrder = await db.Orders
                     .Include(o => o.Listing)
                     .Include(o => o.Seller)
                     .Include(o => o.Buyer)
-                    .FirstOrDefaultAsync(o => o.OrderCode == codeQuery, cancellationToken);
+                    .FirstOrDefaultAsync(o => o.OrderCode == extractedOrderCode, cancellationToken);
 
                 if (foundOrder == null)
                 {
-                    var recentOrders = await db.Orders.Include(o => o.Listing).Include(o => o.Seller).Include(o => o.Buyer).OrderByDescending(o => o.Id).Take(100).ToListAsync(cancellationToken);
-                    foundOrder = recentOrders.FirstOrDefault(o => o.GetDisplayCode().Equals(codeQuery, StringComparison.OrdinalIgnoreCase));
+                    var recentOrders = await db.Orders
+                        .Include(o => o.Listing)
+                        .Include(o => o.Seller)
+                        .Include(o => o.Buyer)
+                        .OrderByDescending(o => o.Id)
+                        .Take(150)
+                        .ToListAsync(cancellationToken);
+                    foundOrder = recentOrders.FirstOrDefault(o => o.GetDisplayCode().Equals(extractedOrderCode, StringComparison.OrdinalIgnoreCase));
+                }
+
+                // Також перевіряємо, чи цифри не відповідають старій ID замовлення (якщо ввели #15 чи 15)
+                if (foundOrder == null && int.TryParse(extractedOrderCode.Substring(3), out int rawId) && rawId < 1000)
+                {
+                    foundOrder = await db.Orders
+                        .Include(o => o.Listing)
+                        .Include(o => o.Seller)
+                        .Include(o => o.Buyer)
+                        .FirstOrDefaultAsync(o => o.Id == rawId, cancellationToken);
                 }
             }
-            else if (codeQuery.StartsWith("#") && int.TryParse(codeQuery.TrimStart('#'), out int parsedId))
+            else if (extractedOrderCode.StartsWith("#") && int.TryParse(extractedOrderCode.TrimStart('#'), out int parsedId))
             {
                 foundOrder = await db.Orders
                     .Include(o => o.Listing)
@@ -454,9 +506,17 @@ public class TelegramBotService : BackgroundService
             {
                 var dispCode = foundOrder.GetDisplayCode();
                 var isService = foundOrder.Listing?.CategoryId == 8 || (foundOrder.Listing?.Title ?? "").Contains("Послуг", StringComparison.OrdinalIgnoreCase);
+
+                // 🛡️ ЗАХИСТ КОНФІДЕНЦІЙНОСТІ ТА БЕЗПЕКИ:
+                // Перевіряємо, чи користувач Telegram є покупцем, продавцем або адміном цього замовлення.
+                var currentUser = await db.Users.FirstOrDefaultAsync(u => u.TelegramChatId == chatId, cancellationToken);
+                bool isAuthorized = (currentUser != null && (currentUser.Role == UserRoles.Admin || currentUser.Id == foundOrder.BuyerId || currentUser.Id == foundOrder.SellerId))
+                                    || (foundOrder.Buyer?.TelegramChatId == chatId)
+                                    || (foundOrder.Seller?.TelegramChatId == chatId);
+
                 var statusUk = foundOrder.Status switch
                 {
-                    OrderStatus.Pending => "⏳ Очікує підтвердження",
+                    OrderStatus.Pending => "⏳ Очікує підтвердження продавцем",
                     OrderStatus.Confirmed => "✅ Підтверджено продавцем (готується до відправки)",
                     OrderStatus.Shipped => "🚚 Відправлено Новою Поштою",
                     OrderStatus.Completed => "🎉 Успішно завершено",
@@ -474,16 +534,28 @@ public class TelegramBotService : BackgroundService
                     _ => ""
                 };
 
+                string deliveryDetails;
+                if (isAuthorized)
+                {
+                    deliveryDetails = $"📍 <b>Отримання:</b> {System.Net.WebUtility.HtmlEncode(foundOrder.DeliveryCity)}, {System.Net.WebUtility.HtmlEncode(foundOrder.DeliveryBranch)}\n";
+                }
+                else
+                {
+                    // Безпечне маскування точної адреси/відділення для сторонніх осіб
+                    deliveryDetails = $"📍 <b>Місто:</b> {System.Net.WebUtility.HtmlEncode(foundOrder.DeliveryCity)} <i>(відділення приховано з міркувань безпеки)</i>\n";
+                }
+
                 var replyText = $"📦 <b>Інформація про замовлення {dispCode}:</b>\n" +
                                 $"━━━━━━━━━━━━━━━━━━\n" +
                                 $"🏷 <b>{(isService ? "Послуга" : "Товар")}:</b> {System.Net.WebUtility.HtmlEncode(foundOrder.Listing?.Title ?? "Оголошення")}\n" +
-                                $"💰 <b>Сума до сплати:</b> {foundOrder.TotalPrice:N0} ₴\n" +
-                                $"⚡ <b>Поточний статус:</b> <b>{statusUk}</b>\n" +
-                                $"📍 <b>Отримання:</b> {System.Net.WebUtility.HtmlEncode(foundOrder.DeliveryCity)}, {System.Net.WebUtility.HtmlEncode(foundOrder.DeliveryBranch)}\n" +
-                                $"💳 <b>Спосіб оплати:</b> {System.Net.WebUtility.HtmlEncode(foundOrder.PaymentMethod)}\n" +
+                                $"💰 <b>Сума:</b> {foundOrder.TotalPrice:N0} ₴\n" +
+                                $"⚡ <b>Статус:</b> <b>{statusUk}</b>\n" +
+                                deliveryDetails +
+                                $"💳 <b>Оплата:</b> {System.Net.WebUtility.HtmlEncode(foundOrder.PaymentMethod)}\n" +
                                 (!string.IsNullOrWhiteSpace(foundOrder.TrackingNumber) ? $"🚚 <b>ТТН Нової Пошти:</b> <code>{foundOrder.TrackingNumber}</code>\n" : "") +
                                 $"━━━━━━━━━━━━━━━━━━\n" +
-                                $"{statusTip}";
+                                $"{statusTip}" +
+                                (!isAuthorized ? "\n\n🔒 <i>Для перегляду повних персональних даних увійдіть у прив'язаний акаунт на сайті.</i>" : "");
 
                 await botClient.SendMessage(
                     chatId: chatId,
@@ -500,8 +572,9 @@ public class TelegramBotService : BackgroundService
             {
                 await botClient.SendMessage(
                     chatId: chatId,
-                    text: $"🔍 <b>Замовлення <code>{codeQuery}</code> не знайдено в базі даних.</b>\n\n" +
-                          $"Перевірте, чи правильно вказано код (наприклад, <code>LP-749281</code>) або скористайтеся кнопкою «📦 Мої замовлення» на клавіатурі.",
+                    text: $"🔍 <b>Замовлення за номером <code>{rawText}</code> не знайдено в системі.</b>\n\n" +
+                          $"Перевірте, будь ласка, правильність цифр (наприклад, <code>749281</code> або <code>LP-749281</code>).\n" +
+                          $"Також ви можете скористатися кнопкою «📦 Мої замовлення» на клавіатурі нижче.",
                     parseMode: ParseMode.Html,
                     cancellationToken: cancellationToken);
                 return;
@@ -568,7 +641,7 @@ public class TelegramBotService : BackgroundService
                        $"  Назва: <b>{System.Net.WebUtility.HtmlEncode(o.Listing?.Title ?? "Оголошення")}</b>\n" +
                        $"  Сума: <b>{o.TotalPrice:N0} ₴</b> | Статус: <b>{statusText}</b>\n" +
                        (!string.IsNullOrWhiteSpace(o.TrackingNumber) ? $"  ТТН: <code>{o.TrackingNumber}</code>\n" : "") +
-                       $"\n";
+                       $"\\n";
             }
             msg += $"━━━━━━━━━━━━━━━━━━\n<i>Для перегляду всіх деталей перейдіть до особистого кабінету.</i>";
 
@@ -596,11 +669,11 @@ public class TelegramBotService : BackgroundService
                       "2. 🚫 <b>Ніколи не переходьте за сторонніми посиланнями:</b> якщо покупець чи продавець просить 'підтвердити оплату' чи 'отримати гроші на картку' за якимось посиланням — це 100% шахраї!\n" +
                       "3. 💳 <b>Конфіденційність картки:</b> для отримання оплати на картку покупцю потрібен ТІЛЬКИ 16-значний номер. <b>Ніколи не називайте термін дії та CVV-код!</b>\n" +
                       "4. 💬 <b>Внутрішній чат:</b> домовляйтеся про деталі у чаті нашого сайту — у разі виникнення суперечок це є офіційним доказом для адміністрації.\n\n" +
-                      "<i>Натисніть кнопку нижче, якщо ви підозрюєте спробу шахрайства:</i>",
+                      "<i>Натисніть кнопку нижче, щоб повідомити адміністратора про підозрілі дії:</i>",
                 parseMode: ParseMode.Html,
                 replyMarkup: new InlineKeyboardMarkup(new[]
                 {
-                    new[] { InlineKeyboardButton.WithCallbackData("🆘 Повідомити про шахрая оператору", "support_contact") },
+                    new[] { InlineKeyboardButton.WithUrl("💬 Написати адміну: @LoopMarketSupport", "https://t.me/LoopMarketSupport") },
                     new[] { InlineKeyboardButton.WithUrl("📖 Читати повні правила безпеки", "https://loopmarket-x0uo.onrender.com/safety.html") }
                 }),
                 cancellationToken: cancellationToken);
@@ -613,7 +686,7 @@ public class TelegramBotService : BackgroundService
             await botClient.SendMessage(
                 chatId: chatId,
                 text: "👋 <b>Служба швидкої підтримки та безпеки Loop Market</b>\n\n" +
-                      "Я допоможу швидко вирішити будь-яке питання або зв'язати вас з черговим оператором.\n\n" +
+                      "Я допоможу швидко вирішити будь-яке питання або зв'язати вас з черговим оператором <b>@LoopMarketSupport</b>.\n\n" +
                       "Оберіть тему вашого питання або просто напишіть повідомлення в цей чат:",
                 parseMode: ParseMode.Html,
                 replyMarkup: GetInlineFaqNavigation(),
@@ -627,7 +700,11 @@ public class TelegramBotService : BackgroundService
             await botClient.SendMessage(
                 chatId: chatId,
                 text: "🔍 <b>Перевірка статусу замовлення в 1 клік:</b>\n\n" +
-                      "Надішліть сюди у чат ваш код замовлення (наприклад: <code>LP-782194</code> або <code>#14</code>), і я миттєво покажу статус відправлення, ТТН та повну інформацію про посилку!",
+                      "Надішліть сюди у чат номер або код вашого замовлення, наприклад:\n" +
+                      "👉 просто цифри: <code>749281</code>\n" +
+                      "👉 або з префіксом: <code>LP-749281</code>\n" +
+                      "👉 або <code>#14</code>\n\n" +
+                      "Я миттєво покажу статус відправлення, ТТН та інформацію про посилку!",
                 parseMode: ParseMode.Html,
                 cancellationToken: cancellationToken);
             return;
@@ -686,7 +763,7 @@ public class TelegramBotService : BackgroundService
         }
 
         // 11. КОРИСТУВАЧ ПИШЕ ТЕКСТОВЕ ЗВЕРНЕННЯ / ПИТАННЯ В ПІДТРИМКУ
-        if (rawText.Length > 8 && !rawText.StartsWith("/"))
+        if (rawText.Length > 3 && !rawText.StartsWith("/"))
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -694,33 +771,32 @@ public class TelegramBotService : BackgroundService
             var user = await db.Users.FirstOrDefaultAsync(u => u.TelegramChatId == chatId, cancellationToken);
             var userName = user != null ? $"{user.FirstName} {user.LastName}".Trim() : message.Chat.FirstName ?? "Користувач Telegram";
             var userPhone = user?.PhoneNumber ?? "Не прив'язано";
-
-            // Фіксуємо сповіщення адміністраторам платформи
-            var adminUsers = await db.Users.Where(u => u.Role == UserRoles.Admin).ToListAsync(cancellationToken);
-            foreach (var adm in adminUsers)
-            {
-                var notif = new Notification
-                {
-                    UserId = adm.Id,
-                    Title = "🆘 Звернення до підтримки в Telegram",
-                    Message = $"{userName} (тел. {userPhone}, ChatId: {chatId}): {rawText}",
-                    Link = "/admin.html",
-                    CreatedAt = DateTime.UtcNow
-                };
-                db.Notifications.Add(notif);
-            }
-            await db.SaveChangesAsync(cancellationToken);
-
             var ticketCode = $"TK-{Random.Shared.Next(100000, 999999)}";
+
+            // Пересилаємо звернення адміністратору @LoopMarketSupport в Telegram та в базу даних
+            await NotifyAdminsAboutSupportTicketAsync(
+                botClient,
+                chatId,
+                userName,
+                userPhone,
+                message.Chat.Username,
+                ticketCode,
+                rawText,
+                cancellationToken);
+
             await botClient.SendMessage(
                 chatId: chatId,
                 text: $"✅ <b>Ваше звернення зареєстровано в системі підтримки!</b>\n\n" +
                       $"🎫 Код звернення: <code>{ticketCode}</code>\n" +
                       $"👤 Відправник: <b>{System.Net.WebUtility.HtmlEncode(userName)}</b>\n\n" +
-                      $"Черговий оператор розгляне ваше питання в найкоротший термін!\n" +
-                      $"Якщо питання термінове — зв'яжіться безпосередньо з черговим оператором: <b>@LoopMarketSupport</b>.",
+                      $"📩 Повідомлення вже передано черговому адміністратору <b>@LoopMarketSupport</b>.\n" +
+                      $"Вам дадуть відповідь у найкоротший термін!\n\n" +
+                      $"<i>Ви також можете написати черговому оператору напряму за кнопкою нижче:</i>",
                 parseMode: ParseMode.Html,
-                replyMarkup: user != null ? GetUserKeyboard(true, user.ReceiveTelegramNotifications) : GetUserKeyboard(false),
+                replyMarkup: new InlineKeyboardMarkup(new[]
+                {
+                    new[] { InlineKeyboardButton.WithUrl("💬 Написати адміну: @LoopMarketSupport", "https://t.me/LoopMarketSupport") }
+                }),
                 cancellationToken: cancellationToken);
             return;
         }
@@ -733,9 +809,9 @@ public class TelegramBotService : BackgroundService
             var isVerified = user != null && user.IsPhoneVerified;
 
             var greeting = isVerified 
-                ? $"👋 <b>Раді вітати, {user!.FirstName}!</b>\n\nЯ ваш офіційний бот-асистент <b>Loop Market</b>. Оберіть дію на клавіатурі нижче:"
+                ? $"👋 <b>Раді вітати, {user!.FirstName}!</b>\n\nЯ ваш офіційний бот-асистент <b>Loop Market</b>. Оберіть потрібну дію на клавіатурі нижче:"
                 : "👋 <b>Вітаємо в офіційному боті Loop Market!</b>\n\n" +
-                  "Тут ви можете миттєво перевіряти замовлення, отримувати сповіщення про посилки та звертатися до служби безпеки й підтримки.\n\n" +
+                  "Тут ви можете миттєво перевіряти статус замовлень (просто введіть цифри замовлення), отримувати сповіщення про посилки та звертатися до служби безпеки й підтримки.\n\n" +
                   "Для початку підтвердіть ваш номер телефону натисканням кнопки нижче («📱 Надіслати мій номер»).";
 
             await botClient.SendMessage(
@@ -744,6 +820,135 @@ public class TelegramBotService : BackgroundService
                 parseMode: ParseMode.Html,
                 replyMarkup: GetUserKeyboard(isVerified, user?.ReceiveTelegramNotifications ?? true),
                 cancellationToken: cancellationToken);
+        }
+    }
+
+    private static string? ExtractOrderCodeCandidate(string text)
+    {
+        var raw = text.Trim();
+
+        // 1. Повний префікс LP-XXXXXX, lp XXXXXX або LPXXXXXX
+        var lpMatch = System.Text.RegularExpressions.Regex.Match(raw, @"\b(?:LP[- ]?([0-9A-Za-z_-]{4,10}))\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        if (lpMatch.Success)
+        {
+            return $"LP-{lpMatch.Groups[1].Value.ToUpperInvariant()}";
+        }
+
+        // 2. Введення просто 5-7 цифр (наприклад, 749281 чи 123456)
+        var digitsMatch = System.Text.RegularExpressions.Regex.Match(raw, @"^\s*(\d{5,7})\s*$");
+        if (digitsMatch.Success)
+        {
+            return $"LP-{digitsMatch.Groups[1].Value}";
+        }
+
+        // 3. Старий порядковий формат #15 чи 1-4 цифри з решіткою
+        var hashMatch = System.Text.RegularExpressions.Regex.Match(raw, @"#(\d+)");
+        if (hashMatch.Success)
+        {
+            return hashMatch.Value;
+        }
+
+        return null;
+    }
+
+    private static bool IsRateLimited(long chatId)
+    {
+        var now = DateTime.UtcNow;
+        var attempts = RateLimitTracker.GetOrAdd(chatId, _ => new List<DateTime>());
+        lock (attempts)
+        {
+            attempts.RemoveAll(t => now - t > TimeSpan.FromMinutes(1));
+            if (attempts.Count >= 6)
+            {
+                return true;
+            }
+            attempts.Add(now);
+            return false;
+        }
+    }
+
+    private async Task NotifyAdminsAboutSupportTicketAsync(
+        ITelegramBotClient botClient, 
+        long userChatId, 
+        string userName, 
+        string userPhone, 
+        string? userUsername, 
+        string ticketCode, 
+        string userMessageText, 
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            // 1. Зберігаємо сповіщення в веб-кабінеті адміністраторів
+            var adminUsers = await db.Users.Where(u => u.Role == UserRoles.Admin).ToListAsync(cancellationToken);
+            foreach (var adm in adminUsers)
+            {
+                var notif = new Notification
+                {
+                    UserId = adm.Id,
+                    Title = $"🆘 Звернення {ticketCode} в Telegram",
+                    Message = $"{userName} (тел. {userPhone}, ChatId: {userChatId}): {userMessageText}",
+                    Link = "/admin.html",
+                    CreatedAt = DateTime.UtcNow
+                };
+                db.Notifications.Add(notif);
+            }
+            await db.SaveChangesAsync(cancellationToken);
+
+            // 2. Відправляємо миттєвий Telegram push головному адміністратору @LoopMarketSupport та підключеним адмінам
+            var adminChatIds = new HashSet<long>();
+            if (MasterSupportChatId != 0 && MasterSupportChatId != userChatId)
+            {
+                adminChatIds.Add(MasterSupportChatId);
+            }
+            foreach (var adm in adminUsers.Where(a => a.TelegramChatId != 0 && a.TelegramChatId != userChatId))
+            {
+                adminChatIds.Add(adm.TelegramChatId);
+            }
+
+            if (adminChatIds.Count > 0)
+            {
+                var adminText = $"🚨 <b>НОВЕ ЗВЕРНЕННЯ В ПІДТРИМКУ!</b>\n" +
+                                $"━━━━━━━━━━━━━━━━━━\n" +
+                                $"🎫 Код тікета: <code>{ticketCode}</code>\n" +
+                                $"👤 Користувач: <b>{System.Net.WebUtility.HtmlEncode(userName)}</b>\n" +
+                                $"📱 Телефон: <code>{userPhone}</code>\n" +
+                                (!string.IsNullOrWhiteSpace(userUsername) ? $"💬 Telegram: @{userUsername}\n" : $"🆔 ChatId: <code>{userChatId}</code>\n") +
+                                $"━━━━━━━━━━━━━━━━━━\n" +
+                                $"📝 <b>Повідомлення:</b>\n<i>{System.Net.WebUtility.HtmlEncode(userMessageText)}</i>";
+
+                var replyBtns = new List<InlineKeyboardButton>();
+                if (!string.IsNullOrWhiteSpace(userUsername))
+                {
+                    replyBtns.Add(InlineKeyboardButton.WithUrl("💬 Відповісти в Telegram", $"https://t.me/{userUsername}"));
+                }
+
+                var markup = replyBtns.Count > 0 ? new InlineKeyboardMarkup(new[] { replyBtns.ToArray() }) : null;
+
+                foreach (var admChatId in adminChatIds)
+                {
+                    try
+                    {
+                        await botClient.SendMessage(
+                            chatId: admChatId,
+                            text: adminText,
+                            parseMode: ParseMode.Html,
+                            replyMarkup: markup,
+                            cancellationToken: cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Telegram Warning] Не вдалося надіслати сповіщення адміну {admChatId}: {ex.Message}");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Telegram Error] Помилка надсилання сповіщення підтримки: {ex.Message}");
         }
     }
 
@@ -796,8 +1001,8 @@ public class TelegramBotService : BackgroundService
             new[] { InlineKeyboardButton.WithCallbackData("📦 Як оформити замовлення товару?", "faq_orders") },
             new[] { InlineKeyboardButton.WithCallbackData("🛠 Як замовити послугу майстра?", "faq_services") },
             new[] { InlineKeyboardButton.WithCallbackData("🛡️ Правила безпеки та захист від шахраїв", "faq_safety") },
-            new[] { InlineKeyboardButton.WithCallbackData("🔍 Перевірити статус за кодом LP-...", "faq_check_order") },
-            new[] { InlineKeyboardButton.WithCallbackData("💬 Зв'язатися з оператором підтримки", "support_contact") }
+            new[] { InlineKeyboardButton.WithCallbackData("🔍 Перевірити замовлення за номером", "faq_check_order") },
+            new[] { InlineKeyboardButton.WithUrl("💬 Написати адміну: @LoopMarketSupport", "https://t.me/LoopMarketSupport") }
         });
     }
 
