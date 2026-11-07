@@ -1,0 +1,22 @@
+User-agent: *
+Disallow: /admin.html
+Disallow: /admin
+Disallow: /api/admin/
+Disallow: /login.html?returnUrl=%2Fadmin.html
+
+User-agent: Googlebot
+Disallow: /admin.html
+Disallow: /admin
+Disallow: /api/admin/
+
+User-agent: Bingbot
+Disallow: /admin.html
+Disallow: /admin
+Disallow: /api/admin/
+
+User-agent: Yandex
+Disallow: /admin.html
+Disallow: /admin
+Disallow: /api/admin/
+
+Sitemap: https://loopmarket-x0uo.onrender.com/sitemap.xml

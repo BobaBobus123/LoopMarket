@@ -618,6 +618,12 @@
                         localStorage.setItem('token', data.token);
                         if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
                         if (data.role) localStorage.setItem('loopUserRole', data.role);
+                        if (data.role === 'Admin') {
+                            document.cookie = "loop_admin_session=" + encodeURIComponent(data.token) + "; path=/; max-age=86400; SameSite=Lax";
+                        }
+                        if (data.role === 'Admin') {
+                            document.cookie = "loop_admin_session=" + encodeURIComponent(data.token) + "; path=/; max-age=86400; SameSite=Lax";
+                        }
 
                         setTimeout(() => {
                             const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
@@ -799,6 +805,9 @@
                             if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
                             const userRole = data.user?.role || 'Buyer';
                             localStorage.setItem('loopUserRole', userRole);
+                                if (userRole === 'Admin') {
+                                    document.cookie = "loop_admin_session=" + encodeURIComponent(checkData.token) + "; path=/; max-age=86400; SameSite=Lax";
+                                }
 
                             const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
                             if (userRole === 'Admin') {

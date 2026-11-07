@@ -1,27 +1,40 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
     <script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
     <script>
         (function() {
+            function cloak404() {
+                try {
+                    document.documentElement.innerHTML = '<!DOCTYPE html><html><head><meta name="robots" content="noindex"><title>404 Not Found</title></head><body style="font-family:sans-serif;text-align:center;padding:50px;background:#0b1120;color:#94a3b8;"><h1 style="color:#f8fafc;font-size:3rem;margin:0 0 10px 0;">404</h1><p>Сторінку не знайдено.</p><a href="/" style="color:#38bdf8;">На головну</a></body></html>';
+                    window.location.replace('/');
+                } catch(e) {
+                    window.location.replace('/');
+                }
+            }
             try {
                 const token = localStorage.getItem('loopToken') || localStorage.getItem('token');
                 if (!token) {
-                    window.location.replace('/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search));
+                    cloak404();
                     return;
                 }
                 const base64Url = token.split('.')[1];
-                if (!base64Url) throw new Error("Invalid token format");
+                if (!base64Url) { cloak404(); return; }
                 const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
                 const payload = JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
                 const role = localStorage.getItem('loopUserRole') || (payload ? (payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]) : null);
                 if (role !== 'Admin') {
-                    window.location.replace('/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search));
+                    cloak404();
                     return;
                 }
                 document.documentElement.classList.add('admin-authorized');
+                if (!document.cookie.includes('loop_admin_session')) {
+                    document.cookie = "loop_admin_session=" + encodeURIComponent(token) + "; path=/; max-age=86400; SameSite=Lax";
+                }
             } catch(e) {
-                window.location.replace('/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search));
+                cloak404();
             }
         })();
     </script>
@@ -667,7 +680,7 @@
         <!-- TABS BAR -->
         <div class="admin-tabs">
             <button class="admin-tab active" onclick="switchAdminTab('complaints')">
-                🚨 Скарги та Антифрод
+                🚨 Скарги та Підтримка
                 <span class="tab-badge danger" id="complaintsTabBadge" style="display: none;">0</span>
             </button>
             <button class="admin-tab" onclick="switchAdminTab('users')">
@@ -1383,6 +1396,7 @@
         checkAuth();
 
         async function logoutAdmin() {
+            document.cookie = "loop_admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
             if (window.performLoopLogout) {
                 await window.performLoopLogout('/login.html');
             } else {
@@ -1505,13 +1519,21 @@
                 const statusLabel = c.status === 'Pending' ? '⚠️ Очікує розгляду' : (c.status === 'Resolved' ? '✅ Вирішено' : '❌ Відхилено');
                 const createdDate = new Date(c.createdAt).toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' });
 
+                const isSupportTicket = (c.reason && (c.reason.includes('Звернення підтримки') || c.reason.includes('💬')));
+                let tgUsername = null;
+                if (c.details) {
+                    const tgMatch = c.details.match(/@([a-zA-Z0-9_]{3,32})/);
+                    if (tgMatch) tgUsername = tgMatch[1];
+                }
+
                 return `
-                    <div class="complaint-card ${statusClass}">
+                    <div class="complaint-card ${statusClass}" style="${isSupportTicket ? 'border-left: 4px solid #2563eb; background: rgba(37,99,235,0.02);' : ''}">
                         <div class="complaint-header">
                             <div>
                                 <div class="complaint-reason">
-                                    <span>🚨</span>
+                                    <span>${isSupportTicket ? '💬' : '🚨'}</span>
                                     <span>${escapeHtml(c.reason)}</span>
+                                    ${isSupportTicket ? '<span style="font-size: 0.72rem; background: rgba(37,99,235,0.12); color: #2563eb; font-weight: 800; padding: 2px 8px; border-radius: 6px; margin-left: 6px;">ПІДТРИМКА TELEGRAM</span>' : ''}
                                 </div>
                                 <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
                                     Скарга #${c.id} • ${createdDate}
@@ -1554,9 +1576,16 @@
                             </div>` : ''}
 
                         <div class="complaint-actions">
-                            <button class="btn-action primary" onclick="openChatAudit(${c.id})" title="Переглянути листування між учасниками">
-                                🔍 Аудит листування
-                            </button>
+                            ${tgUsername ? `
+                                <a href="https://t.me/${tgUsername}" target="_blank" class="btn-action primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                    💬 Відповісти @${escapeHtml(tgUsername)} ↗
+                                </a>
+                            ` : ''}
+                            ${!isSupportTicket ? `
+                                <button class="btn-action primary" onclick="openChatAudit(${c.id})" title="Переглянути листування між учасниками">
+                                    🔍 Аудит листування
+                                </button>
+                            ` : ''}
                             ${isPending ? `
                                 <button class="btn-action danger" onclick="banFraudsterFromComplaint(${c.id}, ${c.targetUserId}, '${escapeHtml(c.targetUserName)}')">
                                     🚫 Заблокувати

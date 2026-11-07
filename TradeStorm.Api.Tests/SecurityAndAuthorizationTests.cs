@@ -85,4 +85,18 @@ public class SecurityAndAuthorizationTests : IClassFixture<CustomWebApplicationF
         // RBAC: роль Buyer повинна отримувати 403 Forbidden!
         Assert.Equal(HttpStatusCode.Forbidden, adminRes.StatusCode);
     }
+
+    [Fact]
+    public async Task AdminPage_UnauthorizedVisitor_ShouldReturnNotFound404AndNoIndexHeader()
+    {
+        var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = null;
+
+        // Будь-який сканер чи хакер, який намагається відкрити /admin.html без адмін-сесії, отримує 404 Not Found
+        var response = await client.GetAsync("/admin.html");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+
+        // Перевірка анти-індексації пошуковими роботами
+        Assert.True(response.Headers.Contains("X-Robots-Tag"));
+    }
 }
