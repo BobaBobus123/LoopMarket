@@ -31,16 +31,19 @@ public class TelegramBotService : BackgroundService
     {
         _scopeFactory = scopeFactory;
         var token = config["Telegram:BotToken"] ?? config["TelegramBot:Token"];
-        if (!string.IsNullOrWhiteSpace(token) && token != "YOUR_BOT_TOKEN_HERE")
+        if (string.IsNullOrWhiteSpace(token) || token.Contains("YOUR_"))
         {
-            try
-            {
-                _botClient = new TelegramBotClient(token);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Telegram Warning] Не вдалося ініціалізувати бота: {ex.Message}");
-            }
+            token = "8990313504:AAGUpi64ddFbrAEa8KxR97lJJ2Y-1kz14uY";
+        }
+
+        try
+        {
+            _botClient = new TelegramBotClient(token);
+            Console.WriteLine("[Telegram Info] TelegramBotClient успішно ініціалізовано з токеном.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Telegram Warning] Не вдалося ініціалізувати бота: {ex.Message}");
         }
     }
 
@@ -72,6 +75,16 @@ public class TelegramBotService : BackgroundService
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine("\n[Telegram] Бот успішно запущений і слухає повідомлення!\n");
         Console.ResetColor();
+
+        // Тримаємо фоновий процес активним протягом усього часу роботи сервера
+        try
+        {
+            await Task.Delay(Timeout.Infinite, stoppingToken);
+        }
+        catch (OperationCanceledException)
+        {
+            // Graceful stop
+        }
     }
 
     public async Task SendNotificationAsync(long telegramChatId, string message)

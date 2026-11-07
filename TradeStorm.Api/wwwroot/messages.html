@@ -994,7 +994,7 @@
             min-height: 0;
             scrollbar-width: thin;
             scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
-            scroll-behavior: smooth;
+            scroll-behavior: auto;
         }
 
         .chat-stream-area::-webkit-scrollbar {
@@ -1981,30 +1981,40 @@
         function handleChatScroll() {
             const chatArea = document.getElementById('chatArea');
             const btn = document.getElementById('btnScrollBottom');
+            const badge = document.getElementById('scrollBottomUnread');
             if (!chatArea || !btn) return;
             const distFromBottom = chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight;
-            if (distFromBottom > 120) {
+            if (distFromBottom > 150) {
                 btn.classList.add('visible');
             } else {
                 btn.classList.remove('visible');
                 unreadCountWhileScrolled = 0;
-                const badge = document.getElementById('scrollBottomUnread');
                 if (badge) badge.style.display = 'none';
             }
         }
 
-        function scrollToChatBottom() {
+        function scrollToChatBottom(smooth = true) {
             const chatArea = document.getElementById('chatArea');
             if (!chatArea) return;
             chatArea.scrollTo({
                 top: chatArea.scrollHeight,
-                behavior: 'smooth'
+                behavior: smooth ? 'smooth' : 'auto'
             });
             unreadCountWhileScrolled = 0;
             const badge = document.getElementById('scrollBottomUnread');
             if (badge) badge.style.display = 'none';
             const btn = document.getElementById('btnScrollBottom');
             if (btn) btn.classList.remove('visible');
+
+            if (activeReceiverId) {
+                const readToken = localStorage.getItem('loopToken') || localStorage.getItem('token');
+                if (readToken) {
+                    fetch(`/api/messages/mark-read/${activeReceiverId}`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${readToken}` }
+                    }).catch(() => {});
+                }
+            }
         }
 
         // СТАРТ СТОРІНКИ
@@ -2523,11 +2533,14 @@
         // ЗАВАНТАЖЕННЯ ІСТОРІЇ
         async function loadChatHistory(partnerId, partnerName) {
             const chatArea = document.getElementById('chatArea');
+            const btnScroll = document.getElementById('btnScrollBottom');
+            const badgeScroll = document.getElementById('scrollBottomUnread');
             chatArea.innerHTML = '<div style="margin: auto; text-align: center; color: var(--text-muted); font-size: 0.88rem;">Завантаження листування...</div>';
 
             try {
+                const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
                 const res = await fetch(`/api/messages/history/${partnerId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${curToken}` }
                 });
                 const history = await res.json();
 
@@ -2537,21 +2550,63 @@
                             <div class="empty-chat-icon">
                                 <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                             </div>
-                            <h3 class="empty-chat-title">Почніть діалог з ${partnerName}</h3>
+                            <h3 class="empty-chat-title">Почніть діалог з ${escapeHtml(partnerName)}</h3>
                             <p class="empty-chat-subtitle">Обговоріть деталі замовлення або послуги. Ваші повідомлення доставляються миттєво в чат та дублюються в Telegram автора.</p>
                         </div>`;
                     updateMessageCounter(0);
+                    if (btnScroll) btnScroll.classList.remove('visible');
+                    if (badgeScroll) badgeScroll.style.display = 'none';
                     return;
                 }
 
                 chatArea.innerHTML = '';
+                let firstUnreadMsgId = null;
+                let unreadCount = 0;
+
                 history.forEach(m => {
                     const isSent = m.senderId === currentUserId;
-                    appendMessage(m.text, isSent ? 'sent' : 'received', m.sentAt, m.isRead, false);
+                    const isUnread = !isSent && !m.isRead;
+                    if (isUnread) {
+                        unreadCount++;
+                        if (!firstUnreadMsgId) firstUnreadMsgId = m.id;
+                    }
+                    appendMessage(m.text, isSent ? 'sent' : 'received', m.sentAt, m.isRead, false, m.id);
                 });
                 updateMessageCounter(history.length);
-                // Завжди прокручуємо вниз при першому завантаженні історії
-                chatArea.scrollTop = chatArea.scrollHeight;
+
+                // Якщо є непрочитані повідомлення від співрозмовника:
+                if (unreadCount > 0 && firstUnreadMsgId) {
+                    const firstUnreadEl = chatArea.querySelector(`[data-msg-id="${firstUnreadMsgId}"]`);
+                    if (firstUnreadEl) {
+                        // Відкриваємо чат саме з першого непрочитаного повідомлення
+                        firstUnreadEl.scrollIntoView({ behavior: 'auto', block: 'start' });
+                        setTimeout(() => {
+                            const distFromBottom = chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight;
+                            if (distFromBottom > 100) {
+                                if (btnScroll) btnScroll.classList.add('visible');
+                                if (badgeScroll) {
+                                    badgeScroll.innerText = unreadCount > 99 ? '99+' : unreadCount;
+                                    badgeScroll.style.display = 'inline-flex';
+                                }
+                                unreadCountWhileScrolled = unreadCount;
+                            } else {
+                                if (btnScroll) btnScroll.classList.remove('visible');
+                                if (badgeScroll) badgeScroll.style.display = 'none';
+                                unreadCountWhileScrolled = 0;
+                            }
+                        }, 50);
+                    } else {
+                        chatArea.scrollTop = chatArea.scrollHeight;
+                        if (btnScroll) btnScroll.classList.remove('visible');
+                        if (badgeScroll) badgeScroll.style.display = 'none';
+                    }
+                } else {
+                    // Якщо всі повідомлення прочитано — ОДРАЗУ показуємо кінець чату БЕЗ прокрутки
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                    if (btnScroll) btnScroll.classList.remove('visible');
+                    if (badgeScroll) badgeScroll.style.display = 'none';
+                    unreadCountWhileScrolled = 0;
+                }
             } catch(e) {
                 console.error("Error loading chat history:", e);
                 chatArea.innerHTML = '<div style="margin: auto; text-align: center; color: #ef4444;">Не вдалося завантажити повідомлення</div>';
@@ -2580,7 +2635,7 @@
         }
 
         // ДОДАВАННЯ ПОВІДОМЛЕННЯ В СТРІЧКУ
-        function appendMessage(text, type, timeString, isRead = false, autoUpdateCount = true) {
+        function appendMessage(text, type, timeString, isRead = false, autoUpdateCount = true, msgId = null) {
             const chatArea = document.getElementById('chatArea');
             const emptyEl = chatArea.querySelector('.chat-empty-state');
             if (emptyEl) chatArea.innerHTML = '';
@@ -2608,7 +2663,7 @@
             const statusHtml = (type === 'sent') ? checkIcon : '';
 
             const bubbleHtml = `
-                <div class="msg-bubble msg-${type}">
+                <div class="msg-bubble msg-${type}" ${msgId ? `data-msg-id="${msgId}"` : ''}>
                     <div>${contentHtml}</div>
                     <div class="msg-time-row">
                         <span>${time}</span>
@@ -2618,19 +2673,21 @@
             `;
 
             chatArea.insertAdjacentHTML('beforeend', bubbleHtml);
-            const distFromBottom = chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight;
-            if (type === 'sent' || distFromBottom < 160) {
-                chatArea.scrollTop = chatArea.scrollHeight;
-            } else {
-                unreadCountWhileScrolled++;
-                const badge = document.getElementById('scrollBottomUnread');
-                if (badge) {
-                    badge.textContent = unreadCountWhileScrolled;
-                    badge.style.display = 'inline-block';
-                }
-            }
 
             if (autoUpdateCount) {
+                const distFromBottom = chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight;
+                if (type === 'sent' || distFromBottom < 120) {
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                } else {
+                    unreadCountWhileScrolled++;
+                    const badge = document.getElementById('scrollBottomUnread');
+                    const btn = document.getElementById('btnScrollBottom');
+                    if (btn) btn.classList.add('visible');
+                    if (badge) {
+                        badge.textContent = unreadCountWhileScrolled > 99 ? '99+' : unreadCountWhileScrolled;
+                        badge.style.display = 'inline-flex';
+                    }
+                }
                 const total = chatArea.querySelectorAll('.msg-bubble').length;
                 updateMessageCounter(total);
             }
@@ -2987,6 +3044,126 @@
             } catch(e) {}
         }
 
+    
+        // ==================== БОКОВЕ МЕНЮ "ТРИ ПОЛОСКИ" ====================
+        window.toggleMobileNavDrawer = function() {
+            const drawer = document.getElementById('mobileNavDrawer');
+            const backdrop = document.getElementById('mobileDrawerBackdrop');
+            if (!drawer || !backdrop) return;
+            const isOpen = drawer.classList.contains('active');
+            if (isOpen) {
+                closeMobileNavDrawer();
+            } else {
+                renderDrawerUserInfo();
+                drawer.classList.add('active');
+                backdrop.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        };
+
+        window.closeMobileNavDrawer = function() {
+            const drawer = document.getElementById('mobileNavDrawer');
+            const backdrop = document.getElementById('mobileDrawerBackdrop');
+            if (drawer) drawer.classList.remove('active');
+            if (backdrop) backdrop.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        function renderDrawerUserInfo() {
+            const container = document.getElementById('drawerUserCard');
+            const logoutBtn = document.getElementById('drawerLogoutBtn');
+            const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token');
+            if (!container) return;
+
+            if (curToken) {
+                try {
+                    const u = parseJwt(curToken);
+                    const name = u["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "Користувач";
+                    const email = u["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] || "";
+                    container.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0;">
+                                ${escapeHtml(name.charAt(0).toUpperCase())}
+                            </div>
+                            <div style="min-width: 0;">
+                                <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(name)}</div>
+                                <div style="font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(email)}</div>
+                            </div>
+                        </div>
+                    `;
+                    if (logoutBtn) logoutBtn.style.display = 'flex';
+                } catch(e) {
+                    showDrawerGuest();
+                }
+            } else {
+                showDrawerGuest();
+            }
+        }
+
+        function showDrawerGuest() {
+            const container = document.getElementById('drawerUserCard');
+            const logoutBtn = document.getElementById('drawerLogoutBtn');
+            if (container) {
+                container.innerHTML = `
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Вхід у ваш профіль:</div>
+                    <div style="display: flex; gap: 8px;">
+                        <a href="/login.html" class="btn-primary" style="flex: 1; text-decoration: none; text-align: center; padding: 9px 12px; font-size: 0.86rem; border-radius: 10px;">Вхід</a>
+                        <a href="/login.html?tab=register" class="btn-primary" style="flex: 1; text-decoration: none; text-align: center; padding: 9px 12px; font-size: 0.86rem; border-radius: 10px; background: transparent; color: var(--primary-light); border: 1.5px solid var(--border-color);">Реєстрація</a>
+                    </div>
+                `;
+            }
+            if (logoutBtn) logoutBtn.style.display = 'none';
+        }
+
     </script>
+
+    <!-- БОКОВЕ МЕНЮ "ТРИ ПОЛОСКИ" ДЛЯ МОБІЛЬНИХ ПРИСТРОЇВ (HAMBURGER DRAWER) -->
+    <div class="mobile-drawer-backdrop" id="mobileDrawerBackdrop" onclick="closeMobileNavDrawer()"></div>
+    <div class="mobile-nav-drawer" id="mobileNavDrawer">
+        <div class="drawer-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+            <a href="/index.html" class="logo" style="text-decoration: none;">
+                <div class="logo-circle" style="width: 34px; height: 34px; font-size: 1rem;">L</div>
+                <span style="font-size: 1.2rem; font-weight: 800; color: var(--text-main);">Loop<span style="color: #10b981;">Market</span></span>
+            </a>
+            <button type="button" class="btn-drawer-close" onclick="closeMobileNavDrawer()" aria-label="Закрити" style="background: none; border: none; font-size: 1.3rem; color: var(--text-muted); cursor: pointer; padding: 4px 8px;">✕</button>
+        </div>
+
+        <div class="drawer-user-box" id="drawerUserCard" style="margin-bottom: 20px; padding: 12px; background: var(--bg-color); border-radius: 12px;">
+            <!-- Заповнюється динамічно JS (гість чи аватарка + ім'я) -->
+        </div>
+
+        <div class="drawer-links-nav" style="display: flex; flex-direction: column; gap: 8px;">
+            <a href="/index.html" onclick="closeMobileNavDrawer()" class="drawer-link" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.95rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                <span>Головна каталог</span>
+            </a>
+            <a href="/index.html?type=service" onclick="closeMobileNavDrawer()" class="drawer-link" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.95rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                <span>🛠 Послуги майстрів</span>
+            </a>
+            <a href="/messages.html" onclick="closeMobileNavDrawer()" class="drawer-link" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; text-decoration: none; color: #2563eb; background: rgba(37,99,235,0.08); font-weight: 700; font-size: 0.95rem; position: relative;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>Повідомлення</span>
+                <span class="badge-count" id="drawerChatBadge" style="display: none; margin-left: auto;">0</span>
+            </a>
+            <a href="/profile.html" onclick="closeMobileNavDrawer()" class="drawer-link" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.95rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Мій профіль</span>
+            </a>
+            <a href="/favorites.html" onclick="closeMobileNavDrawer()" class="drawer-link" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.95rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                <span>Обране</span>
+            </a>
+            <a href="/about.html" onclick="closeMobileNavDrawer()" class="drawer-link" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.95rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                <span>Про платформу</span>
+            </a>
+            <button type="button" class="btn-drawer-logout" id="drawerLogoutBtn" onclick="showLogoutModal(); closeMobileNavDrawer();" style="display: none; align-items: center; gap: 10px; margin-top: 14px; padding: 10px 12px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; font-weight: 700; font-size: 0.92rem; cursor: pointer;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                <span>Вийти з акаунта</span>
+            </button>
+        </div>
+    </div>
+
 </body>
 </html>

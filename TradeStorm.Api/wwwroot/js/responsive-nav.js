@@ -196,7 +196,7 @@
         }
 
         // 3. Inject App-like Mobile Bottom Navigation Bar (< 768px)
-        if (!document.getElementById('mobileBottomBar')) {
+        if (!document.getElementById('mobileBottomBar') && !document.getElementById('mobileBottomAppBar')) {
             const bottomBar = document.createElement('nav');
             bottomBar.id = 'mobileBottomBar';
             bottomBar.className = 'mobile-bottom-bar';

@@ -3454,7 +3454,6 @@
         }
 
         window.enterMobileSearchMode = function() {
-            if (window.innerWidth > 768) return;
             document.body.classList.add('mobile-search-active');
             const overlay = document.getElementById('mobileSearchOverlay');
             const backBtn = document.getElementById('mobileSearchBackBtn');
@@ -3469,6 +3468,29 @@
 
             updateMobileLiveSearch(input ? input.value : '');
         };
+
+        window.openMobileSearchMode = function() {
+            if (window.innerWidth <= 768) {
+                enterMobileSearchMode();
+                const mInput = document.getElementById('mobileTopSearchInput');
+                if (mInput) {
+                    mInput.focus();
+                }
+            } else {
+                const dInput = document.getElementById('searchInput');
+                if (dInput) {
+                    dInput.focus();
+                    dInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        };
+
+        // Перевіряємо параметр ?search=true при переході з інших сторінок
+        if (new URLSearchParams(window.location.search).get('search') === 'true') {
+            setTimeout(() => {
+                window.openMobileSearchMode();
+            }, 200);
+        }
 
         window.exitMobileSearchMode = function() {
             document.body.classList.remove('mobile-search-active');
