@@ -72,7 +72,7 @@ public class EmailService : IEmailService
                             </div>
                             <div style=""margin-top: 10px;"">
                                 <span style=""display: inline-block; padding: 4px 12px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 20px; color: #34d399; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;"">
-                                    🛡️ Офіційне сповіщення безпеки
+                                    Підтвердження акаунта
                                 </span>
                             </div>
                         </td>
@@ -147,11 +147,14 @@ public class EmailService : IEmailService
 
                 using var mail = new MailMessage
                 {
-                    From = new MailAddress(cleanFrom, "LoopMarket Security"),
+                    From = new MailAddress(cleanFrom, "LoopMarket"),
                     Subject = subject,
                     Body = htmlBody,
                     IsBodyHtml = true
                 };
+                mail.ReplyToList.Add(new MailAddress("loopmarketua@gmail.com", "LoopMarket"));
+                mail.Headers.Add("X-Auto-Response-Suppress", "All");
+                mail.Headers.Add("Auto-Submitted", "auto-generated");
                 mail.To.Add(toEmail);
 
                 await client.SendMailAsync(mail);
