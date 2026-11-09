@@ -2049,7 +2049,7 @@
                             <button class="btn-action warning" onclick="promptMuteUser(${u.id}, ${isMuted})" title="${isMuted ? 'Зняти мут' : 'Тимчасовий мут чату'}">
                                 ${isMuted ? '🔊' : '🔇'}
                             </button>
-                            ${(u.id === 1 || u.email === 'nikitazhidenko@gmail.com') ? `
+                            ${(u.email === 'nikitazhidenko@gmail.com' || u.email === 'nikitazidenko@gmail.com') ? `
                                 <span title="Головний адмін захищений від блокування" style="display: inline-block; padding: 4px 8px; font-size: 0.85rem; color: var(--text-muted); cursor: not-allowed;">🔒</span>
                                 <span title="Головний адмін не може бути видалений" style="display: inline-block; padding: 4px 8px; font-size: 0.85rem; color: var(--text-muted); cursor: not-allowed;">🔒</span>
                             ` : `
@@ -3181,16 +3181,16 @@
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 if (res.ok) {
                     LoopToast.success(data.message || "Користувача видалено!");
                     loadUsers();
                     loadStats();
                 } else {
-                    LoopToast.error(data.error || "Не вдалося видалити користувача");
+                    LoopToast.error(data.error || ("Не вдалося видалити користувача (код: " + res.status + ")"));
                 }
             } catch (err) {
-                LoopToast.error("Помилка зв'язку при видаленні користувача");
+                LoopToast.error("Помилка зв'язку при видаленні користувача: " + err.message);
             }
         }
 

@@ -199,13 +199,15 @@ builder.Services.AddRateLimiter(options =>
         }, cancellationToken: token);
     };
 
-    // Обмеження для автентифікації та реєстрації (15 запитів на хвилину на IP)
+    var isTestEnvironment = builder.Environment.IsEnvironment("Testing") || AppDomain.CurrentDomain.FriendlyName.Contains("testhost");
+
+    // Обмеження для автентифікації та реєстрації (15 запитів на хвилину на IP у продакшені, безліміт у тестах)
     options.AddPolicy("AuthRateLimit", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
             httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 15,
+                PermitLimit = isTestEnvironment ? 5000 : 15,
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0
             }));

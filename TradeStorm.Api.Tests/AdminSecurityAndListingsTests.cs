@@ -193,4 +193,46 @@ public class AdminSecurityAndListingsTests : IClassFixture<CustomWebApplicationF
         Assert.True(doc.RootElement.GetProperty("totalListings").GetInt32() >= 1);
         Assert.Equal(JsonValueKind.Array, doc.RootElement.GetProperty("listings").ValueKind);
     }
+
+    [Fact]
+    public async Task Admin_CanDeleteUser_AndCascadeDeletesAllRelatedData()
+    {
+        var (adminClient, _, _) = await CreateUserWithRoleAsync(UserRoles.Admin);
+        var (sellerClient, _, sellerUser) = await CreateUserWithRoleAsync(UserRoles.Seller);
+        var (buyerClient, _, buyerUser) = await CreateUserWithRoleAsync(UserRoles.Buyer);
+
+        // Seller creates listing
+        var createListingDto = new CreateListingDto
+        {
+            Title = "Товар для перевірки видалення",
+            Description = "Опис товару",
+            Price = 1200,
+            CategoryId = 1,
+            Condition = "Нове"
+        };
+        var createRes = await sellerClient.PostAsJsonAsync("/api/listings", createListingDto);
+        createRes.EnsureSuccessStatusCode();
+        var listingJson = await createRes.Content.ReadAsStringAsync();
+        using var listingDoc = JsonDocument.Parse(listingJson);
+        int listingId = listingDoc.RootElement.GetProperty("id").GetInt32();
+
+        // Buyer favorites the listing
+        var favRes = await buyerClient.PostAsync($"/api/favorites/{listingId}", null);
+        favRes.EnsureSuccessStatusCode();
+
+        // Admin deletes seller
+        var delRes = await adminClient.DeleteAsync($"/api/users/admin/{sellerUser.Id}");
+        Assert.Equal(HttpStatusCode.OK, delRes.StatusCode);
+
+        // Verify seller and their listing are deleted
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var u = await db.Users.FindAsync(sellerUser.Id);
+            Assert.Null(u);
+
+            var l = await db.Listings.FindAsync(listingId);
+            Assert.Null(l);
+        }
+    }
 }

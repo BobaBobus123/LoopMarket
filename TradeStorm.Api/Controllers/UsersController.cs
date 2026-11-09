@@ -1790,77 +1790,85 @@ public class UsersController : ControllerBase
 
 
 
-        // Захист головного адміністратора
-
-        if (user.Id == 1 || string.Equals(user.Email, "nikitazhidenko@gmail.com", StringComparison.OrdinalIgnoreCase))
-
+        // Захист головного адміністратора (Нікіти)
+        if (string.Equals(user.Email, "nikitazhidenko@gmail.com", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(user.Email, "nikitazidenko@gmail.com", StringComparison.OrdinalIgnoreCase))
         {
-
-            return BadRequest(new { error = "Головного адміністратора (Нікіту) видалити неможливо. Він закріплений назавжди." });
-
+            return BadRequest(new { error = "Головного адміністратора видалити неможливо. Він закріплений назавжди." });
         }
-
-
 
         var adminIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
         if (int.TryParse(adminIdStr, out int adminId) && adminId == id)
-
         {
-
-            return BadRequest(new { error = "Заборонено видаляти власний акаунт адміністратора" });
-
+            return BadRequest(new { error = "Заборонено видаляти власний акаунт адміністратора під час активної сесії" });
         }
 
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            // 1. Отримуємо всі ID оголошень користувача
+            var listingIds = await _context.Listings
+                .Where(l => l.SellerId == id)
+                .Select(l => l.Id)
+                .ToListAsync();
 
+            // 2. Очищення списку обраного (якщо додані користувачем або іншими на його оголошення)
+            var favs = await _context.Favorites
+                .Where(f => f.UserId == id || (listingIds.Count > 0 && listingIds.Contains(f.ListingId)))
+                .ToListAsync();
+            if (favs.Count > 0) _context.Favorites.RemoveRange(favs);
 
-        // Очищення залежних даних щоб не було помилок Foreign Key
+            // 3. Очищення скарг (подані ним, на нього, або на його оголошення)
+            var comps = await _context.Complaints
+                .Where(c => c.ReporterId == id || c.TargetUserId == id || (c.ListingId.HasValue && listingIds.Contains(c.ListingId.Value)))
+                .ToListAsync();
+            if (comps.Count > 0) _context.Complaints.RemoveRange(comps);
 
-        var notifs = await _context.Notifications.Where(n => n.UserId == id).ToListAsync();
+            // 4. Очищення відгуків (залишені ним, отримані ним, або на його оголошення)
+            var revs = await _context.Reviews
+                .Where(r => r.AuthorId == id || r.TargetUserId == id || (r.ListingId.HasValue && listingIds.Contains(r.ListingId.Value)))
+                .ToListAsync();
+            if (revs.Count > 0) _context.Reviews.RemoveRange(revs);
 
-        _context.Notifications.RemoveRange(notifs);
+            // 5. Очищення чатів / повідомлень
+            var msgs = await _context.Messages
+                .Where(m => m.SenderId == id || m.ReceiverId == id)
+                .ToListAsync();
+            if (msgs.Count > 0) _context.Messages.RemoveRange(msgs);
 
+            // 6. Очищення сповіщень
+            var notifs = await _context.Notifications
+                .Where(n => n.UserId == id)
+                .ToListAsync();
+            if (notifs.Count > 0) _context.Notifications.RemoveRange(notifs);
 
+            // 7. Очищення замовлень (покупець, продавець, або замовлення на його оголошення)
+            var orders = await _context.Orders
+                .Where(o => o.BuyerId == id || o.SellerId == id || (listingIds.Count > 0 && listingIds.Contains(o.ListingId)))
+                .ToListAsync();
+            if (orders.Count > 0) _context.Orders.RemoveRange(orders);
 
-        var favs = await _context.Favorites.Where(f => f.UserId == id).ToListAsync();
+            // Зберігаємо очищення дочірніх зв'язків перед видаленням самих оголошень
+            await _context.SaveChangesAsync();
 
-        _context.Favorites.RemoveRange(favs);
+            // 8. Видаляємо самі оголошення
+            var listings = await _context.Listings
+                .Where(l => l.SellerId == id)
+                .ToListAsync();
+            if (listings.Count > 0) _context.Listings.RemoveRange(listings);
+            await _context.SaveChangesAsync();
 
+            // 9. Видаляємо користувача
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
 
-
-        var msgs = await _context.Messages.Where(m => m.SenderId == id || m.ReceiverId == id).ToListAsync();
-
-        _context.Messages.RemoveRange(msgs);
-
-
-
-        var revs = await _context.Reviews.Where(r => r.AuthorId == id || r.TargetUserId == id).ToListAsync();
-
-        _context.Reviews.RemoveRange(revs);
-
-
-
-        var comps = await _context.Complaints.Where(c => c.ReporterId == id || c.TargetUserId == id).ToListAsync();
-
-        _context.Complaints.RemoveRange(comps);
-
-
-
-        var orders = await _context.Orders.Where(o => o.BuyerId == id || o.SellerId == id).ToListAsync();
-
-        _context.Orders.RemoveRange(orders);
-
-
-
-        var listings = await _context.Listings.Where(l => l.SellerId == id).ToListAsync();
-
-        _context.Listings.RemoveRange(listings);
-
-
-
-        _context.Users.Remove(user);
-
-        await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return StatusCode(500, new { error = $"Помилка бази даних при видаленні користувача: {ex.Message}" });
+        }
 
         await LogAuditAsync("DeleteUser", "User", id, $"Видалено користувача {user.Email}");
 

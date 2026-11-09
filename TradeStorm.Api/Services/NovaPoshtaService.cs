@@ -36,8 +36,10 @@ public class NovaPoshtaService : INovaPoshtaService
 
     private string GetApiKey()
     {
+        var envKey = Environment.GetEnvironmentVariable("NOVA_POSHTA_API_KEY");
+        if (!string.IsNullOrWhiteSpace(envKey)) return envKey;
         var key = _config["NovaPoshta:ApiKey"];
-        return !string.IsNullOrWhiteSpace(key) ? key : "bf8900a77c105022ff2ff848cc2a5225";
+        return !string.IsNullOrWhiteSpace(key) ? key : "";
     }
 
     public List<DeliveryCarrierOptionDto> GetAvailableCarriers()

@@ -36,15 +36,13 @@ public class TelegramBotService : BackgroundService
     public TelegramBotService(IConfiguration config, IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
-        var token = config["Telegram:BotToken"] ?? config["TelegramBot:Token"];
-        if (string.IsNullOrWhiteSpace(token) || token.Contains("YOUR_"))
-        {
-            token = "8990313504:AAGUpi64ddFbrAEa8KxR97lJJ2Y-1kz14uY";
-        }
+        var token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN") 
+            ?? config["Telegram:BotToken"] 
+            ?? config["TelegramBot:Token"];
 
         try
         {
-            _botClient = new TelegramBotClient(token);
+            if (!string.IsNullOrWhiteSpace(token)) _botClient = new TelegramBotClient(token);
             Console.WriteLine("[Telegram Info] TelegramBotClient успішно ініціалізовано з токеном.");
         }
         catch (Exception ex)
