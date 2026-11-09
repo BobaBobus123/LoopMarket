@@ -163,13 +163,7 @@ public class OrderService : IOrderService
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync();
 
-        return orders.Select(o => MapToDto(
-            o,
-            o.Listing?.Title ?? "Товар видалено",
-            o.Listing?.ImageUrl,
-            $"{o.Seller?.FirstName} {o.Seller?.LastName}".Trim(),
-            o.Seller?.PhoneNumber
-        )).ToList();
+        return orders.Select(o => MapToDto(o)).ToList();
     }
 
     public async Task<List<OrderDto>> GetSellerOrdersAsync(int sellerId)
@@ -186,7 +180,8 @@ public class OrderService : IOrderService
             o.Listing?.Title ?? "Товар видалено",
             o.Listing?.ImageUrl,
             $"{o.Buyer?.FirstName} {o.Buyer?.LastName}".Trim(),
-            o.Buyer?.PhoneNumber
+            o.Buyer?.PhoneNumber,
+            o.Listing?.CategoryId == 8 || (o.Listing?.Title ?? "").Contains("Послуг", StringComparison.OrdinalIgnoreCase) || (!string.IsNullOrEmpty(o.DeliveryBranch) && o.DeliveryBranch.Contains("год"))
         )).ToList();
     }
 
@@ -207,14 +202,7 @@ public class OrderService : IOrderService
                 return null;
         }
 
-        return MapToDto(
-            order,
-            order.Listing?.Title ?? "Товар видалено",
-            order.Listing?.ImageUrl,
-            $"{order.Seller?.FirstName} {order.Seller?.LastName}".Trim(),
-            order.Seller?.PhoneNumber,
-            order.Listing?.CategoryId == 8 || (order.Listing?.Title ?? "").Contains("Послуг", StringComparison.OrdinalIgnoreCase) || order.DeliveryBranch.Contains("год")
-        );
+        return MapToDto(order);
     }
 
     public async Task<OrderDto> UpdateOrderStatusAsync(int orderId, int userId, string newStatus, string? trackingNumber = null)
@@ -297,14 +285,7 @@ public class OrderService : IOrderService
                 await _botService.SendNotificationAsync(order.Buyer.TelegramChatId, buyerText);
             });
         }
-        return MapToDto(
-            order,
-            order.Listing?.Title ?? "Товар видалено",
-            order.Listing?.ImageUrl,
-            $"{order.Seller?.FirstName} {order.Seller?.LastName}".Trim(),
-            order.Seller?.PhoneNumber,
-            order.Listing?.CategoryId == 8 || (order.Listing?.Title ?? "").Contains("Послуг", StringComparison.OrdinalIgnoreCase) || order.DeliveryBranch.Contains("год")
-        );
+        return MapToDto(order);
     }
 
     private static OrderDto MapToDto(Order o) => MapToDto(

@@ -71,7 +71,7 @@
 
         if (navActions && isAdmin && !document.getElementById('adminPanelNavBtn')) {
             const adminLink = document.createElement('a');
-            adminLink.id = 'adminPanelNavBtn';
+            adminLink.id = 'adminPanelNavBtn'; adminLink.className = 'admin-panel-nav-btn';
             adminLink.href = '/admin.html';
             adminLink.style.cssText = 'background: rgba(37,99,235,0.12); color: #2563eb; border: 1.5px solid rgba(37,99,235,0.35); padding: 6px 12px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;';
             adminLink.innerHTML = '🛡️ Панель оператора';

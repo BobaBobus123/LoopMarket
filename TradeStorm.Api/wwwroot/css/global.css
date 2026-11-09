@@ -1719,3 +1719,62 @@ body.has-sticky-bar .mobile-bottom-bar {
     padding: 6px 12px 5px 12px !important;
     line-height: 1.35 !important;
 }
+
+/* ==========================================================================
+   UNIFIED LOOPMARKET BRAND LOGO & HEADER STABILITY
+   ========================================================================== */
+.logo {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    flex-wrap: nowrap !important;
+    line-height: 1 !important;
+    letter-spacing: -0.5px !important;
+}
+
+.logo span {
+    white-space: nowrap !important;
+    display: inline-block !important;
+    line-height: 1 !important;
+}
+
+.logo-circle {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: linear-gradient(135deg, #10b981 0%, #2563eb 100%) !important;
+    color: white !important;
+    font-weight: 900 !important;
+    font-size: 1.2rem !important;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
+    flex-shrink: 0 !important;
+}
+
+@media (max-width: 768px) {
+    #adminPanelNavBtn,
+    .admin-panel-nav-btn {
+        display: none !important; /* Preserves mobile header space; fully accessible in hamburger drawer */
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        font-size: 1.25rem !important;
+        gap: 7px !important;
+    }
+    .logo-circle {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        font-size: 1.05rem !important;
+    }
+}

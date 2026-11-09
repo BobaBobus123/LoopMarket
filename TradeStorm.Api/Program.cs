@@ -120,14 +120,14 @@ builder.Services.AddMemoryCache();
 // HTTP-клієнт із тайм-аутом для виклику зовнішніх REST-сервісів (Етап 4)
 builder.Services.AddHttpClient("NbuApiClient", client =>
 {
-    client.Timeout = TimeSpan.FromSeconds(5);
+    client.Timeout = TimeSpan.FromSeconds(15);
 });
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 
 // HTTP-клієнт для інтеграції з API Нової Пошти (Етап 2 та 4)
 builder.Services.AddHttpClient("NovaPoshtaClient", client =>
 {
-    client.Timeout = TimeSpan.FromSeconds(5);
+    client.Timeout = TimeSpan.FromSeconds(15);
 });
 builder.Services.AddScoped<INovaPoshtaService, NovaPoshtaService>();
 
