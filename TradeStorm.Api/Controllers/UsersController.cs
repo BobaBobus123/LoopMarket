@@ -388,43 +388,62 @@ public class UsersController : ControllerBase
         });
     }
 
+        /// <summary>
+    /// Адміністрування: перегляд усіх оголошень конкретного користувача
+    /// </summary>
+    [HttpGet("admin/{id}/listings")]
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> GetUserListingsForAdmin(int id)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return NotFound(new { error = "Користувача не знайдено" });
+
+        var listings = await _context.Listings
+            .AsNoTracking()
+            .Include(l => l.Category)
+                        .Where(l => l.SellerId == id)
+            .OrderByDescending(l => l.CreatedAt)
+            .Select(l => new
+            {
+                l.Id,
+                l.Code,
+                l.Title,
+                l.Price,
+                l.Status,
+                l.Condition,
+                l.CreatedAt,
+                l.ViewsCount,
+                                l.VideoUrl,
+                l.IsFeatured,
+                categoryName = l.Category != null ? l.Category.Name : "Інше",
+                mainImage = l.ImageUrl ?? "/images/placeholder.svg"
+            })
+            .ToListAsync();
+
+        return Ok(new
+        {
+            userId = user.Id,
+            userName = $"{user.FirstName} {user.LastName}".Trim(),
+            userEmail = user.Email,
+            totalListings = listings.Count,
+            listings
+        });
+    }
+
     /// <summary>
     /// Адміністрування: блокування / розблокування користувача
     /// </summary>
     [HttpPatch("admin/{id}/ban")]
     [Authorize(Roles = UserRoles.Admin)]
-        private async Task LogAuditAsync(string action, string? targetType = null, int? targetId = null, string? details = null)
-    {
-        try
-        {
-            var adminIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            int.TryParse(adminIdStr, out int adminId);
-            var adminEmail = User.FindFirstValue(ClaimTypes.Email) ?? "admin@loopmarket.com";
-            var log = new AdminAuditLog
-            {
-                AdminId = adminId > 0 ? adminId : 1,
-                AdminEmail = adminEmail,
-                Action = action,
-                TargetType = targetType,
-                TargetId = targetId,
-                Details = details,
-                CreatedAt = DateTime.UtcNow
-            };
-            _context.AdminAuditLogs.Add(log);
-            await _context.SaveChangesAsync();
-        }
-        catch { }
-    }
-
     public async Task<IActionResult> BanUser(int id, [FromBody] BanUserDto dto)
     {
         var user = await _context.Users.FindAsync(id);
         if (user == null) return NotFound(new { error = "Користувача не знайдено" });
 
-        // Не дозволяти блокувати головного адміністратора (id 1)
-        if (user.Id == 1 && dto.IsBanned)
+        // Не дозволяти блокувати головного адміністратора (id 1 або nikitazhidenko@gmail.com)
+        if ((user.Id == 1 || string.Equals(user.Email, "nikitazhidenko@gmail.com", StringComparison.OrdinalIgnoreCase)) && dto.IsBanned)
         {
-            return BadRequest(new { error = "Головного адміністратора системи не можна заблокувати." });
+            return BadRequest(new { error = "Головного адміністратора платформи (Нікіту) заблокувати неможливо. Він захищений системою назавжди." });
         }
 
         user.IsBanned = dto.IsBanned;
@@ -440,13 +459,14 @@ public class UsersController : ControllerBase
 
         return Ok(new
         {
-            message = dto.IsBanned ? $"Користувача {user.Email} заблоковано" : $"Користувача {user.Email} розблоковано",
+            success = true,
+            message = dto.IsBanned ? $"Користувача {user.Email} заблоковано" : $"Користувача {user.Email} успішно розблоковано",
             isBanned = user.IsBanned,
             banReason = user.BanReason
         });
     }
 
-    /// <summary>
+/// <summary>
     /// Адміністрування: редагування даних користувача оператором (Ім'я, Телефон, Роль, Верифікація)
     /// </summary>
     [HttpPut("admin/{id}")]
@@ -456,6 +476,52 @@ public class UsersController : ControllerBase
         var user = await _context.Users.FindAsync(id);
         if (user == null) return NotFound(new { error = "Користувача не знайдено" });
 
+        var callerIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        int.TryParse(callerIdStr, out int callerId);
+        var callerEmail = User.FindFirstValue(ClaimTypes.Email) ?? "admin@loopmarket.com";
+        bool isMainAdmin = callerId == 1 || string.Equals(callerEmail, "nikitazhidenko@gmail.com", StringComparison.OrdinalIgnoreCase);
+
+        // 1. Захист незмінності головного адміна Нікіти
+        if ((user.Id == 1 || string.Equals(user.Email, "nikitazhidenko@gmail.com", StringComparison.OrdinalIgnoreCase)) && !string.IsNullOrWhiteSpace(dto.Role) && dto.Role != UserRoles.Admin)
+        {
+            return BadRequest(new { error = "Головний адміністратор (Нікіта) має незмінну роль Admin і не може бути понижений або змінений." });
+        }
+
+        // 2. Лише Головний адмін може призначати нових адміністраторів
+        if (!string.IsNullOrWhiteSpace(dto.Role) && dto.Role == UserRoles.Admin && user.Role != UserRoles.Admin)
+        {
+            if (!isMainAdmin)
+            {
+                return StatusCode(403, new { error = "Тільки Головний адміністратор платформи (Нікіта) має право призначати нових адміністраторів." });
+            }
+
+            // Сповіщення на акаунт підтримки (ID 1)
+            var supportNotification = new Notification
+            {
+                UserId = 1,
+                Title = "🛡️ Призначено нового адміністратора",
+                Message = $"Головний адміністратор {callerEmail} призначив користувача {user.FirstName} {user.LastName} ({user.Email}, ID #{user.Id}) адміністратором платформи. Нові права набудуть чинності після повторного входу в акаунт.",
+                Link = "/admin.html",
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            };
+            _context.Notifications.Add(supportNotification);
+
+            // Сповіщення призначеному користувачу
+            var targetNotification = new Notification
+            {
+                UserId = user.Id,
+                Title = "👑 Вам надано статус Адміністратора",
+                Message = "Головний адміністратор надав вам права адміністратора LoopMarket. Для активації нових прав доступу, будь ласка, вийдіть та увійдіть в акаунт повторно.",
+                Link = "/admin.html",
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            };
+            _context.Notifications.Add(targetNotification);
+
+            await LogAuditAsync("PromoteToAdmin", "User", user.Id, $"Користувач {callerEmail} призначив {user.Email} адміном. Нові права набудуть чинності після повторного входу.");
+        }
+
         if (!string.IsNullOrWhiteSpace(dto.FirstName)) user.FirstName = dto.FirstName.Trim();
         if (!string.IsNullOrWhiteSpace(dto.LastName)) user.LastName = dto.LastName.Trim();
         if (!string.IsNullOrWhiteSpace(dto.PhoneNumber)) user.PhoneNumber = dto.PhoneNumber.Trim();
@@ -463,6 +529,10 @@ public class UsersController : ControllerBase
         var validRoles = new[] { UserRoles.Admin, UserRoles.Seller, UserRoles.Buyer, "User" };
         if (!string.IsNullOrWhiteSpace(dto.Role) && validRoles.Contains(dto.Role))
         {
+            if (dto.Role == UserRoles.Admin && !isMainAdmin)
+            {
+                return StatusCode(403, new { error = "Тільки Головний адміністратор платформи (Нікіта) має право призначати нових адміністраторів." });
+            }
             user.Role = dto.Role;
         }
 
@@ -689,6 +759,12 @@ public class UsersController : ControllerBase
     {
         var user = await _context.Users.FindAsync(id);
         if (user == null) return NotFound(new { error = "Користувача не знайдено" });
+
+        // Захист головного адміністратора
+        if (user.Id == 1 || string.Equals(user.Email, "nikitazhidenko@gmail.com", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new { error = "Головного адміністратора (Нікіту) видалити неможливо. Він закріплений назавжди." });
+        }
 
         var adminIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (int.TryParse(adminIdStr, out int adminId) && adminId == id)
@@ -1141,6 +1217,29 @@ public class UsersController : ControllerBase
             verifiedReviewsCount,
             topListings
         });
+    }
+
+    private async Task LogAuditAsync(string action, string? targetType = null, int? targetId = null, string? details = null)
+    {
+        try
+        {
+            var adminIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int.TryParse(adminIdStr, out int adminId);
+            var adminEmail = User.FindFirstValue(ClaimTypes.Email) ?? "admin@loopmarket.com";
+            var log = new AdminAuditLog
+            {
+                AdminId = adminId > 0 ? adminId : 1,
+                AdminEmail = adminEmail,
+                Action = action,
+                TargetType = targetType,
+                TargetId = targetId,
+                Details = details,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.AdminAuditLogs.Add(log);
+            await _context.SaveChangesAsync();
+        }
+        catch { }
     }
 }
 
