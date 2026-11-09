@@ -417,19 +417,23 @@
         .product-layout {
             display: grid;
             grid-template-columns: minmax(0, 1.8fr) minmax(360px, 1.2fr);
-            grid-template-areas:
-                "gallery sidebar"
-                "desc    sidebar";
             gap: 32px;
             align-items: start;
         }
 
+        .details-main-column {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            min-width: 0;
+            width: 100%;
+        }
+
         .gallery-column {
-            grid-area: gallery;
+            width: 100%;
         }
 
         .info-panel {
-            grid-area: sidebar;
             background: var(--surface);
             border-radius: 20px;
             padding: 30px;
@@ -439,7 +443,6 @@
         }
 
         .description-block {
-            grid-area: desc;
             margin-top: 0;
             line-height: 1.8;
             font-size: 1.05rem;
@@ -789,6 +792,10 @@
                 gap: 18px !important;
             }
 
+            .details-main-column {
+                display: contents !important;
+            }
+
             .gallery-column {
                 order: 1 !important;
                 width: 100% !important;
@@ -804,6 +811,10 @@
                 order: 3 !important;
                 width: 100% !important;
                 margin-top: 0 !important;
+            }
+
+            #videoDetailSection {
+                order: 4 !important;
             }
 
             .header-center {
@@ -1496,6 +1507,323 @@
             }
         }
 
+    
+        /* GALLERY SHOWCASE & INTERACTIVE CAROUSEL */
+        .image-showcase {
+            position: relative;
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .main-stage-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            background: var(--bg-color);
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 520px;
+            object-fit: contain;
+            display: block;
+            cursor: zoom-in;
+            transition: opacity 0.2s ease;
+            background: var(--bg-color);
+            border-radius: 16px;
+            margin-bottom: 0 !important;
+        }
+
+        .gallery-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.7);
+            color: #ffffff;
+            border: 1.5px solid rgba(255, 255, 255, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 4;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 0;
+            line-height: 1;
+        }
+
+        .gallery-arrow:hover {
+            background: #10b981;
+            border-color: #10b981;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .gallery-prev { left: 12px; }
+        .gallery-next { right: 12px; }
+
+        .gallery-counter-badge {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: rgba(15, 23, 42, 0.75);
+            color: #ffffff;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .gallery-zoom-badge {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(15, 23, 42, 0.75);
+            color: #ffffff;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            z-index: 3;
+            transition: all 0.2s ease;
+        }
+
+        .gallery-zoom-badge:hover {
+            background: #10b981;
+            border-color: #10b981;
+            transform: scale(1.05);
+        }
+
+        .thumbnails {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            scrollbar-width: thin;
+        }
+
+        .thumb {
+            width: 86px;
+            height: 68px;
+            object-fit: cover;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            opacity: 0.65;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            background: var(--bg-color);
+        }
+
+        .thumb:hover, .thumb.active {
+            opacity: 1;
+            border-color: #10b981;
+            transform: scale(1.04);
+            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.25);
+        }
+
+        /* FULLSCREEN INTERACTIVE LIGHTBOX */
+        .lightbox-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 15, 29, 0.96);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            animation: fadeInLightbox 0.2s ease-out;
+        }
+
+        @keyframes fadeInLightbox {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .lightbox-top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+            background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
+        }
+
+        .lightbox-counter {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        .lightbox-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .lightbox-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .lightbox-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        .lightbox-reset-btn {
+            width: auto;
+            padding: 0 12px;
+            font-size: 0.82rem;
+            font-weight: 800;
+        }
+
+        .lightbox-close-btn:hover {
+            background: #ef4444 !important;
+            border-color: #ef4444 !important;
+        }
+
+        .lightbox-viewport {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox-stage {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 90vw;
+            max-height: 85vh;
+            touch-action: none;
+            transform-origin: center center;
+            will-change: transform;
+        }
+
+        #lightboxImage {
+            max-width: 90vw;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            pointer-events: auto;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .lightbox-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1.5px solid rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            font-size: 2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+            backdrop-filter: blur(8px);
+            padding: 0;
+            line-height: 1;
+        }
+
+        .lightbox-nav-btn:hover {
+            background: #10b981;
+            border-color: #10b981;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .lightbox-prev-btn { left: 20px; }
+        .lightbox-next-btn { right: 20px; }
+
+        .lightbox-hint {
+            position: absolute;
+            bottom: 18px;
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 0.8rem;
+            background: rgba(0, 0, 0, 0.45);
+            padding: 6px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(6px);
+            pointer-events: none;
+            z-index: 5;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .main-image {
+                height: 380px !important;
+            }
+            .lightbox-nav-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 1.6rem;
+            }
+            .lightbox-prev-btn { left: 8px; }
+            .lightbox-next-btn { right: 8px; }
+            .lightbox-hint { display: none; }
+        }
+
     </style>
     <link rel="stylesheet" href="/css/global.css?v=3.2">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
@@ -1576,11 +1904,46 @@
         </div>
 
         <div class="product-layout" id="productContent" style="display: none;">
-            <div class="gallery-column">
-                <div class="image-showcase">
-                    <div id="mainVideoWrap" style="display: none; width: 100%; border-radius: 18px; overflow: hidden; background: #000; margin-bottom: 14px; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.15);"></div>
-                    <img id="mainImage" src="" class="main-image" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
-                    <div class="thumbnails" id="thumbnailsContainer"></div>
+            <div class="details-main-column">
+                <div class="gallery-column">
+                    <div class="image-showcase">
+                        <div class="main-stage-wrapper" id="mainStageWrapper">
+                            <div id="mainVideoWrap" style="display: none; width: 100%; border-radius: 18px; overflow: hidden; background: #000; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.15);"></div>
+                            <img id="mainImage" src="" class="main-image" onerror="this.onerror=null; this.src='/images/placeholder.svg';" onclick="openLightboxZoom()" title="Натисніть для наближення">
+                            
+                            <!-- Навігаційні стрілки скролу фото/відео -->
+                            <button type="button" class="gallery-arrow gallery-prev" id="galleryPrevBtn" onclick="prevMediaSlide(event)" title="Попереднє фото" aria-label="Попереднє фото">‹</button>
+                            <button type="button" class="gallery-arrow gallery-next" id="galleryNextBtn" onclick="nextMediaSlide(event)" title="Наступне фото" aria-label="Наступне фото">›</button>
+                            
+                            <!-- Бейдж лічильника медіа -->
+                            <div class="gallery-counter-badge" id="galleryCounterBadge">1 / 1</div>
+                            
+                            <!-- Кнопка швидкого наближення фото -->
+                            <button type="button" class="gallery-zoom-badge" id="galleryZoomBadge" onclick="openLightboxZoom()" title="Наблизити фото">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6M8 11h6"/></svg>
+                                <span>Наблизити</span>
+                            </button>
+                        </div>
+                        <div class="thumbnails" id="thumbnailsContainer"></div>
+                    </div>
+                </div>
+
+                <div class="description-block" id="productDescriptionBlock">
+                    <h3 style="margin-bottom: 15px; font-size: 1.5rem;" id="descTitle">Опис товару</h3>
+                    <p id="itemDesc" style="white-space: pre-wrap;"></p>
+                </div>
+
+                <!-- ВІДЕООГЛЯД / ВІДЕОПРЕЗЕНТАЦІЯ ТОВАРУ ТА БРЕНДУ -->
+                <div class="description-block" id="videoDetailSection" style="display: none; padding: 24px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                        <h3 style="font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0; color: var(--text-main);">
+                            <span>🎬</span> Відеопрезентація оголошення
+                        </h3>
+                        <span style="font-size: 0.78rem; font-weight: 700; color: #2563eb; background: rgba(37,99,235,0.1); padding: 4px 10px; border-radius: 8px;">
+                            Офіційний огляд
+                        </span>
+                    </div>
+                    <div id="videoDetailPlayer" style="width: 100%; border-radius: 14px; overflow: hidden; background: #000; box-shadow: 0 4px 20px rgba(0,0,0,0.25);"></div>
                 </div>
             </div>
 
@@ -1660,23 +2023,6 @@
                 </div>
             </div>
 
-            <div class="description-block" id="productDescriptionBlock">
-                <h3 style="margin-bottom: 15px; font-size: 1.5rem;" id="descTitle">Опис товару</h3>
-                <p id="itemDesc" style="white-space: pre-wrap;"></p>
-            </div>
-
-            <!-- ВІДЕООГЛЯД / ВІДЕОПРЕЗЕНТАЦІЯ ТОВАРУ ТА БРЕНДУ -->
-            <div class="description-block" id="videoDetailSection" style="display: none; margin-top: 24px; padding: 24px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-                    <h3 style="font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0; color: var(--text-main);">
-                        <span>🎬</span> Відеопрезентація оголошення
-                    </h3>
-                    <span style="font-size: 0.78rem; font-weight: 700; color: #2563eb; background: rgba(37,99,235,0.1); padding: 4px 10px; border-radius: 8px;">
-                        Офіційний огляд
-                    </span>
-                </div>
-                <div id="videoDetailPlayer" style="width: 100%; border-radius: 14px; overflow: hidden; background: #000; box-shadow: 0 4px 20px rgba(0,0,0,0.25);"></div>
-            </div>
         </div>
 
         <!-- ФІКСОВАНА ПАНЕЛЬ ДІЙ ВНИЗУ ЕКРАНА ДЛЯ СМАРТФОНІВ (< 768px) -->
@@ -2663,13 +3009,22 @@
                     }).catch(() => {});
                 }
 
-                // Фотографії та Відео
+                // ==================== МУЛЬТИМЕДІА: СЛАЙДЕР, СКРОЛ ТА НАБЛИЖЕННЯ (ZOOM) ====================
+                let currentListingMediaList = [];
+                let currentMediaSlideIndex = 0;
+
+                // Стан Lightbox
+                let lightboxZoomLevel = 1.0;
+                let lightboxPanX = 0;
+                let lightboxPanY = 0;
+                let isLightboxDragging = false;
+                let lightboxDragStartX = 0;
+                let lightboxDragStartY = 0;
+
                 const mainImg = document.getElementById('mainImage');
                 const vWrap = document.getElementById('mainVideoWrap');
                 const thumbContainer = document.getElementById('thumbnailsContainer');
                 if (thumbContainer) thumbContainer.innerHTML = '';
-                if (vWrap) { vWrap.style.display = 'none'; vWrap.innerHTML = ''; }
-                if (mainImg) mainImg.style.display = 'block';
 
                 let imgList = [];
                 if (Array.isArray(item.imageUrls) && item.imageUrls.length > 0) {
@@ -2681,11 +3036,6 @@
                 const fallbackPlaceholder = isServiceListing 
                     ? '/images/placeholder-service.svg' 
                     : '/images/placeholder.svg';
-
-                if (mainImg) {
-                    mainImg.onerror = function() { this.onerror = null; this.src = fallbackPlaceholder; };
-                    mainImg.src = imgList.length > 0 ? imgList[0] : fallbackPlaceholder;
-                }
 
                 // Відеопрезентація
                 function parseVideoSource(url) {
@@ -2719,14 +3069,26 @@
                 }
                 window.parseVideoSource = parseVideoSource;
 
-                window.currentListingVideoParsed = null;
-                const videoSection = document.getElementById('videoDetailSection');
-                const videoPlayerBox = document.getElementById('videoDetailPlayer');
+                // Збір повного списку медіа для скролу (фотографії + відео)
+                currentListingMediaList = [];
+                imgList.forEach(url => {
+                    currentListingMediaList.push({ type: 'image', url: url });
+                });
 
                 if (item.videoUrl && item.videoUrl.trim()) {
                     const parsedVideo = parseVideoSource(item.videoUrl);
-                    window.currentListingVideoParsed = parsedVideo;
+                    if (parsedVideo) {
+                        currentListingMediaList.push({
+                            type: 'video',
+                            url: parsedVideo.url,
+                            embedUrl: parsedVideo.embedUrl,
+                            parsedType: parsedVideo.type
+                        });
+                    }
 
+                    // Також заповнюємо нижній окремий блок відео, якщо є
+                    const videoSection = document.getElementById('videoDetailSection');
+                    const videoPlayerBox = document.getElementById('videoDetailPlayer');
                     if (videoSection && videoPlayerBox && parsedVideo) {
                         videoSection.style.display = 'block';
                         if (parsedVideo.type === 'youtube' || parsedVideo.type === 'vimeo') {
@@ -2736,66 +3098,322 @@
                         }
                     }
                 } else {
+                    const videoSection = document.getElementById('videoDetailSection');
                     if (videoSection) videoSection.style.display = 'none';
                 }
 
-                function switchToVideoShowcase() {
-                    const wrap = document.getElementById('mainVideoWrap');
-                    const img = document.getElementById('mainImage');
-                    const parsed = window.currentListingVideoParsed;
-                    if (!wrap || !img || !parsed) return;
-                    img.style.display = 'none';
-                    wrap.style.display = 'block';
-                    document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-                    document.getElementById('videoThumbBtn')?.classList.add('active');
+                if (currentListingMediaList.length === 0) {
+                    currentListingMediaList.push({ type: 'image', url: fallbackPlaceholder });
+                }
 
-                    if (parsed.type === 'youtube' || parsed.type === 'vimeo') {
-                        wrap.innerHTML = `<iframe src="${parsed.embedUrl}" style="width: 100%; height: 420px; border: none; border-radius: 18px;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                function showMediaSlide(index) {
+                    if (!currentListingMediaList.length) return;
+                    if (index < 0) index = currentListingMediaList.length - 1;
+                    if (index >= currentListingMediaList.length) index = 0;
+                    currentMediaSlideIndex = index;
+
+                    const media = currentListingMediaList[index];
+                    const mainImageEl = document.getElementById('mainImage');
+                    const videoWrapEl = document.getElementById('mainVideoWrap');
+                    const counterBadge = document.getElementById('galleryCounterBadge');
+                    const zoomBadge = document.getElementById('galleryZoomBadge');
+                    const prevBtn = document.getElementById('galleryPrevBtn');
+                    const nextBtn = document.getElementById('galleryNextBtn');
+
+                    const total = currentListingMediaList.length;
+                    if (counterBadge) {
+                        counterBadge.innerText = (media.type === 'video' ? '🎬 Відео ' : '📷 ') + `${index + 1} / ${total}`;
+                    }
+
+                    if (total <= 1) {
+                        if (prevBtn) prevBtn.style.display = 'none';
+                        if (nextBtn) nextBtn.style.display = 'none';
                     } else {
-                        wrap.innerHTML = `<video src="${parsed.url}" controls playsinline autoplay preload="metadata" style="width: 100%; max-height: 440px; background: #000; border-radius: 18px;"></video>`;
+                        if (prevBtn) prevBtn.style.display = 'flex';
+                        if (nextBtn) nextBtn.style.display = 'flex';
                     }
-                }
-                window.switchToVideoShowcase = switchToVideoShowcase;
 
-                function switchToImageShowcase(url, thumbEl) {
-                    const wrap = document.getElementById('mainVideoWrap');
-                    const img = document.getElementById('mainImage');
-                    if (wrap) {
-                        wrap.style.display = 'none';
-                        wrap.innerHTML = '';
+                    if (media.type === 'image') {
+                        if (videoWrapEl) {
+                            videoWrapEl.style.display = 'none';
+                            videoWrapEl.innerHTML = '';
+                        }
+                        if (mainImageEl) {
+                            mainImageEl.style.display = 'block';
+                            mainImageEl.src = media.url;
+                        }
+                        if (zoomBadge) zoomBadge.style.display = 'inline-flex';
+                    } else if (media.type === 'video') {
+                        if (mainImageEl) mainImageEl.style.display = 'none';
+                        if (zoomBadge) zoomBadge.style.display = 'none';
+                        if (videoWrapEl) {
+                            videoWrapEl.style.display = 'block';
+                            if (media.parsedType === 'youtube' || media.parsedType === 'vimeo') {
+                                videoWrapEl.innerHTML = `<iframe src="${media.embedUrl}" style="width: 100%; height: 500px; border: none; border-radius: 16px;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                            } else {
+                                videoWrapEl.innerHTML = `<video src="${media.url}" controls playsinline autoplay preload="metadata" style="width: 100%; height: 500px; object-fit: contain; background: #000; border-radius: 16px;"></video>`;
+                            }
+                        }
                     }
-                    if (img) {
-                        img.style.display = 'block';
-                        img.src = url;
-                    }
-                    document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-                    if (thumbEl) thumbEl.classList.add('active');
-                }
-                window.switchToImageShowcase = switchToImageShowcase;
 
-                const hasMultipleMedia = (imgList.length > 1) || (imgList.length > 0 && item.videoUrl);
-                if (thumbContainer && hasMultipleMedia) {
-                    imgList.forEach((url, index) => {
-                        const thumb = document.createElement('img');
-                        thumb.onerror = function() { this.onerror = null; this.src = '/images/placeholder.svg'; };
-                        thumb.src = url;
-                        thumb.className = `thumb ${index === 0 ? 'active' : ''}`;
-                        thumb.onclick = () => switchToImageShowcase(url, thumb);
-                        thumbContainer.appendChild(thumb);
+                    // Оновлення активної мініатюри
+                    document.querySelectorAll('.thumb').forEach((t, i) => {
+                        t.classList.toggle('active', i === index);
+                        if (i === index) {
+                            t.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+                        }
                     });
 
-                    if (item.videoUrl && item.videoUrl.trim()) {
-                        const vThumb = document.createElement('div');
-                        vThumb.className = 'thumb thumb-video';
-                        vThumb.id = 'videoThumbBtn';
-                        vThumb.title = 'Дивитися відеопрезентацію';
-                        vThumb.innerHTML = `
-                            <div class="tv-play"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg></div>
-                            <span class="tv-label">Відео</span>
-                        `;
-                        vThumb.onclick = () => switchToVideoShowcase();
-                        thumbContainer.appendChild(vThumb);
+                    updateLightboxContent();
+                }
+                window.showMediaSlide = showMediaSlide;
+
+                window.nextMediaSlide = function(e) {
+                    if (e) { e.preventDefault(); e.stopPropagation(); }
+                    showMediaSlide(currentMediaSlideIndex + 1);
+                };
+
+                window.prevMediaSlide = function(e) {
+                    if (e) { e.preventDefault(); e.stopPropagation(); }
+                    showMediaSlide(currentMediaSlideIndex - 1);
+                };
+
+                // Відмальовка мініатюр
+                if (thumbContainer && currentListingMediaList.length > 1) {
+                    thumbContainer.innerHTML = '';
+                    currentListingMediaList.forEach((media, idx) => {
+                        if (media.type === 'image') {
+                            const thumb = document.createElement('img');
+                            thumb.onerror = function() { this.onerror = null; this.src = '/images/placeholder.svg'; };
+                            thumb.src = media.url;
+                            thumb.className = `thumb ${idx === 0 ? 'active' : ''}`;
+                            thumb.onclick = () => showMediaSlide(idx);
+                            thumbContainer.appendChild(thumb);
+                        } else if (media.type === 'video') {
+                            const vThumb = document.createElement('div');
+                            vThumb.className = `thumb thumb-video ${idx === 0 ? 'active' : ''}`;
+                            vThumb.title = 'Дивитися відеопрезентацію';
+                            vThumb.style.cssText = 'position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0f172a; border-radius: 10px; color: white; cursor: pointer; border: 2px solid transparent; width: 86px; height: 68px; flex-shrink: 0;';
+                            vThumb.innerHTML = `
+                                <div style="font-size: 1.2rem; line-height: 1;">▶</div>
+                                <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; margin-top: 2px;">Відео</span>
+                            `;
+                            vThumb.onclick = () => showMediaSlide(idx);
+                            thumbContainer.appendChild(vThumb);
+                        }
+                    });
+                } else if (thumbContainer) {
+                    thumbContainer.innerHTML = '';
+                }
+
+                // Ініціалізація першого слайда
+                showMediaSlide(0);
+
+                // Підтримка свайпів (Touch Swipe) на мобільних телефонах
+                const stageWrap = document.getElementById('mainStageWrapper');
+                if (stageWrap && !stageWrap._hasSwipeListener) {
+                    stageWrap._hasSwipeListener = true;
+                    let touchStartX = 0;
+                    let touchStartY = 0;
+                    stageWrap.addEventListener('touchstart', (e) => {
+                        touchStartX = e.changedTouches[0].screenX;
+                        touchStartY = e.changedTouches[0].screenY;
+                    }, { passive: true });
+                    stageWrap.addEventListener('touchend', (e) => {
+                        const diffX = e.changedTouches[0].screenX - touchStartX;
+                        const diffY = e.changedTouches[0].screenY - touchStartY;
+                        if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+                            if (diffX < 0) nextMediaSlide();
+                            else prevMediaSlide();
+                        }
+                    }, { passive: true });
+                }
+
+                // ==================== LIGHTBOX & НАБЛИЖЕННЯ ЗУМОМ (ZOOM) ====================
+                window.openLightboxZoom = function() {
+                    const media = currentListingMediaList[currentMediaSlideIndex];
+                    if (!media || media.type !== 'image') return;
+                    const modal = document.getElementById('loopMediaLightbox');
+                    if (!modal) return;
+                    modal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                    resetLightboxZoom();
+                    updateLightboxContent();
+                };
+
+                window.closeLightboxZoom = function() {
+                    const modal = document.getElementById('loopMediaLightbox');
+                    if (!modal) return;
+                    modal.style.display = 'none';
+                    document.body.style.overflow = '';
+                };
+
+                function updateLightboxContent() {
+                    const modal = document.getElementById('loopMediaLightbox');
+                    if (!modal || modal.style.display === 'none') return;
+                    const media = currentListingMediaList[currentMediaSlideIndex];
+                    const img = document.getElementById('lightboxImage');
+                    const counter = document.getElementById('lightboxCounter');
+                    const prevBtn = document.getElementById('lightboxPrevBtn');
+                    const nextBtn = document.getElementById('lightboxNextBtn');
+
+                    if (counter) {
+                        counter.innerText = `Фото ${currentMediaSlideIndex + 1} з ${currentListingMediaList.length}`;
                     }
+
+                    if (currentListingMediaList.length <= 1) {
+                        if (prevBtn) prevBtn.style.display = 'none';
+                        if (nextBtn) nextBtn.style.display = 'none';
+                    } else {
+                        if (prevBtn) prevBtn.style.display = 'flex';
+                        if (nextBtn) nextBtn.style.display = 'flex';
+                    }
+
+                    if (img && media && media.type === 'image') {
+                        img.src = media.url;
+                    }
+                }
+
+                function applyLightboxTransform() {
+                    const stage = document.getElementById('lightboxStage');
+                    const text = document.getElementById('lightboxZoomLevelText');
+                    if (stage) {
+                        stage.style.transform = `scale(${lightboxZoomLevel}) translate(${lightboxPanX / lightboxZoomLevel}px, ${lightboxPanY / lightboxZoomLevel}px)`;
+                        stage.style.cursor = lightboxZoomLevel > 1 ? (isLightboxDragging ? 'grabbing' : 'grab') : 'zoom-in';
+                    }
+                    if (text) {
+                        text.innerText = Math.round(lightboxZoomLevel * 100) + '%';
+                    }
+                }
+
+                window.zoomLightboxIn = function() {
+                    lightboxZoomLevel = Math.min(4.0, lightboxZoomLevel + 0.35);
+                    applyLightboxTransform();
+                };
+
+                window.zoomLightboxOut = function() {
+                    lightboxZoomLevel = Math.max(1.0, lightboxZoomLevel - 0.35);
+                    if (lightboxZoomLevel === 1.0) {
+                        lightboxPanX = 0;
+                        lightboxPanY = 0;
+                    }
+                    applyLightboxTransform();
+                };
+
+                window.resetLightboxZoom = function() {
+                    lightboxZoomLevel = 1.0;
+                    lightboxPanX = 0;
+                    lightboxPanY = 0;
+                    applyLightboxTransform();
+                };
+
+                window.prevLightboxSlide = function(e) {
+                    if (e) e.stopPropagation();
+                    let prevIdx = currentMediaSlideIndex - 1;
+                    if (prevIdx < 0) prevIdx = currentListingMediaList.length - 1;
+                    resetLightboxZoom();
+                    showMediaSlide(prevIdx);
+                };
+
+                window.nextLightboxSlide = function(e) {
+                    if (e) e.stopPropagation();
+                    let nextIdx = currentMediaSlideIndex + 1;
+                    if (nextIdx >= currentListingMediaList.length) nextIdx = 0;
+                    resetLightboxZoom();
+                    showMediaSlide(nextIdx);
+                };
+
+                window.handleLightboxBackdropClick = function(e) {
+                    if (e.target.id === 'loopMediaLightbox' || e.target.id === 'lightboxViewport') {
+                        closeLightboxZoom();
+                    }
+                };
+
+                // Lightbox інтерактивне керування жестами та мишкою
+                const lbViewport = document.getElementById('lightboxViewport');
+                const lbStage = document.getElementById('lightboxStage');
+                if (lbViewport && !lbViewport._hasZoomEvents) {
+                    lbViewport._hasZoomEvents = true;
+
+                    // Зум коліщатком миші
+                    lbViewport.addEventListener('wheel', (e) => {
+                        e.preventDefault();
+                        if (e.deltaY < 0) zoomLightboxIn();
+                        else zoomLightboxOut();
+                    }, { passive: false });
+
+                    // Перетягування (Drag / Pan) при наближенні
+                    lbStage.addEventListener('mousedown', (e) => {
+                        if (lightboxZoomLevel <= 1.0) return;
+                        isLightboxDragging = true;
+                        lightboxDragStartX = e.clientX - lightboxPanX;
+                        lightboxDragStartY = e.clientY - lightboxPanY;
+                        applyLightboxTransform();
+                    });
+
+                    window.addEventListener('mousemove', (e) => {
+                        if (!isLightboxDragging || lightboxZoomLevel <= 1.0) return;
+                        lightboxPanX = e.clientX - lightboxDragStartX;
+                        lightboxPanY = e.clientY - lightboxDragStartY;
+                        applyLightboxTransform();
+                    });
+
+                    window.addEventListener('mouseup', () => {
+                        if (isLightboxDragging) {
+                            isLightboxDragging = false;
+                            applyLightboxTransform();
+                        }
+                    });
+
+                    // Подвійний клік перемикає 1x <-> 2.5x
+                    lbStage.addEventListener('dblclick', (e) => {
+                        e.preventDefault();
+                        if (lightboxZoomLevel > 1.05) {
+                            resetLightboxZoom();
+                        } else {
+                            lightboxZoomLevel = 2.5;
+                            applyLightboxTransform();
+                        }
+                    });
+
+                    // Сенсорні дотики для мобільних
+                    let touchDragX = 0;
+                    let touchDragY = 0;
+                    lbStage.addEventListener('touchstart', (e) => {
+                        if (e.touches.length === 1 && lightboxZoomLevel > 1.0) {
+                            isLightboxDragging = true;
+                            touchDragX = e.touches[0].clientX - lightboxPanX;
+                            touchDragY = e.touches[0].clientY - lightboxPanY;
+                        }
+                    }, { passive: true });
+
+                    lbStage.addEventListener('touchmove', (e) => {
+                        if (isLightboxDragging && e.touches.length === 1 && lightboxZoomLevel > 1.0) {
+                            lightboxPanX = e.touches[0].clientX - touchDragX;
+                            lightboxPanY = e.touches[0].clientY - touchDragY;
+                            applyLightboxTransform();
+                        }
+                    }, { passive: true });
+
+                    lbStage.addEventListener('touchend', () => {
+                        isLightboxDragging = false;
+                    }, { passive: true });
+
+                    // Керування клавіатурою (Esc, стрілки, +, -)
+                    window.addEventListener('keydown', (e) => {
+                        const modal = document.getElementById('loopMediaLightbox');
+                        if (modal && modal.style.display !== 'none') {
+                            if (e.key === 'Escape') closeLightboxZoom();
+                            else if (e.key === 'ArrowLeft') prevLightboxSlide();
+                            else if (e.key === 'ArrowRight') nextLightboxSlide();
+                            else if (e.key === '+' || e.key === '=') zoomLightboxIn();
+                            else if (e.key === '-') zoomLightboxOut();
+                            else if (e.key === '0') resetLightboxZoom();
+                        } else if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                            if (e.key === 'ArrowLeft') prevMediaSlide();
+                            else if (e.key === 'ArrowRight') nextMediaSlide();
+                        }
+                    });
                 }
 
                 // Продавець / Виконавець
@@ -4534,6 +5152,30 @@
                 <span>Вийти з акаунта</span>
             </button>
         </div>
+    </div>
+
+    <!-- FULLSCREEN INTERACTIVE ZOOM LIGHTBOX MODAL -->
+    <div id="loopMediaLightbox" class="lightbox-modal" style="display: none;" onclick="handleLightboxBackdropClick(event)">
+        <div class="lightbox-top-bar" onclick="event.stopPropagation()">
+            <div class="lightbox-counter" id="lightboxCounter">1 / 1</div>
+            <div class="lightbox-controls">
+                <button type="button" class="lightbox-btn" onclick="zoomLightboxOut()" title="Зменшити (-)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                <button type="button" class="lightbox-btn lightbox-reset-btn" id="lightboxZoomLevelText" onclick="resetLightboxZoom()" title="Скинути масштаб (100%)">100%</button>
+                <button type="button" class="lightbox-btn" onclick="zoomLightboxIn()" title="Збільшити (+)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                <button type="button" class="lightbox-btn lightbox-close-btn" onclick="closeLightboxZoom()" title="Закрити (Esc)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            </div>
+        </div>
+        
+        <div class="lightbox-viewport" id="lightboxViewport">
+            <div class="lightbox-stage" id="lightboxStage">
+                <img id="lightboxImage" src="" alt="Zoomed Product">
+            </div>
+        </div>
+
+        <button type="button" class="lightbox-nav-btn lightbox-prev-btn" id="lightboxPrevBtn" onclick="prevLightboxSlide(event)" title="Попереднє фото">‹</button>
+        <button type="button" class="lightbox-nav-btn lightbox-next-btn" id="lightboxNextBtn" onclick="nextLightboxSlide(event)" title="Наступне фото">›</button>
+        
+        <div class="lightbox-hint">Коліщатко миші або подвійний клік — наближення. Перетягуйте фото для огляду деталей.</div>
     </div>
 
 </body>
