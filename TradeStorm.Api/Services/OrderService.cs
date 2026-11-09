@@ -87,11 +87,17 @@ public class OrderService : IOrderService
         };
         _context.Notifications.Add(notif);
 
+        var listingPhoto = !string.IsNullOrWhiteSpace(listing.ImageUrl)
+            ? listing.ImageUrl.Split(';', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim()
+            : null;
+        var photoLine = !string.IsNullOrWhiteSpace(listingPhoto) ? $"• Фото: {listingPhoto.Trim()}\n" : "";
+
         // Структуроване, красиве та інформативне повідомлення в чат між покупцем і продавцем
         var chatMsgText = isService
             ? $"🛠 ЗАМОВЛЕННЯ ПОСЛУГИ {displayCode}\n\n" +
               $"• Послуга: {listing.Title}\n" +
               $"• Вартість: {totalPrice:N0} ₴\n" +
+              photoLine +
               $"• Замовник: {dto.BuyerName}\n" +
               $"• Локація: {dto.DeliveryCity}\n" +
               $"• Деталі: {dto.DeliveryBranch}\n" +
@@ -100,6 +106,7 @@ public class OrderService : IOrderService
             : $"📦 ЗАМОВЛЕННЯ ТОВАРУ {displayCode}\n\n" +
               $"• Товар: {listing.Title}\n" +
               $"• Вартість: {totalPrice:N0} ₴\n" +
+              photoLine +
               $"• Покупець: {dto.BuyerName}\n" +
               $"• Доставка: {dto.DeliveryCity}\n" +
               $"• Відділення: {dto.DeliveryBranch}\n" +
@@ -151,7 +158,7 @@ public class OrderService : IOrderService
             });
         }
 
-        return MapToDto(order, listing.Title, listing.ImageUrl, $"{listing.Seller?.FirstName} {listing.Seller?.LastName}".Trim(), listing.Seller?.PhoneNumber, isService);
+        return MapToDto(order, listing.Title, listingPhoto, $"{listing.Seller?.FirstName} {listing.Seller?.LastName}".Trim(), listing.Seller?.PhoneNumber, isService);
     }
 
     public async Task<List<OrderDto>> GetBuyerOrdersAsync(int buyerId)

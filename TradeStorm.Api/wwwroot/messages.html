@@ -33,7 +33,7 @@
             border-top: 1.5px solid var(--border-color) !important;
             padding: 10px 14px !important;
             padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
-            display: flex !important;
+            display: none !important;
             align-items: center !important;
             gap: 8px !important;
             position: sticky !important;
@@ -43,6 +43,18 @@
             box-sizing: border-box !important;
             width: 100% !important;
             box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .chat-input-bar.active {
+            display: flex !important;
+        }
+
+        #inputBar {
+            display: none !important;
+        }
+
+        #inputBar.active {
+            display: flex !important;
         }
 
         .main-msg-input {
@@ -1345,11 +1357,78 @@
             margin-bottom: 4px;
         }
 
+        .coc-product-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .coc-photo-wrap {
+            position: relative;
+            width: 74px;
+            height: 74px;
+            min-width: 74px;
+            max-width: 74px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1.5px solid var(--border-color);
+            background: var(--bg-color);
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .coc-photo-wrap:hover {
+            transform: scale(1.03);
+            border-color: #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .chat-order-card.service-order-card .coc-photo-wrap:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        }
+
+        .coc-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .coc-photo-zoom-hint {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.65);
+            color: #fff;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+
+        .coc-photo-wrap:hover .coc-photo-zoom-hint {
+            opacity: 1;
+        }
+
+        .coc-product-info {
+            flex: 1;
+            min-width: 0;
+        }
+
         .coc-price {
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             font-weight: 800;
             color: #10b981;
-            margin-bottom: 10px;
+            margin-bottom: 0;
         }
 
         .chat-order-card.service-order-card .coc-price {
@@ -2164,13 +2243,28 @@
         const token = localStorage.getItem('loopToken');
         let currentUserId = null;
         let activeReceiverId = null;
-            const mCardClose = document.querySelector('.messenger-card');
-            if (mCardClose) {
-                mCardClose.classList.remove('chat-open');
-                mCardClose.classList.add('details-collapsed');
+
+        function setChatInputVisible(visible) {
+            const bar = document.getElementById('inputBar');
+            if (!bar) return;
+            if (visible) {
+                bar.classList.add('active');
+                bar.style.setProperty('display', 'flex', 'important');
+            } else {
+                bar.classList.remove('active');
+                bar.style.setProperty('display', 'none', 'important');
             }
-            const dPaneClose = document.getElementById('detailsPane');
-            if (dPaneClose) dPaneClose.style.display = 'none';
+        }
+
+        // За замовчуванням панель вводу та деталі приховані, доки користувач не обере діалог
+        setChatInputVisible(false);
+        const mCardClose = document.querySelector('.messenger-card');
+        if (mCardClose) {
+            mCardClose.classList.remove('chat-open');
+            mCardClose.classList.add('details-collapsed');
+        }
+        const dPaneClose = document.getElementById('detailsPane');
+        if (dPaneClose) dPaneClose.style.display = 'none';
         let activeItemContext = null;
         let allDialogsCache = [];
         let currentFilterTab = 'all';
@@ -2285,6 +2379,9 @@
 
         function showDialogsListMobile() {
             activeReceiverId = null;
+            setChatInputVisible(false);
+            const dPane = document.getElementById('detailsPane');
+            if (dPane) dPane.style.display = 'none';
             const card = document.querySelector('.messenger-card');
             if (card) card.classList.remove('chat-active');
             document.body.classList.remove('in-chat-conversation');
@@ -2649,9 +2746,9 @@
             updateDetailsPane(partnerData, listingItem, partnerId);
 
             // 6. Показуємо панель введення та фокусуємо інпут
-            document.getElementById('inputBar').style.display = 'flex';
+            setChatInputVisible(true);
             const msgInput = document.getElementById('messageInput');
-            setTimeout(() => { msgInput.focus(); }, 100);
+            setTimeout(() => { if (msgInput) msgInput.focus(); }, 100);
 
             // 7. Позначаємо як прочитані на бекенді та оновлюємо бейджі
             const readToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
@@ -2959,6 +3056,60 @@
         }
 
         // РЕНДЕРИНГ КРАСИВОЇ, СТРУКТУРОВАНОЇ КАРТКИ ЗАМОВЛЕННЯ В ЧАТІ
+                let cachedOrdersPhotoMap = null;
+        async function resolveOrderPhotoAsync(orderCode, cardUid) {
+            if (!orderCode || !cardUid) return;
+            window.orderPhotoCache = window.orderPhotoCache || {};
+            if (window.orderPhotoCache[orderCode]) {
+                const img = document.getElementById(`coc-img-${cardUid}`);
+                const wrap = document.getElementById(`coc-wrap-${cardUid}`);
+                if (img && wrap) {
+                    img.src = window.orderPhotoCache[orderCode];
+                    wrap.style.display = 'block';
+                }
+                return;
+            }
+
+            try {
+                if (cachedOrdersPhotoMap === null) {
+                    cachedOrdersPhotoMap = {};
+                    const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
+                    if (curToken) {
+                        const [resB, resS] = await Promise.allSettled([
+                            fetch('/api/orders/my-purchases', { headers: { 'Authorization': `Bearer ${curToken}` } }),
+                            fetch('/api/orders/my-sales', { headers: { 'Authorization': `Bearer ${curToken}` } })
+                        ]);
+                        if (resB.status === 'fulfilled' && resB.value && resB.value.ok) {
+                            const list = await resB.value.json();
+                            (list || []).forEach(o => {
+                                const c = (o.orderCode || '').toUpperCase();
+                                if (c && o.listingImageUrl) cachedOrdersPhotoMap[c] = o.listingImageUrl;
+                            });
+                        }
+                        if (resS.status === 'fulfilled' && resS.value && resS.value.ok) {
+                            const list = await resS.value.json();
+                            (list || []).forEach(o => {
+                                const c = (o.orderCode || '').toUpperCase();
+                                if (c && o.listingImageUrl) cachedOrdersPhotoMap[c] = o.listingImageUrl;
+                            });
+                        }
+                    }
+                }
+
+                const foundPhoto = cachedOrdersPhotoMap[orderCode.toUpperCase()];
+                if (foundPhoto) {
+                    window.orderPhotoCache[orderCode] = foundPhoto;
+                    const img = document.getElementById(`coc-img-${cardUid}`);
+                    const wrap = document.getElementById(`coc-wrap-${cardUid}`);
+                    if (img && wrap) {
+                        img.src = foundPhoto;
+                        wrap.style.display = 'block';
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // РЕНДЕР КАРТКИ ЗАМОВЛЕННЯ В ЧАТІ
         function renderOrderCardInChat(rawText) {
             if (!rawText) return null;
             const isOrder = rawText.includes('ЗАМОВЛЕННЯ') || rawText.includes('Замовлення') || rawText.includes('замовлення');
@@ -2989,7 +3140,34 @@
             const payment = extractField([/•\s*Оплата:\s*([^\n]+)/i, /Оплата:\s*([^\n]+?)(?=\s+(?:Коментар|$))/i]);
             const comment = extractField([/•\s*Коментар:\s*([^\n]+)/i, /Коментар:\s*([^\n]+)$/i]);
 
+            let photo = extractField([
+                /•\s*(?:Фото|Зображення|Картинка|Image|Photo):\s*([^\s\n\r]+)/i,
+                /(?:https?:\/\/[^\s"'<>]+\.(?:png|jpe?g|webp|gif|svg|bmp))/i,
+                /(?:\/uploads\/[^\s"'<>]+\.(?:png|jpe?g|webp|gif|svg|bmp))/i
+            ]);
+
+            if (!photo && window.activeItemContext) {
+                photo = (window.activeItemContext.imageUrls && window.activeItemContext.imageUrls[0]) || window.activeItemContext.imageUrl || null;
+            }
+            if (!photo) {
+                const dtImg = document.getElementById('detailsListingImg');
+                if (dtImg && dtImg.src && !dtImg.src.includes('placehold') && dtImg.style.display !== 'none') {
+                    photo = dtImg.src;
+                }
+            }
+            if (!photo) {
+                const pThumb = document.getElementById('productThumb');
+                if (pThumb && pThumb.src && !pThumb.src.includes('placehold')) {
+                    photo = pThumb.src;
+                }
+            }
+
             if (!title && !price) return null;
+
+            const cardUid = 'coc_' + Math.random().toString(36).substring(2, 9);
+            if (!photo && orderCode) {
+                setTimeout(() => { resolveOrderPhotoAsync(orderCode, cardUid); }, 60);
+            }
 
             return `
             <div class="chat-order-card ${isService ? 'service-order-card' : ''}">
@@ -2997,8 +3175,18 @@
                     <span class="coc-badge">${isService ? '🛠 ЗАМОВЛЕННЯ ПОСЛУГИ' : '📦 ЗАМОВЛЕННЯ ТОВАРУ'}</span>
                     ${orderCode ? `<span class="coc-code">${escapeHtml(orderCode)}</span>` : ''}
                 </div>
-                ${title ? `<div class="coc-title">${escapeHtml(title)}</div>` : ''}
-                ${price ? `<div class="coc-price">${escapeHtml(price)}</div>` : ''}
+                <div class="coc-product-row">
+                    <div class="coc-photo-wrap" id="coc-wrap-${cardUid}" style="${photo ? '' : 'display: none;'}" onclick="openPhotoModal(document.getElementById('coc-img-${cardUid}').src)">
+                        <img id="coc-img-${cardUid}" src="${photo ? escapeHtml(photo) : ''}" class="coc-photo" alt="${escapeHtml(title || 'Товар')}" onerror="this.closest('.coc-photo-wrap').style.display='none';">
+                        <div class="coc-photo-zoom-hint" title="Збільшити фото">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                        </div>
+                    </div>
+                    <div class="coc-product-info">
+                        ${title ? `<div class="coc-title">${escapeHtml(title)}</div>` : ''}
+                        ${price ? `<div class="coc-price">${escapeHtml(price)}</div>` : ''}
+                    </div>
+                </div>
                 <hr class="coc-divider">
                 <div class="coc-grid">
                     ${buyer ? `<div class="coc-row"><span class="coc-label">👤 ${isService ? 'Замовник' : 'Покупець'}:</span><span class="coc-val">${escapeHtml(buyer)}</span></div>` : ''}
@@ -3144,7 +3332,14 @@
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 activeReceiverId = null;
-                document.getElementById('inputBar').style.display = 'none';
+                setChatInputVisible(false);
+                const dPaneDel = document.getElementById('detailsPane');
+                if (dPaneDel) dPaneDel.style.display = 'none';
+                const mCardDel = document.querySelector('.messenger-card');
+                if (mCardDel) {
+                    mCardDel.classList.remove('chat-open');
+                    mCardDel.classList.add('details-collapsed');
+                }
                 document.getElementById('quickChips').style.display = 'none';
                 document.getElementById('headerActions').style.display = 'none';
                 document.getElementById('productBadge').style.display = 'none';
