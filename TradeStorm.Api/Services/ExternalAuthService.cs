@@ -110,7 +110,7 @@ public class ExternalAuthService : IExternalAuthService
 
 
 
-        return _config["Authentication:Google:ClientId"] ?? "";
+        return "";
 
     }
 
@@ -142,7 +142,7 @@ public class ExternalAuthService : IExternalAuthService
 
 
 
-        return _config["Authentication:Google:ClientSecret"] ?? "";
+        return "";
 
     }
 

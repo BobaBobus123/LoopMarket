@@ -50,6 +50,14 @@ catch { }
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Завжди підключаємо локальні конфігурації для розробки (якщо не в юніт-тестах)
+if (!builder.Environment.IsEnvironment("Testing") && !AppDomain.CurrentDomain.FriendlyName.Contains("testhost", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Configuration
+        .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
+        .AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+}
+
 // Конфігурація EF Core (Підтримка SQLite та PostgreSQL / Neon Cloud)
 var pgEnvUrl = Environment.GetEnvironmentVariable("DATABASE_URL") ?? builder.Configuration["DATABASE_URL"];
 var dbProvider = builder.Configuration["DatabaseProvider"] ?? (string.IsNullOrEmpty(pgEnvUrl) ? "Sqlite" : "PostgreSQL");
