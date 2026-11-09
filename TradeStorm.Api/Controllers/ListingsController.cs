@@ -163,6 +163,20 @@ public class ListingsController : ControllerBase
             return BadRequest(new { error = $"🛡️ Антишахрайський фільтр: {scamReason}. Будь ласка, видаліть підозрілі посилання." });
         }
 
+        if (!string.IsNullOrWhiteSpace(dto.VideoUrl) && !User.IsInRole("Admin"))
+        {
+            var currentUser = await _context.Users.FindAsync(userId);
+            bool isPremium = currentUser != null && (currentUser.IsPremium && (!currentUser.PremiumUntil.HasValue || currentUser.PremiumUntil.Value > DateTime.UtcNow));
+            if (!isPremium)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new
+                {
+                    error = "Додавання відеопрезентацій доступне виключно для передплатників LoopMarket PRO / Бренд. Оформіть підписку для розблокування відео.",
+                    code = "PREMIUM_REQUIRED"
+                });
+            }
+        }
+
         var listing = await _listingService.CreateListingAsync(userId, dto);
         return CreatedAtAction(nameof(GetListingById), new { id = listing.Id }, listing);
     }
@@ -188,6 +202,19 @@ public class ListingsController : ControllerBase
         }
 
         bool isAdmin = User.IsInRole("Admin");
+        if (!string.IsNullOrWhiteSpace(dto.VideoUrl) && !isAdmin)
+        {
+            var currentUser = await _context.Users.FindAsync(userId);
+            bool isPremium = currentUser != null && (currentUser.IsPremium && (!currentUser.PremiumUntil.HasValue || currentUser.PremiumUntil.Value > DateTime.UtcNow));
+            if (!isPremium)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new
+                {
+                    error = "Додавання відеопрезентацій доступне виключно для передплатників LoopMarket PRO / Бренд. Оформіть підписку для розблокування відео.",
+                    code = "PREMIUM_REQUIRED"
+                });
+            }
+        }
         var (success, error, listing) = await _listingService.UpdateListingAsync(numericId, userId, dto, isAdmin);
         if (!success)
         {
@@ -421,6 +448,27 @@ public class ListingsController : ControllerBase
     [RequestSizeLimit(100 * 1024 * 1024)]
     public async Task<IActionResult> UploadVideo(IFormFile file)
     {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId))
+        {
+            return Unauthorized();
+        }
+
+        bool isAdmin = User.IsInRole("Admin");
+        if (!isAdmin)
+        {
+            var currentUser = await _context.Users.FindAsync(userId);
+            bool isPremium = currentUser != null && (currentUser.IsPremium && (!currentUser.PremiumUntil.HasValue || currentUser.PremiumUntil.Value > DateTime.UtcNow));
+            if (!isPremium)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new
+                {
+                    error = "Додавання відеопрезентацій доступне виключно для передплатників LoopMarket PRO / Бренд. Оформіть підписку, щоб завантажувати відео та отримувати в 3 рази більше замовлень!",
+                    code = "PREMIUM_REQUIRED"
+                });
+            }
+        }
+
         if (file == null || file.Length == 0)
         {
             return BadRequest(new { error = "Файл відео не вибрано або він порожній" });

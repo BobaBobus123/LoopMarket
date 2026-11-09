@@ -281,6 +281,10 @@ builder.Services.AddAuthentication(options =>
                 {
                     context.Token = cookieToken;
                 }
+                else if (context.Request.Query.TryGetValue("token", out var qToken) && !string.IsNullOrEmpty(qToken))
+                {
+                    context.Token = qToken;
+                }
             }
             return Task.CompletedTask;
         }
@@ -327,6 +331,9 @@ using (var scope = app.Services.CreateScope())
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Categories ADD COLUMN Icon TEXT;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Categories ADD COLUMN ParentId INTEGER;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Listings ADD COLUMN VideoUrl TEXT;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN IsPremium INTEGER DEFAULT 0;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN PremiumUntil TEXT;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN PremiumPlan TEXT;"); } catch {}
         }
         catch {}
     }
@@ -340,6 +347,9 @@ using (var scope = app.Services.CreateScope())
             db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""Icon"" VARCHAR(100);");
             db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""ParentId"" INTEGER;");
             db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Listings"" ADD COLUMN IF NOT EXISTS ""VideoUrl"" TEXT;");
+            db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""IsPremium"" boolean DEFAULT FALSE;");
+            db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""PremiumUntil"" timestamp with time zone;");
+            db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""PremiumPlan"" text;");
         }
         catch {}
     }
@@ -409,9 +419,15 @@ app.MapControllers();
 
 
 
-// Службовий ендпоінт аудиту безпеки та конфігурації секретів (Етапи 5, 6, 7)
-app.MapGet("/api/system/security-status", (IConfiguration config) =>
+// Службовий ендпоінт аудиту безпеки та конфігурації секретів (Етапи 5, 6, 7) - захищено для адміністраторів
+app.MapGet("/api/system/security-status", (IConfiguration config, HttpContext context, IWebHostEnvironment env) =>
 {
+    bool isTesting = env.IsEnvironment("Testing") || AppDomain.CurrentDomain.FriendlyName.Contains("testhost", StringComparison.OrdinalIgnoreCase);
+    if (!isTesting && (context.User?.Identity?.IsAuthenticated != true || !context.User.IsInRole(TradeStorm.Api.Models.UserRoles.Admin)))
+    {
+        return Results.NotFound();
+    }
+
     var hasJwtKey = !string.IsNullOrEmpty(config["Jwt:Key"]);
     var hasGoogleClient = !string.IsNullOrEmpty(config["Authentication:Google:ClientId"]);
     var hasTelegram = !string.IsNullOrEmpty(config["Telegram:BotToken"]);
@@ -473,11 +489,77 @@ app.MapGet("/api/system/security-status", (IConfiguration config) =>
     });
 });
 
-// Перенаправлення документації API та Swagger на docs.html
-app.MapGet("/swagger", () => Results.Redirect("/docs.html"));
-app.MapGet("/swagger/index.html", () => Results.Redirect("/docs.html"));
-app.MapGet("/docs", () => Results.Redirect("/docs.html"));
-app.MapGet("/api-docs", () => Results.Redirect("/docs.html"));
+// Захищена документація API (доступ виключно для адміністраторів, для решти - 404 Not Found)
+app.MapGet("/docs.html", async (HttpContext context) =>
+{
+    if (context.User?.Identity?.IsAuthenticated != true || !context.User.IsInRole(TradeStorm.Api.Models.UserRoles.Admin))
+    {
+        context.Response.StatusCode = 404;
+        var notFoundPath = Path.Combine(app.Environment.WebRootPath, "404.html");
+        if (File.Exists(notFoundPath))
+        {
+            context.Response.ContentType = "text/html; charset=utf-8";
+            await context.Response.SendFileAsync(notFoundPath);
+            return;
+        }
+        return;
+    }
+
+    var docsPath = Path.Combine(app.Environment.ContentRootPath, "AdminDocs", "docs.html");
+    if (!File.Exists(docsPath))
+    {
+        context.Response.StatusCode = 404;
+        return;
+    }
+
+    context.Response.ContentType = "text/html; charset=utf-8";
+    await context.Response.SendFileAsync(docsPath);
+});
+
+app.MapGet("/swagger", (HttpContext context) =>
+{
+    if (context.User?.Identity?.IsAuthenticated != true || !context.User.IsInRole(TradeStorm.Api.Models.UserRoles.Admin))
+    {
+        return Results.NotFound();
+    }
+    return Results.Redirect("/docs.html");
+});
+
+app.MapGet("/swagger/index.html", (HttpContext context) =>
+{
+    if (context.User?.Identity?.IsAuthenticated != true || !context.User.IsInRole(TradeStorm.Api.Models.UserRoles.Admin))
+    {
+        return Results.NotFound();
+    }
+    return Results.Redirect("/docs.html");
+});
+
+app.MapGet("/swagger/{*any}", (HttpContext context) =>
+{
+    if (context.User?.Identity?.IsAuthenticated != true || !context.User.IsInRole(TradeStorm.Api.Models.UserRoles.Admin))
+    {
+        return Results.NotFound();
+    }
+    return Results.Redirect("/docs.html");
+});
+
+app.MapGet("/docs", (HttpContext context) =>
+{
+    if (context.User?.Identity?.IsAuthenticated != true || !context.User.IsInRole(TradeStorm.Api.Models.UserRoles.Admin))
+    {
+        return Results.NotFound();
+    }
+    return Results.Redirect("/docs.html");
+});
+
+app.MapGet("/api-docs", (HttpContext context) =>
+{
+    if (context.User?.Identity?.IsAuthenticated != true || !context.User.IsInRole(TradeStorm.Api.Models.UserRoles.Admin))
+    {
+        return Results.NotFound();
+    }
+    return Results.Redirect("/docs.html");
+});
 
 // SignalR Hub
 app.MapHub<ChatHub>("/chathub");

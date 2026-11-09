@@ -1294,18 +1294,39 @@
                     <div class="photo-previews-grid" id="previewsGrid"></div>
 
                     <!-- VIDEO SHOWCASE BOX (EXCLUSIVE FOR BRANDS & TOP SELLERS) -->
-                    <div class="video-upload-box" style="margin-top: 22px; padding: 18px 20px; background: rgba(37, 99, 235, 0.04); border: 1.5px dashed rgba(37, 99, 235, 0.35); border-radius: 14px;">
+                    <div class="video-upload-box" id="videoUploadBox" style="margin-top: 22px; padding: 18px 20px; background: rgba(37, 99, 235, 0.04); border: 1.5px dashed rgba(37, 99, 235, 0.35); border-radius: 14px;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span style="font-size: 1.3rem;">🎬</span>
                                 <div>
                                     <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-main); margin-bottom: 2px;">Відеопрезентація товару або бренду</h4>
-                                    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Додайте відеоогляд товару для максимальної довіри покупців та замовників.</p>
+                                    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Оголошення з відео збирають у 3 рази більше замовлень та отримують пріоритет.</p>
                                 </div>
                             </div>
-                            <span style="font-size: 0.72rem; font-weight: 800; background: rgba(16, 185, 129, 0.15); color: #059669; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
-                                🌟 Для брендів та топ-продавців
+                            <span id="videoProStatusBadge" style="font-size: 0.74rem; font-weight: 800; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.22)); color: #d97706; padding: 5px 12px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.4); display: inline-flex; align-items: center; gap: 6px;">
+                                👑 Тільки для передплатників PRO
                             </span>
+                        </div>
+
+                        <!-- VIP PRO LOCK BANNER (Shown for non-premium users) -->
+                        <div id="videoProLockBanner" style="display: none; background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.06) 100%); border: 1.5px solid rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 240px;">
+                                <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: #fff; flex-shrink: 0; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);">
+                                    👑
+                                </div>
+                                <div>
+                                    <div style="font-weight: 800; font-size: 0.92rem; color: #d97706; margin-bottom: 2px;">
+                                        Функція доступна в LoopMarket PRO / Бренд
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.35;">
+                                        Оголошення з відеооглядом отримують у 3 рази більше замовлень та закріплення в топі. Отримайте статус PRO, щоб розблокувати додавання відео!
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" onclick="openPremiumModal()" class="btn-pro-unlock" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; font-weight: 800; font-size: 0.85rem; padding: 10px 18px; border-radius: 10px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
+                                <span>👑 Отримати PRO</span>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                            </button>
                         </div>
 
                         <!-- Video Options Switcher -->
@@ -1321,7 +1342,7 @@
                         <!-- 1. Video File Upload Mode -->
                         <div id="videoFileModeBox">
                             <input type="file" id="videoFileInput" accept="video/mp4,video/webm,video/quicktime,video/x-matroska" style="display: none;" onchange="handleVideoFileSelect(this.files[0])">
-                            <div class="video-dropzone" id="videoDropzone" onclick="document.getElementById('videoFileInput').click()">
+                            <div class="video-dropzone" id="videoDropzone" onclick="if(!isUserPremium){ openPremiumModal(); } else { document.getElementById('videoFileInput').click(); }">
                                 <div style="font-size: 1.6rem; margin-bottom: 4px;">📹</div>
                                 <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-main);">Виберіть або перетягніть відео сюди</div>
                                 <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 3px;">Підтримуються MP4, WebM, MOV, MKV (до 100 МБ)</div>
@@ -1463,7 +1484,7 @@
             <div class="footer-col">
                 <h4>Підтримка</h4>
                 <a href="#">Telegram підтримка</a>
-                <a href="/docs.html">Документація API</a>
+                <a href="/safety.html">Центр безпеки</a>
             </div>
         </div>
         <div class="footer-bottom">© 2026 Loop Market. Зручні та безпечні угоди та безпечних угод.</div>
@@ -1766,11 +1787,169 @@
         window.removePhoto = removePhoto;
 
         // ==================== ВІДЕОПРЕЗЕНТАЦІЯ ДЛЯ БРЕНДІВ ТА ТОВАРІВ ====================
+        // ==================== LOOP PRO SUBSCRIPTION & VIDEO GATING ====================
+        let isUserPremium = false;
+        let selectedPremiumPlanId = 'pro_monthly';
+        let selectedPremiumPrice = 199;
+        let selectedPremiumPayMethod = 'card';
+
+        async function checkUserPremiumStatus() {
+            if (!token) return;
+            try {
+                const res = await fetch('/api/subscriptions/status', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    isUserPremium = !!(data.isPremium || data.isAdmin);
+                    updatePremiumUI(data);
+                }
+            } catch(e) {
+                console.warn('Subscription status check failed:', e);
+            }
+        }
+
+        function updatePremiumUI(statusData) {
+            const lockBanner = document.getElementById('videoProLockBanner');
+            const statusBadge = document.getElementById('videoProStatusBadge');
+            
+            if (isUserPremium) {
+                if (lockBanner) lockBanner.style.display = 'none';
+                if (statusBadge) {
+                    statusBadge.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.22))';
+                    statusBadge.style.color = '#059669';
+                    statusBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                    statusBadge.innerHTML = '👑 PRO-продавець: Додавання відео активне';
+                }
+            } else {
+                if (lockBanner) lockBanner.style.display = 'flex';
+                if (statusBadge) {
+                    statusBadge.style.background = 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.22))';
+                    statusBadge.style.color = '#d97706';
+                    statusBadge.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+                    statusBadge.innerHTML = '👑 Тільки для передплатників PRO';
+                }
+            }
+        }
+
+        function openPremiumModal() {
+            const modal = document.getElementById('premiumModal');
+            if (modal) modal.style.display = 'flex';
+        }
+        window.openPremiumModal = openPremiumModal;
+
+        function closePremiumModal() {
+            const modal = document.getElementById('premiumModal');
+            if (modal) modal.style.display = 'none';
+        }
+        window.closePremiumModal = closePremiumModal;
+
+        function selectPremiumPlan(planId, price) {
+            selectedPremiumPlanId = planId;
+            selectedPremiumPrice = price;
+            const cardMonthly = document.getElementById('planCard_pro_monthly');
+            const cardAnnual = document.getElementById('planCard_brand_annual');
+            const btn = document.getElementById('btnSubmitPremiumCheckout');
+
+            if (planId === 'pro_monthly') {
+                if (cardMonthly) {
+                    cardMonthly.style.borderColor = '#2563eb';
+                    cardMonthly.style.background = 'rgba(37,99,235,0.06)';
+                }
+                if (cardAnnual) {
+                    cardAnnual.style.borderColor = 'var(--border-color)';
+                    cardAnnual.style.background = 'var(--bg-color)';
+                }
+                if (btn) btn.innerHTML = '<span>👑 Оплатити 199 ₴ та активувати PRO</span>';
+            } else {
+                if (cardAnnual) {
+                    cardAnnual.style.borderColor = '#10b981';
+                    cardAnnual.style.background = 'rgba(16,185,129,0.06)';
+                }
+                if (cardMonthly) {
+                    cardMonthly.style.borderColor = 'var(--border-color)';
+                    cardMonthly.style.background = 'var(--bg-color)';
+                }
+                if (btn) btn.innerHTML = '<span>💎 Оплатити 1490 ₴ та активувати Бренд</span>';
+            }
+        }
+        window.selectPremiumPlan = selectPremiumPlan;
+
+        function setPayMethod(method) {
+            selectedPremiumPayMethod = method;
+            const methods = ['card', 'monobank', 'applepay'];
+            methods.forEach(m => {
+                const el = document.getElementById('payMethod' + (m === 'card' ? 'Card' : m === 'monobank' ? 'Mono' : 'Apple'));
+                if (el) {
+                    if (m === method) {
+                        el.style.borderColor = '#2563eb';
+                        el.style.background = 'rgba(37,99,235,0.06)';
+                    } else {
+                        el.style.borderColor = 'var(--border-color)';
+                        el.style.background = 'var(--bg-color)';
+                    }
+                }
+            });
+        }
+        window.setPayMethod = setPayMethod;
+
+        async function submitPremiumCheckout() {
+            if (!token) {
+                showToast('Авторизація', 'Будь ласка, увійдіть в акаунт для підключення PRO', '⚠️');
+                setTimeout(() => window.location.href = '/login.html', 1500);
+                return;
+            }
+
+            const btn = document.getElementById('btnSubmitPremiumCheckout');
+            const origHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ Обробка платежу...';
+            }
+
+            try {
+                const res = await fetch('/api/subscriptions/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        planId: selectedPremiumPlanId,
+                        paymentMethod: selectedPremiumPayMethod
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    isUserPremium = true;
+                    closePremiumModal();
+                    updatePremiumUI(data);
+                    showToast('🎉 Вітаємо з PRO!', 'Підписку успішно активовано! Тепер ви можете додавати відеопрезентації до своїх товарів.', '👑');
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    showToast('Помилка', err.error || 'Не вдалося активувати підписку', '❌');
+                }
+            } catch(e) {
+                showToast('Помилка', 'Збій зв\'язку з платіжним сервером', '❌');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = origHtml;
+                }
+            }
+        }
+        window.submitPremiumCheckout = submitPremiumCheckout;
+
         let attachedVideoUrl = null;
         let selectedVideoFile = null;
         let currentVideoMode = 'file';
 
         function switchVideoMode(mode) {
+            if (!isUserPremium) {
+                openPremiumModal();
+                return;
+            }
             currentVideoMode = mode;
             document.getElementById('tabVideoFile')?.classList.toggle('active', mode === 'file');
             document.getElementById('tabVideoLink')?.classList.toggle('active', mode === 'link');
@@ -1814,6 +1993,10 @@
 
         function handleVideoFileSelect(file) {
             if (!file) return;
+            if (!isUserPremium) {
+                openPremiumModal();
+                return;
+            }
             if (file.size > 100 * 1024 * 1024) {
                 showToast('Великий файл', 'Розмір відео не повинен перевищувати 100 МБ', '⚠️', true);
                 return;
@@ -1827,6 +2010,10 @@
         window.handleVideoFileSelect = handleVideoFileSelect;
 
         function applyVideoLink() {
+            if (!isUserPremium) {
+                openPremiumModal();
+                return;
+            }
             const inp = document.getElementById('videoLinkInput');
             const val = (inp ? inp.value.trim() : '');
             if (!val) {
@@ -2301,6 +2488,7 @@
         // СТАРТ ПРИ ЗАВАНТАЖЕННІ DOM
         document.addEventListener('DOMContentLoaded', () => {
             loadCategories();
+            checkUserPremiumStatus();
             initMap();
             const btn = document.getElementById('themeToggleBtn');
             if (btn) btn.innerText = (localStorage.getItem('loopTheme') === 'dark') ? '☀️' : '🌙';
@@ -2398,5 +2586,85 @@
         })();
 
     </script>
+
+    <!-- ==================== PREMIUM SUBSCRIPTION MODAL ==================== -->
+    <div id="premiumModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+        <div style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 20px; max-width: 620px; width: 100%; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); position: relative; animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+            <button type="button" onclick="closePremiumModal()" style="position: absolute; top: 18px; right: 18px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); border-radius: 50%; width: 34px; height: 34px; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+
+            <div style="text-align: center; margin-bottom: 22px;">
+                <div style="display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); font-size: 1.8rem; color: #fff; margin-bottom: 12px; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);">👑</div>
+                <h2 style="font-size: 1.45rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">Підписка LoopMarket PRO</h2>
+                <p style="font-size: 0.88rem; color: var(--text-muted); max-width: 480px; margin: 0 auto;">Підвищуйте продажі та отримуйте в 3 рази більше дзвінків і повідомлень від зацікавлених клієнтів.</p>
+            </div>
+
+            <!-- TARIFF PLANS SELECTOR -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;" id="premiumPlansGrid">
+                <!-- Plan 1: Monthly PRO -->
+                <div id="planCard_pro_monthly" onclick="selectPremiumPlan('pro_monthly', 199)" style="cursor: pointer; border: 2px solid #2563eb; background: rgba(37,99,235,0.06); border-radius: 16px; padding: 18px; position: relative; transition: all 0.2s;">
+                    <div style="position: absolute; top: -10px; right: 14px; background: #2563eb; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; text-transform: uppercase;">Популярний</div>
+                    <div style="font-weight: 800; font-size: 1.05rem; color: var(--text-main); margin-bottom: 4px;">Loop PRO</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;">Для активних продавців</div>
+                    <div style="display: flex; align-items: baseline; gap: 4px; margin-bottom: 14px;">
+                        <span style="font-size: 1.6rem; font-weight: 900; color: var(--text-main);">199 ₴</span>
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">/ місяць</span>
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.78rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 6px;">
+                        <li>🎬 Додавання відеооглядів</li>
+                        <li>👑 Золота плашка PRO у профілі</li>
+                        <li>📸 До 10 фотографій у картці</li>
+                        <li>🚀 Пріоритет у каталозі</li>
+                    </ul>
+                </div>
+
+                <!-- Plan 2: Annual Brand -->
+                <div id="planCard_brand_annual" onclick="selectPremiumPlan('brand_annual', 1490)" style="cursor: pointer; border: 2px solid var(--border-color); background: var(--bg-color); border-radius: 16px; padding: 18px; position: relative; transition: all 0.2s;">
+                    <div style="position: absolute; top: -10px; right: 14px; background: #10b981; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; text-transform: uppercase;">Економія 40%</div>
+                    <div style="font-weight: 800; font-size: 1.05rem; color: var(--text-main); margin-bottom: 4px;">Бренд & Бізнес</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;">Для магазинів та брендів</div>
+                    <div style="display: flex; align-items: baseline; gap: 4px; margin-bottom: 14px;">
+                        <span style="font-size: 1.6rem; font-weight: 900; color: var(--text-main);">1490 ₴</span>
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">/ рік (~124 ₴/міс)</span>
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.78rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 6px;">
+                        <li>💎 Усі переваги Loop PRO</li>
+                        <li>🏷️ Офіційний статус «Бренд»</li>
+                        <li>📌 Закріплення в ТОПі товарів</li>
+                        <li>📊 Розширена аналітика продажів</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- PAYMENT METHOD SELECTOR -->
+            <div style="margin-bottom: 22px;">
+                <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; display: block;">Спосіб оплати:</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                    <label id="payMethodCard" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: 10px; border: 1.5px solid #2563eb; background: rgba(37,99,235,0.06); font-size: 0.8rem; font-weight: 700; color: var(--text-main); cursor: pointer;">
+                        <input type="radio" name="premiumPayMethod" value="card" checked style="display: none;">
+                        <span>💳 Картка</span>
+                    </label>
+                    <label id="payMethodMono" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: 10px; border: 1.5px solid var(--border-color); background: var(--bg-color); font-size: 0.8rem; font-weight: 700; color: var(--text-main); cursor: pointer;" onclick="setPayMethod('monobank')">
+                        <input type="radio" name="premiumPayMethod" value="monobank" style="display: none;">
+                        <span>🖤 Mono</span>
+                    </label>
+                    <label id="payMethodApple" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: 10px; border: 1.5px solid var(--border-color); background: var(--bg-color); font-size: 0.8rem; font-weight: 700; color: var(--text-main); cursor: pointer;" onclick="setPayMethod('applepay')">
+                        <input type="radio" name="premiumPayMethod" value="applepay" style="display: none;">
+                        <span>🍏 Pay</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ACTION BUTTON -->
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button type="button" id="btnSubmitPremiumCheckout" onclick="submitPremiumCheckout()" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; font-weight: 800; font-size: 0.95rem; padding: 13px 20px; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4); width: 100%;">
+                    <span>👑 Оплатити 199 ₴ та активувати PRO</span>
+                </button>
+                <div style="text-align: center; font-size: 0.74rem; color: var(--text-muted);">
+                    🔒 Безпечна оплата через офіційний банківський шлюз. Активація відбувається миттєво.
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

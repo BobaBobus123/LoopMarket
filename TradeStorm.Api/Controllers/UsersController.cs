@@ -755,7 +755,10 @@ public class UsersController : ControllerBase
             bio = user.Bio,
             phoneNumber = user.PhoneNumber,
             telegramChatId = user.TelegramChatId,
-            receiveTelegramNotifications = user.ReceiveTelegramNotifications
+            receiveTelegramNotifications = user.ReceiveTelegramNotifications,
+            isPremium = user.Role == UserRoles.Admin || (user.IsPremium && (!user.PremiumUntil.HasValue || user.PremiumUntil.Value > DateTime.UtcNow)),
+            premiumPlan = user.PremiumPlan,
+            premiumUntil = user.PremiumUntil
         });
     }
 
@@ -801,7 +804,9 @@ public class UsersController : ControllerBase
             bio = user.Bio,
             phoneNumber = user.PhoneNumber,
             isPhoneVerified = user.IsPhoneVerified,
-            completedServicesCount = completedServices
+            completedServicesCount = completedServices,
+            isPremium = user.Role == UserRoles.Admin || (user.IsPremium && (!user.PremiumUntil.HasValue || user.PremiumUntil.Value > DateTime.UtcNow)),
+            premiumPlan = user.PremiumPlan
         });
     }
 

@@ -1837,15 +1837,16 @@
                                         Огляд посилки перед оплатою у відділенні або поштоматі
                                     </div>
                                 </div>
-                                <div class="payment-card" id="payCard_card" onclick="selectPayment('Оплата карткою (онлайн)')">
+                                <div class="payment-card" id="payCard_card" onclick="selectPayment('Оплата карткою (онлайн)')" style="position: relative;">
                                     <div style="display: flex; align-items: center; justify-content: space-between;">
-                                        <div style="font-weight: 800; font-size: 0.92rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                                        <div style="font-weight: 800; font-size: 0.92rem; color: var(--text-main); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                             💳 Онлайн-оплата карткою
+                                            <span style="font-size: 0.68rem; font-weight: 800; background: rgba(245, 158, 11, 0.15); color: #d97706; padding: 2px 7px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.35);">В розробці</span>
                                         </div>
                                         <span class="pay-radio-check">✓</span>
                                     </div>
                                     <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;">
-                                        Безпечний платіж Visa / MasterCard / Apple Pay
+                                        Банківський ескроу-шлюз на стадії підключення (виберіть накладений платіж)
                                     </div>
                                 </div>
                                 <div class="payment-card" id="payCard_cash" onclick="selectPayment('Готівкою при зустрічі')">
@@ -3232,19 +3233,34 @@
 
             const cardGateway = document.getElementById('onlineCardGatewaySection');
 
+            if (method.includes('карткою')) {
+                // Онлайн-оплата тимчасово в розробці (тестується банківський шлюз)
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '🔒 Онлайн-оплата в розробці',
+                        html: '<div style="text-align: left; font-size: 0.92rem; line-height: 1.5; color: var(--text-secondary);">' +
+                              '<p><b>Ескроу-шлюз безпечної оплати</b> наразі проходить тестування банківського еквайрингу.</p>' +
+                              '<p style="margin-top: 8px;">Для безпечних замовлень зараз доступні перевірені способи:</p>' +
+                              '<ul style="margin: 8px 0 0 18px; padding: 0;">' +
+                              '<li><b>Накладений платіж</b> (оплата у відділенні після огляду товару);</li>' +
+                              '<li><b>Особиста зустріч</b> та розрахунок на місці.</li>' +
+                              '</ul>' +
+                              '</div>',
+                        icon: 'info',
+                        confirmButtonText: 'Зрозуміло, обрати накладений платіж',
+                        confirmButtonColor: '#2563eb'
+                    });
+                } else {
+                    alert('🔒 Послуга безпечної онлайн-оплати (ескроу) наразі в розробці! Оберіть накладений платіж (з перевіркою товару при отриманні на пошті).');
+                }
+                // Автоматично повертаємо на перевірений накладений платіж
+                selectPayment('Накладений платіж (при отриманні)');
+                return;
+            }
+
             if (method.includes('Накладений')) {
                 document.getElementById('payCard_cod')?.classList.add('active');
                 if (cardGateway) cardGateway.style.display = 'none';
-            } else if (method.includes('карткою')) {
-                document.getElementById('payCard_card')?.classList.add('active');
-                if (cardGateway) {
-                    cardGateway.style.display = 'block';
-                    const buyerName = document.getElementById('orderBuyerName')?.value.trim();
-                    const cardDisplayName = document.getElementById('cardDisplayName');
-                    if (cardDisplayName && buyerName) {
-                        cardDisplayName.innerText = buyerName.toUpperCase();
-                    }
-                }
             } else {
                 document.getElementById('payCard_cash')?.classList.add('active');
                 if (cardGateway) cardGateway.style.display = 'none';

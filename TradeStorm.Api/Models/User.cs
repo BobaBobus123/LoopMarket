@@ -32,4 +32,9 @@ public class User
     public bool IsBanned { get; set; } = false;
     public string? BanReason { get; set; }
     public DateTime? MutedUntil { get; set; }
+
+    // Преміум-підписка (Loop PRO / Бренд)
+    public bool IsPremium { get; set; } = false;
+    public DateTime? PremiumUntil { get; set; }
+    public string? PremiumPlan { get; set; }
 }
