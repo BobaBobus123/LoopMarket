@@ -330,11 +330,62 @@ public class UsersController : ControllerBase
                 u.IsBanned,
                 u.BanReason,
                 u.MutedUntil,
+                IsPremium = u.Role == UserRoles.Admin || (u.IsPremium && (!u.PremiumUntil.HasValue || u.PremiumUntil.Value > DateTime.UtcNow)),
+                u.PremiumPlan,
+                u.PremiumUntil,
                 ListingCount = _context.Listings.Count(l => l.SellerId == u.Id)
             })
             .ToListAsync();
 
         return Ok(users);
+    }
+
+    public class AdminSetProDto
+    {
+        public bool IsPremium { get; set; } = true;
+        public string? Plan { get; set; } = "pro_monthly";
+        public int Days { get; set; } = 30;
+    }
+
+    /// <summary>
+    /// Ручне призначення / зняття PRO-статусу адміністратором
+    /// </summary>
+    [HttpPost("admin/{id}/pro")]
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> AdminSetPro(int id, [FromBody] AdminSetProDto dto)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return NotFound(new { error = "Користувача не знайдено" });
+
+        user.IsPremium = dto.IsPremium;
+        if (dto.IsPremium)
+        {
+            user.PremiumPlan = string.IsNullOrWhiteSpace(dto.Plan) ? "pro_monthly" : dto.Plan;
+            var currentExpiry = user.PremiumUntil.HasValue && user.PremiumUntil.Value > DateTime.UtcNow
+                ? user.PremiumUntil.Value
+                : DateTime.UtcNow;
+            user.PremiumUntil = currentExpiry.AddDays(dto.Days > 0 ? dto.Days : 30);
+        }
+        else
+        {
+            user.PremiumPlan = null;
+            user.PremiumUntil = null;
+        }
+
+        await LogAuditAsync(dto.IsPremium ? "AdminGrantPro" : "AdminRevokePro", "User", id,
+            dto.IsPremium ? $"Адміністратор надав статус PRO користувачу {user.Email} на {dto.Days} днів (план: {user.PremiumPlan})."
+                          : $"Адміністратор скасував статус PRO користувача {user.Email}.");
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            success = true,
+            message = dto.IsPremium ? $"Статус PRO успішно надано користувачу {user.Email} на {dto.Days} днів!" : $"Статус PRO скасовано для {user.Email}.",
+            isPremium = user.IsPremium,
+            premiumPlan = user.PremiumPlan,
+            premiumUntil = user.PremiumUntil
+        });
     }
 
     /// <summary>

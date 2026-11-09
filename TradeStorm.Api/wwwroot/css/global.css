@@ -1686,3 +1686,31 @@ body.has-sticky-bar .mobile-bottom-bar {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+
+/* ==========================================================================
+   DESKTOP CREATE LAYOUT & CHAT COMPACT BUBBLE ENFORCEMENT
+   ========================================================================== */
+.creation-container,
+#createListingForm {
+    width: 100% !important;
+    max-width: 860px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px !important;
+    box-sizing: border-box !important;
+}
+
+.chat-stream-area {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+    padding: 12px 16px !important;
+}
+
+.msg-bubble {
+    margin: 0 !important;
+    padding: 6px 12px 5px 12px !important;
+    line-height: 1.35 !important;
+}

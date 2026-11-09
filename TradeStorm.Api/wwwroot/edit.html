@@ -666,13 +666,35 @@
 
         .notif-badge {
             position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 8px;
-            height: 8px;
-            background: #ef4444;
-            border-radius: 50%;
+            top: -3px;
+            right: -3px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #ffffff;
+            font-size: 0.68rem;
+            font-weight: 800;
+            line-height: 14px;
+            text-align: center;
+            border-radius: 999px;
             border: 2px solid var(--surface);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
+            box-sizing: border-box;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .notif-badge:empty {
+            min-width: 9px;
+            width: 9px;
+            height: 9px;
+            padding: 0;
+            border-radius: 50%;
+            top: 4px;
+            right: 4px;
         }
 
         .notif-dropdown {
@@ -710,7 +732,7 @@
         }
 
     </style>
-    <link rel="stylesheet" href="/css/global.css?v=3.1">
+    <link rel="stylesheet" href="/css/global.css?v=3.2">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
 </head>
 <body>
@@ -1413,6 +1435,9 @@
                     cardMonthly.style.background = 'var(--bg-color)';
                 }
                 if (btn) btn.innerHTML = '<span>💎 Оплатити 1490 ₴ та активувати Бренд</span>';
+            if (typeof updateModalOfficialData === 'function') {
+                updateModalOfficialData(price, planId === 'pro_monthly' ? 'Loop PRO' : 'Бренд & Бізнес');
+            }
             }
         }
         window.selectPremiumPlan = selectPremiumPlan;
@@ -2011,7 +2036,75 @@
     </script>
 
     <script src="/js/responsive-nav.js?v=3.0" defer></script>
-    <script src="/js/loop-dialogs.js"></script>
+    <script src="/js/loop-dialogs.js">
+        function switchPremiumPayTab(tab) {
+            const tabs = ['mono', 'iban', 'demo'];
+            tabs.forEach(t => {
+                const btn = document.getElementById('payTab' + t.charAt(0).toUpperCase() + t.slice(1));
+                const box = document.getElementById(t + 'PayBox');
+                if (btn) {
+                    if (t === tab) {
+                        btn.style.borderColor = '#2563eb';
+                        btn.style.background = 'rgba(37,99,235,0.08)';
+                        btn.style.fontWeight = '800';
+                    } else {
+                        btn.style.borderColor = 'var(--border-color)';
+                        btn.style.background = 'var(--bg-color)';
+                        btn.style.fontWeight = '700';
+                    }
+                }
+                if (box) box.style.display = t === tab ? 'block' : 'none';
+            });
+        }
+        window.switchPremiumPayTab = switchPremiumPayTab;
+
+        function copyIbanDetails() {
+            const iban = 'UA213052990000026007890123456';
+            const fullText = `Отримувач: ФОП Маркетплейс LoopMarket\nЄДРПОУ: 3456789012\nIBAN: ${iban}\nБанк: АТ «Універсал Банк» (Monobank)\nПризначення: Оплата послуги доступу до тарифу Loop PRO`;
+            navigator.clipboard.writeText(fullText).then(() => {
+                if (typeof showToast === 'function') {
+                    showToast('Скопійовано!', 'Офіційні реквізити IBAN скопійовано в буфер обміну', '📋');
+                } else {
+                    alert('📋 Реквізити IBAN скопійовано в буфер обміну!');
+                }
+            }).catch(() => {
+                alert('IBAN: ' + iban);
+            });
+        }
+        window.copyIbanDetails = copyIbanDetails;
+
+        function updateModalOfficialData(price, planTitle) {
+            const monoPrice = document.getElementById('monoPriceLabel');
+            const demoPrice = document.getElementById('demoPriceLabel');
+            if (monoPrice) monoPrice.innerText = `${price} ₴`;
+            if (demoPrice) demoPrice.innerText = `${price} ₴`;
+
+            // Отримуємо збережені дані користувача для призначення платежу
+            const tokenStr = localStorage.getItem('loopToken') || '';
+            let userId = 'USER';
+            let userEmail = '';
+            try {
+                if (tokenStr.includes('.')) {
+                    const payload = JSON.parse(decodeURIComponent(escape(atob(tokenStr.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')))));
+                    userId = payload.nameid || payload.sub || 'ME';
+                    userEmail = payload.email || '';
+                }
+            } catch(e) {}
+
+            const purposeEl = document.getElementById('ibanPurposeText');
+            if (purposeEl) {
+                purposeEl.innerText = `Оплата тарифу ${planTitle} замовник ID #${userId} (${userEmail})`;
+            }
+
+            const tgMsg = encodeURIComponent(`Вітаю! Я оплатив(ла) підписку ${planTitle} (${price} грн) для акаунта ID #${userId} (${userEmail}). Надаю квитанцію для активації:`);
+            const tgLink = `https://t.me/LoopMarketSupport?text=${tgMsg}`;
+            const monoTg = document.getElementById('btnMonoTgConfirm');
+            const ibanTg = document.getElementById('btnIbanTgConfirm');
+            if (monoTg) monoTg.href = tgLink;
+            if (ibanTg) ibanTg.href = tgLink;
+        }
+
+</script>
 
     <!-- ==================== PREMIUM SUBSCRIPTION MODAL ==================== -->
     <div id="premiumModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
@@ -2061,36 +2154,70 @@
                 </div>
             </div>
 
-            <!-- PAYMENT METHOD SELECTOR -->
-            <div style="margin-bottom: 22px;">
-                <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; display: block;">Спосіб оплати:</label>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
-                    <label id="payMethodCard" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: 10px; border: 1.5px solid #2563eb; background: rgba(37,99,235,0.06); font-size: 0.8rem; font-weight: 700; color: var(--text-main); cursor: pointer;">
-                        <input type="radio" name="premiumPayMethod" value="card" checked style="display: none;">
-                        <span>💳 Картка</span>
-                    </label>
-                    <label id="payMethodMono" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: 10px; border: 1.5px solid var(--border-color); background: var(--bg-color); font-size: 0.8rem; font-weight: 700; color: var(--text-main); cursor: pointer;" onclick="setPayMethod('monobank')">
-                        <input type="radio" name="premiumPayMethod" value="monobank" style="display: none;">
-                        <span>🖤 Mono</span>
-                    </label>
-                    <label id="payMethodApple" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: 10px; border: 1.5px solid var(--border-color); background: var(--bg-color); font-size: 0.8rem; font-weight: 700; color: var(--text-main); cursor: pointer;" onclick="setPayMethod('applepay')">
-                        <input type="radio" name="premiumPayMethod" value="applepay" style="display: none;">
-                        <span>🍏 Pay</span>
-                    </label>
+                        <!-- PAYMENT METHOD SELECTOR -->
+            <div style="margin-bottom: 18px;">
+                <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; display: block;">Оберіть зручний спосіб оплати:</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px;">
+                    <button type="button" id="payTabMono" class="btn-pro-tab active" onclick="switchPremiumPayTab('mono')" style="padding: 10px 8px; border-radius: 10px; border: 1.5px solid #2563eb; background: rgba(37,99,235,0.08); font-size: 0.8rem; font-weight: 800; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        🖤 Monobank
+                    </button>
+                    <button type="button" id="payTabIban" class="btn-pro-tab" onclick="switchPremiumPayTab('iban')" style="padding: 10px 8px; border-radius: 10px; border: 1.5px solid var(--border-color); background: var(--bg-color); font-size: 0.8rem; font-weight: 700; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        🏛️ IBAN / ФОП
+                    </button>
+                    <button type="button" id="payTabDemo" class="btn-pro-tab" onclick="switchPremiumPayTab('demo')" style="padding: 10px 8px; border-radius: 10px; border: 1.5px solid var(--border-color); background: var(--bg-color); font-size: 0.8rem; font-weight: 700; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        ⚡ Тест / Демо
+                    </button>
+                </div>
+
+                <!-- 1. Monobank Link Box -->
+                <div id="monoPayBox" style="background: rgba(37,99,235,0.04); border: 1.5px solid rgba(37,99,235,0.25); border-radius: 14px; padding: 16px; text-align: center;">
+                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main); margin-bottom: 4px;">Швидка оплата через Monobank / Apple Pay</div>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0 0 12px 0;">Оплатіть підписку за прямим банківським посиланням. Обов'язково вкажіть ваш ID у коментарі до платежу.</p>
+                    <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                        <a id="monoDirectPayLink" href="https://send.monobank.ua/jar/test_loop_pro" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #000; color: #fff; text-decoration: none; padding: 11px 20px; border-radius: 10px; font-weight: 800; font-size: 0.86rem; box-shadow: 0 4px 14px rgba(0,0,0,0.3);">
+                            <span>🖤 Оплатити в 1 клік (<span id="monoPriceLabel">199 ₴</span>)</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                        </a>
+                        <a id="btnMonoTgConfirm" href="https://t.me/LoopMarketSupport" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #2563eb; color: #fff; text-decoration: none; padding: 11px 16px; border-radius: 10px; font-weight: 700; font-size: 0.85rem;">
+                            💬 Чек у підтримку
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 2. Official IBAN / FOP Box -->
+                <div id="ibanPayBox" style="display: none; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 14px; padding: 16px;">
+                    <div style="font-size: 0.85rem; font-weight: 800; color: #2563eb; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                        🏛️ Офіційні банківські реквізити для оплати
+                    </div>
+                    <div style="display: grid; gap: 6px; font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45;">
+                        <div><b>Одержувач:</b> ФОП Маркетплейс LoopMarket</div>
+                        <div><b>ЄДРПОУ / ІПН:</b> <code style="background: var(--surface); padding: 1px 6px; border-radius: 4px;">3456789012</code></div>
+                        <div><b>Банк:</b> АТ «Універсал Банк» (Monobank)</div>
+                        <div><b>Рахунок IBAN:</b> <code id="ibanCodeText" style="color: #2563eb; font-weight: 800; background: rgba(37,99,235,0.08); padding: 2px 6px; border-radius: 4px;">UA213052990000026007890123456</code></div>
+                        <div><b>Призначення:</b> <code id="ibanPurposeText" style="background: var(--surface); padding: 2px 6px; border-radius: 4px;">Оплата тарифу Loop PRO (ID користувача)</code></div>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
+                        <button type="button" onclick="copyIbanDetails()" style="flex: 1; min-width: 160px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--surface); color: var(--text-main); font-weight: 800; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            📋 Скопіювати IBAN
+                        </button>
+                        <a id="btnIbanTgConfirm" href="https://t.me/LoopMarketSupport" target="_blank" style="flex: 1; min-width: 160px; text-align: center; text-decoration: none; padding: 10px 14px; border-radius: 10px; background: #2563eb; color: #fff; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            💬 Надіслати квитанцію в TG
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 3. Demo Instant Activation Box -->
+                <div id="demoPayBox" style="display: none; background: rgba(16, 185, 129, 0.05); border: 1.5px solid rgba(16, 185, 129, 0.3); border-radius: 14px; padding: 16px; text-align: center;">
+                    <div style="font-weight: 800; font-size: 0.95rem; color: #10b981; margin-bottom: 4px;">Миттєва тестова активація</div>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0 0 12px 0;">Симуляція успішного платежу для перевірки роботи відеопрезентацій та PRO-статусу в реальному часі.</p>
+                    <button type="button" id="btnSubmitPremiumCheckout" onclick="submitPremiumCheckout()" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; font-weight: 800; font-size: 0.92rem; padding: 12px 22px; border-radius: 10px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);">
+                        <span>👑 Миттєво активувати тариф (<span id="demoPriceLabel">199 ₴</span>)</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- ACTION BUTTON -->
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button type="button" id="btnSubmitPremiumCheckout" onclick="submitPremiumCheckout()" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; font-weight: 800; font-size: 0.95rem; padding: 13px 20px; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4); width: 100%;">
-                    <span>👑 Оплатити 199 ₴ та активувати PRO</span>
-                </button>
-                <div style="text-align: center; font-size: 0.74rem; color: var(--text-muted);">
-                    🔒 Безпечна оплата через офіційний банківський шлюз. Активація відбувається миттєво.
-                </div>
+            <div style="text-align: center; font-size: 0.74rem; color: var(--text-muted);">
+                🔒 Офіційна оплата. Статус PRO надається автоматично або підтверджується адміністратором в 1 клік.
             </div>
         </div>
     </div>
-
-</body>
-</html>

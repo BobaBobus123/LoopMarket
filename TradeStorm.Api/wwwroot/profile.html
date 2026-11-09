@@ -988,13 +988,35 @@
 
         .notif-badge {
             position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 8px;
-            height: 8px;
-            background: #ef4444;
-            border-radius: 50%;
+            top: -3px;
+            right: -3px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #ffffff;
+            font-size: 0.68rem;
+            font-weight: 800;
+            line-height: 14px;
+            text-align: center;
+            border-radius: 999px;
             border: 2px solid var(--surface);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
+            box-sizing: border-box;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .notif-badge:empty {
+            min-width: 9px;
+            width: 9px;
+            height: 9px;
+            padding: 0;
+            border-radius: 50%;
+            top: 4px;
+            right: 4px;
         }
 
         .notif-dropdown {
@@ -1032,7 +1054,7 @@
         }
 
     </style>
-    <link rel="stylesheet" href="/css/global.css?v=3.1">
+    <link rel="stylesheet" href="/css/global.css?v=3.2">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
 </head>
 <body>
@@ -2171,7 +2193,9 @@
                                     <div><strong>${o.isService ? '⏱ Обсяг робіт:' : '🏢 Відділення / адреса:'}</strong> ${o.deliveryBranch}</div>
                                     <div><strong>💳 Оплата:</strong> ${o.paymentMethod}</div>
                                     ${o.comment ? `<div><strong>💬 Коментар:</strong> <em>${o.comment}</em></div>` : ''}
-                                    ${o.trackingNumber ? `<div><strong>🏷 Номер ТТН:</strong> <code style="background: var(--bg-color); padding: 2px 6px; border-radius: 4px; font-weight: bold;">${o.trackingNumber}</code> <button type="button" onclick="trackNovaPoshtaTtn('${o.trackingNumber}')" style="margin-left: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; border-radius: 6px; border: 1px solid #ef4444; background: rgba(239,68,68,0.1); color: #ef4444; cursor: pointer;">📦 Відстежити ТТН</button></div>` : ''}
+                                    ${o.trackingNumber ? `<div><strong>🏷 Номер ТТН:</strong> <code style="background: var(--bg-color); padding: 2px 6px; border-radius: 4px; font-weight: bold;">${o.trackingNumber}</code> <button type="button" onclick="trackNovaPoshtaTtn('${o.trackingNumber}')" style="margin-left: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; border-radius: 6px; border: 1px solid #ef4444; background: rgba(239,68,68,0.1); color: #ef4444; cursor: pointer;">📦 Відстежити ТТН</button></div>` : 
+                                      ((o.deliveryBranch && (o.deliveryBranch.includes('зустріч') || o.deliveryBranch.includes('Самовивіз'))) || (o.paymentMethod && o.paymentMethod.includes('зустрічі'))) ? 
+                                      `<div style="color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 0.8rem; background: rgba(16,185,129,0.1); padding: 2px 8px; border-radius: 6px;">🤝 Особиста зустріч (ТТН не потрібна)</div>` : ''}
                                 </div>
                             </div>
 
@@ -2209,9 +2233,23 @@
                                     </button>
                                 ` : ''}
                                 ${o.status === 'Confirmed' ? `
-                                    <button type="button" onclick="openShipOrderModal(${o.id}, ${o.isService}, ${o.totalPrice}, '${o.orderCode || ""}')" style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
-                                        ${o.isService ? `✅ Позначити як виконано (+${o.totalPrice} ₴)` : '🚚 Вказати ТТН / Відправлено'}
-                                    </button>
+                                    ${(() => {
+                                        const isPickup = (o.deliveryBranch && (o.deliveryBranch.includes('зустріч') || o.deliveryBranch.includes('Самовивіз'))) || 
+                                                         (o.paymentMethod && o.paymentMethod.includes('зустрічі')) ||
+                                                         (o.deliveryCity && o.deliveryCity.includes('Самовивіз'));
+                                        if (isPickup) {
+                                            return `
+                                                <button type="button" onclick="confirmInPersonHandover(${o.id}, '${o.orderCode || ""}', ${o.totalPrice})" style="padding: 8px 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-weight: 800; font-size: 0.86rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(16,185,129,0.3); display: inline-flex; align-items: center; gap: 6px;">
+                                                    🤝 Підтвердити передачу (Зустріч)
+                                                </button>
+                                            `;
+                                        }
+                                        return `
+                                            <button type="button" onclick="openShipOrderModal(${o.id}, ${o.isService}, ${o.totalPrice}, '${o.orderCode || ""}')" style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
+                                                ${o.isService ? `✅ Позначити як виконано (+${o.totalPrice} ₴)` : '🚚 Вказати ТТН / Відправлено'}
+                                            </button>
+                                        `;
+                                    })()}
                                     <button type="button" onclick="openGeneralStatusConfirm(${o.id}, 'Cancelled', '${o.orderCode || ""}')" style="padding: 8px 16px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
                                         ✕ Скасувати
                                     </button>
@@ -2477,6 +2515,38 @@
             }
         };
 
+        
+        window.confirmInPersonHandover = async function(orderId, orderCode, price) {
+            const codeText = orderCode ? ` (${orderCode})` : '';
+            const confirmed = await LoopDialog.confirm(
+                `Ви зустрілися з покупцем особисто, передали товар та отримали оплату (${price} ₴)?\nНомер ТТН пошти не потрібен. Замовлення буде позначено як «Завершено».`,
+                `🤝 Підтвердження передачі товару${codeText}`
+            );
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`/api/orders/${orderId}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status: 'Completed' })
+                });
+
+                if (res.ok) {
+                    showToast('🤝 Угода успішно завершена!', 'Товар передано особисто покупцю. Замовлення закрито!', '🎉');
+                    loadUserOrders(currentOrderSubTab);
+                    if (typeof loadMyServicesStats === 'function') loadMyServicesStats();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    showToast('Помилка', err.error || 'Не вдалося завершити замовлення', '❌');
+                }
+            } catch(e) {
+                showToast('Помилка', 'Збій мережі', '❌');
+            }
+        };
+
         window.trackNovaPoshtaTtn = async function(ttn) {
             const modal = document.getElementById('trackingModal');
             const titleEl = document.getElementById('trackModalTtn');
@@ -2690,7 +2760,7 @@
 
         window.renderNotifications = function(notifs) {
             const listContainer = document.getElementById('notifList');
-            const badge = document.getElementById('globalUnreadBadge');
+            const badge = document.getElementById('notifBadge') || document.getElementById('globalUnreadBadge');
             if (!listContainer) return;
 
             const unreadCount = notifs.filter(n => !n.isRead).length;
@@ -2727,7 +2797,7 @@
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const badge = document.getElementById('globalUnreadBadge');
+                const badge = document.getElementById('notifBadge') || document.getElementById('globalUnreadBadge');
                 if (badge) badge.style.display = 'none';
                 loadNotifications();
             } catch(e) {}

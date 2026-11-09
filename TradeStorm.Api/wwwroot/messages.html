@@ -322,13 +322,35 @@
 
         .notif-badge {
             position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 8px;
-            height: 8px;
-            background: #ef4444;
-            border-radius: 50%;
+            top: -3px;
+            right: -3px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #ffffff;
+            font-size: 0.68rem;
+            font-weight: 800;
+            line-height: 14px;
+            text-align: center;
+            border-radius: 999px;
             border: 2px solid var(--surface);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
+            box-sizing: border-box;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .notif-badge:empty {
+            min-width: 9px;
+            width: 9px;
+            height: 9px;
+            padding: 0;
+            border-radius: 50%;
+            top: 4px;
+            right: 4px;
         }
 
         /* NOTIFICATIONS DROPDOWN */
@@ -1732,7 +1754,7 @@
             line-height: 1;
         }
     </style>
-    <link rel="stylesheet" href="/css/global.css?v=3.1">
+    <link rel="stylesheet" href="/css/global.css?v=3.2">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
 </head>
 <body class="messages-page in-chat-conversation">

@@ -1166,13 +1166,35 @@
 
         .notif-badge {
             position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 8px;
-            height: 8px;
-            background: #ef4444;
-            border-radius: 50%;
+            top: -3px;
+            right: -3px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #ffffff;
+            font-size: 0.68rem;
+            font-weight: 800;
+            line-height: 14px;
+            text-align: center;
+            border-radius: 999px;
             border: 2px solid var(--surface);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
+            box-sizing: border-box;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .notif-badge:empty {
+            min-width: 9px;
+            width: 9px;
+            height: 9px;
+            padding: 0;
+            border-radius: 50%;
+            top: 4px;
+            right: 4px;
         }
 
         .notif-dropdown {
@@ -1475,7 +1497,7 @@
         }
 
     </style>
-    <link rel="stylesheet" href="/css/global.css?v=3.1">
+    <link rel="stylesheet" href="/css/global.css?v=3.2">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
     <script src="/js/loop-dialogs.js"></script>
 </head>
@@ -1805,14 +1827,22 @@
                                 </div>
                             </div>
 
-                            <!-- Самовивіз інформаційний блок -->
-                            <div id="deliveryFieldsPickup" style="display: none; background: rgba(16, 185, 129, 0.08); padding: 16px; border-radius: 14px; border: 1.5px dashed var(--primary-light);">
-                                <div style="font-weight: 800; font-size: 0.95rem; color: var(--primary-light); display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                    📍 Локація продавця: <span id="pickupLocationText" style="color: var(--text-main);">Кременчук</span>
+                            <!-- Самовивіз інформаційний блок (Особиста зустріч) -->
+                            <div id="deliveryFieldsPickup" style="display: none; background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.04) 100%); padding: 18px 20px; border-radius: 16px; border: 1.5px dashed #10b981;">
+                                <div style="font-weight: 800; font-size: 1rem; color: #10b981; display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                    🤝 Особиста зустріч та розрахунок на місці
                                 </div>
-                                <p style="font-size: 0.84rem; color: var(--text-muted); margin: 0; line-height: 1.4;">
-                                    Ви домовитеся з продавцем про зручний час та місце зустрічі в чаті або телефоном після підтвердження замовлення. Доставка безкоштовна.
-                                </p>
+                                <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.45;">
+                                    🔒 <b>Доставка поштою заблокована</b>, оскільки обрано розрахунок готівкою при особистій зустрічі. Ви зустрінетеся з продавцем вживу, оглянете товар і розрахуєтеся. Номер ТТН пошти вводити не потрібно!
+                                </div>
+                                <div style="margin-bottom: 10px;">
+                                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">📍 Місто зустрічі з продавцем:</label>
+                                    <div style="padding: 10px 14px; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 10px; font-weight: 800; font-size: 0.92rem; color: var(--text-main);" id="pickupLocationText">Кременчук</div>
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Орієнтир або побажання щодо часу зустрічі (необов'язково):</label>
+                                    <input type="text" id="orderPickupComment" placeholder="Наприклад: біля головного входу ТЦ або після 18:00" style="width: 100%; box-sizing: border-box; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 14px; color: var(--text-main); font-size: 0.88rem; outline: none;">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -3184,6 +3214,50 @@
             currentSelectedCarrier = carrierId;
             document.querySelectorAll('.carrier-card').forEach(c => c.classList.remove('active'));
             
+            function togglePostalCarriersLock(isLocked) {
+                const postalIds = ['carrierCard_np_branch', 'carrierCard_np_postomat', 'carrierCard_ukrposhta'];
+                postalIds.forEach(cid => {
+                    const el = document.getElementById(cid);
+                    if (el) {
+                        if (isLocked) {
+                            el.classList.remove('active');
+                            el.style.pointerEvents = 'none';
+                            el.style.opacity = '0.35';
+                            el.style.filter = 'grayscale(1)';
+                            el.style.cursor = 'not-allowed';
+                        } else {
+                            el.style.pointerEvents = 'auto';
+                            el.style.opacity = '1';
+                            el.style.filter = 'none';
+                            el.style.cursor = 'pointer';
+                        }
+                    }
+                });
+                const pickupCard = document.getElementById('carrierCard_pickup');
+                if (pickupCard) {
+                    if (isLocked) {
+                        pickupCard.classList.add('active');
+                        pickupCard.style.pointerEvents = 'auto';
+                        pickupCard.style.opacity = '1';
+                        pickupCard.style.filter = 'none';
+                    }
+                }
+            }
+            window.togglePostalCarriersLock = togglePostalCarriersLock;
+
+            if (carrierId === 'pickup') {
+                selectPayment('Готівкою при зустрічі');
+                return;
+            }
+
+            const currentPayMethod = document.getElementById('orderPaymentMethod')?.value || '';
+            if (currentPayMethod.includes('зустрічі')) {
+                document.getElementById('orderPaymentMethod').value = 'Накладений платіж (при отриманні)';
+                document.getElementById('payCard_cod')?.classList.add('active');
+                document.getElementById('payCard_cash')?.classList.remove('active');
+                togglePostalCarriersLock(false);
+            }
+
             const cardMap = {
                 'novaposhta_branch': 'carrierCard_np_branch',
                 'novaposhta_postomat': 'carrierCard_np_postomat',
@@ -3200,28 +3274,22 @@
             const ukrWhBlock = document.getElementById('ukrposhtaBranchContainer');
             const npLabel = document.getElementById('npWarehouseLabel');
 
-            if (carrierId === 'pickup') {
-                postalBlock.style.display = 'none';
-                pickupBlock.style.display = 'block';
-                selectPayment('Готівкою при зустрічі');
-            } else {
-                postalBlock.style.display = 'block';
-                pickupBlock.style.display = 'none';
+            postalBlock.style.display = 'block';
+            pickupBlock.style.display = 'none';
 
-                if (carrierId === 'novaposhta_branch') {
-                    npWhBlock.style.display = 'block';
-                    ukrWhBlock.style.display = 'none';
-                    npLabel.innerText = 'Відділення Нової Пошти *';
-                    loadWarehousesForCity(document.getElementById('orderDeliveryCity').value, 'Branch');
-                } else if (carrierId === 'novaposhta_postomat') {
-                    npWhBlock.style.display = 'block';
-                    ukrWhBlock.style.display = 'none';
-                    npLabel.innerText = 'Поштомат Нової Пошти *';
-                    loadWarehousesForCity(document.getElementById('orderDeliveryCity').value, 'Postomat');
-                } else if (carrierId === 'ukrposhta_standard') {
-                    npWhBlock.style.display = 'none';
-                    ukrWhBlock.style.display = 'block';
-                }
+            if (carrierId === 'novaposhta_branch') {
+                npWhBlock.style.display = 'block';
+                ukrWhBlock.style.display = 'none';
+                npLabel.innerText = 'Відділення Нової Пошти *';
+                loadWarehousesForCity(document.getElementById('orderDeliveryCity').value, 'Branch');
+            } else if (carrierId === 'novaposhta_postomat') {
+                npWhBlock.style.display = 'block';
+                ukrWhBlock.style.display = 'none';
+                npLabel.innerText = 'Поштомат Нової Пошти *';
+                loadWarehousesForCity(document.getElementById('orderDeliveryCity').value, 'Postomat');
+            } else if (carrierId === 'ukrposhta_standard') {
+                npWhBlock.style.display = 'none';
+                ukrWhBlock.style.display = 'block';
             }
 
             updateOrderCostSummary();
@@ -3261,10 +3329,34 @@
             if (method.includes('Накладений')) {
                 document.getElementById('payCard_cod')?.classList.add('active');
                 if (cardGateway) cardGateway.style.display = 'none';
+                if (typeof togglePostalCarriersLock === 'function') togglePostalCarriersLock(false);
+                const postalBlock = document.getElementById('deliveryFieldsPostal');
+                const pickupBlock = document.getElementById('deliveryFieldsPickup');
+                if (postalBlock) postalBlock.style.display = 'block';
+                if (pickupBlock) pickupBlock.style.display = 'none';
+                if (currentSelectedCarrier === 'pickup') {
+                    currentSelectedCarrier = 'novaposhta_branch';
+                }
+                document.querySelectorAll('.carrier-card').forEach(c => c.classList.remove('active'));
+                document.getElementById('carrierCard_' + (currentSelectedCarrier === 'novaposhta_branch' ? 'np_branch' : currentSelectedCarrier === 'novaposhta_postomat' ? 'np_postomat' : 'ukrposhta'))?.classList.add('active');
             } else {
+                // Обрано розрахунок готівкою при особистій зустрічі
                 document.getElementById('payCard_cash')?.classList.add('active');
                 if (cardGateway) cardGateway.style.display = 'none';
+                if (typeof togglePostalCarriersLock === 'function') togglePostalCarriersLock(true);
+                currentSelectedCarrier = 'pickup';
+                const postalBlock = document.getElementById('deliveryFieldsPostal');
+                const pickupBlock = document.getElementById('deliveryFieldsPickup');
+                if (postalBlock) postalBlock.style.display = 'none';
+                if (pickupBlock) {
+                    pickupBlock.style.display = 'block';
+                    const locEl = document.getElementById('pickupLocationText');
+                    if (locEl && window.currentListingData) {
+                        locEl.innerText = window.currentListingData.location || 'Кременчук';
+                    }
+                }
             }
+            updateOrderCostSummary();
         };
 
         // ==========================================
@@ -3615,7 +3707,11 @@
                 deliveryCity: `${city} [${carrierNameMap[currentSelectedCarrier] || 'Доставка'}]`,
                 deliveryBranch: branch,
                 paymentMethod: document.getElementById('orderPaymentMethod').value,
-                comment: document.getElementById('orderComment').value.trim()
+                comment: (() => {
+                    const pickupSpot = document.getElementById('orderPickupComment')?.value?.trim();
+                    const mainComment = document.getElementById('orderComment')?.value?.trim() || '';
+                    return pickupSpot ? ('[Зустріч: ' + pickupSpot + '] ' + mainComment).trim() : mainComment;
+                })()
             };
 
             try {
@@ -4131,7 +4227,7 @@
                 });
                 if (res.ok) {
                     const notifs = await res.json();
-                    const badge = document.getElementById('globalUnreadBadge');
+                    const badge = document.getElementById('notifBadge') || document.getElementById('globalUnreadBadge');
                     const listContainer = document.getElementById('notifList');
                     if (badge) {
                         const unread = notifs.filter(n => !n.isRead).length;
