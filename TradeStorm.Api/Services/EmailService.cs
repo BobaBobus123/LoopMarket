@@ -72,6 +72,10 @@ public class EmailService : IEmailService
         {
             try
             {
+                var effectiveFrom = (!string.IsNullOrWhiteSpace(smtpFrom) && smtpFrom != "security@loopmarket.com") 
+                    ? smtpFrom 
+                    : smtpUser;
+
                 using var client = new SmtpClient(smtpHost, smtpPort)
                 {
                     Credentials = new NetworkCredential(smtpUser, smtpPass),
@@ -80,7 +84,7 @@ public class EmailService : IEmailService
 
                 using var mail = new MailMessage
                 {
-                    From = new MailAddress(smtpFrom, "LoopMarket Security"),
+                    From = new MailAddress(effectiveFrom, "LoopMarket Security"),
                     Subject = subject,
                     Body = htmlBody,
                     IsBodyHtml = true
