@@ -14,6 +14,40 @@ using Microsoft.AspNetCore.ResponseCompression;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
+// Завантаження локального .env файлу, якщо присутній
+try
+{
+    var candidatePaths = new[]
+    {
+        Path.Combine(Directory.GetCurrentDirectory(), ".env"),
+        Path.Combine(AppContext.BaseDirectory, ".env"),
+        Path.Combine(Directory.GetCurrentDirectory(), "..", ".env")
+    };
+    foreach (var path in candidatePaths)
+    {
+        if (File.Exists(path))
+        {
+            foreach (var line in File.ReadAllLines(path))
+            {
+                var trimmed = line.Trim();
+                if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith("#")) continue;
+                var eqIdx = trimmed.IndexOf('=');
+                if (eqIdx > 0)
+                {
+                    var k = trimmed.Substring(0, eqIdx).Trim();
+                    var v = trimmed.Substring(eqIdx + 1).Trim();
+                    if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(k)))
+                    {
+                        Environment.SetEnvironmentVariable(k, v);
+                    }
+                }
+            }
+            break;
+        }
+    }
+}
+catch { }
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Конфігурація EF Core (Підтримка SQLite та PostgreSQL / Neon Cloud)
