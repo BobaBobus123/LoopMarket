@@ -235,4 +235,88 @@ public class AdminSecurityAndListingsTests : IClassFixture<CustomWebApplicationF
             Assert.Null(l);
         }
     }
+
+    [Fact]
+    public async Task Admin_CanToggleUserVerification_AndUpdatesBothEmailAndPhone()
+    {
+        var (adminClient, _, _) = await CreateUserWithRoleAsync(UserRoles.Admin);
+        var (_, _, targetUser) = await CreateUserWithRoleAsync(UserRoles.Buyer);
+
+        // Initially ensure target user has IsPhoneVerified = false, IsEmailVerified = false
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var u = await db.Users.FindAsync(targetUser.Id);
+            Assert.NotNull(u);
+            u.IsPhoneVerified = false;
+            u.IsEmailVerified = false;
+            u.EmailVerificationCode = "123456";
+            await db.SaveChangesAsync();
+        }
+
+        // Admin toggles verification ON
+        var patchRes = await adminClient.PatchAsJsonAsync($"/api/users/admin/{targetUser.Id}/verify", new AdminToggleVerifyDto
+        {
+            IsVerified = true
+        });
+        Assert.Equal(HttpStatusCode.OK, patchRes.StatusCode);
+
+        // Verify in DB that both are now true, and verification code cleared
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var u = await db.Users.FindAsync(targetUser.Id);
+            Assert.NotNull(u);
+            Assert.True(u.IsPhoneVerified);
+            Assert.True(u.IsEmailVerified);
+            Assert.Null(u.EmailVerificationCode);
+        }
+
+        // Admin toggles verification OFF
+        var patchOffRes = await adminClient.PatchAsJsonAsync($"/api/users/admin/{targetUser.Id}/verify", new AdminToggleVerifyDto
+        {
+            IsVerified = false
+        });
+        Assert.Equal(HttpStatusCode.OK, patchOffRes.StatusCode);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var u = await db.Users.FindAsync(targetUser.Id);
+            Assert.NotNull(u);
+            Assert.False(u.IsPhoneVerified);
+            Assert.False(u.IsEmailVerified);
+        }
+    }
+
+    [Fact]
+    public async Task Admin_CanUpdateUser_WithEmailAndPhoneVerification()
+    {
+        var (adminClient, _, _) = await CreateUserWithRoleAsync(UserRoles.Admin);
+        var (_, _, targetUser) = await CreateUserWithRoleAsync(UserRoles.Buyer);
+
+        var updateDto = new UpdateUserAdminDto
+        {
+            FirstName = "Оновлений",
+            LastName = "Користувач",
+            PhoneNumber = "+380501234567",
+            Role = UserRoles.Seller,
+            IsPhoneVerified = true,
+            IsEmailVerified = true
+        };
+
+        var putRes = await adminClient.PutAsJsonAsync($"/api/users/admin/{targetUser.Id}", updateDto);
+        Assert.Equal(HttpStatusCode.OK, putRes.StatusCode);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var u = await db.Users.FindAsync(targetUser.Id);
+            Assert.NotNull(u);
+            Assert.Equal("Оновлений", u.FirstName);
+            Assert.True(u.IsPhoneVerified);
+            Assert.True(u.IsEmailVerified);
+            Assert.Equal(UserRoles.Seller, u.Role);
+        }
+    }
 }

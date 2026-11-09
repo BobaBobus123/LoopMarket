@@ -1412,20 +1412,27 @@
                     </div>
                     <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">1 Telegram Chat ID закріплено строго за 1 номером/акаунтом (Нікіта: 1010562582, Вова: 6760959105).</div>
                 </div>
+                <div class="admin-form-group">
+                    <label>Системна роль</label>
+                    <select id="editUserRole" class="admin-form-select">
+                        <option value="Admin" id="optRoleAdmin">Admin (Адміністратор)</option>
+                        <option value="Seller">Seller (Продавець)</option>
+                        <option value="Buyer">Buyer (Покупець)</option>
+                        <option value="User">User (Звичайний)</option>
+                    </select>
+                    <div id="editUserRoleNotice" style="font-size: 0.73rem; color: #f59e0b; margin-top: 4px; line-height: 1.35;"></div>
+                </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div class="admin-form-group">
-                        <label>Системна роль</label>
-                        <select id="editUserRole" class="admin-form-select">
-                            <option value="Admin" id="optRoleAdmin">Admin (Адміністратор)</option>
-                            <option value="Seller">Seller (Продавець)</option>
-                            <option value="Buyer">Buyer (Покупець)</option>
-                            <option value="User">User (Звичайний)</option>
+                        <label>✉️ Верифікація Email</label>
+                        <select id="editUserEmailVerified" class="admin-form-select">
+                            <option value="true">✅ Підтверджено</option>
+                            <option value="false">⏳ Очікує верифікації</option>
                         </select>
-                        <div id="editUserRoleNotice" style="font-size: 0.73rem; color: #f59e0b; margin-top: 4px; line-height: 1.35;"></div>
                     </div>
                     <div class="admin-form-group">
-                        <label>Статус верифікації</label>
-                        <select id="editUserVerified" class="admin-form-select">
+                        <label>📱 Верифікація Телефону</label>
+                        <select id="editUserPhoneVerified" class="admin-form-select">
                             <option value="true">✅ Підтверджено</option>
                             <option value="false">⏳ Очікує верифікації</option>
                         </select>
@@ -1499,9 +1506,21 @@
     <script src="/js/loop-dialogs.js"></script>
     <script>
         // AUTHENTICATION & ACCESS VERIFICATION
-        let token = localStorage.getItem('loopToken') || localStorage.getItem('token');
+        let token = null;
         let currentUser = null;
         let userRole = null;
+
+        function getAdminToken() {
+            let t = localStorage.getItem('loopToken') || localStorage.getItem('token') || sessionStorage.getItem('loopToken') || sessionStorage.getItem('token');
+            if (!t) {
+                const m = document.cookie.match(/(?:^|;\s*)loop_admin_session=([^;]+)/);
+                if (m) {
+                    t = decodeURIComponent(m[1]);
+                    try { localStorage.setItem('loopToken', t); } catch (e) {}
+                }
+            }
+            return t;
+        }
 
         function parseJwt(tok) {
             try {
@@ -1515,9 +1534,19 @@
             }
         }
 
+        function showAuthGate(msg) {
+            console.warn("[Admin AuthGate]", msg);
+            if (window.LoopToast) {
+                LoopToast.error(msg || "Потрібна авторизація адміністратора");
+            }
+            setTimeout(() => {
+                window.location.href = '/login.html?returnUrl=' + encodeURIComponent('/admin.html');
+            }, 1400);
+        }
+
         async function tryAutoRefresh() {
-            const currentToken = localStorage.getItem('loopToken') || localStorage.getItem('token');
-            const refreshToken = localStorage.getItem('loopRefreshToken');
+            const currentToken = getAdminToken();
+            const refreshToken = localStorage.getItem('loopRefreshToken') || sessionStorage.getItem('loopRefreshToken');
             if (!currentToken || !refreshToken) return false;
 
             try {
@@ -1542,10 +1571,11 @@
         }
 
         async function adminFetch(url, options = {}) {
+            options = options || {};
             options.headers = options.headers || {};
-            token = localStorage.getItem('loopToken') || localStorage.getItem('token');
-            if (token && !options.headers['Authorization']) {
-                options.headers['Authorization'] = `Bearer ${token}`;
+            const currentToken = getAdminToken();
+            if (currentToken) {
+                options.headers['Authorization'] = `Bearer ${currentToken}`;
             }
 
             let res = await fetch(url, options);
@@ -1553,18 +1583,20 @@
                 console.warn("[Admin] 401 Unauthorized, attempting token refresh...");
                 const refreshed = await tryAutoRefresh();
                 if (refreshed) {
-                    token = localStorage.getItem('loopToken') || localStorage.getItem('token');
-                    options.headers['Authorization'] = `Bearer ${token}`;
+                    const refreshedToken = getAdminToken();
+                    if (refreshedToken) {
+                        options.headers['Authorization'] = `Bearer ${refreshedToken}`;
+                    }
                     res = await fetch(url, options);
                 } else {
-                    showAuthGate("Сесію завершено (401 Unauthorized). Будь ласка, оберіть акаунт оператора для продовження роботи.");
+                    showAuthGate("Сесію завершено (401 Unauthorized). Будь ласка, увійдіть в акаунт адміністратора.");
                 }
             }
             return res;
         }
 
         function checkAuth() {
-            token = localStorage.getItem('loopToken') || localStorage.getItem('token');
+            token = getAdminToken();
             if (!token) {
                 showAuthGate("Ви не авторизовані.");
                 return false;
@@ -1606,8 +1638,6 @@
             if (avatarEl) avatarEl.innerText = (adminName.charAt(0) || 'A').toUpperCase();
             return true;
         }
-
-
 
         // Run check
         checkAuth();
@@ -1989,10 +2019,30 @@
                 if (isBanned) statusBadge = `<span class="status-badge banned">🔴 Заблоковано</span>`;
                 else if (isMuted) statusBadge = `<span class="status-badge muted" title="До ${new Date(u.mutedUntil).toLocaleString('uk-UA')}">🔇 Мут чату</span>`;
 
+                const isFullVerified = !!(u.isEmailVerified && u.isPhoneVerified);
+                const isPartialVerified = !!(u.isEmailVerified || u.isPhoneVerified);
+
+                let verifyLabel = '⏳ Непідтверджено';
+                let verifyClass = 'neutral';
+                if (isFullVerified) {
+                    verifyLabel = '✅ Підтверджено';
+                    verifyClass = 'success';
+                } else if (isPartialVerified) {
+                    verifyLabel = u.isEmailVerified ? '🟡 Email' : '🟡 Телефон';
+                    verifyClass = 'warning';
+                }
+
                 const verifiedBadge = `
-                    <button class="btn-action ${u.isPhoneVerified ? 'success' : 'neutral'}" onclick="toggleUserVerification(${u.id}, ${!!u.isPhoneVerified})" title="1 клік: перемкнути верифікацію" style="padding: 4px 8px; font-size: 0.76rem; border-radius: 8px;">
-                        ${u.isPhoneVerified ? '✅ Підтверджено' : '⏳ Непідтверджено'}
-                    </button>
+                    <div style="display: inline-flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                        <button class="btn-action ${verifyClass}" onclick="toggleUserVerification(${u.id}, ${!!isPartialVerified})" title="1 клік: перемкнути верифікацію (Email + Телефон)" style="padding: 4px 8px; font-size: 0.76rem; border-radius: 8px; white-space: nowrap;">
+                            ${verifyLabel}
+                        </button>
+                        <div style="font-size: 0.70rem; color: var(--text-muted); display: flex; gap: 4px; align-items: center;">
+                            <span style="color: ${u.isEmailVerified ? '#10b981' : '#94a3b8'}; font-weight: 600;" title="Верифікація пошти">✉️ ${u.isEmailVerified ? 'так' : 'ні'}</span>
+                            <span>•</span>
+                            <span style="color: ${u.isPhoneVerified ? '#10b981' : '#94a3b8'}; font-weight: 600;" title="Верифікація телефону">📱 ${u.isPhoneVerified ? 'так' : 'ні'}</span>
+                        </div>
+                    </div>
                 `;
 
                 const roleBadge = u.role === 'Admin' 
@@ -2062,7 +2112,7 @@
                                         🚫 Бан
                                     </button>
                                 `}
-                                <button class="btn-action danger" onclick="deleteUser(${u.id}, '${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}')" title="Видалити користувача з бази (в 1 клік)">
+                                <button class="btn-action danger" onclick="deleteUser(${u.id})" title="Видалити користувача з бази (в 1 клік)">
                                     🗑️
                                 </button>
                             `}
@@ -2157,7 +2207,10 @@
             document.getElementById('editUserPhone').value = user.phoneNumber || '';
             document.getElementById('editUserTelegramChatId').value = user.telegramChatId || 0;
             document.getElementById('editUserRole').value = user.role || 'User';
-            document.getElementById('editUserVerified').value = user.isPhoneVerified ? 'true' : 'false';
+            const elEmailVer = document.getElementById('editUserEmailVerified');
+            if (elEmailVer) elEmailVer.value = user.isEmailVerified ? 'true' : 'false';
+            const elPhoneVer = document.getElementById('editUserPhoneVerified');
+            if (elPhoneVer) elPhoneVer.value = user.isPhoneVerified ? 'true' : 'false';
 
             const roleSelect = document.getElementById('editUserRole');
             const roleNotice = document.getElementById('editUserRoleNotice');
@@ -2195,7 +2248,10 @@
             const phoneNumber = document.getElementById('editUserPhone').value.trim();
             const telegramChatId = parseInt(document.getElementById('editUserTelegramChatId').value) || 0;
             const role = document.getElementById('editUserRole').value;
-            const isPhoneVerified = document.getElementById('editUserVerified').value === 'true';
+            const elEmailVer = document.getElementById('editUserEmailVerified');
+            const isEmailVerified = elEmailVer ? (elEmailVer.value === 'true') : false;
+            const elPhoneVer = document.getElementById('editUserPhoneVerified');
+            const isPhoneVerified = elPhoneVer ? (elPhoneVer.value === 'true') : false;
 
             if (role === 'Admin' && currentEditUserObj && currentEditUserObj.role !== 'Admin') {
                 const ok = await LoopDialog.confirm(`Увага! Призначення користувача ${firstName} ${lastName} Адміністратором надасть йому повний доступ до системи та управління сайтом. Сповіщення буде надіслано в службу підтримки. Нові права набудуть чинності після повторного входу користувача в акаунт. Продовжити?`, "Призначення адміністратора");
@@ -2205,8 +2261,8 @@
             try {
                 const res = await adminFetch(`/api/users/admin/${id}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ firstName, lastName, phoneNumber, role, isPhoneVerified, telegramChatId })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstName, lastName, phoneNumber, role, isPhoneVerified, isEmailVerified, telegramChatId })
                 });
                 const data = await res.json().catch(() => ({}));
                 if (res.ok) {
@@ -3115,10 +3171,10 @@
             try {
                 const res = await adminFetch(`/api/users/admin/${userId}/verify`, {
                     method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ isVerified: !currentStatus })
                 });
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 if (res.ok) {
                     LoopToast.success(data.message || "Верифікацію оновлено!");
                     loadUsers();
@@ -3126,7 +3182,7 @@
                     LoopToast.error(data.error || "Помилка оновлення верифікації");
                 }
             } catch (err) {
-                LoopToast.error("Помилка мережі");
+                LoopToast.error("Помилка мережі при верифікації: " + err.message);
             }
         }
 
@@ -3173,19 +3229,26 @@
 
         // 4. ВИДАЛЕННЯ КОРИСТУВАЧА В 1 КЛІК З ПІДТВЕРДЖЕННЯМ
         async function deleteUser(userId, userName) {
-            const confirmed = await LoopDialog.confirm(`Ви дійсно бажаєте повністю видалити користувача ${userName} (#${userId}) та всі його оголошення/замовлення?`, "Видалення користувача");
+            const user = allUsers.find(u => u.id === userId);
+            const displayName = userName || (user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : `#${userId}`);
+
+            if (user && (user.email === 'nikitazhidenko@gmail.com' || user.email === 'nikitazidenko@gmail.com' || user.id === 1)) {
+                LoopToast.error("Головного адміністратора видалити неможливо.");
+                return;
+            }
+
+            const confirmed = await LoopDialog.confirm(`Ви дійсно бажаєте повністю видалити користувача ${displayName} (#${userId}) та всі його оголошення/замовлення?`, "Видалення користувача");
             if (!confirmed) return;
 
             try {
                 const res = await adminFetch(`/api/users/admin/${userId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    method: 'DELETE'
                 });
                 const data = await res.json().catch(() => ({}));
                 if (res.ok) {
                     LoopToast.success(data.message || "Користувача видалено!");
-                    loadUsers();
-                    loadStats();
+                    await loadUsers();
+                    if (typeof loadStats === 'function') loadStats();
                 } else {
                     LoopToast.error(data.error || ("Не вдалося видалити користувача (код: " + res.status + ")"));
                 }

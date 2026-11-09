@@ -13,6 +13,7 @@ public class UpdateUserAdminDto
     public string? PhoneNumber { get; set; }
     public string Role { get; set; } = string.Empty;
     public bool IsPhoneVerified { get; set; }
+    public bool? IsEmailVerified { get; set; }
     public long? TelegramChatId { get; set; }
 }
 
@@ -101,11 +102,14 @@ public class AdminCreateUserDto
     public string? PhoneNumber { get; set; }
     public string Role { get; set; } = "Buyer";
     public bool IsPhoneVerified { get; set; } = false;
+    public bool IsEmailVerified { get; set; } = false;
 }
 
 public class AdminToggleVerifyDto
 {
     public bool? IsVerified { get; set; }
+    public bool? IsEmailVerified { get; set; }
+    public bool? IsPhoneVerified { get; set; }
 }
 
 public class AdminSendNotificationDto

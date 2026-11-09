@@ -712,7 +712,7 @@ public class UsersController : ControllerBase
 
         bool isTestAccount = user.Email.Contains("test_") || user.Email.EndsWith("@loopmarket.com") || Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing";
 
-        if (!user.IsPhoneVerified && user.Role != UserRoles.Admin && !isTestAccount)
+        if (!user.IsPhoneVerified && !user.IsEmailVerified && user.Role != UserRoles.Admin && !isTestAccount)
 
         {
 
@@ -728,7 +728,9 @@ public class UsersController : ControllerBase
 
                 role = user.Role,
 
-                error = "Номер телефону не підтверджено в Telegram"
+                isEmailVerified = false,
+
+                error = "Номер телефону або пошту не підтверджено"
 
             });
 
@@ -748,7 +750,11 @@ public class UsersController : ControllerBase
 
             refreshToken = refreshToken,
 
-            isPhoneVerified = true,
+            isPhoneVerified = user.IsPhoneVerified,
+
+            isEmailVerified = user.IsEmailVerified,
+
+            isVerified = user.IsEmailVerified || user.IsPhoneVerified,
 
             role = user.Role
 
@@ -921,6 +927,10 @@ public class UsersController : ControllerBase
                 u.Role,
 
                 u.IsPhoneVerified,
+
+                u.IsEmailVerified,
+
+                IsVerified = u.IsEmailVerified || u.IsPhoneVerified,
 
                 u.TelegramChatId,
 
@@ -1343,8 +1353,18 @@ public class UsersController : ControllerBase
 
 
         user.IsPhoneVerified = dto.IsPhoneVerified;
-
-
+        if (dto.IsEmailVerified.HasValue)
+        {
+            user.IsEmailVerified = dto.IsEmailVerified.Value;
+        }
+        else
+        {
+            user.IsEmailVerified = dto.IsPhoneVerified;
+        }
+        if (user.IsEmailVerified)
+        {
+            user.EmailVerificationCode = null;
+        }
 
         if (dto.TelegramChatId.HasValue)
 
@@ -1391,6 +1411,10 @@ public class UsersController : ControllerBase
                 user.Role,
 
                 user.IsPhoneVerified,
+
+                user.IsEmailVerified,
+
+                isVerified = user.IsEmailVerified || user.IsPhoneVerified,
 
                 user.IsBanned
 
@@ -1572,7 +1596,9 @@ public class UsersController : ControllerBase
 
             Role = role,
 
-            IsPhoneVerified = dto.IsPhoneVerified
+            IsPhoneVerified = dto.IsPhoneVerified,
+
+            IsEmailVerified = dto.IsEmailVerified || dto.IsPhoneVerified
 
         };
 
@@ -1619,56 +1645,48 @@ public class UsersController : ControllerBase
     /// </summary>
 
     [HttpPatch("admin/{id}/verify")]
-
     [Authorize(Roles = UserRoles.Admin)]
-
     public async Task<IActionResult> AdminToggleVerify(int id, [FromBody] AdminToggleVerifyDto? dto)
-
     {
-
         var user = await _context.Users.FindAsync(id);
-
         if (user == null) return NotFound(new { error = "Користувача не знайдено" });
 
-
-
+        bool targetStatus;
         if (dto != null && dto.IsVerified.HasValue)
-
         {
-
-            user.IsPhoneVerified = dto.IsVerified.Value;
-
+            targetStatus = dto.IsVerified.Value;
         }
-
         else
-
         {
-
-            user.IsPhoneVerified = !user.IsPhoneVerified;
-
+            targetStatus = !(user.IsPhoneVerified || user.IsEmailVerified);
         }
 
+        user.IsPhoneVerified = dto?.IsPhoneVerified ?? targetStatus;
+        user.IsEmailVerified = dto?.IsEmailVerified ?? targetStatus;
 
+        if (user.IsEmailVerified)
+        {
+            user.EmailVerificationCode = null;
+        }
 
         await _context.SaveChangesAsync();
 
-        await LogAuditAsync(user.IsPhoneVerified ? "VerifyPhone" : "UnverifyPhone", "User", user.Id, $"Телефон: {user.PhoneNumber}");
+        await LogAuditAsync(user.IsPhoneVerified || user.IsEmailVerified ? "VerifyUser" : "UnverifyUser", "User", user.Id,
+            $"Верифікація оновлена: Email={user.IsEmailVerified}, Телефон={user.IsPhoneVerified}");
 
         return Ok(new
-
         {
-
             id = user.Id,
-
             isPhoneVerified = user.IsPhoneVerified,
-
-            message = user.IsPhoneVerified ? "Статус верифікації: ПІДТВЕРДЖЕНО ✅" : "Статус верифікації: НЕ ПІДТВЕРДЖЕНО ⏳"
-
+            isEmailVerified = user.IsEmailVerified,
+            isVerified = user.IsPhoneVerified || user.IsEmailVerified,
+            message = (user.IsPhoneVerified && user.IsEmailVerified)
+                ? "Статус верифікації: ПОВНІСТЮ ПІДТВЕРДЖЕНО ✅"
+                : (user.IsPhoneVerified || user.IsEmailVerified)
+                    ? "Статус верифікації: ЧАСТКОВО ПІДТВЕРДЖЕНО 🟡"
+                    : "Статус верифікації: НЕ ПІДТВЕРДЖЕНО ⏳"
         });
-
     }
-
-
 
     /// <summary>
 
@@ -1867,7 +1885,8 @@ public class UsersController : ControllerBase
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            return StatusCode(500, new { error = $"Помилка бази даних при видаленні користувача: {ex.Message}" });
+            var details = ex.InnerException != null ? $"{ex.Message} -> {ex.InnerException.Message}" : ex.Message;
+            return StatusCode(500, new { error = $"Помилка бази даних при видаленні користувача: {details}" });
         }
 
         await LogAuditAsync("DeleteUser", "User", id, $"Видалено користувача {user.Email}");
