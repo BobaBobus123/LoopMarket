@@ -884,6 +884,12 @@
 
                     </p>
 
+                    <div style="background: rgba(245, 158, 11, 0.1); border: 1px dashed rgba(245, 158, 11, 0.4); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.82rem; color: #b45309; text-align: left;">
+
+                        💡 <b>Порада:</b> Якщо лист не з'явився у «Вхідних» протягом хвилини — обов'язково перевірте папку <b>«Спам»</b> або <b>«Промоакції»</b>!
+
+                    </div>
+
                     <!-- Поле 6-значного коду -->
 
                     <div style="max-width: 320px; margin: 0 auto 14px;">
@@ -1467,6 +1473,8 @@
 
         document.addEventListener('DOMContentLoaded', () => {
 
+            loadRegisterCaptcha();
+
             const codeInput = document.getElementById('regEmailCodeInput');
 
             if (codeInput) {
@@ -1505,6 +1513,8 @@
             document.getElementById('authContainer').style.display = 'block';
 
             document.getElementById('errorMsg').innerText = '';
+
+            loadRegisterCaptcha();
 
         }
 
