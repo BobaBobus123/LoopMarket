@@ -73,6 +73,7 @@ public class SiteAnnouncementDto
     public string? Duration { get; set; }
     public string? ActionText { get; set; }
     public string? ActionUrl { get; set; }
+    public string? ImageUrl { get; set; }
     public bool IsActive { get; set; } = true;
 }
 

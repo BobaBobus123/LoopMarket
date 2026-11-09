@@ -2898,7 +2898,7 @@
                                 <div class="card-price">${item.price} ₴</div>
                                 <div class="card-actions">
                                     <a href="/edit.html?id=${item.code || item.id}" class="btn-edit">${ICONS.edit} Змінити</a>
-                                    <button onclick="deleteListing(${item.id})" class="btn-delete">${ICONS.trash} Видалити</button>
+                                    <button onclick="deleteListing('${item.code || item.id}')" class="btn-delete">${ICONS.trash} Видалити</button>
                                 </div>
                             </div>
                         </div>
@@ -3864,9 +3864,9 @@
 
                                     <!-- Кнопки дій -->
                                     <div style="display: flex; gap: 8px; align-items: center;">
-                                        <a href="/details.html?id=${s.id}" class="nav-pill" style="text-decoration: none; padding: 8px 12px; font-size: 0.82rem;">Переглянути</a>
+                                        <a href="/details.html?id=${s.code || s.id}" class="nav-pill" style="text-decoration: none; padding: 8px 12px; font-size: 0.82rem;">Переглянути</a>
                                         <a href="/edit.html?id=${s.code || s.id}" class="nav-pill" style="text-decoration: none; padding: 8px 12px; font-size: 0.82rem; border-color: #2563eb; color: #2563eb;">Налаштувати</a>
-                                        <button onclick="deleteListing(${s.id})" class="btn-delete" style="padding: 6px 10px; font-size: 0.82rem;" title="Видалити послугу">${ICONS.trash}</button>
+                                        <button onclick="deleteListing('${s.code || s.id}')" class="btn-delete" style="padding: 6px 10px; font-size: 0.82rem;" title="Видалити послугу">${ICONS.trash}</button>
                                     </div>
                                 </div>
                             `;

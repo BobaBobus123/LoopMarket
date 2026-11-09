@@ -99,6 +99,11 @@ public class ListingService : IListingService
             listing.Status = dto.Status.Trim();
         }
 
+        if (dto.IsFeatured.HasValue && isAdmin)
+        {
+            listing.IsFeatured = dto.IsFeatured.Value;
+        }
+
         await _listingRepository.UpdateAsync(listing);
         return (true, null, listing);
     }

@@ -136,6 +136,7 @@ public class AdminOperationsController : ControllerBase
             placement = primary.Placement,
             actionText = primary.ActionText,
             actionUrl = primary.ActionUrl,
+            imageUrl = primary.ImageUrl,
             expiresAt = primary.ExpiresAt,
             createdAt = primary.CreatedAt,
             announcements = activeList.Select(a => new
@@ -148,6 +149,7 @@ public class AdminOperationsController : ControllerBase
                 placement = a.Placement,
                 actionText = a.ActionText,
                 actionUrl = a.ActionUrl,
+                imageUrl = a.ImageUrl,
                 expiresAt = a.ExpiresAt,
                 createdAt = a.CreatedAt
             })
@@ -175,6 +177,7 @@ public class AdminOperationsController : ControllerBase
             placement = a.Placement,
             actionText = a.ActionText,
             actionUrl = a.ActionUrl,
+            imageUrl = a.ImageUrl,
             expiresAt = a.ExpiresAt,
             isActive = a.IsActive,
             isExpired = a.ExpiresAt.HasValue && a.ExpiresAt.Value <= now,
@@ -218,6 +221,7 @@ public class AdminOperationsController : ControllerBase
             ExpiresAt = expiresAt,
             ActionText = string.IsNullOrWhiteSpace(dto.ActionText) ? null : dto.ActionText.Trim(),
             ActionUrl = string.IsNullOrWhiteSpace(dto.ActionUrl) ? null : dto.ActionUrl.Trim(),
+            ImageUrl = string.IsNullOrWhiteSpace(dto.ImageUrl) ? null : dto.ImageUrl.Trim(),
             IsActive = dto.IsActive,
             CreatedAt = now
         };

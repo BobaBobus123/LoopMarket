@@ -241,7 +241,15 @@ public class ListingsController : ControllerBase
             return StatusCode(403, new { error });
         }
 
-        return Ok(listing);
+        return Ok(new
+        {
+            id = listing.Id,
+            code = ListingIdEncoder.Encode(listing.Id),
+            publicId = ListingIdEncoder.Encode(listing.Id),
+            title = listing.Title,
+            price = listing.Price,
+            status = listing.Status
+        });
     }
 
     [HttpPatch("{id}/status")]
@@ -336,6 +344,40 @@ public class ListingsController : ControllerBase
     /// <summary>
     /// Адміністрування: модераційне видалення будь-якого оголошення (Етап 6 RBAC)
     /// </summary>
+        [HttpPut("admin/{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AdminUpdateListing(string id, [FromBody] UpdateListingDto dto)
+    {
+        if (!ListingIdEncoder.TryDecode(id, out int numericId))
+        {
+            return NotFound(new { error = "Оголошення не знайдено" });
+        }
+
+        var (success, error, listing) = await _listingService.UpdateListingAsync(numericId, 0, dto, isAdmin: true);
+        if (!success || listing == null)
+        {
+            return NotFound(new { error = error ?? "Не вдалося оновити оголошення" });
+        }
+
+        if (dto.IsFeatured.HasValue)
+        {
+            listing.IsFeatured = dto.IsFeatured.Value;
+            await _context.SaveChangesAsync();
+        }
+
+        return Ok(new
+        {
+            id = listing.Id,
+            code = ListingIdEncoder.Encode(listing.Id),
+            publicId = ListingIdEncoder.Encode(listing.Id),
+            title = listing.Title,
+            price = listing.Price,
+            status = listing.Status,
+            isFeatured = listing.IsFeatured,
+            message = "Оголошення успішно збережено адміністратором"
+        });
+    }
+
     [HttpDelete("admin/{id}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AdminDeleteListing(int id)

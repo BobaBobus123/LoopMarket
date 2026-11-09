@@ -29,4 +29,6 @@ public class UpdateListingDto
     public bool IsShippingAvailable { get; set; }
 
     public string? Status { get; set; }
+
+    public bool? IsFeatured { get; set; }
 }

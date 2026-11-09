@@ -863,117 +863,235 @@
             </div>
         </section>
 
-        <!-- TAB 5: BROADCAST & ANNOUNCEMENTS -->
+        <!-- TAB 5: MARKETING & ANNOUNCEMENTS (3 SEPARATE TOOLS) -->
         <section id="panel-broadcast" class="tab-panel">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-bottom: 24px;">
-                <!-- ANNOUNCEMENT & AD BANNER SETTER -->
-                <div class="admin-card" style="padding: 24px;">
-                    <h3 style="margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
-                        📌 Конструктор оголошень та рекламних банерів
-                    </h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 18px;">
-                        Керуйте системними сповіщеннями, банерами у шапці, рекламними блоками у каталозі та спливаючими вікнами з точним налаштуванням сторінки та терміну дії.
-                    </p>
-                    <form onsubmit="handleSetAnnouncement(event)">
+            <!-- MARKETING SUB-NAVIGATION PILLS -->
+            <div style="display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; background: var(--surface); padding: 8px 12px; border-radius: 14px; border: 1px solid var(--border-color);">
+                <button type="button" id="subtabBtnAd" class="admin-tab active" onclick="switchMarketingSubTab('ad')" style="padding: 8px 16px; font-size: 0.88rem; font-weight: 800; border-radius: 10px;">
+                    🏷️ 1. Рекламний банер (OLX Скайскрепер & Каталог)
+                </button>
+                <button type="button" id="subtabBtnInfo" class="admin-tab" onclick="switchMarketingSubTab('info')" style="padding: 8px 16px; font-size: 0.88rem; font-weight: 800; border-radius: 10px;">
+                    ℹ️ 2. Інформаційний банер сайту (Шапка / Модальне)
+                </button>
+                <button type="button" id="subtabBtnBroadcast" class="admin-tab" onclick="switchMarketingSubTab('broadcast')" style="padding: 8px 16px; font-size: 0.88rem; font-weight: 800; border-radius: 10px;">
+                    📢 3. Масова розсилка (В додатку & Telegram)
+                </button>
+            </div>
+
+            <!-- SECTION 1: РЕКЛАМНИЙ БАНЕР (OLX SKYSCRAPER & CATALOG) -->
+            <div id="subtabPanelAd" class="admin-card" style="padding: 26px; margin-bottom: 24px; display: block;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--text-main);">
+                            <span>🏷️</span> Конструктор рекламного банера (OLX-Style)
+                        </h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 0;">
+                            Налаштування вертикального скайскрепера праворуч/ліворуч або горизонтального промо-блоку над каталогом товарів.
+                        </p>
+                    </div>
+                    <span class="status-badge" style="background: rgba(16,185,129,0.12); color: #059669; font-weight: 800; padding: 6px 14px; border-radius: 10px;">
+                        🎯 Спонсорська реклама платформи
+                    </span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; align-items: start;">
+                    <form onsubmit="handleSetAdBanner(event)">
                         <div class="admin-form-group">
-                            <label>Заголовок (опціонально)</label>
-                            <input type="text" id="bannerTitleInput" class="admin-form-input" placeholder="Наприклад: Тут могла бути ваша реклама! або Важливе оновлення">
+                            <label>Заголовок реклами *</label>
+                            <input type="text" id="adBannerTitleInput" class="admin-form-input" required value="Тут могла бути ваша реклама!" oninput="updateAdBannerLivePreview()">
                         </div>
+
                         <div class="admin-form-group">
-                            <label>Текст оголошення *</label>
-                            <textarea id="bannerMessageInput" class="admin-form-textarea" rows="3" required placeholder="Залучайте покупців для свого бізнесу на маркетплейсі LoopMarket..."></textarea>
+                            <label>Текст реклами / Спонсорський опис *</label>
+                            <textarea id="adBannerMessageInput" class="admin-form-textarea" rows="3" required oninput="updateAdBannerLivePreview()">Залучайте тисячі покупців щодня на LoopMarket. Розміщуйте товари вашого бренду, банери чи акційні пропозиції.</textarea>
                         </div>
-                        
+
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                             <div class="admin-form-group">
-                                <label>Тип сповіщення</label>
-                                <select id="bannerTypeSelect" class="admin-form-select">
-                                    <option value="promo">🏷️ Реклама / Промоція (Зелений)</option>
-                                    <option value="warning" selected>⚠️ Попередження (Жовтий)</option>
-                                    <option value="info">ℹ️ Інформаційне (Синій)</option>
-                                    <option value="danger">🚫 Критичне / Антифрод (Червоний)</option>
-                                </select>
+                                <label>🖼️ URL зображення / банера (опціонально)</label>
+                                <input type="url" id="adBannerImageInput" class="admin-form-input" placeholder="https://... (JPG, PNG, WebP)" oninput="updateAdBannerLivePreview()">
                             </div>
                             <div class="admin-form-group">
-                                <label>Цільова сторінка</label>
-                                <select id="bannerTargetPageSelect" class="admin-form-select">
-                                    <option value="all" selected>🌐 Всі сторінки сайту</option>
-                                    <option value="home">🏠 Головна / Каталог</option>
-                                    <option value="details">📦 Сторінка товару (Details)</option>
-                                    <option value="services">🛠️ Послуги майстрів</option>
+                                <label>🧭 Позиція розміщення на екрані *</label>
+                                <select id="adBannerPlacementSelect" class="admin-form-select" onchange="updateAdBannerLivePreview()">
+                                    <option value="sidebar_right" selected>➡️ Праворуч на екрані (Вертикальний Skyscraper як на OLX)</option>
+                                    <option value="sidebar_left">⬅️ Ліворуч на екрані (Вертикальний Skyscraper)</option>
+                                    <option value="catalog">📰 У каталозі товарів (Горизонтальний блок над сіткою)</option>
+                                    <option value="hidden">🚫 Приховано / Вимкнено</option>
                                 </select>
                             </div>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                             <div class="admin-form-group">
-                                <label>Місце розміщення</label>
-                                <select id="bannerPlacementSelect" class="admin-form-select">
-                                    <option value="top" selected>🔝 Верхній банер сайту (Header bar)</option>
-                                    <option value="catalog">📰 У каталозі товарів (OLX-style блок)</option>
-                                    <option value="modal">🪟 Спливаюче модальне вікно</option>
-                                </select>
+                                <label>Текст кнопки дії</label>
+                                <input type="text" id="adBannerActionTextInput" class="admin-form-input" value="Розмістити рекламу 📢" oninput="updateAdBannerLivePreview()">
                             </div>
                             <div class="admin-form-group">
-                                <label>Термін дії</label>
-                                <select id="bannerDurationSelect" class="admin-form-select">
-                                    <option value="forever" selected>♾️ Безстроково (до ручного скасування)</option>
-                                    <option value="24h">⏰ 24 години</option>
-                                    <option value="3d">📅 3 дні</option>
-                                    <option value="7d">📅 7 днів (1 тиждень)</option>
-                                    <option value="30d">🗓️ 30 днів (1 місяць)</option>
-                                </select>
+                                <label>Посилання переходу (URL кнопки)</label>
+                                <input type="text" id="adBannerActionUrlInput" class="admin-form-input" value="https://t.me/LoopMarketSupport">
                             </div>
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <div class="admin-form-group">
-                                <label>Текст кнопки (опціонально)</label>
-                                <input type="text" id="bannerActionTextInput" class="admin-form-input" placeholder="Наприклад: Розмістити рекламу">
-                            </div>
-                            <div class="admin-form-group">
-                                <label>Посилання кнопки URL</label>
-                                <input type="text" id="bannerActionUrlInput" class="admin-form-input" placeholder="https://t.me/LoopMarketSupport">
-                            </div>
+                        <div class="admin-form-group">
+                            <label>Термін дії реклами</label>
+                            <select id="adBannerDurationSelect" class="admin-form-select">
+                                <option value="forever" selected>♾️ Безстроково (до ручного скасування)</option>
+                                <option value="24h">⏰ 24 години</option>
+                                <option value="7d">📅 7 днів (1 тиждень)</option>
+                                <option value="30d">🗓️ 30 днів (1 місяць)</option>
+                            </select>
                         </div>
 
-                        <div style="display: flex; gap: 10px; margin-top: 14px;">
-                            <button type="submit" class="btn-action primary" style="padding: 10px 18px; font-weight: 700;">
-                                🚀 Опублікувати оголошення / банер
+                        <div style="display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap;">
+                            <button type="submit" class="btn-action success" style="padding: 11px 22px; font-weight: 800; font-size: 0.92rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 4px 14px rgba(16,185,129,0.35);">
+                                🚀 Зберегти та виставити рекламний банер
+                            </button>
+                            <button type="button" class="btn-action warning" onclick="handleDeactivateAdBanner()" style="padding: 11px 18px; font-weight: 700;">
+                                🛑 Зняти поточну рекламу
                             </button>
                         </div>
                     </form>
-                </div>
 
-                <!-- MASS BROADCAST SENDER -->
-                <div class="admin-card" style="padding: 24px;">
-                    <h3 style="margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
-                        📢 Масова розсилка користувачам
-                    </h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 18px;">
-                        Надішле системне сповіщення всім зареєстрованим користувачам у дзвіночок сайту та у прив'язаний Telegram-бот.
-                    </p>
-                    <form onsubmit="handleSendBroadcast(event)">
-                        <div class="admin-form-group">
-                            <label>Заголовок розсилки</label>
-                            <input type="text" id="broadcastTitleInput" class="admin-form-input" required placeholder="Оновлення правил безпеки платформи">
+                    <!-- LIVE PREVIEW BOX -->
+                    <div style="background: var(--bg-color); border: 1.5px dashed var(--border-color); border-radius: 16px; padding: 18px;">
+                        <div style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>👁️ Живе прев'ю на сайті:</span>
+                            <span id="adPreviewPosBadge" style="color: #2563eb; background: rgba(37,99,235,0.1); padding: 2px 8px; border-radius: 6px;">Праворуч</span>
                         </div>
-                        <div class="admin-form-group">
-                            <label>Повідомлення</label>
-                            <textarea id="broadcastMessageInput" class="admin-form-textarea" rows="4" required placeholder="Шановні користувачі, запущено нову систему захисту угод..."></textarea>
+                        <div id="adLivePreviewBox" style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; margin-bottom: 10px;">
+                                <span style="font-size: 0.68rem; font-weight: 800; color: var(--text-muted);">Реклама <span style="background: rgba(16,185,129,0.15); color: #10b981; padding: 1px 5px; border-radius: 4px;">AD</span></span>
+                                <span style="color: var(--text-muted); font-size: 1.1rem; line-height: 1;">&times;</span>
+                            </div>
+                            <div id="adPreviewImageWrap" style="display: none; margin-bottom: 10px;">
+                                <img id="adPreviewImg" src="" style="width: 100%; max-height: 140px; object-fit: cover; border-radius: 10px;">
+                            </div>
+                            <div id="adPreviewBrandWrap" style="background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(37,99,235,0.12)); border: 1px dashed rgba(16,185,129,0.3); border-radius: 10px; padding: 14px; text-align: center; margin-bottom: 10px;">
+                                <div style="width: 38px; height: 38px; margin: 0 auto 4px; background: linear-gradient(135deg, #10b981, #2563eb); border-radius: 10px; color: white; font-weight: 900; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;">L</div>
+                                <div style="font-size: 0.65rem; font-weight: 800; color: #10b981;">LOOP ADS</div>
+                            </div>
+                            <div id="adPreviewTitle" style="font-weight: 800; font-size: 0.95rem; margin-bottom: 4px; color: var(--text-main);">Тут могла бути ваша реклама!</div>
+                            <div id="adPreviewText" style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 12px;">Залучайте тисячі покупців щодня на LoopMarket...</div>
+                            <div id="adPreviewBtn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; text-align: center; font-size: 0.8rem; font-weight: 800; padding: 8px 12px; border-radius: 8px;">Розмістити рекламу 📢</div>
                         </div>
-                        <div class="admin-form-group" style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="broadcastTgCheckbox" checked style="width: 18px; height: 18px; accent-color: var(--admin-primary);">
-                            <label for="broadcastTgCheckbox" style="margin: 0; font-weight: 600; cursor: pointer;">Дублювати повідомлення в Telegram-бот</label>
-                        </div>
-                        <button type="submit" class="btn-action success" style="padding: 11px 20px; margin-top: 10px; font-weight: 700;">
-                            🚀 Відправити всім користувачам
-                        </button>
-                    </form>
+                    </div>
                 </div>
             </div>
 
-            <!-- LIVE ANNOUNCEMENTS TABLE -->
+            <!-- SECTION 2: ІНФОРМАЦІЙНИЙ БАНЕР САЙТУ (HEADER BAR / MODAL) -->
+            <div id="subtabPanelInfo" class="admin-card" style="padding: 26px; margin-bottom: 24px; display: none;">
+                <div style="margin-bottom: 18px;">
+                    <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--text-main);">
+                        <span>ℹ️</span> Конструктор інформаційних банерів та сповіщень
+                    </h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 0;">
+                        Системні плашки у шапці всіх сторінок сайту або спливаючі модальні вікна (технічні роботи, оновлення правил, акції).
+                    </p>
+                </div>
+
+                <form onsubmit="handleSetInfoBanner(event)" style="max-width: 900px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div class="admin-form-group">
+                            <label>Тип та терміновість інфо-банера *</label>
+                            <select id="infoBannerTypeSelect" class="admin-form-select">
+                                <option value="info" selected>ℹ️ Інформаційне (Синій фон — оновлення, інструкції)</option>
+                                <option value="warning">⚠️ Попередження (Жовтий фон — техроботи, регламент)</option>
+                                <option value="danger">🚫 Термінове / Антифрод (Червоний фон — критична безпека)</option>
+                                <option value="promo">🟢 Святкове / Промоція (Зелений фон)</option>
+                            </select>
+                        </div>
+                        <div class="admin-form-group">
+                            <label>Формат відображення *</label>
+                            <select id="infoBannerPlacementSelect" class="admin-form-select">
+                                <option value="top" selected>🔝 Плашка у самій шапці сайту (Header bar)</option>
+                                <option value="modal">🪟 Повноекранне модальне вікно (Popup modal)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div class="admin-form-group">
+                            <label>Цільова сторінка</label>
+                            <select id="infoBannerTargetPageSelect" class="admin-form-select">
+                                <option value="all" selected>🌐 Всі сторінки сайту (Global)</option>
+                                <option value="home">🏠 Каталог / Головна сторінка</option>
+                                <option value="details">📦 Картки товарів (Details)</option>
+                                <option value="services">🛠️ Послуги майстрів</option>
+                            </select>
+                        </div>
+                        <div class="admin-form-group">
+                            <label>Термін дії</label>
+                            <select id="infoBannerDurationSelect" class="admin-form-select">
+                                <option value="forever" selected>♾️ Безстроково (до зняття адміном)</option>
+                                <option value="24h">⏰ 24 години</option>
+                                <option value="3d">📅 3 дні</option>
+                                <option value="7d">📅 7 днів</option>
+                                <option value="30d">🗓️ 30 днів</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label>Заголовок повідомлення</label>
+                        <input type="text" id="infoBannerTitleInput" class="admin-form-input" placeholder="Наприклад: Оновлення платформи 2.0 або Технічні роботи">
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label>Текст інформаційного оголошення *</label>
+                        <textarea id="infoBannerMessageInput" class="admin-form-textarea" rows="3" required placeholder="Введіть текст повідомлення для користувачів..."></textarea>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div class="admin-form-group">
+                            <label>Текст кнопки (опціонально)</label>
+                            <input type="text" id="infoBannerActionTextInput" class="admin-form-input" placeholder="Дізнатися більше">
+                        </div>
+                        <div class="admin-form-group">
+                            <label>Посилання кнопки URL (опціонально)</label>
+                            <input type="text" id="infoBannerActionUrlInput" class="admin-form-input" placeholder="https://... або /about.html">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-action primary" style="padding: 11px 22px; font-weight: 800; font-size: 0.92rem; margin-top: 10px;">
+                        🚀 Опублікувати інформаційний банер
+                    </button>
+                </form>
+            </div>
+
+            <!-- SECTION 3: МАСОВА РОЗСИЛКА (BROADCAST) -->
+            <div id="subtabPanelBroadcast" class="admin-card" style="padding: 26px; margin-bottom: 24px; display: none;">
+                <div style="margin-bottom: 18px;">
+                    <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--text-main);">
+                        <span>📢</span> Масова розсилка повідомлень користувачам
+                    </h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 0;">
+                        Надішле персональне системне сповіщення кожному користувачу у внутрішній дзвіночок сайту та у прив'язаний Telegram-бот.
+                    </p>
+                </div>
+
+                <form onsubmit="handleSendBroadcast(event)" style="max-width: 800px;">
+                    <div class="admin-form-group">
+                        <label>Тема розсилки *</label>
+                        <input type="text" id="broadcastTitleInput" class="admin-form-input" required placeholder="Важливе оновлення безпеки угод LoopMarket">
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Текст розсилки *</label>
+                        <textarea id="broadcastMessageInput" class="admin-form-textarea" rows="4" required placeholder="Шановні користувачі, для вашої безпеки запущено оновлені правила..."></textarea>
+                    </div>
+                    <div class="admin-form-group" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 12px;">
+                        <input type="checkbox" id="broadcastTgCheckbox" checked style="width: 18px; height: 18px; accent-color: var(--admin-primary); cursor: pointer;">
+                        <label for="broadcastTgCheckbox" style="margin: 0; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
+                            🤖 Дублювати розсилку у підключені Telegram-боти користувачів
+                        </label>
+                    </div>
+                    <button type="submit" id="btnSubmitBroadcast" class="btn-action success" style="padding: 12px 24px; font-weight: 800; font-size: 0.95rem; margin-top: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 4px 14px rgba(16,185,129,0.35);">
+                        🚀 Відправити всім користувачам
+                    </button>
+                    <div id="broadcastStatusBox" style="display: none; margin-top: 14px; padding: 12px 16px; border-radius: 10px; font-weight: 700; font-size: 0.88rem;"></div>
+                </form>
+            </div>
+<!-- LIVE ANNOUNCEMENTS TABLE -->
             <div class="admin-card">
                 <div style="padding: 18px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
                     <div>
@@ -1372,6 +1490,100 @@
                 <div class="admin-modal-actions">
                     <button type="button" class="btn-action neutral" onclick="closeCreateListingModal()">Скасувати</button>
                     <button type="submit" class="btn-action success" style="padding: 8px 18px;">Опублікувати в 1 клік</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+        <!-- MODAL: EDIT USER LISTING (ADMIN PANEL) -->
+    <div class="admin-modal-overlay" id="adminEditListingModal">
+        <div class="admin-modal-box" style="max-width: 680px; width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                        <span>✏️</span> Редагування оголошення користувача
+                    </h3>
+                    <div id="adminEditListingSub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;">
+                        Редагування з повними правами адміністратора LoopMarket
+                    </div>
+                </div>
+                <button type="button" onclick="closeAdminEditListingModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+            </div>
+            <form id="adminEditListingForm" onsubmit="saveAdminListingChanges(event)">
+                <input type="hidden" id="adminEditListingId">
+                
+                <div class="admin-form-group">
+                    <label>Назва товару / послуги *</label>
+                    <input type="text" id="adminEditListingTitle" class="admin-form-input" required maxlength="100">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="admin-form-group">
+                        <label>Ціна (₴ грн) *</label>
+                        <input type="number" id="adminEditListingPrice" class="admin-form-input" required min="0" step="any">
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Категорія *</label>
+                        <select id="adminEditListingCategory" class="admin-form-select"></select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="admin-form-group">
+                        <label>Статус публікації</label>
+                        <select id="adminEditListingStatus" class="admin-form-select">
+                            <option value="Active">🟢 Активне (В наявності / опубліковано)</option>
+                            <option value="Sold">🔴 Продано (Архівне)</option>
+                            <option value="Reserved">🟡 Зарезервовано (Оформлюється угода)</option>
+                        </select>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Стан товару / формат</label>
+                        <input type="text" id="adminEditListingCondition" class="admin-form-input" placeholder="Вживане, Нове або Послуга">
+                    </div>
+                </div>
+
+                <div class="admin-form-group">
+                    <label>Місто / локація</label>
+                    <input type="text" id="adminEditListingLocation" class="admin-form-input" placeholder="Кременчук, Київ...">
+                </div>
+
+                <div class="admin-form-group">
+                    <label>Детальний опис *</label>
+                    <textarea id="adminEditListingDesc" class="admin-form-textarea" rows="4" required></textarea>
+                </div>
+
+                <div class="admin-form-group">
+                    <label>Посилання на фотографії (розділені крапкою з комою ';' або новим рядком)</label>
+                    <textarea id="adminEditListingImages" class="admin-form-textarea" rows="2" placeholder="/uploads/..., https://..."></textarea>
+                </div>
+
+                <div class="admin-form-group">
+                    <label>🎬 Посилання на відеопрезентацію (YouTube, Shorts або /uploads/videos/...)</label>
+                    <input type="text" id="adminEditListingVideo" class="admin-form-input" placeholder="https://youtube.com/watch?v=... або порожньо">
+                </div>
+
+                <div style="display: flex; gap: 20px; align-items: center; margin-top: 10px; margin-bottom: 14px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.88rem; font-weight: 700;">
+                        <input type="checkbox" id="adminEditListingFeatured" style="width: 18px; height: 18px; cursor: pointer; accent-color: #eab308;">
+                        ⭐ Закріпити як ТОП оголошення
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.88rem; font-weight: 700;">
+                        <input type="checkbox" id="adminEditListingShipping" style="width: 18px; height: 18px; cursor: pointer; accent-color: #10b981;">
+                        📦 Можлива відправка поштою
+                    </label>
+                </div>
+
+                <div class="admin-modal-actions" style="display: flex; justify-content: space-between; align-items: center;">
+                    <a id="adminEditListingPublicLink" href="#" target="_blank" style="font-size: 0.82rem; color: #2563eb; font-weight: 700; text-decoration: underline;">
+                        👁️ Переглянути на сайті &rarr;
+                    </a>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="btn-action neutral" onclick="closeAdminEditListingModal()">Скасувати</button>
+                        <button type="submit" id="adminEditListingSaveBtn" class="btn-action success" style="padding: 9px 20px; font-weight: 800;">
+                            💾 Зберегти зміни
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -2384,9 +2596,9 @@
                                     <a href="/details.html?id=${l.code || l.id}" target="_blank" class="btn-action primary" style="padding: 6px 12px; text-decoration: none; font-size: 0.8rem;" title="Відкрити картку оголошення">
                                         👁️ Перегляд
                                     </a>
-                                    <a href="/edit.html?id=${l.code || l.id}" target="_blank" class="btn-action neutral" style="padding: 6px 12px; text-decoration: none; font-size: 0.8rem;" title="Редагувати оголошення">
+                                    <button type="button" class="btn-action neutral" onclick="openAdminEditListingModal(${l.id})" style="padding: 6px 12px; font-size: 0.8rem; cursor: pointer;" title="Редагувати оголошення в адмінці">
                                         ✏️ Редагувати
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         `;
@@ -2480,9 +2692,9 @@
                             <a href="/details.html?id=${l.code || l.id}" target="_blank" class="btn-action neutral" title="Переглянути">
                                 👁️
                             </a>
-                            <a href="/edit.html?id=${l.id}" target="_blank" class="btn-action primary" title="Редагувати оголошення">
+                            <button type="button" class="btn-action primary" onclick="openAdminEditListingModal(${l.id})" title="Редагувати оголошення в адмінці">
                                 ✏️
-                            </a>
+                            </button>
                             <button class="btn-action danger" onclick="deleteFraudListing(${l.id}, '${escapeHtml(l.title)}')" title="Видалити">
                                 🗑️
                             </button>
@@ -2656,6 +2868,273 @@
             }
         }
         window.loadAnnouncementsList = loadAnnouncementsList;
+
+        // ==================== ADMIN EDIT LISTING MODAL ====================
+        window.openAdminEditListingModal = async function(id) {
+            const modal = document.getElementById('adminEditListingModal');
+            if (!modal) return;
+
+            let item = allListings.find(l => l.id == id);
+            if (!item && typeof currentUserListings !== 'undefined') {
+                item = currentUserListings.find(l => l.id == id);
+            }
+
+            try {
+                const res = await adminFetch(`/api/listings/${id}`);
+                if (res.ok) {
+                    item = await res.json();
+                }
+            } catch(e) {}
+
+            if (!item) {
+                LoopToast.error("Не вдалося завантажити дані оголошення");
+                return;
+            }
+
+            document.getElementById('adminEditListingId').value = item.id;
+            document.getElementById('adminEditListingTitle').value = item.title || '';
+            document.getElementById('adminEditListingPrice').value = item.price || 0;
+            document.getElementById('adminEditListingCondition').value = item.condition || 'Вживане';
+            document.getElementById('adminEditListingLocation').value = item.location || 'Кременчук';
+            document.getElementById('adminEditListingDesc').value = item.description || '';
+            document.getElementById('adminEditListingStatus').value = item.status || 'Active';
+            document.getElementById('adminEditListingFeatured').checked = !!item.isFeatured;
+            document.getElementById('adminEditListingShipping').checked = !!item.isShippingAvailable;
+            document.getElementById('adminEditListingVideo').value = item.videoUrl || '';
+
+            const rawImgs = Array.isArray(item.imageUrls) ? item.imageUrls : (item.imageUrl ? item.imageUrl.split(';') : []);
+            document.getElementById('adminEditListingImages').value = rawImgs.join(';\n');
+
+            const catSelect = document.getElementById('adminEditListingCategory');
+            if (catSelect) {
+                fetch('/api/categories').then(r => r.json()).then(cats => {
+                    catSelect.innerHTML = cats.map(c => `<option value="${c.id}" ${c.id == item.categoryId ? 'selected' : ''}>${c.name}</option>`).join('');
+                }).catch(() => {});
+            }
+
+            const sub = document.getElementById('adminEditListingSub');
+            if (sub) {
+                sub.innerText = `Оголошення #${item.id} (Код: ${item.code || item.publicId || item.id}) • Продавець: ID #${item.sellerId || item.seller?.id || '—'}`;
+            }
+
+            const link = document.getElementById('adminEditListingPublicLink');
+            if (link) {
+                link.href = `/details.html?id=${encodeURIComponent(item.code || item.publicId || item.id)}`;
+            }
+
+            modal.classList.add('active');
+        };
+
+        window.closeAdminEditListingModal = function() {
+            document.getElementById('adminEditListingModal')?.classList.remove('active');
+        };
+
+        window.saveAdminListingChanges = async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('adminEditListingId').value;
+            const saveBtn = document.getElementById('adminEditListingSaveBtn');
+            const origHtml = saveBtn ? saveBtn.innerHTML : '';
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '⏳ Збереження...';
+            }
+
+            const rawImagesText = document.getElementById('adminEditListingImages').value || '';
+            const imagesList = rawImagesText.split(/[\n;]+/).map(s => s.trim()).filter(Boolean);
+
+            const payload = {
+                title: document.getElementById('adminEditListingTitle').value.trim(),
+                price: parseFloat(document.getElementById('adminEditListingPrice').value) || 0,
+                categoryId: parseInt(document.getElementById('adminEditListingCategory').value) || 1,
+                condition: document.getElementById('adminEditListingCondition').value.trim(),
+                location: document.getElementById('adminEditListingLocation').value.trim() || 'Кременчук',
+                description: document.getElementById('adminEditListingDesc').value.trim(),
+                status: document.getElementById('adminEditListingStatus').value,
+                isFeatured: document.getElementById('adminEditListingFeatured').checked,
+                isShippingAvailable: document.getElementById('adminEditListingShipping').checked,
+                videoUrl: document.getElementById('adminEditListingVideo').value.trim() || null,
+                imageUrls: imagesList
+            };
+
+            try {
+                const res = await adminFetch(`/api/listings/admin/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    LoopToast.success("Оголошення успішно збережено та оновлено на сайті!");
+                    closeAdminEditListingModal();
+                    loadListings();
+                    if (typeof currentListingsUserId !== 'undefined' && currentListingsUserId) {
+                        openUserListingsModal(currentListingsUserId, currentListingsUserName, currentListingsUserEmail);
+                    }
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    LoopToast.error(err.error || "Не вдалося зберегти зміни оголошення");
+                }
+            } catch(err) {
+                LoopToast.error("Помилка зв'язку з сервером при збереженні");
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = origHtml;
+                }
+            }
+        };
+
+        // ==================== MARKETING SUB-TABS & AD BANNER CONTROLLER ====================
+        window.switchMarketingSubTab = function(subtab) {
+            document.getElementById('subtabBtnAd')?.classList.toggle('active', subtab === 'ad');
+            document.getElementById('subtabBtnInfo')?.classList.toggle('active', subtab === 'info');
+            document.getElementById('subtabBtnBroadcast')?.classList.toggle('active', subtab === 'broadcast');
+
+            document.getElementById('subtabPanelAd').style.display = (subtab === 'ad') ? 'block' : 'none';
+            document.getElementById('subtabPanelInfo').style.display = (subtab === 'info') ? 'block' : 'none';
+            document.getElementById('subtabPanelBroadcast').style.display = (subtab === 'broadcast') ? 'block' : 'none';
+        };
+
+        window.updateAdBannerLivePreview = function() {
+            const title = document.getElementById('adBannerTitleInput')?.value?.trim() || 'Тут могла бути ваша реклама!';
+            const desc = document.getElementById('adBannerMessageInput')?.value?.trim() || 'Залучайте тисячі покупців щодня на LoopMarket...';
+            const imgUrl = document.getElementById('adBannerImageInput')?.value?.trim() || '';
+            const actionText = document.getElementById('adBannerActionTextInput')?.value?.trim() || 'Розмістити рекламу 📢';
+            const placement = document.getElementById('adBannerPlacementSelect')?.value || 'sidebar_right';
+
+            document.getElementById('adPreviewTitle').innerText = title;
+            document.getElementById('adPreviewText').innerText = desc;
+            document.getElementById('adPreviewBtn').innerText = actionText;
+
+            const badge = document.getElementById('adPreviewPosBadge');
+            if (badge) {
+                badge.innerText = placement === 'sidebar_right' ? 'Праворуч' : (placement === 'sidebar_left' ? 'Ліворуч' : (placement === 'catalog' ? 'У каталозі' : 'Приховано'));
+            }
+
+            const imgWrap = document.getElementById('adPreviewImageWrap');
+            const imgEl = document.getElementById('adPreviewImg');
+            const brandWrap = document.getElementById('adPreviewBrandWrap');
+
+            if (imgUrl) {
+                if (imgEl) imgEl.src = imgUrl;
+                if (imgWrap) imgWrap.style.display = 'block';
+                if (brandWrap) brandWrap.style.display = 'none';
+            } else {
+                if (imgWrap) imgWrap.style.display = 'none';
+                if (brandWrap) brandWrap.style.display = 'block';
+            }
+        };
+
+        window.handleSetAdBanner = async function(e) {
+            e.preventDefault();
+            const title = document.getElementById('adBannerTitleInput').value.trim();
+            const message = document.getElementById('adBannerMessageInput').value.trim();
+            const imageUrl = document.getElementById('adBannerImageInput').value.trim();
+            const placement = document.getElementById('adBannerPlacementSelect').value;
+            const actionText = document.getElementById('adBannerActionTextInput').value.trim();
+            const actionUrl = document.getElementById('adBannerActionUrlInput').value.trim();
+            const duration = document.getElementById('adBannerDurationSelect').value;
+
+            try {
+                const res = await adminFetch('/api/admin/announcement', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        message,
+                        imageUrl: imageUrl || null,
+                        type: 'promo',
+                        targetPage: 'all',
+                        placement,
+                        duration,
+                        actionText,
+                        actionUrl,
+                        isActive: (placement !== 'hidden')
+                    })
+                });
+
+                if (res.ok) {
+                    LoopToast.success("Рекламний банер успішно опубліковано на сайті!");
+                    loadAnnouncementsList();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    LoopToast.error(err.error || "Не вдалося зберегти рекламний банер");
+                }
+            } catch(err) {
+                LoopToast.error("Помилка зв'язку з сервером");
+            }
+        };
+
+        window.handleDeactivateAdBanner = async function() {
+            const confirmed = await LoopDialog.confirm("Зняти поточний рекламний банер з сайту?", "Вимкнення реклами");
+            if (!confirmed) return;
+
+            // Find active promo announcement or call deactivate
+            const activePromo = allAnnouncementsList.find(a => a.type === 'promo' && a.isActive);
+            const targetId = activePromo ? activePromo.id : 0;
+
+            try {
+                const res = await adminFetch(`/api/admin/announcement/${targetId}`, { method: 'DELETE' });
+                if (res.ok) {
+                    LoopToast.success("Рекламу знято з показу на сайті");
+                    loadAnnouncementsList();
+                } else {
+                    LoopToast.error("Помилка деактивації реклами");
+                }
+            } catch(err) {
+                LoopToast.error("Помилка зв'язку з сервером");
+            }
+        };
+
+        window.handleSetInfoBanner = async function(e) {
+            e.preventDefault();
+            const type = document.getElementById('infoBannerTypeSelect').value;
+            const placement = document.getElementById('infoBannerPlacementSelect').value;
+            const targetPage = document.getElementById('infoBannerTargetPageSelect').value;
+            const duration = document.getElementById('infoBannerDurationSelect').value;
+            const title = document.getElementById('infoBannerTitleInput').value.trim();
+            const message = document.getElementById('infoBannerMessageInput').value.trim();
+            const actionText = document.getElementById('infoBannerActionTextInput').value.trim();
+            const actionUrl = document.getElementById('infoBannerActionUrlInput').value.trim();
+
+            if (!message) {
+                LoopToast.error("Введіть текст оголошення");
+                return;
+            }
+
+            try {
+                const res = await adminFetch('/api/admin/announcement', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        message,
+                        type,
+                        targetPage,
+                        placement,
+                        duration,
+                        actionText,
+                        actionUrl,
+                        isActive: true
+                    })
+                });
+
+                if (res.ok) {
+                    LoopToast.success("Інформаційний банер успішно опубліковано на сайті!");
+                    document.getElementById('infoBannerTitleInput').value = '';
+                    document.getElementById('infoBannerMessageInput').value = '';
+                    document.getElementById('infoBannerActionTextInput').value = '';
+                    document.getElementById('infoBannerActionUrlInput').value = '';
+                    loadAnnouncementsList();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    LoopToast.error(err.error || "Не вдалося опублікувати інфо-банер");
+                }
+            } catch(err) {
+                LoopToast.error("Помилка зв'язку з сервером");
+            }
+        };
+
 
         function renderAnnouncementsTable(list) {
             const tbody = document.getElementById('announcementsTableBody');

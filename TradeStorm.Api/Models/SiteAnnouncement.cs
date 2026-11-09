@@ -13,6 +13,7 @@ public class SiteAnnouncement
     public DateTime? ExpiresAt { get; set; }
     public string? ActionText { get; set; }
     public string? ActionUrl { get; set; }
+    public string? ImageUrl { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

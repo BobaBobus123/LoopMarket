@@ -1275,6 +1275,7 @@
             cancel: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
         };
 
+        function escapeHtml(t){ if(!t)return""; return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
         function parseJwt(tk) {
             try {
                 const base64Url = tk.split('.')[1];
@@ -1307,7 +1308,7 @@
             window.location.href = '/index.html';
         }
 
-        const token = localStorage.getItem('loopToken') || localStorage.getItem('token');
+        const token = localStorage.getItem('loopToken') || localStorage.getItem('token') || sessionStorage.getItem('loopToken') || sessionStorage.getItem('token');
         let currentUser = null;
 
         if (token) {
@@ -1826,15 +1827,37 @@
                 window.currentListing = item;
                 window.savedPhysicalLocation = item.location && !item.location.toLowerCase().includes('онлайн') ? item.location : 'Кременчук';
 
-                // Перевірка прав доступу: тільки автор оголошення або оператор / адмін
+                // Безпечна заміна числового ID на хешований код у посиланні браузера
+                const secureCode = item.code || item.publicId;
+                if (secureCode && window.location.search.includes('id=' + item.id)) {
+                    try {
+                        const newUrl = window.location.pathname + '?id=' + encodeURIComponent(secureCode) + (window.location.hash || '');
+                        window.history.replaceState({ listingCode: secureCode }, '', newUrl);
+                    } catch(e) {}
+                }
+
+                // Перевірка прав доступу: автор оголошення або адміністратор / оператор платформи
                 if (window.currentUser) {
                     const currentUserId = parseInt(window.currentUser["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || window.currentUser["id"] || window.currentUser["sub"] || 0);
-                    const currentUserRole = window.currentUser["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || window.currentUser["role"] || "";
-                    const isAdmin = currentUserRole === 'Admin';
+                    const roleRaw = (window.currentUser["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || window.currentUser["role"] || localStorage.getItem('loopUserRole') || sessionStorage.getItem('loopUserRole') || "").toString().toLowerCase();
+                    const isAdmin = roleRaw === 'admin' || roleRaw.includes('admin');
+
                     if (item.sellerId && currentUserId && !isAdmin && item.sellerId !== currentUserId) {
                         LoopToast.error("У вас немає прав редагувати це оголошення (ви не є його власником).");
-                        setTimeout(() => { window.location.href = `/details.html?id=${listingId}`; }, 2500);
+                        const backCode = item.code || item.publicId || listingId;
+                        setTimeout(() => { window.location.href = `/details.html?id=${encodeURIComponent(backCode)}`; }, 2500);
                         return;
+                    }
+
+                    if (isAdmin && item.sellerId && item.sellerId !== currentUserId) {
+                        const heading = document.getElementById('pageHeading');
+                        if (heading && !document.getElementById('adminEditListingBanner')) {
+                            const banner = document.createElement('div');
+                            banner.id = 'adminEditListingBanner';
+                            banner.style.cssText = 'background: rgba(37,99,235,0.08); border: 1.5px solid #2563eb; color: #1d4ed8; padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 10px;';
+                            banner.innerHTML = `<span>🛡️</span> <div>Режим адміністратора: Ви редагуєте оголошення користувача <b>ID #${item.sellerId}</b> (Код товару: <code>${item.code || item.id}</code>). Ваші зміни мають найвищий пріоритет.</div>`;
+                            heading.parentElement.insertBefore(banner, heading.nextSibling);
+                        }
                     }
                 }
 
@@ -2020,7 +2043,8 @@
                     LoopToast.success("Зміни успішно збережено!");
                     statusDiv.innerText = "Оголошення успішно збережено!";
                     statusDiv.style.color = "var(--primary-light)";
-                    setTimeout(() => { window.location.href = `/details.html?id=${listingId}`; }, 700);
+                    const finalCode = window.currentListing?.code || window.currentListing?.publicId || listingId;
+                    setTimeout(() => { window.location.href = `/details.html?id=${encodeURIComponent(finalCode)}`; }, 700);
                 } else {
                     const errorData = await response.json().catch(() => ({}));
                     throw new Error(errorData.error || "Помилка сервера при оновленні");

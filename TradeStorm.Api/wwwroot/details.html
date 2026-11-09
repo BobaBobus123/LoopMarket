@@ -2906,6 +2906,15 @@
                 window.currentItem = item;
                 window.currentListingData = item;
 
+                // Заміна числового ID на безпечний хешований код в адресному рядку браузера
+                const secureCode = item.code || item.publicId;
+                if (secureCode && window.location.search.includes('id=' + item.id)) {
+                    try {
+                        const newUrl = window.location.pathname + '?id=' + encodeURIComponent(secureCode) + (window.location.hash || '');
+                        window.history.replaceState({ listingCode: secureCode }, '', newUrl);
+                    } catch(e) {}
+                }
+
                 currentSellerId = item.sellerId;
                 if (currentSellerId) {
                     initSellerReviews(currentSellerId);
@@ -3480,8 +3489,8 @@
                                     </div>
                                 </div>
                                 <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                                    <button class="btn-edit" style="flex: 1; padding: 12px;" onclick="window.location.href='/edit.html?id=${item.id}'">${ICONS.edit} Редагувати</button>
-                                    <button class="btn-delete" style="flex: 1; padding: 12px;" onclick="deleteListing(${item.id})">${ICONS.trash} Видалити</button>
+                                    <button class="btn-edit" style="flex: 1; padding: 12px;" onclick="window.location.href='/edit.html?id=${encodeURIComponent(item.code || item.publicId || item.id)}'">${ICONS.edit} Редагувати</button>
+                                    <button class="btn-delete" style="flex: 1; padding: 12px;" onclick="deleteListing('${item.code || item.publicId || item.id}')">${ICONS.trash} Видалити</button>
                                 </div>
                             `;
                         } else {
@@ -3496,8 +3505,8 @@
                                     </div>
                                 </div>
                                 <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                                    <button class="btn-edit" style="flex: 1; padding: 12px;" onclick="window.location.href='/edit.html?id=${item.id}'">${ICONS.edit} Редагувати</button>
-                                    <button class="btn-delete" style="flex: 1; padding: 12px;" onclick="deleteListing(${item.id})">${ICONS.trash} Видалити</button>
+                                    <button class="btn-edit" style="flex: 1; padding: 12px;" onclick="window.location.href='/edit.html?id=${encodeURIComponent(item.code || item.publicId || item.id)}'">${ICONS.edit} Редагувати</button>
+                                    <button class="btn-delete" style="flex: 1; padding: 12px;" onclick="deleteListing('${item.code || item.publicId || item.id}')">${ICONS.trash} Видалити</button>
                                 </div>
                             `;
                         }
@@ -3533,10 +3542,10 @@
                                         🛡️ Інструменти модератора безпеки (Admin):
                                     </div>
                                     <div style="display: flex; gap: 6px;">
-                                        <button type="button" onclick="window.location.href='/edit.html?id=${item.id}'" style="flex: 1; padding: 8px; font-size: 0.82rem; font-weight: 700; background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); cursor: pointer;">
+                                        <button type="button" onclick="window.location.href='/edit.html?id=${encodeURIComponent(item.code || item.publicId || item.id)}'" style="flex: 1; padding: 8px; font-size: 0.82rem; font-weight: 700; background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); cursor: pointer;">
                                             ✏️ Редагувати
                                         </button>
-                                        <button type="button" onclick="deleteListing(${item.id})" style="flex: 1; padding: 8px; font-size: 0.82rem; font-weight: 700; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #ef4444; cursor: pointer;">
+                                        <button type="button" onclick="deleteListing('${item.code || item.publicId || item.id}')" style="flex: 1; padding: 8px; font-size: 0.82rem; font-weight: 700; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #ef4444; cursor: pointer;">
                                             🗑️ Видалити
                                         </button>
                                     </div>

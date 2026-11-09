@@ -437,6 +437,279 @@
         });
     }
 
+    
+    // ==========================================
+    // 📢 OLX-STYLE SKYSCRAPER & CATALOG AD BANNER
+    // ==========================================
+    function injectSkyscraperStyles() {
+        if (document.getElementById('loopSkyscraperStyles')) return;
+        const style = document.createElement('style');
+        style.id = 'loopSkyscraperStyles';
+        style.textContent = `
+            .loop-olx-skyscraper {
+                position: fixed;
+                top: 86px;
+                width: 240px;
+                z-index: 995;
+                background: var(--surface, #1e293b);
+                border: 1.5px solid var(--border-color, #334155);
+                border-radius: 16px;
+                box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+                overflow: hidden;
+                transition: transform 0.25s ease, opacity 0.25s ease;
+                animation: loopSkyscraperSlide 0.35s ease;
+                display: flex;
+                flex-direction: column;
+            }
+            @keyframes loopSkyscraperSlide {
+                from { opacity: 0; transform: translateY(18px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .loop-olx-skyscraper.pos-right {
+                right: 20px;
+            }
+            .loop-olx-skyscraper.pos-left {
+                left: 20px;
+            }
+            .loop-olx-skyscraper.closing {
+                opacity: 0;
+                transform: scale(0.92);
+            }
+            .skyscraper-inner {
+                display: flex;
+                flex-direction: column;
+                padding: 12px 14px 14px;
+            }
+            .skyscraper-top-bar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 10px;
+                padding-bottom: 6px;
+                border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.08));
+            }
+            .skyscraper-ad-tag {
+                font-size: 0.68rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                color: var(--text-muted, #94a3b8);
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+            }
+            .skyscraper-ad-tag .ad-badge {
+                background: rgba(16, 185, 129, 0.15);
+                color: #10b981;
+                padding: 1px 5px;
+                border-radius: 4px;
+                font-size: 0.62rem;
+            }
+            .skyscraper-close-btn {
+                background: none;
+                border: none;
+                color: var(--text-muted, #94a3b8);
+                font-size: 1.3rem;
+                line-height: 1;
+                cursor: pointer;
+                padding: 2px 6px;
+                border-radius: 6px;
+                transition: all 0.15s;
+            }
+            .skyscraper-close-btn:hover {
+                color: #ef4444;
+                background: rgba(239, 68, 68, 0.12);
+            }
+            .skyscraper-media img {
+                width: 100%;
+                max-height: 220px;
+                object-fit: cover;
+                border-radius: 12px;
+                margin-bottom: 10px;
+                border: 1px solid var(--border-color, #334155);
+            }
+            .skyscraper-brand-box {
+                background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(37, 99, 235, 0.12) 100%);
+                border: 1px dashed rgba(16, 185, 129, 0.35);
+                border-radius: 12px;
+                padding: 18px 10px;
+                text-align: center;
+                margin-bottom: 12px;
+            }
+            .skyscraper-brand-logo {
+                width: 44px;
+                height: 44px;
+                margin: 0 auto 6px;
+                background: linear-gradient(135deg, #10b981 0%, #2563eb 100%);
+                border-radius: 12px;
+                color: white;
+                font-weight: 900;
+                font-size: 1.35rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            }
+            .skyscraper-title {
+                font-size: 0.95rem;
+                font-weight: 800;
+                color: var(--text-main, #f8fafc);
+                line-height: 1.35;
+                margin-bottom: 6px;
+            }
+            .skyscraper-desc {
+                font-size: 0.8rem;
+                color: var(--text-muted, #94a3b8);
+                line-height: 1.45;
+                margin-bottom: 14px;
+            }
+            .skyscraper-action-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                width: 100%;
+                padding: 10px 14px;
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                color: white !important;
+                text-decoration: none;
+                font-weight: 800;
+                font-size: 0.82rem;
+                border-radius: 10px;
+                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+            .skyscraper-action-btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+            }
+            @media (max-width: 1300px) {
+                .loop-olx-skyscraper {
+                    display: none !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    function renderOlxSkyscraperAd(item) {
+        if (!item || item.placement === 'hidden') return;
+        const dismissedKey = 'loop_ad_skyscraper_dismissed_' + (item.id || 'curr');
+        if (sessionStorage.getItem(dismissedKey) === 'true') {
+            return;
+        }
+
+        injectSkyscraperStyles();
+        const existing = document.getElementById('loopOlxSkyscraperAd');
+        if (existing) existing.remove();
+
+        const isLeft = (item.placement === 'sidebar_left');
+        const adWrap = document.createElement('aside');
+        adWrap.id = 'loopOlxSkyscraperAd';
+        adWrap.className = 'loop-olx-skyscraper ' + (isLeft ? 'pos-left' : 'pos-right');
+
+        const title = (item.title || 'Тут могла бути ваша реклама!').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const desc = (item.message || 'Залучайте тисячі покупців щодня на LoopMarket.').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const actionUrl = (item.actionUrl || 'https://t.me/LoopMarketSupport').replace(/"/g, '&quot;');
+        const actionText = (item.actionText || 'Розмістити рекламу 📢').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const imgUrl = item.imageUrl ? item.imageUrl.trim() : '';
+
+        adWrap.innerHTML = `
+            <div class="skyscraper-inner">
+                <div class="skyscraper-top-bar">
+                    <span class="skyscraper-ad-tag">Реклама <span class="ad-badge">AD</span></span>
+                    <button type="button" class="skyscraper-close-btn" title="Закрити рекламу" aria-label="Закрити рекламу">&times;</button>
+                </div>
+                <div class="skyscraper-body">
+                    ${imgUrl ? `
+                        <div class="skyscraper-media">
+                            <img src="${imgUrl}" alt="Рекламний банер" onerror="this.onerror=null; this.parentElement.style.display='none';">
+                        </div>
+                    ` : `
+                        <div class="skyscraper-brand-box">
+                            <div class="skyscraper-brand-logo">L</div>
+                            <div style="font-size: 0.68rem; font-weight: 800; letter-spacing: 0.8px; color: #10b981;">LOOP ADS</div>
+                        </div>
+                    `}
+                    <div class="skyscraper-title">${title}</div>
+                    <div class="skyscraper-desc">${desc}</div>
+                </div>
+                <div class="skyscraper-footer">
+                    <a href="${actionUrl}" target="_blank" rel="noopener noreferrer" class="skyscraper-action-btn">
+                        <span>${actionText}</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    </a>
+                </div>
+            </div>
+        `;
+
+        const closeBtn = adWrap.querySelector('.skyscraper-close-btn');
+        if (closeBtn) {
+            closeBtn.onclick = function() {
+                sessionStorage.setItem(dismissedKey, 'true');
+                adWrap.classList.add('closing');
+                setTimeout(() => adWrap.remove(), 250);
+            };
+        }
+
+        document.body.appendChild(adWrap);
+    }
+    window.renderOlxSkyscraperAd = renderOlxSkyscraperAd;
+
+    function renderCatalogPromoBanner(item) {
+        const slot = document.getElementById('catalogPromoSlot');
+        if (!slot) return;
+        const dismissedKey = 'loop_catalog_promo_dismissed_' + (item.id || 'curr');
+        if (localStorage.getItem(dismissedKey) === 'true') {
+            slot.style.display = 'none';
+            return;
+        }
+
+        slot.style.display = 'block';
+        const title = (item.title || '📢 Тут могла бути ваша реклама!').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const desc = (item.message || 'Залучайте тисячі покупців щодня на LoopMarket. Розміщуйте товари вашого бренду, банери чи акційні пропозиції.').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const actionUrl = (item.actionUrl || 'https://t.me/LoopMarketSupport').replace(/"/g, '&quot;');
+        const actionText = (item.actionText || 'Розмістити рекламу 📢').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const imgUrl = item.imageUrl ? item.imageUrl.trim() : '';
+
+        slot.innerHTML = `
+            <div class="olx-promo-banner" id="olxPromoBanner" style="position: relative;">
+                <div class="olx-promo-left" style="display: flex; align-items: center; gap: 14px;">
+                    ${imgUrl ? `
+                        <img src="${imgUrl}" style="width: 56px; height: 56px; border-radius: 12px; object-fit: cover; border: 1px solid var(--border-color);" alt="Promo">
+                    ` : `
+                        <div class="olx-promo-logo-box">
+                            <span class="olx-promo-logo">L</span>
+                            <span class="olx-promo-badge">ADS</span>
+                        </div>
+                    `}
+                    <div class="olx-promo-text">
+                        <div class="olx-promo-title">${title}</div>
+                        <div class="olx-promo-sub">${desc}</div>
+                    </div>
+                </div>
+                <div class="olx-promo-actions" style="display: flex; align-items: center; gap: 10px;">
+                    <a href="${actionUrl}" target="_blank" class="olx-promo-btn">
+                        <span>${actionText}</span>
+                    </a>
+                    <button type="button" class="olx-promo-close" onclick="dismissCustomCatalogPromo(${item.id})" title="Закрити рекламу">&times;</button>
+                </div>
+            </div>
+        `;
+    }
+    window.renderCatalogPromoBanner = renderCatalogPromoBanner;
+
+    window.dismissCustomCatalogPromo = function(id) {
+        const slot = document.getElementById('catalogPromoSlot');
+        if (slot) {
+            slot.style.transition = 'opacity 0.25s, transform 0.25s';
+            slot.style.opacity = '0';
+            slot.style.transform = 'translateY(-10px)';
+            setTimeout(() => { slot.style.display = 'none'; }, 250);
+        }
+        localStorage.setItem('loop_catalog_promo_dismissed_' + id, 'true');
+        localStorage.setItem('loop_catalog_promo_dismissed', 'true');
+    };
+
     async function checkSiteAnnouncement() {
         try {
             const path = window.location.pathname.toLowerCase();
@@ -499,6 +772,16 @@
                         };
                     }
                     document.body.prepend(banner);
+                }
+
+                // 3. OLX-STYLE SKYSCRAPER SIDEBAR BANNER (RIGHT OR LEFT)
+                if (item.placement === 'sidebar_right' || item.placement === 'sidebar_left' || (item.type === 'promo' && item.placement && item.placement.startsWith('sidebar'))) {
+                    renderOlxSkyscraperAd(item);
+                }
+
+                // 4. CATALOG IN-GRID PROMO BANNER
+                if (item.placement === 'catalog') {
+                    renderCatalogPromoBanner(item);
                 }
 
                 // 2. MODAL POPUP
