@@ -468,12 +468,17 @@
 
         .avatar-upload-btn {
             position: absolute;
-            bottom: 2px;
-            right: 2px;
+            bottom: 0;
+            right: 0;
             background: var(--primary-light);
             color: white;
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+            min-height: 34px;
+            max-width: 34px;
+            max-height: 34px;
+            aspect-ratio: 1 / 1;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -482,7 +487,9 @@
             border: 2.5px solid var(--surface);
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 2;
+            z-index: 4;
+            box-sizing: border-box;
+            padding: 0;
         }
 
         .avatar-upload-btn:hover {
@@ -496,12 +503,17 @@
 
         .avatar-remove-btn {
             position: absolute;
-            top: 2px;
-            right: 2px;
+            top: 0;
+            left: 0;
             background: #ef4444;
             color: white;
             width: 26px;
             height: 26px;
+            min-width: 26px;
+            min-height: 26px;
+            max-width: 26px;
+            max-height: 26px;
+            aspect-ratio: 1 / 1;
             border-radius: 50%;
             display: none;
             align-items: center;
@@ -510,8 +522,10 @@
             border: 2px solid var(--surface);
             box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 3;
+            z-index: 5;
             padding: 0;
+            box-sizing: border-box;
+            line-height: 1;
         }
 
         .avatar-remove-btn:hover {
@@ -759,33 +773,52 @@
         }
 
         .card-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: auto;
+            display: flex !important;
+            gap: 8px !important;
+            width: 100% !important;
+            margin-top: auto !important;
+            padding-top: 8px !important;
         }
 
         .btn-edit, .btn-delete {
-            text-align: center;
-            padding: 8px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: 0.2s;
-            text-decoration: none;
+            flex: 1 1 0 !important;
+            min-width: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            padding: 8px 6px !important;
+            border-radius: 10px !important;
+            font-size: 0.82rem !important;
+            font-weight: 700 !important;
+            white-space: nowrap !important;
+            text-decoration: none !important;
+            box-sizing: border-box !important;
+            transition: all 0.2s ease !important;
+            cursor: pointer !important;
         }
 
         .btn-edit {
-            background: var(--bg-color);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
+            background: var(--bg-color) !important;
+            color: var(--text-main) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        .btn-edit:hover {
+            border-color: #10b981 !important;
+            color: #10b981 !important;
         }
 
         .btn-delete {
-            background: transparent;
-            color: #ef4444;
-            border: 1px solid #ef4444;
+            background: rgba(239, 68, 68, 0.08) !important;
+            color: #ef4444 !important;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+        }
+
+        .btn-delete:hover {
+            background: #ef4444 !important;
+            color: #ffffff !important;
+            border-color: #ef4444 !important;
         }
 
         .reviews-container {
@@ -951,10 +984,10 @@
             }
         }
 
-        /* SMARTPHONES & MOBILE SCREENS (<= 768px) */
+                /* SMARTPHONES & MOBILE SCREENS (<= 768px) */
         @media (max-width: 768px) {
             body {
-                padding-bottom: 84px !important;
+                padding-bottom: 96px !important;
             }
 
             header {
@@ -971,7 +1004,7 @@
             main {
                 grid-template-columns: 1fr !important;
                 margin: 12px auto 20px !important;
-                padding: 0 12px !important;
+                padding: 0 12px 30px !important;
                 gap: 16px !important;
             }
 
@@ -989,12 +1022,14 @@
                 display: flex !important;
                 align-items: center !important;
                 gap: 14px !important;
-                margin-bottom: 10px !important;
+                margin-bottom: 6px !important;
             }
 
             .avatar-wrapper {
                 width: 76px !important;
                 height: 76px !important;
+                min-width: 76px !important;
+                min-height: 76px !important;
                 margin: 0 !important;
                 flex-shrink: 0 !important;
                 border-width: 2.5px !important;
@@ -1007,25 +1042,34 @@
             .avatar-upload-btn {
                 width: 28px !important;
                 height: 28px !important;
+                min-width: 28px !important;
+                min-height: 28px !important;
+                max-width: 28px !important;
+                max-height: 28px !important;
                 bottom: -2px !important;
                 right: -2px !important;
             }
             .avatar-upload-btn svg {
-                width: 12px !important;
-                height: 12px !important;
+                width: 13px !important;
+                height: 13px !important;
             }
 
             .avatar-remove-btn {
                 width: 22px !important;
                 height: 22px !important;
+                min-width: 22px !important;
+                min-height: 22px !important;
+                max-width: 22px !important;
+                max-height: 22px !important;
                 top: -2px !important;
-                right: -2px !important;
+                left: -2px !important;
+                right: auto !important;
             }
 
             .avatar-hint-text {
                 font-size: 0.72rem !important;
-                margin-bottom: 12px !important;
-                text-align: center !important;
+                margin-bottom: 10px !important;
+                text-align: left !important;
             }
 
             .profile-info {
@@ -1051,41 +1095,23 @@
                 margin-bottom: 4px !important;
             }
 
-            .profile-widgets-row {
-                gap: 8px !important;
-                margin-bottom: 10px !important;
+            .profile-stats-grid {
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 6px !important;
+                margin: 10px 0 !important;
             }
 
-            .widget-box {
-                padding: 6px 10px !important;
-            }
-
-            .widget-num {
-                font-size: 1rem !important;
-            }
-
-            .widget-label {
-                font-size: 0.65rem !important;
-            }
-
-            .sidebar-rating-box {
-                padding: 8px 12px !important;
-                margin-bottom: 10px !important;
-            }
-
-            .sidebar-rating-num {
-                font-size: 1.35rem !important;
-            }
-
-            .sidebar-services-stat {
-                padding: 8px 12px !important;
-                margin-top: 8px !important;
-            }
-
-            .btn-logout {
-                padding: 9px 12px !important;
-                font-size: 0.85rem !important;
+            .stat-pill {
+                padding: 7px 3px !important;
                 border-radius: 10px !important;
+            }
+
+            .stat-num {
+                font-size: 0.95rem !important;
+            }
+
+            .stat-lbl {
+                font-size: 0.62rem !important;
             }
 
             /* TABS ON MOBILE */
@@ -1093,14 +1119,23 @@
                 margin-bottom: 14px !important;
                 padding-bottom: 10px !important;
                 gap: 6px !important;
+                display: flex !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                scrollbar-width: none !important;
+            }
+            .tabs::-webkit-scrollbar {
+                display: none;
             }
 
             .tab {
                 padding: 8px 14px !important;
                 font-size: 0.84rem !important;
+                white-space: nowrap !important;
+                flex-shrink: 0 !important;
             }
 
-            /* 2-COLUMN COMMERCE GRID ON MOBILE (OLX / Instagram style) */
+            /* COMMERCE GRID ON MOBILE */
             .listings-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
                 gap: 10px !important;
@@ -1114,14 +1149,22 @@
                 height: 135px !important;
             }
 
-            .card-info {
+            .card-info, .card-content {
                 padding: 10px 8px !important;
             }
 
             .card-title {
-                font-size: 0.86rem !important;
-                line-height: 1.25 !important;
-                min-height: 2.5em !important;
+                font-size: 0.88rem !important;
+                line-height: 1.35 !important;
+                min-height: 2.7em !important;
+                max-height: 2.85em !important;
+                display: -webkit-box !important;
+                -webkit-line-clamp: 2 !important;
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                word-break: break-word !important;
+                font-weight: 700 !important;
                 margin-bottom: 4px !important;
             }
 
@@ -1131,15 +1174,18 @@
             }
 
             .card-actions {
+                display: flex !important;
                 gap: 6px !important;
-                flex-direction: column !important;
+                width: 100% !important;
+                flex-direction: row !important;
             }
 
-            .card-actions .btn-sm {
-                width: 100% !important;
-                justify-content: center !important;
-                padding: 6px !important;
-                font-size: 0.76rem !important;
+            .btn-edit, .btn-delete {
+                flex: 1 1 0 !important;
+                padding: 7px 4px !important;
+                font-size: 0.78rem !important;
+                white-space: nowrap !important;
+                min-width: 0 !important;
             }
 
             /* SETTINGS TAB ADAPTIVE */
@@ -1400,6 +1446,163 @@
             overflow-y: auto;
         }
 
+    
+        /* PROFILE STATS 4-IN-1 GRID & ACTIONS */
+        .profile-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin: 14px 0 10px;
+            width: 100%;
+        }
+        .stat-pill {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .stat-pill:hover, .stat-pill:active {
+            border-color: #10b981;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+        }
+        .stat-num {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+        .stat-lbl {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-top: 2px;
+        }
+
+        .profile-actions-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .btn-profile-settings {
+            flex: 1;
+            padding: 9px 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 10px;
+            background: var(--bg-color);
+            color: var(--text-main);
+            border: 1.5px solid var(--border-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        .btn-profile-settings:hover {
+            border-color: #10b981;
+            color: #10b981;
+        }
+        .btn-profile-logout {
+            padding: 9px 14px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 10px;
+            background: rgba(239, 68, 68, 0.08);
+            color: #ef4444;
+            border: 1.5px solid rgba(239, 68, 68, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-profile-logout:hover {
+            background: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+        }
+
+        /* PAGINATION CONTROLS */
+        .pagination-wrapper {
+            margin: 24px 0 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            grid-column: 1 / -1;
+        }
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .pagination-btn {
+            min-width: 36px;
+            height: 36px;
+            padding: 0 10px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border-color);
+            background: var(--surface);
+            color: var(--text-main);
+            font-size: 0.88rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+        .pagination-btn:hover:not(:disabled) {
+            border-color: #10b981;
+            color: #10b981;
+            transform: translateY(-1px);
+        }
+        .pagination-btn.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: #ffffff !important;
+            border-color: #10b981 !important;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+        }
+        .pagination-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .pagination-ellipsis {
+            padding: 0 4px;
+            color: var(--text-muted);
+            font-weight: 800;
+            font-size: 1.1rem;
+            user-select: none;
+        }
+        .pagination-info {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-align: center;
+        }
+
     </style>
     <link rel="stylesheet" href="/css/global.css?v=3.2">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
@@ -1492,49 +1695,40 @@
 
             <div class="avatar-hint-text" id="avatarHintText">Натисніть на фото або іконку камери, щоб встановити фото</div>
 
-            <!-- Нові акуратні віджети статистики -->
-            <div class="profile-widgets-row">
-                <div class="widget-box" onclick="switchTab('myListings')" style="cursor: pointer;" title="Мої оголошення">
-                    <div class="widget-num" id="statMyCount">0</div>
-                    <div class="widget-label">Оголошень</div>
+            <!-- Компактна сітка статистики 4-в-1 -->
+            <div class="profile-stats-grid">
+                <div class="stat-pill" onclick="switchTab('myListings')" title="Мої оголошення">
+                    <div class="stat-num" id="statMyCount">0</div>
+                    <div class="stat-lbl">Оголошень</div>
                 </div>
-                <div class="widget-box" onclick="switchTab('favorites')" style="cursor: pointer;" title="Обране">
-                    <div class="widget-num" id="statFavCount">0</div>
-                    <div class="widget-label">Обране</div>
+                <div class="stat-pill" onclick="switchTab('reviews')" title="Рейтинг та відгуки">
+                    <div class="stat-num" id="sidebarAvgRating">5.0 ★</div>
+                    <div class="stat-lbl">Рейтинг</div>
                 </div>
-            </div>
-
-            <div class="sidebar-rating-box" onclick="switchTab('reviews')" title="Переглянути всі відгуки">
-                <div>
-                    <div class="sidebar-rating-num" id="sidebarAvgRating">0.0</div>
-                    <div id="sidebarStars" style="display:inline-flex;align-items:center;gap:2px;"></div>
+                <div class="stat-pill" onclick="switchTab('services')" title="Послуги майстра">
+                    <div class="stat-num" id="sidebarServicesCompletedCount">0</div>
+                    <div class="stat-lbl">Послуг</div>
                 </div>
-                <div style="text-align: left; font-size: 0.8rem; color: var(--text-muted);">
-                    <b id="sidebarTotalReviews" style="color: var(--text-main);">0</b> відгуків
+                <div class="stat-pill" onclick="switchTab('favorites')" title="Обрані товари">
+                    <div class="stat-num" id="statFavCount">0</div>
+                    <div class="stat-lbl">Обране</div>
                 </div>
             </div>
 
-            <!-- Віджет послуг майстра -->
-            <div class="sidebar-services-stat" onclick="switchTab('services')" style="margin-top: 10px; padding: 10px 14px; background: rgba(37, 99, 235, 0.08); border: 1.5px solid rgba(37, 99, 235, 0.28); border-radius: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s;" title="Переглянути статистику послуг">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.25rem;">🛠</span>
-                    <div style="text-align: left;">
-                        <div style="font-size: 0.72rem; color: #2563eb; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Послуги майстра</div>
-                        <div style="font-size: 0.92rem; font-weight: 800; color: var(--text-main);" id="sidebarServicesCompletedCount">0 виконано</div>
-                    </div>
-                </div>
-                <span style="color: #2563eb; font-weight: 800; font-size: 1rem;">→</span>
-            </div>
-
-            <div style="margin-top: 12px; display: flex; gap: 8px;">
-                <button type="button" class="btn-primary" onclick="switchTab('settings')" style="flex: 1; padding: 10px 12px; font-size: 0.85rem; border-radius: 10px; background: var(--surface); color: var(--text-main); border: 1.5px solid var(--border-color); display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+            <!-- Швидкі дії: Налаштування та Вихід -->
+            <div class="profile-actions-row">
+                <button type="button" class="btn-profile-settings" onclick="switchTab('settings')">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                     <span>Налаштування</span>
                 </button>
-                <button type="button" class="btn-logout" onclick="showLogoutModal()" style="width: auto; padding: 10px 14px;">
-                    Вийти
+                <button type="button" class="btn-profile-logout" onclick="showLogoutModal()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span>Вийти</span>
                 </button>
             </div>
+            <!-- Приховані контейнери для зворотної сумісності зі скриптами відгуків -->
+            <div id="sidebarStars" style="display:none;"></div>
+            <div id="sidebarTotalReviews" style="display:none;">0</div>
         </aside>
 
         <div class="profile-content">
@@ -1548,8 +1742,12 @@
                 <div class="tab" id="tabSettings" onclick="switchTab('settings')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg> Налаштування</div>
             </div>
 
-            <div class="listings-grid" id="myListingsContainer">
+                        <div class="listings-grid" id="myListingsContainer">
                 <p style="color: var(--text-muted);">Завантаження...</p>
+            </div>
+            <div class="pagination-wrapper" id="myListingsPagination" style="display: none;">
+                <div class="pagination-controls" id="myListingsPaginationControls"></div>
+                <div class="pagination-info" id="myListingsPaginationInfo"></div>
             </div>
 
             <div id="ordersContainer" style="display: none; margin-top: 10px;">
@@ -1603,8 +1801,12 @@
                 </div>
             </div>
 
-            <div class="listings-grid" id="favoritesContainer" style="display: none;">
+                        <div class="listings-grid" id="favoritesContainer" style="display: none;">
                 <p style="color: var(--text-muted);">Тут будуть ваші улюблені товари.</p>
+            </div>
+            <div class="pagination-wrapper" id="favoritesPagination" style="display: none;">
+                <div class="pagination-controls" id="favoritesPaginationControls"></div>
+                <div class="pagination-info" id="favoritesPaginationInfo"></div>
             </div>
 
             
@@ -2489,7 +2691,7 @@
                         const res = await fetch(`/api/reviews/user/${userId}`);
                         const data = await res.json();
 
-                        document.getElementById('sidebarAvgRating').innerText = data.averageRating;
+                        const avg = (data.averageRating && !isNaN(data.averageRating)) ? Number(data.averageRating).toFixed(1) : '5.0'; document.getElementById('sidebarAvgRating').innerText = avg + ' ★';
                         document.getElementById('sidebarTotalReviews').innerText = data.totalReviews;
                         document.getElementById('sidebarStars').innerHTML = renderStars(data.averageRating);
 
@@ -2524,6 +2726,8 @@
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                     document.getElementById('myListingsContainer').style.display = 'none';
                     document.getElementById('favoritesContainer').style.display = 'none';
+                    if (document.getElementById('myListingsPagination')) document.getElementById('myListingsPagination').style.display = 'none';
+                    if (document.getElementById('favoritesPagination')) document.getElementById('favoritesPagination').style.display = 'none';
                     document.getElementById('reviewsContainerTab').style.display = 'none';
                     document.getElementById('settingsContainer').style.display = 'none';
                     if (document.getElementById('ordersContainer')) document.getElementById('ordersContainer').style.display = 'none';
@@ -2533,6 +2737,7 @@
                     if (tabName === 'myListings') {
                         document.getElementById('tabMyListings').classList.add('active');
                         document.getElementById('myListingsContainer').style.display = 'grid';
+                        renderMyListings();
                     } else if (tabName === 'favorites') {
                         document.getElementById('tabFavorites').classList.add('active');
                         document.getElementById('favoritesContainer').style.display = 'grid';
@@ -2595,14 +2800,94 @@
                     }
                 };
 
+                
+        function renderPaginationButtons(container, currentPage, totalPages, clickHandlerName) {
+            if (!container) return;
+            let phtml = '';
+            phtml += `<button class="pagination-btn" onclick="${clickHandlerName}(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} aria-label="Попередня сторінка">‹</button>`;
+            
+            const pages = [];
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+            } else {
+                if (currentPage <= 4) {
+                    for (let i = 1; i <= 5; i++) pages.push(i);
+                    pages.push('...');
+                    pages.push(totalPages);
+                } else if (currentPage >= totalPages - 3) {
+                    pages.push(1);
+                    pages.push('...');
+                    for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
+                } else {
+                    pages.push(1);
+                    pages.push('...');
+                    pages.push(currentPage - 1);
+                    pages.push(currentPage);
+                    pages.push(currentPage + 1);
+                    pages.push('...');
+                    pages.push(totalPages);
+                }
+            }
+
+            pages.forEach(p => {
+                if (p === '...') {
+                    phtml += `<span class="pagination-ellipsis">…</span>`;
+                } else {
+                    phtml += `<button class="pagination-btn ${p === currentPage ? 'active' : ''}" onclick="${clickHandlerName}(${p})">${p}</button>`;
+                }
+            });
+
+            phtml += `<button class="pagination-btn" onclick="${clickHandlerName}(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} aria-label="Наступна сторінка">›</button>`;
+            container.innerHTML = phtml;
+        }
+
+        let myCurrentPage = 1;
+        const MY_PAGE_SIZE = 8;
+        window.goToMyListingsPage = function(page) {
+            const myListings = (allListingsData || []).filter(l => l.sellerId === currentUserId);
+            const totalPages = Math.ceil(myListings.length / MY_PAGE_SIZE);
+            if (page < 1 || page > totalPages) return;
+            myCurrentPage = page;
+            renderMyListings();
+            const c = document.getElementById('tabMyListings') || document.getElementById('myListingsContainer');
+            if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        let favCurrentPage = 1;
+        const FAV_PAGE_SIZE = 8;
+        window.goToFavoritesPage = function(page) {
+            const favIds = getFavorites();
+            const favoriteItems = (allListingsData || []).filter(l => favIds.includes(l.id));
+            const totalPages = Math.ceil(favoriteItems.length / FAV_PAGE_SIZE);
+            if (page < 1 || page > totalPages) return;
+            favCurrentPage = page;
+            renderFavorites();
+            const c = document.getElementById('tabFavorites') || document.getElementById('favoritesContainer');
+            if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
                 function renderMyListings() {
                     const container = document.getElementById('myListingsContainer');
-                    const myListings = allListingsData.filter(l => l.sellerId === currentUserId);
+                    const paginationWrapper = document.getElementById('myListingsPagination');
+                    const paginationControls = document.getElementById('myListingsPaginationControls');
+                    const paginationInfo = document.getElementById('myListingsPaginationInfo');
+
+                    const myListings = (allListingsData || []).filter(l => l.sellerId === currentUserId);
                     if (!myListings.length) {
-                        container.innerHTML = '<p style="color: var(--text-muted); grid-column: 1/-1; padding: 20px; border: 1px dashed var(--border-color); border-radius: 8px;">У вас ще немає активних оголошень.</p>';
+                        if (paginationWrapper) paginationWrapper.style.display = 'none';
+                        container.innerHTML = '<p style="color: var(--text-muted); grid-column: 1/-1; padding: 20px; border: 1px dashed var(--border-color); border-radius: 8px; text-align: center;">У вас ще немає активних оголошень.</p>';
                         return;
                     }
-                    container.innerHTML = myListings.map(item => `
+
+                    const totalPages = Math.ceil(myListings.length / MY_PAGE_SIZE);
+                    if (myCurrentPage > totalPages) myCurrentPage = totalPages;
+                    if (myCurrentPage < 1) myCurrentPage = 1;
+
+                    const startIdx = (myCurrentPage - 1) * MY_PAGE_SIZE;
+                    const endIdx = startIdx + MY_PAGE_SIZE;
+                    const pageItems = myListings.slice(startIdx, endIdx);
+
+                    container.innerHTML = pageItems.map(item => `
                         <div class="card">
                             <div class="card-img-wrapper">
                                 <img src="${(item.imageUrl ? item.imageUrl.split(';')[0] : '') || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.code || item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
@@ -2618,17 +2903,41 @@
                             </div>
                         </div>
                     `).join('');
+
+                    if (totalPages > 1) {
+                        if (paginationWrapper) paginationWrapper.style.display = 'flex';
+                        renderPaginationButtons(paginationControls, myCurrentPage, totalPages, 'goToMyListingsPage');
+                        if (paginationInfo) {
+                            paginationInfo.innerText = `Сторінка ${myCurrentPage} з ${totalPages} (показано ${startIdx + 1}–${Math.min(endIdx, myListings.length)} з ${myListings.length})`;
+                        }
+                    } else {
+                        if (paginationWrapper) paginationWrapper.style.display = 'none';
+                    }
                 }
 
                 function renderFavorites() {
                     const container = document.getElementById('favoritesContainer');
+                    const paginationWrapper = document.getElementById('favoritesPagination');
+                    const paginationControls = document.getElementById('favoritesPaginationControls');
+                    const paginationInfo = document.getElementById('favoritesPaginationInfo');
+
                     const favIds = getFavorites();
-                    const favoriteItems = allListingsData.filter(l => favIds.includes(l.id));
+                    const favoriteItems = (allListingsData || []).filter(l => favIds.includes(l.id));
                     if (!favoriteItems.length) {
-                        container.innerHTML = '<p style="color: var(--text-muted); grid-column: 1/-1; padding: 20px; border: 1px dashed var(--border-color); border-radius: 8px;">Ви ще не додали жодного товару в обране.</p>';
+                        if (paginationWrapper) paginationWrapper.style.display = 'none';
+                        container.innerHTML = '<p style="color: var(--text-muted); grid-column: 1/-1; padding: 20px; border: 1px dashed var(--border-color); border-radius: 8px; text-align: center;">Ви ще не додали жодного товару в обране.</p>';
                         return;
                     }
-                    container.innerHTML = favoriteItems.map(item => `
+
+                    const totalPages = Math.ceil(favoriteItems.length / FAV_PAGE_SIZE);
+                    if (favCurrentPage > totalPages) favCurrentPage = totalPages;
+                    if (favCurrentPage < 1) favCurrentPage = 1;
+
+                    const startIdx = (favCurrentPage - 1) * FAV_PAGE_SIZE;
+                    const endIdx = startIdx + FAV_PAGE_SIZE;
+                    const pageItems = favoriteItems.slice(startIdx, endIdx);
+
+                    container.innerHTML = pageItems.map(item => `
                         <div class="card">
                             <div class="card-img-wrapper">
                                 <img src="${(item.imageUrl ? item.imageUrl.split(';')[0] : '') || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.code || item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
@@ -2641,6 +2950,16 @@
                             </div>
                         </div>
                     `).join('');
+
+                    if (totalPages > 1) {
+                        if (paginationWrapper) paginationWrapper.style.display = 'flex';
+                        renderPaginationButtons(paginationControls, favCurrentPage, totalPages, 'goToFavoritesPage');
+                        if (paginationInfo) {
+                            paginationInfo.innerText = `Сторінка ${favCurrentPage} з ${totalPages} (показано ${startIdx + 1}–${Math.min(endIdx, favoriteItems.length)} з ${favoriteItems.length})`;
+                        }
+                    } else {
+                        if (paginationWrapper) paginationWrapper.style.display = 'none';
+                    }
                 }
 
                 async function deleteListing(id) {
@@ -2652,8 +2971,18 @@
                     if (!confirmed) return;
                     try {
                         const response = await fetch(`/api/listings/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-                        if (response.ok) location.reload();
-                    } catch (err) { LoopToast.error("Помилка з'єднання."); }
+                        if (response.ok) {
+                            allListingsData = allListingsData.filter(l => l.id !== id);
+                            renderMyListings();
+                            if (typeof LoopToast !== 'undefined' && LoopToast.success) {
+                                LoopToast.success("Оголошення успішно видалено");
+                            }
+                        }
+                    } catch (err) {
+                        if (typeof LoopToast !== 'undefined' && LoopToast.error) {
+                            LoopToast.error("Помилка з'єднання.");
+                        }
+                    }
                 }
     
         // ==================== ЗАМОВЛЕННЯ ТА СПОВІЩЕННЯ ====================
@@ -3477,7 +3806,7 @@
 
                 const sidebarBadge = document.getElementById('sidebarServicesCompletedCount');
                 if (sidebarBadge) {
-                    sidebarBadge.innerText = `${data.completedServicesCount} виконано`;
+                    sidebarBadge.innerText = `${data.completedServicesCount || 0}`; const wServ = document.getElementById('servStatCompleted'); if (wServ) wServ.innerText = data.completedServicesCount || 0;
                 }
 
                 if (!data.services || data.services.length === 0) {

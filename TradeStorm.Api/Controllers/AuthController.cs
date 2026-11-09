@@ -150,7 +150,8 @@ public class AuthController : ControllerBase
                 id = user.Id,
                 email = user.Email,
                 name = $"{user.FirstName} {user.LastName}".Trim(),
-                role = user.Role
+                role = user.Role,
+                avatarUrl = user.AvatarUrl
             }
         });
     }
@@ -190,7 +191,8 @@ public class AuthController : ControllerBase
                 id = user.Id,
                 email = user.Email,
                 name = $"{user.FirstName} {user.LastName}".Trim(),
-                role = user.Role
+                role = user.Role,
+                avatarUrl = user.AvatarUrl
             }
         });
     }

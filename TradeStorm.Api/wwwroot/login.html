@@ -1341,7 +1341,14 @@
 
                     if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
 
-                    if (data.role) localStorage.setItem('loopUserRole', data.role);
+                                        if (data.role) localStorage.setItem('loopUserRole', data.role);
+                    if (data.avatarUrl) {
+                        localStorage.setItem('loopUserAvatar', data.avatarUrl);
+                        if (data.userId) localStorage.setItem('userAvatar_' + data.userId, data.avatarUrl);
+                    } else if (data.user && data.user.avatarUrl) {
+                        localStorage.setItem('loopUserAvatar', data.user.avatarUrl);
+                        if (data.user.id) localStorage.setItem('userAvatar_' + data.user.id, data.user.avatarUrl);
+                    }
 
                     if (data.role === 'Admin') {
 
@@ -1552,7 +1559,14 @@
 
                         if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
 
-                        if (data.role) localStorage.setItem('loopUserRole', data.role);
+                                            if (data.role) localStorage.setItem('loopUserRole', data.role);
+                    if (data.avatarUrl) {
+                        localStorage.setItem('loopUserAvatar', data.avatarUrl);
+                        if (data.userId) localStorage.setItem('userAvatar_' + data.userId, data.avatarUrl);
+                    } else if (data.user && data.user.avatarUrl) {
+                        localStorage.setItem('loopUserAvatar', data.user.avatarUrl);
+                        if (data.user.id) localStorage.setItem('userAvatar_' + data.user.id, data.user.avatarUrl);
+                    }
 
                         if (data.role === 'Admin') {
 
@@ -1674,7 +1688,14 @@
 
                         if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
 
-                        if (data.role) localStorage.setItem('loopUserRole', data.role);
+                                            if (data.role) localStorage.setItem('loopUserRole', data.role);
+                    if (data.avatarUrl) {
+                        localStorage.setItem('loopUserAvatar', data.avatarUrl);
+                        if (data.userId) localStorage.setItem('userAvatar_' + data.userId, data.avatarUrl);
+                    } else if (data.user && data.user.avatarUrl) {
+                        localStorage.setItem('loopUserAvatar', data.user.avatarUrl);
+                        if (data.user.id) localStorage.setItem('userAvatar_' + data.user.id, data.user.avatarUrl);
+                    }
 
                         const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
 

@@ -742,22 +742,18 @@ public class UsersController : ControllerBase
 
 
 
-        return Ok(new
-
+                return Ok(new
         {
-
             token = accessToken,
-
             refreshToken = refreshToken,
-
             isPhoneVerified = user.IsPhoneVerified,
-
             isEmailVerified = user.IsEmailVerified,
-
             isVerified = user.IsEmailVerified || user.IsPhoneVerified,
-
-            role = user.Role
-
+            role = user.Role,
+            avatarUrl = user.AvatarUrl,
+            userId = user.Id,
+            firstName = user.FirstName,
+            lastName = user.LastName
         });
 
     }

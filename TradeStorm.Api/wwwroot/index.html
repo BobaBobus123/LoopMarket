@@ -1656,14 +1656,18 @@
             }
 
             .card-title {
-                font-size: 0.82rem !important;
-                line-height: 1.25 !important;
-                min-height: 2.1em !important;
-                max-height: 2.1em !important;
+                font-size: 0.88rem !important;
+                line-height: 1.35 !important;
+                min-height: 2.7em !important;
+                max-height: 2.85em !important;
+                display: -webkit-box !important;
                 -webkit-line-clamp: 2 !important;
+                -webkit-box-orient: vertical !important;
                 overflow: hidden !important;
-                font-weight: 600 !important;
-                margin-bottom: 2px !important;
+                text-overflow: ellipsis !important;
+                word-break: break-word !important;
+                font-weight: 700 !important;
+                margin-bottom: 4px !important;
             }
 
             .card-price-row {
@@ -2252,6 +2256,81 @@
             }
         }
 
+    
+        /* PAGINATION CONTROLS */
+        .pagination-wrapper {
+            margin: 28px 0 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            grid-column: 1 / -1;
+        }
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .pagination-btn {
+            min-width: 38px;
+            height: 38px;
+            padding: 0 12px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border-color);
+            background: var(--surface);
+            color: var(--text-main);
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+        .pagination-btn:hover:not(:disabled) {
+            border-color: #10b981;
+            color: #10b981;
+            transform: translateY(-1px);
+        }
+        .pagination-btn.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: #ffffff !important;
+            border-color: #10b981 !important;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+        }
+        .pagination-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .pagination-ellipsis {
+            padding: 0 6px;
+            color: var(--text-muted);
+            font-weight: 800;
+            font-size: 1.1rem;
+            user-select: none;
+        }
+        .pagination-info {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 96px !important;
+            }
+            .main-layout {
+                padding-bottom: 30px !important;
+            }
+        }
+
     </style>
     <link rel="stylesheet" href="/css/global.css?v=3.2">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
@@ -2742,6 +2821,10 @@
             <div class="listings-grid" id="listingsContainer">
                 <p style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">Завантаження оголошень...</p>
             </div>
+            <div class="pagination-wrapper" id="paginationWrapper" style="display: none;">
+                <div class="pagination-controls" id="paginationControls"></div>
+                <div class="pagination-info" id="paginationInfo"></div>
+            </div>
         </main>
     </div>
 
@@ -3013,6 +3096,99 @@
 
         let allListings = [];
         let selectedCategoryName = null;
+        let catalogCurrentPage = 1;
+        const CATALOG_PAGE_SIZE = 12;
+        let currentFilteredListings = [];
+
+        function renderPaginationButtons(container, currentPage, totalPages, clickHandlerName) {
+            if (!container) return;
+            let html = '';
+            html += `<button class="pagination-btn" onclick="${clickHandlerName}(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} aria-label="Попередня сторінка">‹</button>`;
+            
+            const pages = [];
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+            } else {
+                if (currentPage <= 4) {
+                    for (let i = 1; i <= 5; i++) pages.push(i);
+                    pages.push('...');
+                    pages.push(totalPages);
+                } else if (currentPage >= totalPages - 3) {
+                    pages.push(1);
+                    pages.push('...');
+                    for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
+                } else {
+                    pages.push(1);
+                    pages.push('...');
+                    pages.push(currentPage - 1);
+                    pages.push(currentPage);
+                    pages.push(currentPage + 1);
+                    pages.push('...');
+                    pages.push(totalPages);
+                }
+            }
+
+            pages.forEach(p => {
+                if (p === '...') {
+                    html += `<span class="pagination-ellipsis">…</span>`;
+                } else {
+                    html += `<button class="pagination-btn ${p === currentPage ? 'active' : ''}" onclick="${clickHandlerName}(${p})">${p}</button>`;
+                }
+            });
+
+            html += `<button class="pagination-btn" onclick="${clickHandlerName}(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} aria-label="Наступна сторінка">›</button>`;
+            container.innerHTML = html;
+        }
+
+        window.goToCatalogPage = function(page) {
+            const totalPages = Math.ceil((currentFilteredListings || []).length / CATALOG_PAGE_SIZE);
+            if (page < 1 || page > totalPages) return;
+            catalogCurrentPage = page;
+            renderCatalogCurrentPage();
+            const target = document.getElementById('gridTitle') || document.getElementById('listingsContainer');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        };
+
+        function renderCatalogCurrentPage() {
+            const container = document.getElementById('listingsContainer');
+            const paginationWrapper = document.getElementById('paginationWrapper');
+            const paginationControls = document.getElementById('paginationControls');
+            const paginationInfo = document.getElementById('paginationInfo');
+
+            if (!currentFilteredListings || currentFilteredListings.length === 0) {
+                if (paginationWrapper) paginationWrapper.style.display = 'none';
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: var(--surface); border-radius: 16px; border: 1px dashed var(--border-color);">
+                        <div style="margin-bottom: 16px; color: var(--text-muted);"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+                        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 6px;">Нічого не знайдено</h3>
+                        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 18px;">Спробуйте змінити фільтри або пошуковий запит</p>
+                        <button onclick="resetFilters()" class="btn-primary" style="display: inline-flex;">Скинути фільтри</button>
+                    </div>`;
+                return;
+            }
+
+            const totalPages = Math.ceil(currentFilteredListings.length / CATALOG_PAGE_SIZE);
+            if (catalogCurrentPage > totalPages) catalogCurrentPage = totalPages;
+            if (catalogCurrentPage < 1) catalogCurrentPage = 1;
+
+            const startIdx = (catalogCurrentPage - 1) * CATALOG_PAGE_SIZE;
+            const endIdx = startIdx + CATALOG_PAGE_SIZE;
+            const pageItems = currentFilteredListings.slice(startIdx, endIdx);
+
+            container.innerHTML = pageItems.map((item, index) => createCardHtml(item, index)).join('');
+
+            if (totalPages > 1) {
+                if (paginationWrapper) paginationWrapper.style.display = 'flex';
+                renderPaginationButtons(paginationControls, catalogCurrentPage, totalPages, 'goToCatalogPage');
+                if (paginationInfo) {
+                    paginationInfo.innerText = `Сторінка ${catalogCurrentPage} з ${totalPages} (показано ${startIdx + 1}–${Math.min(endIdx, currentFilteredListings.length)} з ${currentFilteredListings.length})`;
+                }
+            } else {
+                if (paginationWrapper) paginationWrapper.style.display = 'none';
+            }
+        }
 
         function getFavorites() { return JSON.parse(localStorage.getItem('loopFavorites') || '[]'); }
 
@@ -3374,7 +3550,7 @@
             applyFilters();
         };
 
-        function applyFilters() {
+        function applyFilters(resetPage = true) {
             const query = document.getElementById('searchInput').value.toLowerCase().trim();
             const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
             const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
@@ -3470,17 +3646,9 @@
                 counter.innerText = `(${displayListings.length} шт.)`;
             }
 
-            if (displayListings.length === 0) {
-                container.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: var(--surface); border-radius: 16px; border: 1px dashed var(--border-color);">
-                        <div style="margin-bottom: 16px; color: var(--text-muted);"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
-                        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 6px;">Нічого не знайдено</h3>
-                        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 18px;">Спробуйте змінити фільтри або пошуковий запит</p>
-                        <button onclick="resetFilters()" class="btn-primary" style="display: inline-flex;">Скинути фільтри</button>
-                    </div>`;
-            } else {
-                container.innerHTML = displayListings.map((item, index) => createCardHtml(item, index)).join('');
-            }
+            currentFilteredListings = displayListings;
+            if (resetPage) catalogCurrentPage = 1;
+            renderCatalogCurrentPage();
 
             let defaultTitle = (catalogMode === 'services') ? "🛠 Послуги та сервіси" : (catalogMode === 'goods' ? "📦 Каталог товарів" : "🌟 Всі свіжі оголошення");
             document.getElementById('gridTitle').innerText = selectedCategoryName || (query ? `Результати пошуку: "${query}"` : defaultTitle);
