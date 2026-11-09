@@ -3453,11 +3453,17 @@
                     const u = parseJwt(curToken);
                     const name = u["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "Користувач";
                     const email = u["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] || "";
+                    const uId = u["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || u.sub || u.id;
+                    const savedDrawerAvatar = localStorage.getItem("loopUserAvatar") || (uId ? localStorage.getItem(`userAvatar_${uId}`) : null);
                     container.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0;">
-                                ${escapeHtml(name.charAt(0).toUpperCase())}
-                            </div>
+                            ${savedDrawerAvatar ? `
+                                <img src="${savedDrawerAvatar}" alt="${escapeHtml(name)}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #10b981; flex-shrink: 0;">
+                            ` : `
+                                <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0;">
+                                    ${escapeHtml(name.charAt(0).toUpperCase())}
+                                </div>
+                            `}
                             <div style="min-width: 0;">
                                 <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(name)}</div>
                                 <div style="font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(email)}</div>

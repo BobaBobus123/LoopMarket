@@ -319,4 +319,59 @@ public class AdminSecurityAndListingsTests : IClassFixture<CustomWebApplicationF
             Assert.Equal(UserRoles.Seller, u.Role);
         }
     }
+
+    [Fact]
+    public async Task User_AvatarUpload_PersistsAcrossProfileUpdates_AndCanBeRemoved()
+    {
+        var (client, _, user) = await CreateUserWithRoleAsync(UserRoles.Buyer);
+
+        // 1. Upload avatar
+        var uploadRes = await client.PostAsJsonAsync("/api/users/upload-avatar", new
+        {
+            avatarUrl = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBD..."
+        });
+        Assert.Equal(HttpStatusCode.OK, uploadRes.StatusCode);
+
+        // Verify avatar in DB
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var u = await db.Users.FindAsync(user.Id);
+            Assert.NotNull(u);
+            Assert.False(string.IsNullOrEmpty(u.AvatarUrl));
+        }
+
+        // 2. Update profile with firstName and lastName, WITHOUT avatarUrl
+        var updateRes = await client.PutAsJsonAsync("/api/users/profile", new UpdateProfileDto
+        {
+            FirstName = "НовеІм'я",
+            LastName = "НовеПрізвище",
+            Bio = "Мій новий опис"
+        });
+        Assert.Equal(HttpStatusCode.OK, updateRes.StatusCode);
+
+        // Verify avatar was NOT wiped out
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var u = await db.Users.FindAsync(user.Id);
+            Assert.NotNull(u);
+            Assert.Equal("НовеІм'я", u.FirstName);
+            Assert.Equal("НовеПрізвище", u.LastName);
+            Assert.Equal("Мій новий опис", u.Bio);
+            Assert.False(string.IsNullOrEmpty(u.AvatarUrl), "AvatarUrl should not be wiped when updating profile without avatarUrl");
+        }
+
+        // 3. User explicitly deletes avatar
+        var delAvatarRes = await client.DeleteAsync("/api/users/avatar");
+        Assert.Equal(HttpStatusCode.OK, delAvatarRes.StatusCode);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var u = await db.Users.FindAsync(user.Id);
+            Assert.NotNull(u);
+            Assert.Null(u.AvatarUrl);
+        }
+    }
 }

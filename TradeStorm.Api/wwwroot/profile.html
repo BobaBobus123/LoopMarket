@@ -410,14 +410,21 @@
             align-items: start;
         }
 
+        
         .profile-sidebar {
             background: var(--surface);
-            border-radius: 12px;
-            padding: 30px 20px;
+            border-radius: 16px;
+            padding: 26px 20px;
             border: 1px solid var(--border-color);
             text-align: center;
             position: sticky;
             top: 90px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .profile-sidebar-top-row {
+            display: contents;
         }
 
         .avatar-wrapper {
@@ -426,7 +433,13 @@
             height: 120px;
             margin: 0 auto 10px;
             border-radius: 50%;
-            border: 3px solid var(--primary-light);
+            border: 3.5px solid var(--primary-light);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.22);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .avatar-wrapper:hover {
+            transform: scale(1.02);
         }
 
         .avatar {
@@ -434,20 +447,29 @@
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            background: var(--bg-color);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
-            font-weight: bold;
-            color: var(--text-muted);
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #ffffff;
             overflow: hidden;
+            user-select: none;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
         }
 
         .avatar-upload-btn {
             position: absolute;
-            bottom: 0;
-            right: 0;
+            bottom: 2px;
+            right: 2px;
             background: var(--primary-light);
             color: white;
             width: 36px;
@@ -457,28 +479,57 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            border: 3px solid var(--surface);
-            transition: 0.2s;
-            font-size: 1rem;
+            border: 2.5px solid var(--surface);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
         }
 
-            .avatar-upload-btn:hover {
-                background: #00876e;
-                transform: scale(1.1);
-            }
+        .avatar-upload-btn:hover {
+            background: #059669;
+            transform: scale(1.12);
+        }
 
-            .avatar-upload-btn input {
-                display: none;
-            }
+        .avatar-upload-btn input {
+            display: none;
+        }
 
-        /* Аккуратная подсказка лимита фото */
-        .avatar-limit-hint {
-            font-size: 0.75rem;
+        .avatar-remove-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #ef4444;
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid var(--surface);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3;
+            padding: 0;
+        }
+
+        .avatar-remove-btn:hover {
+            background: #dc2626;
+            transform: scale(1.15);
+        }
+
+        .avatar-hint-text {
+            font-size: 0.78rem;
             color: var(--text-muted);
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            line-height: 1.35;
         }
-
-        .profile-info h1 {
+        
+        .avatar-limit-hint {
+            display: none;
+        }
+    .profile-info h1 {
             font-size: 1.5rem;
             margin-bottom: 5px;
             color: var(--text-main);
@@ -565,32 +616,60 @@
                 color: white;
             }
 
+        
+        /* MODERN HORIZONTALLY SCROLLABLE TAB BAR */
         .tabs {
             display: flex;
-            flex-wrap: wrap;
-            margin-bottom: 25px;
-            border-bottom: 2px solid var(--border-color);
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            gap: 8px;
+            padding: 4px 2px 14px 2px;
+            margin-bottom: 22px;
+            border-bottom: 1.5px solid var(--border-color);
+        }
+        .tabs::-webkit-scrollbar {
+            display: none;
         }
 
         .tab {
-            flex: 1;
-            min-width: 120px;
-            text-align: center;
-            padding: 15px;
-            cursor: pointer;
-            font-weight: 600;
+            flex: 0 0 auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+            padding: 10px 18px;
+            font-size: 0.92rem;
+            font-weight: 700;
             color: var(--text-muted);
-            font-size: 1.05rem;
-            transition: 0.2s;
+            background: var(--surface);
+            border: 1.5px solid var(--border-color);
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
         }
 
-            .tab.active {
-                color: var(--primary-light);
-                border-bottom: 3px solid var(--primary-light);
-                margin-bottom: -2px;
-            }
+        .tab:hover {
+            color: var(--text-main);
+            border-color: #10b981;
+            transform: translateY(-1px);
+        }
 
-        .listings-grid {
+        .tab.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff !important;
+            border-color: #10b981;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+        }
+
+        .tab.active svg {
+            stroke: #ffffff !important;
+        }
+    .listings-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
             gap: 20px;
@@ -846,15 +925,283 @@
             font-size: 0.85rem;
         }
 
-        @media (max-width: 900px) {
+        
+        /* ==========================================================================
+           FULL RESPONSIVE & ADAPTIVE VIEWPORTS BREAKPOINTS
+           ========================================================================== */
+
+        /* Prevent auto-zoom on mobile iOS Safari */
+        .modern-input, input[type="text"], input[type="email"], input[type="tel"], select, textarea {
+            font-size: 16px !important;
+        }
+
+        /* TABLETS & FOLDABLES (769px - 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
             main {
-                grid-template-columns: 1fr;
+                grid-template-columns: 270px 1fr !important;
+                gap: 18px !important;
+                padding: 0 16px !important;
+            }
+            .profile-sidebar {
+                padding: 20px 14px !important;
+            }
+            .listings-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 14px !important;
+            }
+        }
+
+        /* SMARTPHONES & MOBILE SCREENS (<= 768px) */
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 84px !important;
             }
 
-            .profile-sidebar {
-                position: static;
-                margin-bottom: 20px;
+            header {
+                padding: 0 14px !important;
+                height: 60px !important;
             }
+
+            .nav-actions .nav-link,
+            .nav-actions .btn-create-top,
+            .nav-actions #btnLogoutHeader {
+                display: none !important;
+            }
+
+            main {
+                grid-template-columns: 1fr !important;
+                margin: 12px auto 20px !important;
+                padding: 0 12px !important;
+                gap: 16px !important;
+            }
+
+            /* COMPACT MOBILE HERO CARD FOR PROFILE */
+            .profile-sidebar {
+                position: static !important;
+                padding: 16px 14px !important;
+                border-radius: 18px !important;
+                margin-bottom: 0 !important;
+                text-align: left !important;
+                box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04) !important;
+            }
+
+            .profile-sidebar-top-row {
+                display: flex !important;
+                align-items: center !important;
+                gap: 14px !important;
+                margin-bottom: 10px !important;
+            }
+
+            .avatar-wrapper {
+                width: 76px !important;
+                height: 76px !important;
+                margin: 0 !important;
+                flex-shrink: 0 !important;
+                border-width: 2.5px !important;
+            }
+
+            .avatar {
+                font-size: 1.8rem !important;
+            }
+
+            .avatar-upload-btn {
+                width: 28px !important;
+                height: 28px !important;
+                bottom: -2px !important;
+                right: -2px !important;
+            }
+            .avatar-upload-btn svg {
+                width: 12px !important;
+                height: 12px !important;
+            }
+
+            .avatar-remove-btn {
+                width: 22px !important;
+                height: 22px !important;
+                top: -2px !important;
+                right: -2px !important;
+            }
+
+            .avatar-hint-text {
+                font-size: 0.72rem !important;
+                margin-bottom: 12px !important;
+                text-align: center !important;
+            }
+
+            .profile-info {
+                flex: 1 !important;
+                min-width: 0 !important;
+            }
+
+            .profile-info h1 {
+                font-size: 1.25rem !important;
+                margin-bottom: 2px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
+            .profile-info p.role {
+                font-size: 0.8rem !important;
+                margin-bottom: 2px !important;
+            }
+
+            .profile-info p.phone {
+                font-size: 0.84rem !important;
+                margin-bottom: 4px !important;
+            }
+
+            .profile-widgets-row {
+                gap: 8px !important;
+                margin-bottom: 10px !important;
+            }
+
+            .widget-box {
+                padding: 6px 10px !important;
+            }
+
+            .widget-num {
+                font-size: 1rem !important;
+            }
+
+            .widget-label {
+                font-size: 0.65rem !important;
+            }
+
+            .sidebar-rating-box {
+                padding: 8px 12px !important;
+                margin-bottom: 10px !important;
+            }
+
+            .sidebar-rating-num {
+                font-size: 1.35rem !important;
+            }
+
+            .sidebar-services-stat {
+                padding: 8px 12px !important;
+                margin-top: 8px !important;
+            }
+
+            .btn-logout {
+                padding: 9px 12px !important;
+                font-size: 0.85rem !important;
+                border-radius: 10px !important;
+            }
+
+            /* TABS ON MOBILE */
+            .tabs {
+                margin-bottom: 14px !important;
+                padding-bottom: 10px !important;
+                gap: 6px !important;
+            }
+
+            .tab {
+                padding: 8px 14px !important;
+                font-size: 0.84rem !important;
+            }
+
+            /* 2-COLUMN COMMERCE GRID ON MOBILE (OLX / Instagram style) */
+            .listings-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px !important;
+            }
+
+            .card {
+                border-radius: 14px !important;
+            }
+
+            .card-img-wrapper {
+                height: 135px !important;
+            }
+
+            .card-info {
+                padding: 10px 8px !important;
+            }
+
+            .card-title {
+                font-size: 0.86rem !important;
+                line-height: 1.25 !important;
+                min-height: 2.5em !important;
+                margin-bottom: 4px !important;
+            }
+
+            .card-price {
+                font-size: 1rem !important;
+                margin-bottom: 6px !important;
+            }
+
+            .card-actions {
+                gap: 6px !important;
+                flex-direction: column !important;
+            }
+
+            .card-actions .btn-sm {
+                width: 100% !important;
+                justify-content: center !important;
+                padding: 6px !important;
+                font-size: 0.76rem !important;
+            }
+
+            /* SETTINGS TAB ADAPTIVE */
+            .settings-box {
+                padding: 16px 14px !important;
+                border-radius: 16px !important;
+            }
+
+            .settings-box h2 {
+                font-size: 1.2rem !important;
+                margin-bottom: 14px !important;
+            }
+
+            .row {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+
+            .form-group {
+                margin-bottom: 14px !important;
+            }
+
+            /* STATS & ANALYTICS GRIDS */
+            #servicesContainer > div:first-child,
+            #analyticsContainerTab > div:first-child {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
+
+            /* FOOTER ON MOBILE */
+            footer {
+                padding: 24px 14px !important;
+                margin-bottom: 60px !important;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
+                text-align: center !important;
+            }
+        }
+
+        /* EXTRA NARROW MOBILE (<= 360px - iPhone SE 1st gen, Galaxy Fold cover) */
+        @media (max-width: 360px) {
+            main {
+                padding: 0 8px !important;
+            }
+
+            .listings-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .card-img-wrapper {
+                height: 170px !important;
+            }
+
+            #servicesContainer > div:first-child,
+            #analyticsContainerTab > div:first-child {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    
 
             .header-center {
                 display: none;
@@ -1122,56 +1469,72 @@
 
     <main>
         <aside class="profile-sidebar">
-            <div class="avatar-wrapper">
-                <div class="avatar" id="userAvatar"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-                <label class="avatar-upload-btn" title="Змінити фото (ліміт: 3 рази на місяць)">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                    <input type="file" id="avatarInput" accept="image/*">
-                </label>
-            </div>
-            <!-- Новая подсказка лимита смены фото -->
-            <div class="avatar-limit-hint" id="avatarLimitHint">Залишилось замін фото: 3/3</div>
-
-            <div class="profile-info">
-                <h1 id="userName">Завантаження...</h1>
-                <p class="role" id="userRoleText">Користувач</p>
-                <p class="phone" id="userPhone"></p>
-
-                <!-- Новые аккуратные виджеты статистики -->
-                <div class="profile-widgets-row">
-                    <div class="widget-box">
-                        <div class="widget-num" id="statMyCount">0</div>
-                        <div class="widget-label">Оголошень</div>
-                    </div>
-                    <div class="widget-box">
-                        <div class="widget-num" id="statFavCount">0</div>
-                        <div class="widget-label">Обране</div>
+            <div class="profile-sidebar-top-row">
+                <div>
+                    <div class="avatar-wrapper">
+                        <div class="avatar" id="userAvatar"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                        <label class="avatar-upload-btn" title="Завантажити або змінити фото">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                            <input type="file" id="avatarInput" accept="image/*">
+                        </label>
+                        <button type="button" class="avatar-remove-btn" id="avatarRemoveBtn" onclick="confirmDeleteAvatar()" title="Видалити фото" style="display: none;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
                     </div>
                 </div>
 
-                <div class="sidebar-rating-box" onclick="switchTab('reviews')" title="Переглянути всі відгуки">
-                    <div>
-                        <div class="sidebar-rating-num" id="sidebarAvgRating">0.0</div>
-                        <div id="sidebarStars" style="display:inline-flex;align-items:center;gap:2px;"></div>
-                    </div>
-                    <div style="text-align: left; font-size: 0.8rem; color: var(--text-muted);">
-                        <b id="sidebarTotalReviews" style="color: var(--text-main);">0</b> відгуків
-                    </div>
-                </div>
-
-                <!-- Віджет послуг майстра -->
-                <div class="sidebar-services-stat" onclick="switchTab('services')" style="margin-top: 12px; padding: 12px 14px; background: rgba(37, 99, 235, 0.08); border: 1.5px solid rgba(37, 99, 235, 0.28); border-radius: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s;" title="Переглянути статистику послуг">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 1.35rem;">🛠</span>
-                        <div style="text-align: left;">
-                            <div style="font-size: 0.72rem; color: #2563eb; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Послуги майстра</div>
-                            <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-main);" id="sidebarServicesCompletedCount">0 виконано</div>
-                        </div>
-                    </div>
-                    <span style="color: #2563eb; font-weight: 800; font-size: 1rem;">→</span>
+                <div class="profile-info">
+                    <h1 id="userName">Завантаження...</h1>
+                    <p class="role" id="userRoleText">Користувач</p>
+                    <p class="phone" id="userPhone"></p>
                 </div>
             </div>
-            <button class="btn-logout" onclick="showLogoutModal()">Вийти з акаунта</button>
+
+            <div class="avatar-hint-text" id="avatarHintText">Натисніть на фото або іконку камери, щоб встановити фото</div>
+
+            <!-- Нові акуратні віджети статистики -->
+            <div class="profile-widgets-row">
+                <div class="widget-box" onclick="switchTab('myListings')" style="cursor: pointer;" title="Мої оголошення">
+                    <div class="widget-num" id="statMyCount">0</div>
+                    <div class="widget-label">Оголошень</div>
+                </div>
+                <div class="widget-box" onclick="switchTab('favorites')" style="cursor: pointer;" title="Обране">
+                    <div class="widget-num" id="statFavCount">0</div>
+                    <div class="widget-label">Обране</div>
+                </div>
+            </div>
+
+            <div class="sidebar-rating-box" onclick="switchTab('reviews')" title="Переглянути всі відгуки">
+                <div>
+                    <div class="sidebar-rating-num" id="sidebarAvgRating">0.0</div>
+                    <div id="sidebarStars" style="display:inline-flex;align-items:center;gap:2px;"></div>
+                </div>
+                <div style="text-align: left; font-size: 0.8rem; color: var(--text-muted);">
+                    <b id="sidebarTotalReviews" style="color: var(--text-main);">0</b> відгуків
+                </div>
+            </div>
+
+            <!-- Віджет послуг майстра -->
+            <div class="sidebar-services-stat" onclick="switchTab('services')" style="margin-top: 10px; padding: 10px 14px; background: rgba(37, 99, 235, 0.08); border: 1.5px solid rgba(37, 99, 235, 0.28); border-radius: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s;" title="Переглянути статистику послуг">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.25rem;">🛠</span>
+                    <div style="text-align: left;">
+                        <div style="font-size: 0.72rem; color: #2563eb; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Послуги майстра</div>
+                        <div style="font-size: 0.92rem; font-weight: 800; color: var(--text-main);" id="sidebarServicesCompletedCount">0 виконано</div>
+                    </div>
+                </div>
+                <span style="color: #2563eb; font-weight: 800; font-size: 1rem;">→</span>
+            </div>
+
+            <div style="margin-top: 12px; display: flex; gap: 8px;">
+                <button type="button" class="btn-primary" onclick="switchTab('settings')" style="flex: 1; padding: 10px 12px; font-size: 0.85rem; border-radius: 10px; background: var(--surface); color: var(--text-main); border: 1.5px solid var(--border-color); display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span>Налаштування</span>
+                </button>
+                <button type="button" class="btn-logout" onclick="showLogoutModal()" style="width: auto; padding: 10px 14px;">
+                    Вийти
+                </button>
+            </div>
         </aside>
 
         <div class="profile-content">
@@ -1703,6 +2066,174 @@
                 let allListingsData = [];
                 let currentUserId = null;
 
+                // --- AVATAR & PROFILE IMAGE MANAGEMENT ---
+                // Helper to compress and crop image to square 400x400 JPEG (~25KB-35KB)
+                function compressImage(file, maxDimension = 400, quality = 0.85) {
+                    return new Promise((resolve, reject) => {
+                        if (!file || !file.type.startsWith('image/')) {
+                            return reject(new Error('Будь ласка, виберіть файл зображення (PNG, JPEG, WebP)'));
+                        }
+                        const reader = new FileReader();
+                        reader.onerror = () => reject(new Error('Не вдалося прочитати вибраний файл'));
+                        reader.onload = function(e) {
+                            const img = new Image();
+                            img.onerror = () => reject(new Error('Помилка відкриття файлу як зображення'));
+                            img.onload = function() {
+                                try {
+                                    const width = img.naturalWidth || img.width;
+                                    const height = img.naturalHeight || img.height;
+                                    const minSide = Math.min(width, height);
+                                    const sx = (width - minSide) / 2;
+                                    const sy = (height - minSide) / 2;
+
+                                    const canvas = document.createElement('canvas');
+                                    const size = Math.min(minSide, maxDimension);
+                                    canvas.width = size;
+                                    canvas.height = size;
+                                    const ctx = canvas.getContext('2d');
+                                    ctx.imageSmoothingEnabled = true;
+                                    ctx.imageSmoothingQuality = 'high';
+                                    ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+
+                                    const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                                    resolve(dataUrl);
+                                } catch(err) {
+                                    reject(err);
+                                }
+                            };
+                            img.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+
+                // Global Avatar Sync Across Page, Header, Bottom Nav, Drawer, and Local Storage
+                function syncAvatarEverywhere(avatarUrl, userInitials = 'К') {
+                    const avatarEl = document.getElementById('userAvatar');
+                    const removeBtn = document.getElementById('avatarRemoveBtn');
+                    const hintText = document.getElementById('avatarHintText');
+
+                    if (avatarUrl && typeof avatarUrl === 'string' && avatarUrl.trim()) {
+                        const cleanUrl = avatarUrl.trim();
+                        if (avatarEl) {
+                            avatarEl.innerHTML = `<img src="${cleanUrl}" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;">`;
+                            avatarEl.style.background = 'transparent';
+                        }
+                        if (removeBtn) removeBtn.style.display = 'flex';
+                        if (hintText) hintText.innerText = 'Натисніть на фото або камеру, щоб змінити його';
+
+                        // Save in local caches safely
+                        try {
+                            if (currentUserId) localStorage.setItem(`userAvatar_${currentUserId}`, cleanUrl);
+                            localStorage.setItem('loopUserAvatar', cleanUrl);
+                            const rawUser = localStorage.getItem('loopUser') || localStorage.getItem('user');
+                            if (rawUser) {
+                                const uObj = JSON.parse(rawUser);
+                                uObj.avatarUrl = cleanUrl;
+                                localStorage.setItem('loopUser', JSON.stringify(uObj));
+                                localStorage.setItem('user', JSON.stringify(uObj));
+                            }
+                        } catch(e) {
+                            console.warn('Storage quota note:', e);
+                        }
+
+                        // Update desktop header navigation avatar
+                        const navProfile = document.getElementById('navProfileLink');
+                        if (navProfile) {
+                            let navAv = navProfile.querySelector('.nav-profile-avatar');
+                            if (!navAv) {
+                                navAv = document.createElement('img');
+                                navAv.className = 'nav-profile-avatar';
+                                navAv.style.cssText = 'width:20px; height:20px; border-radius:50%; object-fit:cover; border:1.5px solid #10b981; margin-right:4px; vertical-align:middle;';
+                                const svg = navProfile.querySelector('svg');
+                                if (svg) svg.replaceWith(navAv);
+                                else navProfile.prepend(navAv);
+                            }
+                            navAv.src = cleanUrl;
+                        }
+
+                        // Update mobile bottom bar avatar
+                        const bnavProf = document.getElementById('bnavProfile') || document.querySelector('#mobileBottomBar a[href*="profile"]');
+                        if (bnavProf) {
+                            let bnavAv = bnavProf.querySelector('.bottom-nav-avatar');
+                            if (!bnavAv) {
+                                bnavAv = document.createElement('img');
+                                bnavAv.className = 'bottom-nav-avatar';
+                                bnavAv.style.cssText = 'width:22px; height:22px; border-radius:50%; object-fit:cover; border:1.5px solid #10b981; margin-bottom:2px; display:block;';
+                                const svg = bnavProf.querySelector('svg');
+                                if (svg) svg.replaceWith(bnavAv);
+                                else bnavProf.prepend(bnavAv);
+                            }
+                            bnavAv.src = cleanUrl;
+                        }
+
+                        // Update mobile drawer avatar
+                        const drawerCardImg = document.querySelector('.mobile-user-card img');
+                        if (drawerCardImg) drawerCardImg.src = cleanUrl;
+                        const drawerCard = document.getElementById('drawerUserCard');
+                        if (drawerCard) {
+                            const dImg = drawerCard.querySelector('img');
+                            if (dImg) dImg.src = cleanUrl;
+                        }
+
+                        // Broadcast event so any open listeners update
+                        window.dispatchEvent(new CustomEvent('loop:avatar-changed', { detail: { avatarUrl: cleanUrl } }));
+                    } else {
+                        // Initials placeholder
+                        if (avatarEl) {
+                            avatarEl.innerHTML = `<span style="font-size:inherit; font-weight:800; color:white;">${userInitials}</span>`;
+                            avatarEl.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                        }
+                        if (removeBtn) removeBtn.style.display = 'none';
+                        if (hintText) hintText.innerText = 'Натисніть на іконку камери, щоб встановити фото';
+
+                        // Reset header navigation avatar back to default SVG
+                        const navProfile = document.getElementById('navProfileLink');
+                        if (navProfile) {
+                            const navAv = navProfile.querySelector('.nav-profile-avatar');
+                            if (navAv) {
+                                navAv.outerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+                            }
+                        }
+                    }
+                }
+
+                // Explicit deletion of avatar
+                window.confirmDeleteAvatar = async function() {
+                    const confirmed = confirm('Ви дійсно хочете видалити фото профілю?');
+                    if (!confirmed) return;
+
+                    try {
+                        await fetch('/api/users/avatar', {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+
+                        // Clear local caches
+                        if (currentUserId) localStorage.removeItem(`userAvatar_${currentUserId}`);
+                        localStorage.removeItem('loopUserAvatar');
+                        const rawUser = localStorage.getItem('loopUser') || localStorage.getItem('user');
+                        if (rawUser) {
+                            try {
+                                const uObj = JSON.parse(rawUser);
+                                uObj.avatarUrl = null;
+                                localStorage.setItem('loopUser', JSON.stringify(uObj));
+                                localStorage.setItem('user', JSON.stringify(uObj));
+                            } catch(e) {}
+                        }
+
+                        const fullName = document.getElementById('userName')?.innerText || 'Користувач';
+                        const uInit = (fullName.split(' ').map(p => p[0]).join('') || 'К').toUpperCase();
+                        syncAvatarEverywhere(null, uInit);
+
+                        if (typeof LoopToast !== 'undefined' && LoopToast.info) {
+                            LoopToast.info('Фото профілю видалено');
+                        }
+                    } catch(err) {
+                        console.error('Failed to remove avatar:', err);
+                    }
+                };
+
                 async function initProfilePage() {
                     const activeUser = getJwtUserData(token);
                     if (!activeUser) { window.location.href = '/login.html'; return; }
@@ -1714,27 +2245,18 @@
                     document.getElementById('editFirstName').value = nameParts[0] || 'Користувач';
                     document.getElementById('editLastName').value = nameParts.slice(1).join(' ') || '';
 
-                    // Завантаження профілю та аватара з API та збереженого кешу
                     const fullNameParts = fullName.split(' ').filter(Boolean);
                     const userInitials = (fullNameParts.map(p => p[0]).join('') || 'К').toUpperCase();
-                    
-                    function updateAvatarDisplay(avatarUrl) {
-                        const avatarEl = document.getElementById('userAvatar');
-                        if (avatarUrl) {
-                            avatarEl.innerHTML = `<img src="${avatarUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" onerror="this.remove(); document.getElementById('userAvatar').innerText='${userInitials}';">`;
-                        } else {
-                            avatarEl.innerText = userInitials;
-                        }
-                    }
 
-                    const cachedAvatar = localStorage.getItem(`userAvatar_${currentUserId}`);
-                    if (cachedAvatar) {
-                        updateAvatarDisplay(cachedAvatar);
+                    // Step 1: Render cached avatar immediately (instant visual feedback, zero lag)
+                    const cachedAvatar = localStorage.getItem(`userAvatar_${currentUserId}`) || localStorage.getItem('loopUserAvatar');
+                    if (cachedAvatar && cachedAvatar.trim()) {
+                        syncAvatarEverywhere(cachedAvatar.trim(), userInitials);
                     } else {
-                        updateAvatarDisplay(null);
+                        syncAvatarEverywhere(null, userInitials);
                     }
 
-                    // Опитуємо API для актуалізації аватара та даних користувача
+                    // Step 2: Fetch current fresh user data from API
                     fetch('/api/users/me', {
                         headers: { 'Authorization': `Bearer ${token}` }
                     })
@@ -1763,11 +2285,24 @@
                                 const pInput = document.getElementById('editPhone');
                                 if (pInput) pInput.value = meData.phoneNumber;
                             }
-                            if (meData.avatarUrl) {
-                                localStorage.setItem(`userAvatar_${currentUserId}`, meData.avatarUrl);
-                                updateAvatarDisplay(meData.avatarUrl);
+
+                            // SAFE PERSISTENCE LOGIC: Never wipe an avatar if server is null but cache exists!
+                            const localSavedAvatar = localStorage.getItem(`userAvatar_${currentUserId}`) || localStorage.getItem('loopUserAvatar');
+                            if (meData.avatarUrl && typeof meData.avatarUrl === 'string' && meData.avatarUrl.trim()) {
+                                syncAvatarEverywhere(meData.avatarUrl.trim(), userInitials);
+                            } else if (localSavedAvatar && localSavedAvatar.trim()) {
+                                // Server returned null/empty, but local avatar is set -> keep it and sync to server!
+                                syncAvatarEverywhere(localSavedAvatar.trim(), userInitials);
+                                fetch('/api/users/upload-avatar', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${token}`
+                                    },
+                                    body: JSON.stringify({ avatarUrl: localSavedAvatar.trim() })
+                                }).catch(() => {});
                             } else {
-                                updateAvatarDisplay(null);
+                                syncAvatarEverywhere(null, userInitials);
                             }
 
                             // Оновлюємо статус Telegram та посилання на бота
@@ -1826,6 +2361,7 @@
                         }
                     }).catch(e => console.error(e));
 
+                    // Обробник збереження особистих даних (НІКОЛИ не затирає аватар)
                     const profForm = document.getElementById('profileSettingsForm');
                     if (profForm) {
                         profForm.addEventListener('submit', async function(e) {
@@ -1854,40 +2390,72 @@
                         });
                     }
 
-                    // Инициализация лимита смены фото (3 раза в месяц)
-                    initAvatarLimit(currentUserId);
+                    // Обробник завантаження фото зі стисненням Canvas (без штучних лімітів!)
+                    const avatarInput = document.getElementById('avatarInput');
+                    if (avatarInput) {
+                        avatarInput.addEventListener('change', async function (e) {
+                            const file = e.target.files && e.target.files[0];
+                            if (!file) return;
 
-                    // telegram section initialized from meData
+                            // Reset input value to allow selecting same file again if desired
+                            e.target.value = '';
 
-                    // Обработчик загрузки аватарки с лимитом
-                    document.getElementById('avatarInput').addEventListener('change', function (e) {
-                        const file = e.target.files[0];
-                        if (!file) return;
-
-                        if (!checkAndUpdateAvatarLimit(currentUserId)) {
-                            LoopToast.warning('Ліміт вичерпано! Ви можете змінювати фото профілю не частіше 3 разів на місяць.');
-                            return;
-                        }
-
-                        const reader = new FileReader();
-                        reader.onload = async function (event) {
-                            const base64Img = event.target.result;
-                            updateAvatarDisplay(base64Img);
-                            localStorage.setItem(`userAvatar_${currentUserId}`, base64Img);
+                            const avatarEl = document.getElementById('userAvatar');
+                            const originalContent = avatarEl ? avatarEl.innerHTML : '';
+                            if (avatarEl) avatarEl.style.opacity = '0.5';
 
                             try {
-                                await fetch('/api/users/upload-avatar', {
+                                if (typeof LoopToast !== 'undefined' && LoopToast.info) {
+                                    LoopToast.info('Оптимізація та збереження фото...');
+                                }
+
+                                // Compress to max 400x400 JPEG (~25KB)
+                                const compressedBase64 = await compressImage(file, 400, 0.85);
+
+                                // Optimistic UI update everywhere instantly
+                                syncAvatarEverywhere(compressedBase64, userInitials);
+                                if (avatarEl) avatarEl.style.opacity = '1';
+
+                                // Send to backend upload-avatar endpoint
+                                const response = await fetch('/api/users/upload-avatar', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',
                                         'Authorization': `Bearer ${token}`
                                     },
-                                    body: JSON.stringify({ avatarUrl: base64Img })
+                                    body: JSON.stringify({ avatarUrl: compressedBase64 })
                                 });
-                            } catch (err) { console.error(err); }
-                        };
-                        reader.readAsDataURL(file);
-                    });
+
+                                if (response.ok) {
+                                    if (typeof LoopToast !== 'undefined' && LoopToast.success) {
+                                        LoopToast.success('Фото профілю успішно встановлено!');
+                                    }
+                                } else {
+                                    // Try PUT /api/users/profile fallback
+                                    await fetch('/api/users/profile', {
+                                        method: 'PUT',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Bearer ${token}`
+                                        },
+                                        body: JSON.stringify({ avatarUrl: compressedBase64 })
+                                    });
+                                    if (typeof LoopToast !== 'undefined' && LoopToast.success) {
+                                        LoopToast.success('Фото профілю збережено!');
+                                    }
+                                }
+                            } catch (err) {
+                                console.error('Avatar upload error:', err);
+                                if (avatarEl) {
+                                    avatarEl.style.opacity = '1';
+                                    avatarEl.innerHTML = originalContent;
+                                }
+                                if (typeof LoopToast !== 'undefined' && LoopToast.error) {
+                                    LoopToast.error(err.message || 'Помилка при завантаженні фото');
+                                }
+                            }
+                        });
+                    }
 
                     loadUserReviewsForProfile(currentUserId);
                     fetch('/api/favorites/ids', {
@@ -1914,39 +2482,6 @@
                     document.addEventListener('DOMContentLoaded', initProfilePage);
                 } else {
                     initProfilePage();
-                }
-
-                // ЛОГИКА ЛИМИТА СМЕНЫ АВАТАРА (3 РАЗА В МЕСЯЦ)
-                function initAvatarLimit(userId) {
-                    const now = new Date();
-                    const currentMonth = now.getMonth();
-                    const currentYear = now.getFullYear();
-
-                    let limitData = JSON.parse(localStorage.getItem(`avatarLimit_${userId}`) || '{}');
-
-                    if (limitData.month !== currentMonth || limitData.year !== currentYear) {
-                        limitData = { month: currentMonth, year: currentYear, count: 0 };
-                        localStorage.setItem(`avatarLimit_${userId}`, JSON.stringify(limitData));
-                    }
-
-                    const remaining = 3 - limitData.count;
-                    document.getElementById('avatarLimitHint').innerText = `Залишилось замін фото: ${remaining}/3`;
-                }
-
-                function checkAndUpdateAvatarLimit(userId) {
-                    const now = new Date();
-                    let limitData = JSON.parse(localStorage.getItem(`avatarLimit_${userId}`) || '{"count":0}');
-
-                    if (limitData.count >= 3) return false;
-
-                    limitData.count += 1;
-                    limitData.month = now.getMonth();
-                    limitData.year = now.getFullYear();
-                    localStorage.setItem(`avatarLimit_${userId}`, JSON.stringify(limitData));
-
-                    const remaining = 3 - limitData.count;
-                    document.getElementById('avatarLimitHint').innerText = `Залишилось замін фото: ${remaining}/3`;
-                    return true;
                 }
 
                 async function loadUserReviewsForProfile(userId) {

@@ -2084,45 +2084,41 @@ public class UsersController : ControllerBase
 
 
     [HttpPost("upload-avatar")]
-
     [Authorize]
-
     public async Task<IActionResult> UploadAvatar([FromBody] AvatarDto dto)
-
     {
-
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
         if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
 
-
-
         var user = await _context.Users.FindAsync(userId);
-
         if (user == null) return NotFound();
 
+        if (string.IsNullOrWhiteSpace(dto?.AvatarUrl))
+        {
+            return BadRequest(new { error = "Аватар не може бути порожнім" });
+        }
 
-
-        user.AvatarUrl = dto.AvatarUrl;
-
+        user.AvatarUrl = dto.AvatarUrl.Trim();
         await _context.SaveChangesAsync();
 
-
-
         return Ok(new { message = "Аватар оновлено", avatarUrl = user.AvatarUrl });
-
     }
 
-
-
-    public class AvatarDto
-
+    [HttpDelete("avatar")]
+    [Authorize]
+    public async Task<IActionResult> RemoveAvatar()
     {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
 
-        public string AvatarUrl { get; set; } = string.Empty;
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return NotFound();
 
+        user.AvatarUrl = null;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Аватар успішно видалено" });
     }
-
 
 
     [HttpPost("send-email-code")]
@@ -2729,44 +2725,46 @@ public class UsersController : ControllerBase
 
 
     [HttpPut("me")]
-
+    [HttpPut("profile")]
     [Authorize]
-
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
-
     {
-
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
         if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
 
-
-
         var user = await _context.Users.FindAsync(userId);
-
         if (user == null) return NotFound();
 
+        if (!string.IsNullOrWhiteSpace(dto.FirstName)) user.FirstName = dto.FirstName.Trim();
+        if (dto.LastName != null) user.LastName = dto.LastName.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.PhoneNumber)) user.PhoneNumber = dto.PhoneNumber.Trim();
+        if (dto.Bio != null) user.Bio = dto.Bio.Trim();
+        if (dto.ReceiveTelegramNotifications.HasValue) user.ReceiveTelegramNotifications = dto.ReceiveTelegramNotifications.Value;
 
-
-        user.Bio = dto.Bio;
-
-        if (!string.IsNullOrEmpty(dto.AvatarUrl))
-
+        // Never wipe out avatar if dto.AvatarUrl is null or empty. Only update if explicit non-empty string is sent.
+        if (!string.IsNullOrWhiteSpace(dto.AvatarUrl))
         {
-
-            user.AvatarUrl = dto.AvatarUrl;
-
+            user.AvatarUrl = dto.AvatarUrl.Trim();
         }
-
-
 
         await _context.SaveChangesAsync();
 
-        return Ok(new { message = "Профіль оновлено!" });
-
+        return Ok(new
+        {
+            message = "Профіль успішно оновлено!",
+            user = new
+            {
+                user.Id,
+                user.FirstName,
+                user.LastName,
+                user.Email,
+                user.AvatarUrl,
+                user.Bio,
+                user.PhoneNumber,
+                user.ReceiveTelegramNotifications
+            }
+        });
     }
-
-
 
     [HttpPost("link-telegram")]
 
@@ -2983,16 +2981,6 @@ public class UsersController : ControllerBase
 }
 
 
-
-public class UpdateProfileDto
-
-{
-
-    public string? AvatarUrl { get; set; }
-
-    public string? Bio { get; set; }
-
-}
 
 
 

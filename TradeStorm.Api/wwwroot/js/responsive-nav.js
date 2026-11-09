@@ -109,7 +109,8 @@
 
             const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Користувач' : 'Гість';
             const userEmail = user?.email || 'Авторизуйтесь для покупок';
-            const userAvatar = user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=10b981&color=fff&bold=true`;
+            const savedLocalAvatar = localStorage.getItem('loopUserAvatar') || (user?.id ? localStorage.getItem(`userAvatar_${user.id}`) : null);
+            const userAvatar = savedLocalAvatar || user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=10b981&color=fff&bold=true`;
 
             drawer.innerHTML = `
                 <div class="mobile-drawer-header">
@@ -244,7 +245,7 @@
                         <span>Чат</span>
                     </a>
                     <a href="${token ? '/profile.html' : '/login.html'}" class="bottom-bar-item ${isProfile ? 'active' : ''}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        ${(typeof savedLocalAvatar !== 'undefined' && savedLocalAvatar) || user?.avatarUrl ? `<img src="${(typeof savedLocalAvatar !== 'undefined' && savedLocalAvatar) || user?.avatarUrl}" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 1.5px solid #10b981; margin-bottom: 2px; display: block;" alt="Avatar">` : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`}
                         <span>Профіль</span>
                     </a>
                 </div>
@@ -257,6 +258,46 @@
         }
 
         // 4. Mobile Filters Collapsible Toggle for index.html
+        
+        // Sync user avatar with top header navigation icon
+        function syncNavProfileAvatar(avatarUrl) {
+            const navProf = document.getElementById('navProfileLink');
+            if (!navProf) return;
+            const existingImg = navProf.querySelector('.nav-profile-avatar');
+            if (avatarUrl && typeof avatarUrl === 'string' && avatarUrl.trim()) {
+                if (existingImg) {
+                    existingImg.src = avatarUrl.trim();
+                } else {
+                    const img = document.createElement('img');
+                    img.className = 'nav-profile-avatar';
+                    img.src = avatarUrl.trim();
+                    img.style.cssText = 'width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 1.5px solid #10b981; margin-right: 4px; vertical-align: middle; display: inline-block;';
+                    const svg = navProf.querySelector('svg');
+                    if (svg) svg.replaceWith(img);
+                    else navProf.prepend(img);
+                }
+            } else if (existingImg) {
+                existingImg.outerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+            }
+        }
+
+        const initialAv = localStorage.getItem('loopUserAvatar') || (user?.id ? localStorage.getItem(`userAvatar_${user.id}`) : null) || user?.avatarUrl;
+        if (initialAv) {
+            syncNavProfileAvatar(initialAv);
+        }
+
+        if (!window._loopAvatarListenerAttached) {
+            window._loopAvatarListenerAttached = true;
+            window.addEventListener('loop:avatar-changed', (e) => {
+                const newAv = e.detail && e.detail.avatarUrl;
+                syncNavProfileAvatar(newAv);
+                const drImg = document.querySelector('.mobile-user-card img');
+                if (drImg && newAv) drImg.src = newAv;
+                const bImg = document.querySelector('#mobileBottomBar a[href*="profile"] img, #mobileBottomAppBar a[href*="profile"] img');
+                if (bImg && newAv) bImg.src = newAv;
+            });
+        }
+
         setupMobileFilters();
     }
 
