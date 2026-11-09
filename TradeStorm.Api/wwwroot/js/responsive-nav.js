@@ -836,4 +836,21 @@
         checkSiteAnnouncement();
         setupNotificationCenter();
     }
+
+    // Глобальне перехоплення кліків на створення оголошень для незареєстрованих користувачів
+    document.addEventListener('click', function(e) {
+        const createLink = e.target.closest('a[href*="create.html"], .btn-create-top, .create-fab, .bottom-nav-sell, .drawer-sell-link, .btn-create-mobile');
+        if (!createLink) return;
+        const currentToken = localStorage.getItem('loopToken') || localStorage.getItem('token');
+        if (!currentToken) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (typeof LoopToast !== 'undefined' && LoopToast.info) {
+                LoopToast.info('Щоб створити оголошення, будь ласка, увійдіть або зареєструйтесь');
+            }
+            const targetUrl = createLink.getAttribute('href') || '/create.html';
+            window.location.href = '/login.html?returnUrl=' + encodeURIComponent(targetUrl) + '&notice=create_auth_required';
+        }
+    }, true);
+
 })();

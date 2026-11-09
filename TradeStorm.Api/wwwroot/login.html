@@ -676,6 +676,13 @@
 
                 <div id="authContainer">
 
+                                        <div id="authCreateNotice" style="display: none; align-items: center; gap: 12px; background: rgba(16, 185, 129, 0.1); border: 1.5px solid rgba(16, 185, 129, 0.35); border-radius: 12px; padding: 12px 14px; margin-bottom: 18px; font-size: 0.88rem; color: var(--text-main);">
+                        <span style="font-size: 1.4rem;">📢</span>
+                        <div style="flex: 1;">
+                            <strong style="color: #10b981; display: block; margin-bottom: 2px;">Для створення оголошення потрібна авторизація</strong>
+                            <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.35;">Спершу увійдіть у свій акаунт або зареєструйтесь — після цього ви зможете розміщувати оголошення на маркетплейсі.</div>
+                        </div>
+                    </div>
                     <div class="tabs">
 
                         <div class="tab active" id="tabLogin" onclick="switchTab('login')">Вхід</div>
@@ -2280,7 +2287,7 @@
 
                 if (err) {
 
-                    err.innerText = 'Помилка з'єднання з сервером';
+                    err.innerText = "Помилка з'єднання з сервером";
 
                     err.style.display = 'block';
 

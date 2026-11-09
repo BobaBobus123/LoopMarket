@@ -14,11 +14,16 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- Миттєве застосування теми -->
+    <!-- Миттєве застосування теми та суворий захист авторизації -->
     <script>
         const existingEditId = new URLSearchParams(window.location.search).get('id');
         if (existingEditId) {
             window.location.replace('/edit.html?id=' + encodeURIComponent(existingEditId));
+        }
+        // ОБОВ'ЯЗКОВА АВТОРИЗАЦІЯ ДЛЯ СТВОРЕННЯ ОГОЛОШЕНЬ
+        const authGateToken = localStorage.getItem('loopToken') || localStorage.getItem('token');
+        if (!authGateToken) {
+            window.location.replace('/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search) + '&notice=create_auth_required');
         }
         const savedTheme = localStorage.getItem('loopTheme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -1135,14 +1140,7 @@
                 </p>
             </div>
 
-            <!-- DRAFT / GUEST HELPER BANNER -->
-            <div id="guestDraftBanner" style="display: none; margin-bottom: 20px; background: rgba(37, 99, 235, 0.08); border: 1.5px solid rgba(37, 99, 235, 0.25); border-radius: 14px; padding: 14px 18px; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
-                <div style="display: flex; align-items: center; gap: 12px; min-width: 240px; flex: 1;">
-                    <div style="font-size: 1.4rem;">💡</div>
-                    <div style="font-size: 0.88rem; color: var(--text-main); line-height: 1.4;">
-                        <strong id="draftBannerTitle">Ви ще не увійшли в акаунт</strong>
-                        <div id="draftBannerSub" style="color: var(--text-muted); font-size: 0.82rem;">Ви можете спокійно заповнювати форму — система автоматично зберігає чернетку. При публікації ваші тексти та фото не загубляться!</div>
-                    </div>
+            
                 </div>
                 <div style="display: flex; gap: 8px;">
                     <a href="/login.html?returnUrl=/create.html?restore=1" class="btn-primary" style="text-decoration: none; padding: 8px 16px; font-size: 0.84rem; border-radius: 8px; white-space: nowrap;">Увійти зараз</a>
@@ -1863,11 +1861,20 @@
         let isUserTgVerified = true;
 
         async function checkUserVerificationAndStatus() {
-            if (!token) return;
+            if (!token) {
+                window.location.replace('/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search) + '&notice=create_auth_required');
+                return;
+            }
             try {
                 const res = await fetch('/api/users/me', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                if (res.status === 401) {
+                    localStorage.removeItem('loopToken');
+                    localStorage.removeItem('token');
+                    window.location.replace('/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search) + '&notice=create_auth_required');
+                    return;
+                }
                 if (res.ok) {
                     const data = await res.json();
                     const isAdmin = data.role === 'Admin';
@@ -2783,14 +2790,14 @@
             if (el) el.addEventListener('change', saveDraftToStorage);
         });
 
-        // Ініціалізація стану гостя / чернетки
-        (function checkGuestAndDraft() {
-            const banner = document.getElementById('guestDraftBanner');
+        // Ініціалізація перевірки входу та чернетки
+        (function checkAuthAndDraft() {
             if (!token) {
-                if (banner) banner.style.display = 'flex';
+                window.location.replace('/login.html?returnUrl=' + encodeURIComponent(window.location.pathname + window.location.search) + '&notice=create_auth_required');
+                return;
             }
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('restore') === '1' || (!token && localStorage.getItem('loop_create_draft'))) {
+            if (urlParams.get('restore') === '1' || localStorage.getItem('loop_create_draft')) {
                 setTimeout(restoreDraftFromStorage, 300);
             }
         })();
