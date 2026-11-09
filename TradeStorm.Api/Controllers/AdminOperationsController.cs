@@ -102,66 +102,184 @@ public class AdminOperationsController : ControllerBase
             Console.WriteLine($"Audit log error: {ex.Message}");
         }
     }
-
-    // 1. ПУБЛІЧНИЙ БАНЕР ОГОЛОШЕНЬ ПЛАТФОРМИ
+    // 1. ПУБЛІЧНИЙ БАНЕР ТА СПИСОК АКТИВНИХ ОГОЛОШЕНЬ ПЛАТФОРМИ
     [HttpGet("announcement/active")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetActiveAnnouncement()
+    public async Task<IActionResult> GetActiveAnnouncement([FromQuery] string? page = null, [FromQuery] string? placement = null)
     {
-        var active = await _context.SiteAnnouncements
-            .Where(a => a.IsActive)
-            .OrderByDescending(a => a.CreatedAt)
-            .FirstOrDefaultAsync();
+        var now = DateTime.UtcNow;
+        var query = _context.SiteAnnouncements
+            .Where(a => a.IsActive && (!a.ExpiresAt.HasValue || a.ExpiresAt.Value > now));
 
-        if (active == null) return Ok(new { hasActive = false });
+        if (!string.IsNullOrWhiteSpace(page) && page != "all")
+        {
+            query = query.Where(a => a.TargetPage == "all" || a.TargetPage == page);
+        }
+        if (!string.IsNullOrWhiteSpace(placement) && placement != "all")
+        {
+            query = query.Where(a => a.Placement == placement);
+        }
+
+        var activeList = await query.OrderByDescending(a => a.CreatedAt).ToListAsync();
+        var primary = activeList.FirstOrDefault();
+
+        if (primary == null) return Ok(new { hasActive = false, announcements = new object[0] });
 
         return Ok(new
         {
             hasActive = true,
-            id = active.Id,
-            message = active.Message,
-            type = active.Type,
-            createdAt = active.CreatedAt
+            id = primary.Id,
+            title = primary.Title,
+            message = primary.Message,
+            type = primary.Type,
+            targetPage = primary.TargetPage,
+            placement = primary.Placement,
+            actionText = primary.ActionText,
+            actionUrl = primary.ActionUrl,
+            expiresAt = primary.ExpiresAt,
+            createdAt = primary.CreatedAt,
+            announcements = activeList.Select(a => new
+            {
+                id = a.Id,
+                title = a.Title,
+                message = a.Message,
+                type = a.Type,
+                targetPage = a.TargetPage,
+                placement = a.Placement,
+                actionText = a.ActionText,
+                actionUrl = a.ActionUrl,
+                expiresAt = a.ExpiresAt,
+                createdAt = a.CreatedAt
+            })
         });
     }
 
-    // 2. ВСТАНОВИТИ НОВИЙ БАНЕР ОГОЛОШЕННЯ
+    // 1.1 СПИСОК УСІХ ОГОЛОШЕНЬ ДЛЯ АДМІН-ПАНЕЛІ
+    [HttpGet("announcements")]
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> GetAllAnnouncements()
+    {
+        var now = DateTime.UtcNow;
+        var list = await _context.SiteAnnouncements
+            .OrderByDescending(a => a.CreatedAt)
+            .Take(100)
+            .ToListAsync();
+
+        return Ok(list.Select(a => new
+        {
+            id = a.Id,
+            title = a.Title,
+            message = a.Message,
+            type = a.Type,
+            targetPage = a.TargetPage,
+            placement = a.Placement,
+            actionText = a.ActionText,
+            actionUrl = a.ActionUrl,
+            expiresAt = a.ExpiresAt,
+            isActive = a.IsActive,
+            isExpired = a.ExpiresAt.HasValue && a.ExpiresAt.Value <= now,
+            createdAt = a.CreatedAt
+        }));
+    }
+
+    // 2. ВСТАНОВИТИ / СТВОРИТИ НОВЕ ОГОЛОШЕННЯ АБО БАНЕР
     [HttpPost("announcement")]
     [Authorize(Roles = UserRoles.Admin)]
     public async Task<IActionResult> SetAnnouncement([FromBody] SiteAnnouncementDto dto)
     {
-        // Деактивуємо всі старі
-        var old = await _context.SiteAnnouncements.Where(a => a.IsActive).ToListAsync();
-        foreach (var a in old) a.IsActive = false;
+        if (string.IsNullOrWhiteSpace(dto.Message))
+        {
+            return BadRequest(new { error = "Текст оголошення не може бути порожнім" });
+        }
+
+        DateTime? expiresAt = null;
+        var now = DateTime.UtcNow;
+        if (!string.IsNullOrWhiteSpace(dto.Duration))
+        {
+            var dur = dto.Duration.Trim().ToLowerInvariant();
+            if (dur == "24h" || dur == "1d") expiresAt = now.AddHours(24);
+            else if (dur == "3d") expiresAt = now.AddDays(3);
+            else if (dur == "7d" || dur == "1w") expiresAt = now.AddDays(7);
+            else if (dur == "30d" || dur == "1m") expiresAt = now.AddDays(30);
+            else if (dur == "forever" || dur == "none" || dur == "unlimited") expiresAt = null;
+        }
+
+        var targetPage = string.IsNullOrWhiteSpace(dto.TargetPage) ? "all" : dto.TargetPage.Trim().ToLowerInvariant();
+        var placement = string.IsNullOrWhiteSpace(dto.Placement) ? "top" : dto.Placement.Trim().ToLowerInvariant();
+        var type = string.IsNullOrWhiteSpace(dto.Type) ? "warning" : dto.Type.Trim().ToLowerInvariant();
 
         var banner = new SiteAnnouncement
         {
-            Message = dto.Message,
-            Type = string.IsNullOrWhiteSpace(dto.Type) ? "warning" : dto.Type,
+            Title = (dto.Title ?? string.Empty).Trim(),
+            Message = dto.Message.Trim(),
+            Type = type,
+            TargetPage = targetPage,
+            Placement = placement,
+            ExpiresAt = expiresAt,
+            ActionText = string.IsNullOrWhiteSpace(dto.ActionText) ? null : dto.ActionText.Trim(),
+            ActionUrl = string.IsNullOrWhiteSpace(dto.ActionUrl) ? null : dto.ActionUrl.Trim(),
             IsActive = dto.IsActive,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = now
         };
+
         _context.SiteAnnouncements.Add(banner);
         await _context.SaveChangesAsync();
 
-        await LogAuditAsync("SetAnnouncement", "Announcement", banner.Id, dto.Message);
+        await LogAuditAsync("SetAnnouncement", "Announcement", banner.Id, $"[{placement} / {targetPage}] {dto.Message}");
 
-        return Ok(new { message = "Банер оголошення успішно активовано на сайті", id = banner.Id });
+        return Ok(new
+        {
+            message = "Оголошення успішно опубліковано на сайті",
+            id = banner.Id,
+            expiresAt = banner.ExpiresAt,
+            placement = banner.Placement,
+            targetPage = banner.TargetPage
+        });
     }
 
-    // 3. ЗНЯТИ БАНЕР ОГОЛОШЕННЯ
+    // 3. ЗНЯТИ ОГОЛОШЕННЯ / ДЕАКТИВУВАТИ
     [HttpDelete("announcement/{id}")]
     [Authorize(Roles = UserRoles.Admin)]
     public async Task<IActionResult> RemoveAnnouncement(int id)
     {
-        var banner = await _context.SiteAnnouncements.FindAsync(id);
+        SiteAnnouncement? banner = null;
+        if (id > 0)
+        {
+            banner = await _context.SiteAnnouncements.FindAsync(id);
+        }
+
+        if (banner == null)
+        {
+            banner = await _context.SiteAnnouncements
+                .Where(a => a.IsActive)
+                .OrderByDescending(a => a.CreatedAt)
+                .FirstOrDefaultAsync();
+        }
+
         if (banner != null)
         {
             banner.IsActive = false;
             await _context.SaveChangesAsync();
-            await LogAuditAsync("RemoveAnnouncement", "Announcement", id, "Банер знято");
+            await LogAuditAsync("RemoveAnnouncement", "Announcement", banner.Id, "Оголошення знято з сайту");
+            return Ok(new { message = $"Оголошення #{banner.Id} деактивовано", id = banner.Id });
         }
-        return Ok(new { message = "Оголошення деактивовано" });
+
+        return Ok(new { message = "Активних оголошень не знайдено" });
+    }
+
+    // 3.1 ВИДАЛИТИ ОГОЛОШЕННЯ НАЗАВЖДИ
+    [HttpDelete("announcement/{id}/permanent")]
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> DeleteAnnouncementPermanent(int id)
+    {
+        var banner = await _context.SiteAnnouncements.FindAsync(id);
+        if (banner != null)
+        {
+            _context.SiteAnnouncements.Remove(banner);
+            await _context.SaveChangesAsync();
+            await LogAuditAsync("DeleteAnnouncement", "Announcement", id, "Оголошення видалено назавжди");
+        }
+        return Ok(new { message = "Оголошення видалено" });
     }
 
     // 4. МАСОВА СИСТЕМНА РОЗСИЛКА (BROADCAST)

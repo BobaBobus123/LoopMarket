@@ -881,6 +881,8 @@ public class UsersController : ControllerBase
             avatarUrl = user.AvatarUrl,
             bio = user.Bio,
             phoneNumber = user.PhoneNumber,
+            isPhoneVerified = user.IsPhoneVerified,
+            isTelegramVerified = user.IsPhoneVerified && user.TelegramChatId != 0,
             telegramChatId = user.TelegramChatId,
             receiveTelegramNotifications = user.ReceiveTelegramNotifications,
             isPremium = user.Role == UserRoles.Admin || (user.IsPremium && (!user.PremiumUntil.HasValue || user.PremiumUntil.Value > DateTime.UtcNow)),

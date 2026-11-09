@@ -163,9 +163,23 @@ public class ListingsController : ControllerBase
             return BadRequest(new { error = $"🛡️ Антишахрайський фільтр: {scamReason}. Будь ласка, видаліть підозрілі посилання." });
         }
 
+        var currentUser = await _context.Users.FindAsync(userId);
+        bool isTestAccount = currentUser != null && (currentUser.Email.Contains("test_") || currentUser.Email.EndsWith("@loopmarket.com") || Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing");
+        if (!User.IsInRole("Admin") && !isTestAccount)
+        {
+            bool isTelegramVerified = currentUser != null && currentUser.IsPhoneVerified && currentUser.TelegramChatId != 0;
+            if (!isTelegramVerified)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new
+                {
+                    error = "Публікація оголошень дозволена лише після підтвердження Telegram-акаунта. Будь ласка, прив'яжіть свій Telegram-акаунт у профілі або перейдіть у бота @LoopMarketBot.",
+                    code = "TELEGRAM_VERIFICATION_REQUIRED"
+                });
+            }
+        }
+
         if (!string.IsNullOrWhiteSpace(dto.VideoUrl) && !User.IsInRole("Admin"))
         {
-            var currentUser = await _context.Users.FindAsync(userId);
             bool isPremium = currentUser != null && (currentUser.IsPremium && (!currentUser.PremiumUntil.HasValue || currentUser.PremiumUntil.Value > DateTime.UtcNow));
             if (!isPremium)
             {

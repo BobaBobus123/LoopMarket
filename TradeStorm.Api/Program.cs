@@ -334,6 +334,12 @@ using (var scope = app.Services.CreateScope())
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN IsPremium INTEGER DEFAULT 0;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN PremiumUntil TEXT;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN PremiumPlan TEXT;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN Title TEXT;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN TargetPage TEXT;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN Placement TEXT;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN ExpiresAt TEXT;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN ActionText TEXT;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN ActionUrl TEXT;"); } catch {}
         }
         catch {}
     }
@@ -350,6 +356,12 @@ using (var scope = app.Services.CreateScope())
             db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""IsPremium"" boolean DEFAULT FALSE;");
             db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""PremiumUntil"" timestamp with time zone;");
             db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""PremiumPlan"" text;");
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""Title"" TEXT;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""TargetPage"" VARCHAR(50);"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""Placement"" VARCHAR(50);"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""ExpiresAt"" timestamp with time zone;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""ActionText"" VARCHAR(100);"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""ActionUrl"" VARCHAR(500);"); } catch {}
         }
         catch {}
     }

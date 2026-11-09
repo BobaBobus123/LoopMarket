@@ -2255,6 +2255,152 @@
     </style>
     <link rel="stylesheet" href="/css/global.css?v=3.2">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
+
+        /* ==================== OLX-STYLE AD BANNER ==================== */
+        .catalog-promo-slot {
+            width: 100%;
+            margin-bottom: 22px;
+        }
+
+        .olx-promo-banner {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);
+            border: 1.5px dashed rgba(37, 99, 235, 0.35);
+            border-radius: 18px;
+            padding: 16px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            position: relative;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+            transition: all 0.25s ease;
+        }
+
+        .olx-promo-banner:hover {
+            border-color: rgba(37, 99, 235, 0.6);
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(16, 185, 129, 0.12) 100%);
+        }
+
+        .olx-promo-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .olx-promo-logo-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2563eb, #10b981);
+            color: white;
+            width: 54px;
+            height: 54px;
+            border-radius: 15px;
+            flex-shrink: 0;
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+        }
+
+        .olx-promo-logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .olx-promo-badge {
+            font-size: 0.52rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+            margin-top: 2px;
+        }
+
+        .olx-promo-title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .olx-promo-sub {
+            margin: 4px 0 0 0;
+            font-size: 0.86rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .olx-promo-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .olx-promo-btn {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff !important;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.88rem;
+            padding: 9px 18px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+        }
+
+        .olx-promo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(37, 99, 235, 0.45);
+        }
+
+        .olx-promo-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            line-height: 1;
+            border-radius: 8px;
+            transition: color 0.2s, background 0.2s;
+        }
+
+        .olx-promo-close:hover {
+            color: var(--text-main);
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        @media (max-width: 768px) {
+            .olx-promo-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 14px 16px;
+                gap: 12px;
+            }
+            .olx-promo-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .olx-promo-btn {
+                flex: 1;
+                justify-content: center;
+            }
+            .olx-promo-title {
+                font-size: 1rem;
+            }
+            .olx-promo-sub {
+                font-size: 0.8rem;
+            }
+        }
+
 </head>
 <body>
     <header>
@@ -2567,6 +2713,28 @@
                             <option value="price_asc">Від дешевих</option>
                             <option value="price_desc">Від дорогих</option>
                         </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OLX-STYLE PROMO / ADVERTISEMENT BANNER SLOT -->
+            <div id="catalogPromoSlot" class="catalog-promo-slot">
+                <div class="olx-promo-banner" id="olxPromoBanner">
+                    <div class="olx-promo-left">
+                        <div class="olx-promo-logo-box">
+                            <span class="olx-promo-logo">L</span>
+                            <span class="olx-promo-badge">ADS</span>
+                        </div>
+                        <div class="olx-promo-text">
+                            <div class="olx-promo-title">📢 Тут могла бути ваша реклама!</div>
+                            <div class="olx-promo-sub">Залучайте тисячі покупців щодня на LoopMarket. Розміщуйте товари вашого бренду, банери чи акційні пропозиції.</div>
+                        </div>
+                    </div>
+                    <div class="olx-promo-actions">
+                        <a href="https://t.me/LoopMarketSupport" target="_blank" class="olx-promo-btn">
+                            <span>Розмістити рекламу 📢</span>
+                        </a>
+                        <button type="button" class="olx-promo-close" onclick="dismissCatalogPromo()" title="Закрити рекламу">&times;</button>
                     </div>
                 </div>
             </div>

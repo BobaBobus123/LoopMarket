@@ -103,10 +103,27 @@
 
         .admin-main {
             flex: 1;
-            max-width: 1440px;
-            width: 100%;
+            max-width: 1720px;
+            width: calc(100% - 32px);
             margin: 0 auto;
-            padding: 24px;
+            padding: 24px 20px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(37, 99, 235, 0.3) transparent;
+        }
+
+        .table-responsive::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: rgba(37, 99, 235, 0.3);
+            border-radius: 10px;
         }
 
         /* KPI STATS ROW */
@@ -311,18 +328,20 @@
 
         table.admin-table th {
             background: rgba(0, 0, 0, 0.02);
-            padding: 14px 18px;
+            padding: 11px 12px;
             font-weight: 700;
             color: var(--text-muted);
             border-bottom: 1px solid var(--border-color);
             white-space: nowrap;
+            font-size: 0.82rem;
         }
 
         table.admin-table td {
-            padding: 14px 18px;
+            padding: 10px 12px;
             border-bottom: 1px solid var(--border-color);
             color: var(--text-main);
             vertical-align: middle;
+            font-size: 0.84rem;
         }
 
         table.admin-table tr:hover {
@@ -846,31 +865,82 @@
 
         <!-- TAB 5: BROADCAST & ANNOUNCEMENTS -->
         <section id="panel-broadcast" class="tab-panel">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
-                <!-- GLOBAL BANNER SETTER -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-bottom: 24px;">
+                <!-- ANNOUNCEMENT & AD BANNER SETTER -->
                 <div class="admin-card" style="padding: 24px;">
                     <h3 style="margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
-                        📌 Закріплений інформаційний банер сайту
+                        📌 Конструктор оголошень та рекламних банерів
                     </h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 18px;">
-                        Цей банер буде відображатися зверху для всіх відвідувачів маркетплейсу (попередження про фішинг, техроботи тощо).
+                        Керуйте системними сповіщеннями, банерами у шапці, рекламними блоками у каталозі та спливаючими вікнами з точним налаштуванням сторінки та терміну дії.
                     </p>
                     <form onsubmit="handleSetAnnouncement(event)">
                         <div class="admin-form-group">
-                            <label>Тип сповіщення</label>
-                            <select id="bannerTypeSelect" class="admin-form-select">
-                                <option value="warning">⚠️ Попередження (Жовтий)</option>
-                                <option value="danger">🚫 Критичне / Антифрод (Червоний)</option>
-                                <option value="info">ℹ️ Інформаційне (Синій)</option>
-                            </select>
+                            <label>Заголовок (опціонально)</label>
+                            <input type="text" id="bannerTitleInput" class="admin-form-input" placeholder="Наприклад: Тут могла бути ваша реклама! або Важливе оновлення">
                         </div>
                         <div class="admin-form-group">
-                            <label>Текст оголошення</label>
-                            <textarea id="bannerMessageInput" class="admin-form-textarea" rows="3" required placeholder="Увага! Адміністрація ніколи не просить переходити за сторонніми посиланнями для оплати."></textarea>
+                            <label>Текст оголошення *</label>
+                            <textarea id="bannerMessageInput" class="admin-form-textarea" rows="3" required placeholder="Залучайте покупців для свого бізнесу на маркетплейсі LoopMarket..."></textarea>
                         </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="admin-form-group">
+                                <label>Тип сповіщення</label>
+                                <select id="bannerTypeSelect" class="admin-form-select">
+                                    <option value="promo">🏷️ Реклама / Промоція (Зелений)</option>
+                                    <option value="warning" selected>⚠️ Попередження (Жовтий)</option>
+                                    <option value="info">ℹ️ Інформаційне (Синій)</option>
+                                    <option value="danger">🚫 Критичне / Антифрод (Червоний)</option>
+                                </select>
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Цільова сторінка</label>
+                                <select id="bannerTargetPageSelect" class="admin-form-select">
+                                    <option value="all" selected>🌐 Всі сторінки сайту</option>
+                                    <option value="home">🏠 Головна / Каталог</option>
+                                    <option value="details">📦 Сторінка товару (Details)</option>
+                                    <option value="services">🛠️ Послуги майстрів</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="admin-form-group">
+                                <label>Місце розміщення</label>
+                                <select id="bannerPlacementSelect" class="admin-form-select">
+                                    <option value="top" selected>🔝 Верхній банер сайту (Header bar)</option>
+                                    <option value="catalog">📰 У каталозі товарів (OLX-style блок)</option>
+                                    <option value="modal">🪟 Спливаюче модальне вікно</option>
+                                </select>
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Термін дії</label>
+                                <select id="bannerDurationSelect" class="admin-form-select">
+                                    <option value="forever" selected>♾️ Безстроково (до ручного скасування)</option>
+                                    <option value="24h">⏰ 24 години</option>
+                                    <option value="3d">📅 3 дні</option>
+                                    <option value="7d">📅 7 днів (1 тиждень)</option>
+                                    <option value="30d">🗓️ 30 днів (1 місяць)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="admin-form-group">
+                                <label>Текст кнопки (опціонально)</label>
+                                <input type="text" id="bannerActionTextInput" class="admin-form-input" placeholder="Наприклад: Розмістити рекламу">
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Посилання кнопки URL</label>
+                                <input type="text" id="bannerActionUrlInput" class="admin-form-input" placeholder="https://t.me/LoopMarketSupport">
+                            </div>
+                        </div>
+
                         <div style="display: flex; gap: 10px; margin-top: 14px;">
-                            <button type="submit" class="btn-action primary" style="padding: 10px 16px;">Встановити банер</button>
-                            <button type="button" class="btn-action danger" onclick="handleRemoveAnnouncement()">Зняти активний банер</button>
+                            <button type="submit" class="btn-action primary" style="padding: 10px 18px; font-weight: 700;">
+                                🚀 Опублікувати оголошення / банер
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -890,16 +960,52 @@
                         </div>
                         <div class="admin-form-group">
                             <label>Повідомлення</label>
-                            <textarea id="broadcastMessageInput" class="admin-form-textarea" rows="3" required placeholder="Шановні користувачі, запущено нову систему захисту угод..."></textarea>
+                            <textarea id="broadcastMessageInput" class="admin-form-textarea" rows="4" required placeholder="Шановні користувачі, запущено нову систему захисту угод..."></textarea>
                         </div>
                         <div class="admin-form-group" style="display: flex; align-items: center; gap: 10px;">
                             <input type="checkbox" id="broadcastTgCheckbox" checked style="width: 18px; height: 18px; accent-color: var(--admin-primary);">
                             <label for="broadcastTgCheckbox" style="margin: 0; font-weight: 600; cursor: pointer;">Дублювати повідомлення в Telegram-бот</label>
                         </div>
-                        <button type="submit" class="btn-action success" style="padding: 10px 18px; margin-top: 10px;">
+                        <button type="submit" class="btn-action success" style="padding: 11px 20px; margin-top: 10px; font-weight: 700;">
                             🚀 Відправити всім користувачам
                         </button>
                     </form>
+                </div>
+            </div>
+
+            <!-- LIVE ANNOUNCEMENTS TABLE -->
+            <div class="admin-card">
+                <div style="padding: 18px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                            <span>📋 Оголошення та активні банери платформи</span>
+                            <span id="announcementsCountBadge" class="status-badge" style="background: rgba(37,99,235,0.12); color: #2563eb; font-weight: 800;">0</span>
+                        </h3>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;">
+                            Якщо користувач закриває оголошення хрестиком на сайті, воно більше йому не показується, але залишається видимим для нових та інших користувачів.
+                        </div>
+                    </div>
+                    <button type="button" class="btn-action primary" onclick="loadAnnouncementsList()">🔄 Оновити список</button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">ID</th>
+                                <th>Тип</th>
+                                <th>Заголовок та повідомлення</th>
+                                <th>Сторінка</th>
+                                <th>Місце</th>
+                                <th>Термін дії</th>
+                                <th>Статус</th>
+                                <th style="text-align: right;">Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="announcementsTableBody">
+                            <tr><td colspan="8" style="text-align: center; padding: 24px; color: var(--text-muted);">Завантаження списку оголошень...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
@@ -1561,6 +1667,7 @@
             if (tabKey === 'orders') loadOrders();
             if (tabKey === 'categories') loadCategories();
             if (tabKey === 'audit') loadAuditLogs();
+            if (tabKey === 'broadcast') loadAnnouncementsList();
         }
 
         // LOAD DASHBOARD STATS
@@ -2138,7 +2245,11 @@
             if (countBadge) countBadge.innerText = 'Завантаження...';
             if (filterInp) filterInp.value = '';
 
-            document.getElementById('userListingsModal').style.display = 'flex';
+            const modal = document.getElementById('userListingsModal');
+            if (modal) {
+                modal.classList.add('active');
+                modal.style.display = 'flex';
+            }
 
             try {
                 const res = await adminFetch(`/api/users/admin/${userId}/listings`);
@@ -2157,9 +2268,17 @@
         window.openUserListingsModal = openUserListingsModal;
 
         function closeUserListingsModal() {
-            document.getElementById('userListingsModal').style.display = 'none';
+            const modal = document.getElementById('userListingsModal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
         }
         window.closeUserListingsModal = closeUserListingsModal;
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeUserListingsModal();
+        });
+
 
         function renderUserListingsModalList(list) {
             const container = document.getElementById('userListingsContent');
@@ -2460,44 +2579,179 @@
         }
 
         // TAB 5: BROADCAST & ANNOUNCEMENTS
+        let allAnnouncementsList = [];
+
+        async function loadAnnouncementsList() {
+            const tbody = document.getElementById('announcementsTableBody');
+            const badge = document.getElementById('announcementsCountBadge');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: var(--text-muted);">Завантаження списку оголошень...</td></tr>';
+
+            try {
+                const res = await adminFetch('/api/admin/announcements');
+                if (res.ok) {
+                    allAnnouncementsList = await res.json();
+                    if (badge) badge.innerText = allAnnouncementsList.length;
+                    renderAnnouncementsTable(allAnnouncementsList);
+                } else {
+                    if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: #ef4444;">Не вдалося завантажити оголошення</td></tr>';
+                }
+            } catch(e) {
+                if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: #ef4444;">Помилка сервера при отриманні оголошень</td></tr>';
+            }
+        }
+        window.loadAnnouncementsList = loadAnnouncementsList;
+
+        function renderAnnouncementsTable(list) {
+            const tbody = document.getElementById('announcementsTableBody');
+            if (!tbody) return;
+
+            if (!list || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 32px; color: var(--text-muted);">На платформі немає створених банерів чи оголошень. Створіть перший у формі вище!</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = list.map(a => {
+                const isExpired = a.isExpired;
+                const isActive = a.isActive && !isExpired;
+
+                const typeBadge = a.type === 'danger' 
+                    ? '<span class="status-badge banned">🚫 Критичне</span>' 
+                    : (a.type === 'promo' 
+                        ? '<span class="status-badge" style="background: rgba(16,185,129,0.15); color: #059669; font-weight: 800;">🏷️ Реклама</span>' 
+                        : (a.type === 'info' 
+                            ? '<span class="status-badge" style="background: rgba(37,99,235,0.12); color: #2563eb; font-weight: 800;">ℹ️ Інфо</span>' 
+                            : '<span class="status-badge warning">⚠️ Попередження</span>'));
+
+                const statusBadge = isActive 
+                    ? '<span class="status-badge active">🟢 Активне на сайті</span>' 
+                    : (isExpired 
+                        ? '<span class="status-badge muted">⏳ Термін сплив</span>' 
+                        : '<span class="status-badge" style="background: rgba(100,116,139,0.15); color: #64748b;">⚪ Знято адміном</span>');
+
+                const pageLabel = a.targetPage === 'home' ? '🏠 Каталог / Головна' : (a.targetPage === 'details' ? '📦 Товар' : (a.targetPage === 'services' ? '🛠️ Послуги' : '🌐 Всі сторінки'));
+                const placeLabel = a.placement === 'catalog' ? '📰 У каталозі' : (a.placement === 'modal' ? '🪟 Модальне вікно' : '🔝 Верхній банер');
+
+                const expiresLabel = a.expiresAt 
+                    ? new Date(a.expiresAt).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : '♾️ Безстроково';
+
+                return `
+                    <tr style="${!isActive ? 'opacity: 0.65;' : ''}">
+                        <td style="font-weight: 800; color: var(--text-muted);">#${a.id}</td>
+                        <td>${typeBadge}</td>
+                        <td>
+                            ${a.title ? `<div style="font-weight: 800; color: var(--text-main); margin-bottom: 2px;">${escapeHtml(a.title)}</div>` : ''}
+                            <div style="font-size: 0.85rem; color: var(--text-muted); max-width: 380px; word-break: break-word;">${escapeHtml(a.message)}</div>
+                            ${a.actionUrl ? `<div style="font-size: 0.75rem; margin-top: 4px;"><a href="${escapeHtml(a.actionUrl)}" target="_blank" style="color: #2563eb; font-weight: 700;">🔗 ${escapeHtml(a.actionText || 'Перейти')}</a></div>` : ''}
+                        </td>
+                        <td><span style="font-weight: 700; font-size: 0.82rem;">${pageLabel}</span></td>
+                        <td><span style="font-weight: 700; font-size: 0.82rem;">${placeLabel}</span></td>
+                        <td><span style="font-size: 0.8rem; color: var(--text-muted);">${expiresLabel}</span></td>
+                        <td>${statusBadge}</td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            ${isActive ? `
+                                <button type="button" class="btn-action warning" onclick="handleDeactivateAnnouncement(${a.id})" title="Зняти з показу на сайті" style="padding: 4px 10px; font-weight: 700; font-size: 0.78rem;">
+                                    🛑 Зняти
+                                </button>
+                            ` : ''}
+                            <button type="button" class="btn-action danger" onclick="handleDeleteAnnouncementPermanent(${a.id})" title="Видалити назавжди" style="padding: 4px 8px; font-weight: 700; font-size: 0.78rem;">
+                                🗑️
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
         async function handleSetAnnouncement(e) {
             e.preventDefault();
-            const type = document.getElementById('bannerTypeSelect').value;
-            const message = document.getElementById('bannerMessageInput').value.trim();
+            const title = document.getElementById('bannerTitleInput')?.value?.trim() || '';
+            const message = document.getElementById('bannerMessageInput')?.value?.trim();
+            const type = document.getElementById('bannerTypeSelect')?.value || 'warning';
+            const targetPage = document.getElementById('bannerTargetPageSelect')?.value || 'all';
+            const placement = document.getElementById('bannerPlacementSelect')?.value || 'top';
+            const duration = document.getElementById('bannerDurationSelect')?.value || 'forever';
+            const actionText = document.getElementById('bannerActionTextInput')?.value?.trim() || '';
+            const actionUrl = document.getElementById('bannerActionUrlInput')?.value?.trim() || '';
+
+            if (!message) {
+                LoopToast.error("Введіть текст оголошення");
+                return;
+            }
 
             try {
                 const res = await adminFetch('/api/admin/announcement', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ type, message, isActive: true })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        message,
+                        type,
+                        targetPage,
+                        placement,
+                        duration,
+                        actionText,
+                        actionUrl,
+                        isActive: true
+                    })
                 });
+
                 if (res.ok) {
-                    LoopToast.success("Банер успішно активовано на сайті!");
+                    LoopToast.success("Оголошення / банер успішно опубліковано на сайті!");
+                    document.getElementById('bannerTitleInput').value = '';
                     document.getElementById('bannerMessageInput').value = '';
+                    document.getElementById('bannerActionTextInput').value = '';
+                    document.getElementById('bannerActionUrlInput').value = '';
+                    loadAnnouncementsList();
                 } else {
-                    LoopToast.error("Помилка збереження");
+                    const err = await res.json();
+                    LoopToast.error(err.error || "Помилка збереження оголошення");
                 }
             } catch (err) {
-                LoopToast.error("Помилка сервера");
+                LoopToast.error("Помилка зв'язку з сервером");
             }
         }
+        window.handleSetAnnouncement = handleSetAnnouncement;
 
-        async function handleRemoveAnnouncement() {
-            const confirmed = await LoopDialog.confirm("Зняти поточний активний банер із сайту?", "Деактивація");
+        async function handleDeactivateAnnouncement(id) {
+            const confirmed = await LoopDialog.confirm(`Зняти оголошення #${id} з показу на сайті?`, "Деактивація");
             if (!confirmed) return;
 
             try {
-                const res = await adminFetch('/api/admin/announcement/1', {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                const res = await adminFetch(`/api/admin/announcement/${id}`, {
+                    method: 'DELETE'
                 });
                 if (res.ok) {
-                    LoopToast.info("Банер деактивовано");
+                    LoopToast.info(`Оголошення #${id} деактивовано`);
+                    loadAnnouncementsList();
+                } else {
+                    LoopToast.error("Не вдалося деактивувати");
                 }
-            } catch (e) {
-                LoopToast.error("Помилка");
+            } catch(e) {
+                LoopToast.error("Помилка сервера");
             }
         }
+        window.handleDeactivateAnnouncement = handleDeactivateAnnouncement;
+
+        async function handleDeleteAnnouncementPermanent(id) {
+            const confirmed = await LoopDialog.confirm(`Видалити оголошення #${id} назавжди з бази даних?`, "Видалення");
+            if (!confirmed) return;
+
+            try {
+                const res = await adminFetch(`/api/admin/announcement/${id}/permanent`, {
+                    method: 'DELETE'
+                });
+                if (res.ok) {
+                    LoopToast.info(`Оголошення #${id} видалено`);
+                    loadAnnouncementsList();
+                } else {
+                    LoopToast.error("Помилка видалення");
+                }
+            } catch(e) {
+                LoopToast.error("Помилка сервера");
+            }
+        }
+        window.handleDeleteAnnouncementPermanent = handleDeleteAnnouncementPermanent;
 
         async function handleSendBroadcast(e) {
             e.preventDefault();
@@ -3115,8 +3369,8 @@
 
 
     <!-- ==================== MODAL: USER LISTINGS ==================== -->
-    <div class="admin-modal-overlay" id="userListingsModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 100000; align-items: center; justify-content: center; padding: 20px;">
-        <div style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 20px; max-width: 860px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.5); position: relative;">
+    <div class="admin-modal-overlay" id="userListingsModal" onclick="if(event.target === this) closeUserListingsModal();" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 100000; align-items: center; justify-content: center; padding: 20px;">
+        <div class="admin-modal-box" style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 20px; max-width: 900px; width: 100%; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.5); position: relative;">
             <div style="padding: 18px 24px; border-bottom: 1.5px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--surface);">
                 <div>
                     <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px;">

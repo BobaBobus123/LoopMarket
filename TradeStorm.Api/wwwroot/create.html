@@ -1172,6 +1172,21 @@
 
             <!-- MAIN FORM -->
             <form id="createListingForm">
+                <!-- TELEGRAM VERIFICATION REQUIRED BANNER -->
+                <div id="tgVerificationBanner" style="display: none; background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(30,64,175,0.08)); border: 1.5px solid rgba(37,99,235,0.4); border-radius: 18px; padding: 18px 22px; margin-bottom: 24px; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; box-shadow: 0 4px 16px rgba(37,99,235,0.08);">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <div style="width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">✈️</div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 1.05rem; color: var(--text-main);">Потрібна верифікація Telegram для публікації</div>
+                            <div style="font-size: 0.86rem; color: var(--text-muted); margin-top: 3px;">Для захисту платформи від ботів та спаму, розміщувати оголошення можуть лише користувачі з підтвердженим Telegram-акаунтом.</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <a href="/profile.html" style="background: #2563eb; color: white; text-decoration: none; padding: 10px 18px; border-radius: 12px; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(37,99,235,0.35);">
+                            <span>Перейти до профілю ✈️</span>
+                        </a>
+                    </div>
+                </div>
                 <!-- SECTION 1: BASIC INFO -->
                 <div class="form-section-card">
                     <div class="section-header-row">
@@ -1814,6 +1829,41 @@
         let selectedPremiumPlanId = 'pro_monthly';
         let selectedPremiumPrice = 199;
         let selectedPremiumPayMethod = 'card';
+
+        let isUserTgVerified = true;
+
+        async function checkUserVerificationAndStatus() {
+            if (!token) return;
+            try {
+                const res = await fetch('/api/users/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const isAdmin = data.role === 'Admin';
+                    isUserTgVerified = isAdmin || (data.isTelegramVerified || (data.telegramChatId && data.telegramChatId !== 0 && data.isPhoneVerified));
+                    
+                    const tgBanner = document.getElementById('tgVerificationBanner');
+                    const btnPublish = document.getElementById('btnPublish');
+                    
+                    if (!isUserTgVerified) {
+                        if (tgBanner) tgBanner.style.display = 'flex';
+                        if (btnPublish) {
+                            btnPublish.disabled = true;
+                            btnPublish.title = "Підтвердіть Telegram-акаунт для публікації";
+                            btnPublish.innerHTML = '🔒 Потрібна верифікація Telegram для публікації';
+                            btnPublish.style.opacity = '0.65';
+                            btnPublish.style.cursor = 'not-allowed';
+                            btnPublish.style.background = 'linear-gradient(135deg, #64748b, #475569)';
+                        }
+                    } else {
+                        if (tgBanner) tgBanner.style.display = 'none';
+                    }
+                }
+            } catch(e) {
+                console.warn('User me verification check error:', e);
+            }
+        }
 
         async function checkUserPremiumStatus() {
             if (!token) return;
@@ -2520,6 +2570,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadCategories();
             checkUserPremiumStatus();
+            checkUserVerificationAndStatus();
             initMap();
             const btn = document.getElementById('themeToggleBtn');
             if (btn) btn.innerText = (localStorage.getItem('loopTheme') === 'dark') ? '☀️' : '🌙';

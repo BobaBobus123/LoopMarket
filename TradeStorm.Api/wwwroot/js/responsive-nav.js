@@ -396,31 +396,106 @@
         });
     }
 
-        async function checkSiteAnnouncement() {
+    async function checkSiteAnnouncement() {
         try {
-            const res = await fetch('/api/admin/announcement/active');
+            const path = window.location.pathname.toLowerCase();
+            let pageKey = 'all';
+            if (path.includes('details') || path.includes('product')) pageKey = 'details';
+            else if (path.includes('services')) pageKey = 'services';
+            else if (path === '/' || path.includes('index')) pageKey = 'home';
+            else if (path.includes('create')) pageKey = 'create';
+
+            const res = await fetch('/api/admin/announcement/active?page=' + pageKey);
             if (!res.ok) return;
             const data = await res.json();
-            if (data && data.hasActive && data.message) {
-                const dismissedKey = 'loop_dismissed_announcement_' + data.id;
+            if (!data || !data.hasActive) return;
+
+            const items = data.announcements || (data.message ? [data] : []);
+
+            for (const item of items) {
+                if (!item || !item.message) continue;
+                const dismissedKey = 'loop_dismissed_announcement_' + item.id;
                 if (localStorage.getItem(dismissedKey) === 'true') {
-                    return; // Вже закрито користувачем - більше не показувати навіть після перезавантаження!
+                    continue; // Закрито цим користувачем - більше не показувати
                 }
-                if (document.getElementById('siteAnnouncementBanner')) return;
-                const banner = document.createElement('div');
-                banner.id = 'siteAnnouncementBanner';
-                const bg = data.type === 'danger' ? '#ef4444' : (data.type === 'info' ? '#2563eb' : '#f59e0b');
-                banner.style.cssText = 'background: ' + bg + '; color: #ffffff; padding: 10px 16px; font-size: 0.88rem; font-weight: 700; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; z-index: 1000; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.15);';
-                banner.innerHTML = '<span>📢 ' + data.message + '</span><button id="closeAnnouncementBtn" title="Закрити назавжди" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.25rem; line-height: 1; margin-left: 14px; opacity: 0.9; padding: 2px 6px;">&times;</button>';
-                
-                const closeBtn = banner.querySelector('#closeAnnouncementBtn');
-                if (closeBtn) {
-                    closeBtn.onclick = function() {
-                        localStorage.setItem(dismissedKey, 'true');
-                        banner.remove();
-                    };
+
+                // 1. TOP HEADER BANNER
+                if (!item.placement || item.placement === 'top' || item.placement === 'header') {
+                    const bannerId = 'siteAnnouncementBanner_' + item.id;
+                    if (document.getElementById(bannerId)) continue;
+
+                    const banner = document.createElement('div');
+                    banner.id = bannerId;
+                    
+                    let bg = 'linear-gradient(90deg, #d97706 0%, #f59e0b 100%)';
+                    let icon = '⚠️';
+                    if (item.type === 'danger') {
+                        bg = 'linear-gradient(90deg, #dc2626 0%, #ef4444 100%)';
+                        icon = '🚫';
+                    } else if (item.type === 'promo') {
+                        bg = 'linear-gradient(90deg, #059669 0%, #10b981 100%)';
+                        icon = '🏷️';
+                    } else if (item.type === 'info') {
+                        bg = 'linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%)';
+                        icon = 'ℹ️';
+                    }
+
+                    banner.style.cssText = 'background: ' + bg + '; color: #ffffff; padding: 11px 18px; font-size: 0.88rem; font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px; z-index: 1000; position: relative; box-shadow: 0 3px 12px rgba(0,0,0,0.18); flex-wrap: wrap;';
+                    
+                    const actionBtn = (item.actionUrl && item.actionText) 
+                        ? `<a href="${item.actionUrl}" target="_blank" style="margin-left: 8px; background: rgba(255,255,255,0.22); color: white; padding: 3px 12px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 0.82rem; border: 1px solid rgba(255,255,255,0.4); display: inline-flex; align-items: center; gap: 4px;">${item.actionText} &rarr;</a>` 
+                        : '';
+
+                    const titleHtml = item.title ? `<strong style="font-weight: 800; letter-spacing: 0.3px;">${item.title}:</strong> ` : '';
+
+                    banner.innerHTML = `<span>${icon} ${titleHtml}${item.message}</span>${actionBtn}<button class="close-ann-btn" title="Закрити оголошення назавжди" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.35rem; line-height: 1; margin-left: 12px; opacity: 0.9; padding: 2px 6px; border-radius: 4px;">&times;</button>`;
+
+                    const closeBtn = banner.querySelector('.close-ann-btn');
+                    if (closeBtn) {
+                        closeBtn.onclick = function() {
+                            localStorage.setItem(dismissedKey, 'true');
+                            banner.remove();
+                        };
+                    }
+                    document.body.prepend(banner);
                 }
-                document.body.prepend(banner);
+
+                // 2. MODAL POPUP
+                if (item.placement === 'modal') {
+                    const modalId = 'siteAnnouncementModal_' + item.id;
+                    if (document.getElementById(modalId)) continue;
+
+                    const overlay = document.createElement('div');
+                    overlay.id = modalId;
+                    overlay.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 18px;';
+                    
+                    overlay.innerHTML = `
+                        <div style="background: var(--surface, #1e293b); border: 1.5px solid var(--border-color, #334155); border-radius: 20px; max-width: 500px; width: 100%; padding: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); color: var(--text-main, #f8fafc); position: relative;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                                    <span>📢</span>
+                                    <span>${item.title || 'Повідомлення платформи'}</span>
+                                </h3>
+                                <button type="button" class="close-modal-ann" style="background: none; border: none; font-size: 1.5rem; color: var(--text-muted, #94a3b8); cursor: pointer; line-height: 1;">&times;</button>
+                            </div>
+                            <p style="font-size: 0.92rem; color: var(--text-muted, #cbd5e1); line-height: 1.5; margin-bottom: 18px;">
+                                ${item.message}
+                            </p>
+                            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                                ${item.actionUrl ? `<a href="${item.actionUrl}" target="_blank" style="background: #2563eb; color: white; padding: 9px 18px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.88rem;">${item.actionText || 'Дізнатися більше'}</a>` : ''}
+                                <button type="button" class="close-modal-ann" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color, #334155); color: var(--text-main, #fff); padding: 9px 18px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.88rem;">Закрити</button>
+                            </div>
+                        </div>
+                    `;
+
+                    overlay.querySelectorAll('.close-modal-ann').forEach(btn => {
+                        btn.onclick = function() {
+                            localStorage.setItem(dismissedKey, 'true');
+                            overlay.remove();
+                        };
+                    });
+                    document.body.appendChild(overlay);
+                }
             }
         } catch(e) {}
     }
