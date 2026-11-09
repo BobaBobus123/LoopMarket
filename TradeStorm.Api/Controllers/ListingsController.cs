@@ -168,12 +168,15 @@ public class ListingsController : ControllerBase
         if (!User.IsInRole("Admin") && !isTestAccount)
         {
             bool isTelegramVerified = currentUser != null && currentUser.IsPhoneVerified && currentUser.TelegramChatId != 0;
-            if (!isTelegramVerified)
+            bool isEmailVerified = currentUser != null && currentUser.IsEmailVerified;
+            bool isIdentityVerified = isTelegramVerified || isEmailVerified;
+
+            if (!isIdentityVerified)
             {
                 return StatusCode(StatusCodes.Status403Forbidden, new
                 {
-                    error = "Публікація оголошень дозволена лише після підтвердження Telegram-акаунта. Будь ласка, прив'яжіть свій Telegram-акаунт у профілі або перейдіть у бота @LoopMarketBot.",
-                    code = "TELEGRAM_VERIFICATION_REQUIRED"
+                    error = "Публікація оголошень дозволена лише після підтвердження особи (через Email або Telegram). Будь ласка, підтвердіть пошту або Telegram у своєму профілі.",
+                    code = "VERIFICATION_REQUIRED"
                 });
             }
         }

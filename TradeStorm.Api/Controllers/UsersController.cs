@@ -56,14 +56,16 @@ public class UsersController : ControllerBase
     private readonly ITokenService _tokenService;
     private readonly TelegramBotService _telegramService;
     private readonly ICaptchaService? _captchaService;
+    private readonly IEmailService? _emailService;
     private readonly PasswordHasher<User> _passwordHasher = new();
 
-    public UsersController(AppDbContext context, ITokenService tokenService, TelegramBotService telegramService, ICaptchaService? captchaService = null)
+    public UsersController(AppDbContext context, ITokenService tokenService, TelegramBotService telegramService, ICaptchaService? captchaService = null, IEmailService? emailService = null)
     {
         _context = context;
         _tokenService = tokenService;
         _telegramService = telegramService;
         _captchaService = captchaService;
+        _emailService = emailService;
     }
 
     [HttpPost]
@@ -883,6 +885,8 @@ public class UsersController : ControllerBase
             phoneNumber = user.PhoneNumber,
             isPhoneVerified = user.IsPhoneVerified,
             isTelegramVerified = user.IsPhoneVerified && user.TelegramChatId != 0,
+            isEmailVerified = user.IsEmailVerified,
+            isVerified = user.IsEmailVerified || (user.IsPhoneVerified && user.TelegramChatId != 0),
             telegramChatId = user.TelegramChatId,
             receiveTelegramNotifications = user.ReceiveTelegramNotifications,
             isPremium = user.Role == UserRoles.Admin || (user.IsPremium && (!user.PremiumUntil.HasValue || user.PremiumUntil.Value > DateTime.UtcNow)),
@@ -910,6 +914,102 @@ public class UsersController : ControllerBase
     public class AvatarDto
     {
         public string AvatarUrl { get; set; } = string.Empty;
+    }
+
+    [HttpPost("send-email-code")]
+    [Authorize]
+    public async Task<IActionResult> SendEmailVerificationCode()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
+
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return NotFound(new { error = "Користувача не знайдено" });
+
+        if (user.IsEmailVerified)
+        {
+            return Ok(new { message = "Ваша електронна пошта вже підтверджена", isEmailVerified = true });
+        }
+
+        // Rate limit: 60 sec cooldown
+        if (user.EmailVerificationCodeExpiresAt.HasValue && user.EmailVerificationCodeExpiresAt.Value > DateTime.UtcNow.AddMinutes(14))
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests, new { error = "Зачекайте 60 секунд перед повторним запитом коду" });
+        }
+
+        var emailLower = user.Email.ToLowerInvariant();
+        string[] disposableDomains = ["tempmail", "10minutemail", "mailinator", "guerrillamail", "throwawaymail", "trashmail", "dropmail"];
+        if (disposableDomains.Any(d => emailLower.Contains(d)))
+        {
+            return BadRequest(new { error = "Використання тимчасових поштових скриньок заборонено з міркувань безпеки платформи" });
+        }
+
+        var code = System.Security.Cryptography.RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+        user.EmailVerificationCode = code;
+        user.EmailVerificationCodeExpiresAt = DateTime.UtcNow.AddMinutes(15);
+        await _context.SaveChangesAsync();
+
+        if (_emailService != null)
+        {
+            await _emailService.SendVerificationCodeAsync(user.Email, user.FirstName, code);
+        }
+
+        await LogAuditAsync("SendEmailVerificationCode", "User", user.Id, $"Код надіслано на {user.Email}");
+
+        return Ok(new
+        {
+            message = "Код підтвердження успішно надіслано на вашу пошту",
+            expiresAt = user.EmailVerificationCodeExpiresAt,
+            devHint = (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" || user.Email.Contains("test_") || Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing") ? code : null
+        });
+    }
+
+    [HttpPost("verify-email-code")]
+    [Authorize]
+    public async Task<IActionResult> VerifyEmailCode([FromBody] VerifyEmailCodeDto dto)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
+
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return NotFound(new { error = "Користувача не знайдено" });
+
+        if (user.IsEmailVerified)
+        {
+            return Ok(new { message = "Електронна пошта вже підтверджена", isEmailVerified = true });
+        }
+
+        if (string.IsNullOrWhiteSpace(dto?.Code))
+        {
+            return BadRequest(new { error = "Введіть 6-значний код підтвердження" });
+        }
+
+        var enteredCode = dto.Code.Trim();
+
+        if (string.IsNullOrWhiteSpace(user.EmailVerificationCode) ||
+            !user.EmailVerificationCodeExpiresAt.HasValue ||
+            user.EmailVerificationCodeExpiresAt.Value < DateTime.UtcNow)
+        {
+            return BadRequest(new { error = "Термін дії коду підтвердження сплив. Будь ласка, замовте новий код." });
+        }
+
+        if (user.EmailVerificationCode != enteredCode)
+        {
+            return BadRequest(new { error = "Невірний код підтвердження. Перевірте та спробуйте ще раз." });
+        }
+
+        user.IsEmailVerified = true;
+        user.EmailVerificationCode = null;
+        user.EmailVerificationCodeExpiresAt = null;
+        await _context.SaveChangesAsync();
+
+        await LogAuditAsync("VerifyEmailSuccess", "User", user.Id, "Електронну пошту успішно верифіковано кодом");
+
+        return Ok(new
+        {
+            message = "Електронну пошту успішно підтверджено! Тепер ви можете публікувати оголошення.",
+            isEmailVerified = true
+        });
     }
 
     [HttpGet("public/{id}")]

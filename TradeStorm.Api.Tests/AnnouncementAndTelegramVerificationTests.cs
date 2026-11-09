@@ -85,9 +85,9 @@ public class AnnouncementAndTelegramVerificationTests : IClassFixture<CustomWebA
     }
 
     [Fact]
-    public async Task CreateListing_WithoutTelegramVerification_Returns403Forbidden()
+    public async Task CreateListing_WithoutVerification_Returns403Forbidden()
     {
-        // Arrange: User with token, but Telegram unverified and non-test domain
+        // Arrange: User with token, but neither Telegram nor Email verified and non-test domain
         var (client, _, user) = await CreateUserWithRoleAsync(UserRoles.Buyer);
 
         using (var scope = _factory.Services.CreateScope())
@@ -96,9 +96,9 @@ public class AnnouncementAndTelegramVerificationTests : IClassFixture<CustomWebA
             var u = await db.Users.FindAsync(user.Id);
             if (u != null)
             {
-                // Set to real user email pattern and revoke Telegram verification
                 u.Email = $"realuser_{Guid.NewGuid():N}@gmail.com";
                 u.IsPhoneVerified = false;
+                u.IsEmailVerified = false;
                 u.TelegramChatId = 0;
                 await db.SaveChangesAsync();
             }
@@ -120,7 +120,65 @@ public class AnnouncementAndTelegramVerificationTests : IClassFixture<CustomWebA
         // Assert
         Assert.Equal(HttpStatusCode.Forbidden, res.StatusCode);
         var body = await res.Content.ReadAsStringAsync();
-        Assert.Contains("TELEGRAM_VERIFICATION_REQUIRED", body);
+        Assert.Contains("VERIFICATION_REQUIRED", body);
+    }
+
+    [Fact]
+    public async Task User_CanVerifyEmailWithCode_AndPublishListing()
+    {
+        // Arrange: User with unverified status
+        var (client, _, user) = await CreateUserWithRoleAsync(UserRoles.Buyer);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var u = await db.Users.FindAsync(user.Id);
+            if (u != null)
+            {
+                u.Email = $"buyer_{Guid.NewGuid():N}@gmail.com";
+                u.IsPhoneVerified = false;
+                u.IsEmailVerified = false;
+                u.TelegramChatId = 0;
+                await db.SaveChangesAsync();
+            }
+        }
+
+        // 1. Request Email verification code
+        var sendRes = await client.PostAsync("/api/users/send-email-code", null);
+        Assert.Equal(HttpStatusCode.OK, sendRes.StatusCode);
+
+        string? generatedCode = null;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var u = await db.Users.FindAsync(user.Id);
+            generatedCode = u?.EmailVerificationCode;
+        }
+
+        Assert.NotNull(generatedCode);
+        Assert.Equal(6, generatedCode!.Length);
+
+        // 2. Submit wrong code -> should fail
+        var wrongRes = await client.PostAsJsonAsync("/api/users/verify-email-code", new VerifyEmailCodeDto { Code = "000000" });
+        Assert.Equal(HttpStatusCode.BadRequest, wrongRes.StatusCode);
+
+        // 3. Submit correct code -> should succeed
+        var verifyRes = await client.PostAsJsonAsync("/api/users/verify-email-code", new VerifyEmailCodeDto { Code = generatedCode });
+        Assert.Equal(HttpStatusCode.OK, verifyRes.StatusCode);
+
+        // 4. Now user can publish listing without Telegram!
+        var listingDto = new CreateListingDto
+        {
+            Title = "Смартфон Samsung Galaxy S23 Ultra",
+            Description = "Офіційний, на гарантії, повний комплект",
+            Price = 32000,
+            CategoryId = 1,
+            Location = "Львів",
+            Condition = "Нове"
+        };
+
+        var pubRes = await client.PostAsJsonAsync("/api/listings", listingDto);
+        Assert.Equal(HttpStatusCode.Created, pubRes.StatusCode);
     }
 
     [Fact]

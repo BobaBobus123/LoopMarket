@@ -1172,19 +1172,49 @@
 
             <!-- MAIN FORM -->
             <form id="createListingForm">
-                <!-- TELEGRAM VERIFICATION REQUIRED BANNER -->
-                <div id="tgVerificationBanner" style="display: none; background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(30,64,175,0.08)); border: 1.5px solid rgba(37,99,235,0.4); border-radius: 18px; padding: 18px 22px; margin-bottom: 24px; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; box-shadow: 0 4px 16px rgba(37,99,235,0.08);">
+                <!-- IDENTITY VERIFICATION REQUIRED BANNER (EMAIL OR TELEGRAM) -->
+                <div id="tgVerificationBanner" style="display: none; background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(16,185,129,0.08)); border: 1.5px solid rgba(37,99,235,0.4); border-radius: 18px; padding: 18px 22px; margin-bottom: 24px; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; box-shadow: 0 4px 16px rgba(37,99,235,0.08);">
                     <div style="display: flex; align-items: center; gap: 14px;">
-                        <div style="width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">✈️</div>
+                        <div style="width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #2563eb, #10b981); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 4px 14px rgba(37,99,235,0.3);">🛡️</div>
                         <div>
-                            <div style="font-weight: 800; font-size: 1.05rem; color: var(--text-main);">Потрібна верифікація Telegram для публікації</div>
-                            <div style="font-size: 0.86rem; color: var(--text-muted); margin-top: 3px;">Для захисту платформи від ботів та спаму, розміщувати оголошення можуть лише користувачі з підтвердженим Telegram-акаунтом.</div>
+                            <div style="font-weight: 800; font-size: 1.05rem; color: var(--text-main);">Потрібна верифікація особи для публікації</div>
+                            <div style="font-size: 0.86rem; color: var(--text-muted); margin-top: 3px;">Для захисту від спаму та ботів, підтвердіть особу через <b>Email-код (приватно)</b> або через <b>Telegram</b>.</div>
                         </div>
                     </div>
                     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                        <a href="/profile.html" style="background: #2563eb; color: white; text-decoration: none; padding: 10px 18px; border-radius: 12px; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(37,99,235,0.35);">
-                            <span>Перейти до профілю ✈️</span>
+                        <button type="button" onclick="openEmailVerifyModal()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 18px; border-radius: 12px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16,185,129,0.35);">
+                            <span>✉️ Підтвердити Email кодом</span>
+                        </button>
+                        <a href="/profile.html" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-main); text-decoration: none; padding: 10px 16px; border-radius: 12px; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 6px;">
+                            <span>✈️ Через Telegram</span>
                         </a>
+                    </div>
+                </div>
+
+                <!-- EMAIL VERIFICATION MODAL -->
+                <div id="emailVerifyModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 100000; align-items: center; justify-content: center; padding: 20px;">
+                    <div style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 20px; max-width: 440px; width: 100%; padding: 26px; box-shadow: 0 25px 60px rgba(0,0,0,0.5); position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                                <span>✉️ Підтвердження Email</span>
+                            </h3>
+                            <button type="button" onclick="closeEmailVerifyModal()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; line-height: 1;">&times;</button>
+                        </div>
+                        <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 18px;">
+                            Ми надішлемо одноразовий 6-значний код на вашу електронну пошту. Введіть його нижче для розблокування публікації.
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 14px;">
+                            <button type="button" id="btnSendCreateCode" class="btn-primary" onclick="requestEmailCodeInCreate()" style="padding: 11px; font-weight: 700;">
+                                📨 Отримати 6-значний код на пошту
+                            </button>
+                            <div id="createCodeInputRow" style="display: none; flex-direction: column; gap: 10px;">
+                                <input type="text" id="createEmailCodeInput" placeholder="000000" maxlength="6" style="padding: 12px; font-size: 1.2rem; letter-spacing: 6px; font-weight: 900; text-align: center; border-radius: 12px; border: 1.5px solid var(--border-color); background: var(--bg-color); color: var(--text-main);">
+                                <button type="button" class="btn-primary" onclick="submitEmailCodeInCreate()" style="background: #10b981; padding: 11px; font-weight: 700;">
+                                    Підтвердити та продовжити ✅
+                                </button>
+                                <span id="createCodeTimer" style="font-size: 0.8rem; color: var(--text-muted); text-align: center;"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <!-- SECTION 1: BASIC INFO -->
@@ -1841,7 +1871,7 @@
                 if (res.ok) {
                     const data = await res.json();
                     const isAdmin = data.role === 'Admin';
-                    isUserTgVerified = isAdmin || (data.isTelegramVerified || (data.telegramChatId && data.telegramChatId !== 0 && data.isPhoneVerified));
+                    isUserTgVerified = isAdmin || data.isVerified || data.isEmailVerified || (data.isTelegramVerified || (data.telegramChatId && data.telegramChatId !== 0 && data.isPhoneVerified));
                     
                     const tgBanner = document.getElementById('tgVerificationBanner');
                     const btnPublish = document.getElementById('btnPublish');
@@ -1850,14 +1880,22 @@
                         if (tgBanner) tgBanner.style.display = 'flex';
                         if (btnPublish) {
                             btnPublish.disabled = true;
-                            btnPublish.title = "Підтвердіть Telegram-акаунт для публікації";
-                            btnPublish.innerHTML = '🔒 Потрібна верифікація Telegram для публікації';
+                            btnPublish.title = "Підтвердіть Email або Telegram для публікації";
+                            btnPublish.innerHTML = '🔒 Потрібна верифікація (Email або Telegram)';
                             btnPublish.style.opacity = '0.65';
                             btnPublish.style.cursor = 'not-allowed';
                             btnPublish.style.background = 'linear-gradient(135deg, #64748b, #475569)';
                         }
                     } else {
                         if (tgBanner) tgBanner.style.display = 'none';
+                        if (btnPublish) {
+                            btnPublish.disabled = false;
+                            btnPublish.title = "";
+                            btnPublish.innerHTML = '🚀 Опублікувати оголошення';
+                            btnPublish.style.opacity = '1';
+                            btnPublish.style.cursor = 'pointer';
+                            btnPublish.style.background = '';
+                        }
                     }
                 }
             } catch(e) {
@@ -2488,6 +2526,96 @@
             if (btn) btn.innerText = next === 'dark' ? '☀️' : '🌙';
         }
         window.toggleTheme = toggleTheme;
+
+        function openEmailVerifyModal() {
+            const m = document.getElementById('emailVerifyModal');
+            if (m) m.style.display = 'flex';
+        }
+        window.openEmailVerifyModal = openEmailVerifyModal;
+
+        function closeEmailVerifyModal() {
+            const m = document.getElementById('emailVerifyModal');
+            if (m) m.style.display = 'none';
+        }
+        window.closeEmailVerifyModal = closeEmailVerifyModal;
+
+        let createEmailTimer = null;
+        async function requestEmailCodeInCreate() {
+            const btn = document.getElementById('btnSendCreateCode');
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch('/api/users/send-email-code', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('📨 Код надіслано', 'Перевірте вашу електронну пошту (вхідні або спам)', '✉️');
+                    document.getElementById('createCodeInputRow').style.display = 'flex';
+                    let cd = 60;
+                    const timerEl = document.getElementById('createCodeTimer');
+                    clearInterval(createEmailTimer);
+                    createEmailTimer = setInterval(() => {
+                        cd--;
+                        if (cd <= 0) {
+                            clearInterval(createEmailTimer);
+                            if (btn) {
+                                btn.disabled = false;
+                                btn.innerText = '📨 Надіслати код повторно';
+                            }
+                            if (timerEl) timerEl.innerText = '';
+                        } else {
+                            if (timerEl) timerEl.innerText = `Повтор через ${cd}с`;
+                        }
+                    }, 1000);
+                } else {
+                    showToast('Помилка', data.error || 'Не вдалося надіслати код', '❌', true);
+                    if (btn) btn.disabled = false;
+                }
+            } catch(e) {
+                showToast('Помилка сервера', 'Не вдалося надіслати запит', '❌', true);
+                if (btn) btn.disabled = false;
+            }
+        }
+        window.requestEmailCodeInCreate = requestEmailCodeInCreate;
+
+        async function submitEmailCodeInCreate() {
+            const inp = document.getElementById('createEmailCodeInput');
+            const code = inp ? inp.value.trim() : '';
+            if (!code || code.length < 6) {
+                showToast('Увага', 'Введіть 6-значний код із листа', '⚠️', true);
+                return;
+            }
+            try {
+                const res = await fetch('/api/users/verify-email-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ code })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('🎉 Успішно!', 'Електронну пошту підтверджено! Оголошення можна публікувати.', '✅');
+                    closeEmailVerifyModal();
+                    isUserTgVerified = true;
+                    const tgBanner = document.getElementById('tgVerificationBanner');
+                    if (tgBanner) tgBanner.style.display = 'none';
+                    const btnPublish = document.getElementById('btnPublish');
+                    if (btnPublish) {
+                        btnPublish.disabled = false;
+                        btnPublish.innerHTML = '🚀 Опублікувати оголошення';
+                        btnPublish.style.opacity = '1';
+                        btnPublish.style.cursor = 'pointer';
+                        btnPublish.style.background = '';
+                    }
+                } else {
+                    showToast('Помилка', data.error || 'Невірний код', '❌', true);
+                }
+            } catch(e) {
+                showToast('Помилка', 'Не вдалося перевірити код', '❌', true);
+            }
+        }
+        window.submitEmailCodeInCreate = submitEmailCodeInCreate;
+
 
         // СПОВІЩЕННЯ
         function toggleNotifications() {

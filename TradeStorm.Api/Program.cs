@@ -96,6 +96,7 @@ builder.Services.AddHostedService<QueuedHostedService>();
 // Зовнішня автентифікація OAuth 2.0 (Етап 7)
 builder.Services.AddScoped<IExternalAuthService, ExternalAuthService>();
 builder.Services.AddSingleton<ICaptchaService, CaptchaService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Стандартний ASP.NET Core Health Check (Етап 1)
 builder.Services.AddHealthChecks()
@@ -334,6 +335,9 @@ using (var scope = app.Services.CreateScope())
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN IsPremium INTEGER DEFAULT 0;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN PremiumUntil TEXT;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN PremiumPlan TEXT;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN IsEmailVerified INTEGER DEFAULT 0;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN EmailVerificationCode TEXT;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN EmailVerificationCodeExpiresAt TEXT;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN Title TEXT;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN TargetPage TEXT;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN Placement TEXT;"); } catch {}
@@ -356,6 +360,9 @@ using (var scope = app.Services.CreateScope())
             db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""IsPremium"" boolean DEFAULT FALSE;");
             db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""PremiumUntil"" timestamp with time zone;");
             db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""PremiumPlan"" text;");
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""IsEmailVerified"" boolean DEFAULT FALSE;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""EmailVerificationCode"" VARCHAR(10);"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""EmailVerificationCodeExpiresAt"" timestamp with time zone;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""Title"" TEXT;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""TargetPage"" VARCHAR(50);"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""Placement"" VARCHAR(50);"); } catch {}

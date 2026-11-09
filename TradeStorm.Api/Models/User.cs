@@ -19,6 +19,9 @@ public class User
     public string Role { get; set; } = UserRoles.Buyer;
     public string? PhoneNumber { get; set; }
     public bool IsPhoneVerified { get; set; } = false;
+    public bool IsEmailVerified { get; set; } = false;
+    public string? EmailVerificationCode { get; set; }
+    public DateTime? EmailVerificationCodeExpiresAt { get; set; }
     public string? AvatarUrl { get; set; }
     public string? Bio { get; set; }
     public long TelegramChatId { get; set; }

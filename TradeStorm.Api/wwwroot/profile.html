@@ -1373,6 +1373,34 @@
                             </div>
                             <a id="telegramBotLink" href="https://t.me/LoopMarket_Verify_bot?start=verify" target="_blank" class="btn-primary" style="font-size: 0.85rem; padding: 8px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Відкрити Telegram для підтвердження (/start)</a>
                         </div>
+
+                        <!-- БЛОК ВЕРИФІКАЦІЇ ЗА EMAIL КОДОМ (ПРИВАТНА АЛЬТЕРНАТИВА) -->
+                        <div id="emailVerificationSection" style="display: block; margin-top: 15px; padding: 15px; background: var(--bg-color); border-radius: 8px; border: 1px solid var(--border-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <label style="font-weight: bold; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                    <span>✉️ Підтвердження через Email</span>
+                                    <span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; background: rgba(37,99,235,0.12); color: #2563eb; font-weight: 800;">Приватно</span>
+                                </label>
+                                <span id="emailVerifyBadge" style="font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: rgba(245,158,11,0.15); color: #d97706;">Не підтверджено</span>
+                            </div>
+                            <div id="emailVerificationStatusBox">
+                                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 10px;">
+                                    Отримайте 6-значний код на вашу пошту для повної верифікації без підключення соцмереж.
+                                </p>
+                            </div>
+                            <div id="emailVerificationActionBox">
+                                <button type="button" id="btnRequestEmailCode" class="btn-primary" onclick="requestEmailVerificationCode()" style="font-size: 0.85rem; padding: 8px 14px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <span>📨 Надіслати 6-значний код</span>
+                                </button>
+                                <div id="emailCodeInputWrap" style="display: none; margin-top: 12px; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                    <input type="text" id="emailVerificationCodeInput" placeholder="000000" maxlength="6" style="width: 140px; padding: 8px 12px; font-size: 1rem; letter-spacing: 4px; font-weight: 800; border-radius: 8px; border: 1.5px solid var(--border-color); background: var(--surface); color: var(--text-main); text-align: center;">
+                                    <button type="button" class="btn-primary" onclick="submitEmailVerificationCode()" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 700;">
+                                        Підтвердити ✅
+                                    </button>
+                                    <span id="emailCodeTimer" style="font-size: 0.78rem; color: var(--text-muted);"></span>
+                                </div>
+                            </div>
+                        </div>
                         <button type="submit" class="btn-submit" style="margin-top: 20px;">Зберегти зміни</button>
                     </form>
                 </div>
@@ -1773,6 +1801,27 @@
                                     `;
                                     if (tgLink) tgLink.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Підтвердити номер у Telegram (/start)`;
                                 }
+                            }
+
+                            // Оновлюємо статус Email-верифікації
+                            const emailBadge = document.getElementById('emailVerifyBadge');
+                            const emailStatusBox = document.getElementById('emailVerificationStatusBox');
+                            const emailActionBox = document.getElementById('emailVerificationActionBox');
+                            if (meData.isEmailVerified) {
+                                if (emailBadge) {
+                                    emailBadge.innerText = '✅ Підтверджено';
+                                    emailBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+                                    emailBadge.style.color = '#10b981';
+                                }
+                                if (emailStatusBox) {
+                                    emailStatusBox.innerHTML = `
+                                        <p style="font-size: 0.85rem; color: #10b981; margin-bottom: 4px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                                            Електронну пошту підтверджено. Публікація оголошень розблокована!
+                                        </p>
+                                    `;
+                                }
+                                if (emailActionBox) emailActionBox.style.display = 'none';
                             }
                         }
                     }).catch(e => console.error(e));
