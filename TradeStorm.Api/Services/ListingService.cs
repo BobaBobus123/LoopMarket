@@ -48,6 +48,7 @@ public class ListingService : IListingService
             ImageUrl = dto.ImageUrls != null && dto.ImageUrls.Any() 
                 ? string.Join(";", dto.ImageUrls) 
                 : (dto.CategoryId == 8 || dto.Title.Contains("Послуг") ? "/images/placeholder-service.svg" : "/images/placeholder.svg"),
+            VideoUrl = string.IsNullOrWhiteSpace(dto.VideoUrl) ? null : dto.VideoUrl.Trim(),
             CategoryId = dto.CategoryId,
             Condition = dto.Condition,
             Location = string.IsNullOrWhiteSpace(dto.Location) ? "Не вказано" : dto.Location.Trim(),
@@ -86,6 +87,11 @@ public class ListingService : IListingService
             listing.ImageUrl = dto.ImageUrls.Any() 
                 ? string.Join(";", dto.ImageUrls) 
                 : (listing.CategoryId == 8 || listing.Title.Contains("Послуг") ? "/images/placeholder-service.svg" : "/images/placeholder.svg");
+        }
+
+        if (dto.VideoUrl != null)
+        {
+            listing.VideoUrl = string.IsNullOrWhiteSpace(dto.VideoUrl) ? null : dto.VideoUrl.Trim();
         }
 
         if (!string.IsNullOrWhiteSpace(dto.Status))

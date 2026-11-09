@@ -121,5 +121,6 @@ public class AdminCreateListingDto
     public bool IsShippingAvailable { get; set; } = true;
     public int? SellerId { get; set; }
     public string? ImageUrl { get; set; }
+    public string? VideoUrl { get; set; }
     public bool IsFeatured { get; set; } = false;
 }

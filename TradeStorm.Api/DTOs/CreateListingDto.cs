@@ -20,6 +20,8 @@ public class CreateListingDto
 
     public List<string>? ImageUrls { get; set; }
 
+    public string? VideoUrl { get; set; }
+
     public string? Condition { get; set; }
 
     public string? Location { get; set; }

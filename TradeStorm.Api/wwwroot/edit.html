@@ -891,6 +891,61 @@
                         <b style="color: var(--text-main);">+ Додати нові фотографії</b>
                         <input type="file" id="imageFile" accept="image/*" multiple>
                     </label>
+
+                    <!-- ВІДЕОПРЕЗЕНТАЦІЯ ТОВАРУ ЧИ БРЕНДУ -->
+                    <div class="video-upload-box" style="margin-top: 22px; padding: 18px 20px; background: rgba(37, 99, 235, 0.04); border: 1.5px dashed rgba(37, 99, 235, 0.35); border-radius: 14px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 1.3rem;">🎬</span>
+                                <div>
+                                    <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-main); margin-bottom: 2px;">Відеопрезентація товару або бренду</h4>
+                                    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Оновіть або додайте відеоогляд для залучення клієнтів.</p>
+                                </div>
+                            </div>
+                            <span style="font-size: 0.72rem; font-weight: 800; background: rgba(16, 185, 129, 0.15); color: #059669; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                                🌟 Для брендів та топ-продавців
+                            </span>
+                        </div>
+
+                        <!-- Video Mode Switcher -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+                            <button type="button" id="tabVideoFile" class="btn-video-tab active" onclick="switchVideoMode('file')">
+                                📁 Завантажити відеофайл (MP4 / WebM)
+                            </button>
+                            <button type="button" id="tabVideoLink" class="btn-video-tab" onclick="switchVideoMode('link')">
+                                🔗 Посилання (YouTube / Shorts / TikTok)
+                            </button>
+                        </div>
+
+                        <div id="videoFileModeBox">
+                            <input type="file" id="videoFileInput" accept="video/mp4,video/webm,video/quicktime,video/x-matroska" style="display: none;" onchange="handleVideoFileSelect(this.files[0])">
+                            <div class="video-dropzone" id="videoDropzone" onclick="document.getElementById('videoFileInput').click()">
+                                <div style="font-size: 1.6rem; margin-bottom: 4px;">📹</div>
+                                <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-main);">Виберіть або перетягніть відео сюди</div>
+                                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 3px;">Підтримуються MP4, WebM, MOV, MKV (до 100 МБ)</div>
+                            </div>
+                        </div>
+
+                        <div id="videoLinkModeBox" style="display: none;">
+                            <div style="display: flex; gap: 8px;">
+                                <input type="url" id="videoLinkInput" class="modern-input" placeholder="Вставте посилання на YouTube, Shorts або TikTok" oninput="onVideoLinkChange(this.value)" style="flex:1;">
+                                <button type="button" class="btn-video-apply" onclick="applyVideoLink()">Перевірити</button>
+                            </div>
+                        </div>
+
+                        <!-- Video Preview Container -->
+                        <div id="videoPreviewContainer" style="display: none; margin-top: 14px; position: relative; border-radius: 12px; overflow: hidden; background: #000; border: 1.5px solid var(--border-color);">
+                            <div id="videoPlayerWrap" style="max-height: 320px; display: flex; justify-content: center; align-items: center; background: #000;"></div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--surface); border-top: 1px solid var(--border-color);">
+                                <span id="videoStatusBadge" style="font-size: 0.82rem; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 6px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Відео прикріплено
+                                </span>
+                                <button type="button" onclick="removeVideo()" style="background: none; border: none; color: #ef4444; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                    🗑️ Видалити відео
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-publish">Зберегти зміни</button>
@@ -1251,7 +1306,125 @@
             }
         }
 
-        // ==================== 2. КЕРУВАННЯ ФОТОГРАФІЯМИ ====================
+        // ==================== 2. КЕРУВАННЯ ВІДЕО ТА ФОТОГРАФІЯМИ ====================
+        let attachedVideoUrl = null;
+        let selectedVideoFile = null;
+        let currentVideoMode = 'file';
+
+        function switchVideoMode(mode) {
+            currentVideoMode = mode;
+            document.getElementById('tabVideoFile')?.classList.toggle('active', mode === 'file');
+            document.getElementById('tabVideoLink')?.classList.toggle('active', mode === 'link');
+            const fileBox = document.getElementById('videoFileModeBox');
+            const linkBox = document.getElementById('videoLinkModeBox');
+            if (fileBox) fileBox.style.display = mode === 'file' ? 'block' : 'none';
+            if (linkBox) linkBox.style.display = mode === 'link' ? 'block' : 'none';
+        }
+        window.switchVideoMode = switchVideoMode;
+
+        function parseVideoSource(url) {
+            if (!url || typeof url !== 'string') return null;
+            url = url.trim();
+            if (!url) return null;
+
+            if (url.startsWith('/uploads/videos/') || url.match(/\.(mp4|webm|mov|m4v|mkv)(\?.*)?$/i)) {
+                return { type: 'video', url: url };
+            }
+
+            const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/i);
+            if (ytMatch && ytMatch[1]) {
+                return {
+                    type: 'youtube',
+                    id: ytMatch[1],
+                    embedUrl: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?rel=0&modestbranding=1&playsinline=1`
+                };
+            }
+
+            const vimeoMatch = url.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|album\/(\d+)\/video\/|)(\d+)(?:$|\/|\?)/i);
+            if (vimeoMatch && vimeoMatch[3]) {
+                return {
+                    type: 'vimeo',
+                    id: vimeoMatch[3],
+                    embedUrl: `https://player.vimeo.com/video/${vimeoMatch[3]}`
+                };
+            }
+
+            return { type: 'video', url: url };
+        }
+
+        function handleVideoFileSelect(file) {
+            if (!file) return;
+            if (file.size > 100 * 1024 * 1024) {
+                LoopToast.error('Розмір відео не повинен перевищувати 100 МБ');
+                return;
+            }
+            selectedVideoFile = file;
+            attachedVideoUrl = null;
+            const blobUrl = URL.createObjectURL(file);
+            renderVideoPreview(blobUrl, file.name);
+            LoopToast.success('Відео вибрано для завантаження!');
+        }
+        window.handleVideoFileSelect = handleVideoFileSelect;
+
+        function applyVideoLink() {
+            const inp = document.getElementById('videoLinkInput');
+            const val = (inp ? inp.value.trim() : '');
+            if (!val) {
+                LoopToast.error('Будь ласка, вставте URL відео на YouTube або TikTok');
+                return;
+            }
+            const parsed = parseVideoSource(val);
+            if (!parsed) {
+                LoopToast.error('Підтримуються YouTube, Shorts, TikTok або прямі MP4 посилання');
+                return;
+            }
+            selectedVideoFile = null;
+            attachedVideoUrl = val;
+            renderVideoPreview(val, 'Відео за посиланням');
+            LoopToast.success('Відео успішно підключено!');
+        }
+        window.applyVideoLink = applyVideoLink;
+
+        function onVideoLinkChange(val) {
+            if (val && (val.includes('youtube.com') || val.includes('youtu.be') || val.includes('vimeo.com'))) {
+                applyVideoLink();
+            }
+        }
+        window.onVideoLinkChange = onVideoLinkChange;
+
+        function renderVideoPreview(urlOrBlob, label) {
+            const wrap = document.getElementById('videoPreviewContainer');
+            const playerBox = document.getElementById('videoPlayerWrap');
+            const statusBadge = document.getElementById('videoStatusBadge');
+            if (!wrap || !playerBox) return;
+
+            wrap.style.display = 'block';
+            if (statusBadge) {
+                statusBadge.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> ${label || 'Відео прикріплено'}`;
+            }
+
+            const parsed = parseVideoSource(urlOrBlob);
+            if (parsed && (parsed.type === 'youtube' || parsed.type === 'vimeo')) {
+                playerBox.innerHTML = `<iframe src="${parsed.embedUrl}" style="width: 100%; height: 300px; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+            } else {
+                playerBox.innerHTML = `<video src="${urlOrBlob}" controls playsinline preload="metadata" style="max-width: 100%; max-height: 300px; width: 100%; border-radius: 10px; background: #000;"></video>`;
+            }
+        }
+
+        function removeVideo() {
+            selectedVideoFile = null;
+            attachedVideoUrl = "";
+            const wrap = document.getElementById('videoPreviewContainer');
+            const playerBox = document.getElementById('videoPlayerWrap');
+            const inp = document.getElementById('videoLinkInput');
+            const fileInp = document.getElementById('videoFileInput');
+            if (wrap) wrap.style.display = 'none';
+            if (playerBox) playerBox.innerHTML = '';
+            if (inp) inp.value = '';
+            if (fileInp) fileInp.value = '';
+            LoopToast.info('Відеопрезентацію видалено');
+        }
+        window.removeVideo = removeVideo;
         let existingPhotos = [];
         let newSelectedFiles = [];
         const previewGrid = document.getElementById('previewGrid');
@@ -1363,10 +1536,17 @@
                 }
                 document.getElementById('isShippingAvailable').checked = !!item.isShippingAvailable;
 
-                // 4. Завантажуємо фотографії
+                // 4. Завантажуємо фотографії та відео
                 const rawImgs = item.imageUrls || (item.imageUrl ? item.imageUrl.split(';') : []);
                 existingPhotos = rawImgs.map(u => u.trim()).filter(Boolean);
                 renderAllPhotos();
+
+                if (item.videoUrl) {
+                    attachedVideoUrl = item.videoUrl;
+                    const inp = document.getElementById('videoLinkInput');
+                    if (inp) inp.value = item.videoUrl;
+                    renderVideoPreview(item.videoUrl, 'Збережене відео');
+                }
 
                 // 5. Визначення послуги чи товару
                 const isService = item.categoryId === 8 ||
@@ -1461,6 +1641,25 @@
                     finalImageUrls = [isCurrentService ? '/images/placeholder-service.svg' : '/images/placeholder.svg'];
                 }
 
+                let finalVideoUrl = attachedVideoUrl;
+                if (selectedVideoFile) {
+                    btn.innerText = "Завантаження відео...";
+                    const videoFormData = new FormData();
+                    videoFormData.append('file', selectedVideoFile);
+                    const vRes = await fetch('/api/listings/upload-video', {
+                        method: 'POST',
+                        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                        body: videoFormData
+                    });
+                    if (vRes.ok) {
+                        const vData = await vRes.json();
+                        finalVideoUrl = vData.videoUrl;
+                    } else {
+                        const errData = await vRes.json().catch(() => null);
+                        throw new Error(errData?.error || "Не вдалося завантажити відеопрезентацію");
+                    }
+                }
+
                 let conditionValue = document.getElementById('condition').value;
                 let shippingAvailable = document.getElementById('isShippingAvailable').checked;
 
@@ -1479,6 +1678,7 @@
                     price: parseFloat(document.getElementById('price').value) || 0,
                     categoryId: parseInt(document.getElementById('categoryId').value),
                     imageUrls: finalImageUrls,
+                    videoUrl: finalVideoUrl,
                     condition: conditionValue,
                     location: document.getElementById('location').value.trim() || 'Кременчук',
                     isShippingAvailable: shippingAvailable

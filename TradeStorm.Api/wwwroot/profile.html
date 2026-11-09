@@ -2006,6 +2006,7 @@
                         <div class="card">
                             <div class="card-img-wrapper">
                                 <img src="${(item.imageUrl ? item.imageUrl.split(';')[0] : '') || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.code || item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
+                                ${item.videoUrl ? '<span class="card-badge-video" title="Є відеопрезентація"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Відео</span>' : ''}
                             </div>
                             <div class="card-content">
                                 <div class="card-title">${item.title}</div>
@@ -2031,6 +2032,7 @@
                         <div class="card">
                             <div class="card-img-wrapper">
                                 <img src="${(item.imageUrl ? item.imageUrl.split(';')[0] : '') || 'https://placehold.co/600x400'}" class="card-img" onclick="window.location.href='/details.html?id=${item.code || item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
+                                ${item.videoUrl ? '<span class="card-badge-video" title="Є відеопрезентація"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Відео</span>' : ''}
                                 <button onclick="toggleFavorite(${item.id}, event)" class="btn-fav" title="Видалити з обраного">${ICONS.heartFilled}</button>
                             </div>
                             <div class="card-content">

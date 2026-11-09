@@ -2100,6 +2100,7 @@
                             <a href="/details.html?id=${l.code || l.id}" target="_blank" style="font-weight: 700; color: var(--text-main); text-decoration: underline;">
                                 ${escapeHtml(l.title)}
                             </a>
+                            ${l.videoUrl ? '<span style="margin-left: 6px; font-size: 0.72rem; background: rgba(37,99,235,0.1); color: #2563eb; padding: 1px 6px; border-radius: 4px; font-weight: 700;">🎬 Відео</span>' : ''}
                         </td>
                         <td><b>${l.price} ₴</b></td>
                         <td><span class="status-badge user">${escapeHtml(l.categoryName || 'Інше')}</span></td>

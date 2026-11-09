@@ -19,6 +19,7 @@ public class Listing
     public decimal Price { get; set; }
 
     public string? ImageUrl { get; set; }
+    public string? VideoUrl { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

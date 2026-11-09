@@ -1317,6 +1317,7 @@
                             <img src="${imgUrl}" class="card-img" onclick="window.location.href='/details.html?id=${item.code || item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
                             <button onclick="toggleFavorite(${item.id}, event)" class="btn-fav" title="Додати в обране">${favIcon}</button>
                             ${isService ? '<span style="position: absolute; top: 10px; left: 10px; background: #2563eb; color: white; font-size: 0.72rem; font-weight: 800; padding: 4px 8px; border-radius: 6px;">🛠 Послуга</span>' : ''}
+                            ${item.videoUrl ? '<span class="card-badge-video" title="Є відеопрезентація"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Відео</span>' : ''}
                         </div>
                         <div class="card-content">
                             <div class="card-title">${item.title}</div>

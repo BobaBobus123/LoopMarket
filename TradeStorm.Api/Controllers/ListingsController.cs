@@ -118,6 +118,7 @@ public class ListingsController : ControllerBase
             imageUrls = (string.IsNullOrEmpty(l.ImageUrl) || l.ImageUrl.Contains("placehold.co"))
                 ? new List<string> { (l.CategoryId == 8 || (l.Title != null && l.Title.Contains("Послуг")) ? "/images/placeholder-service.svg" : "/images/placeholder.svg") }
                 : l.ImageUrl.Split(';', StringSplitOptions.None).ToList(),
+            videoUrl = l.VideoUrl,
             condition = l.Condition,
             location = l.Location,
             isShippingAvailable = l.IsShippingAvailable,
@@ -277,6 +278,7 @@ public class ListingsController : ControllerBase
                 sellerPhone = l.Seller != null ? l.Seller.PhoneNumber : string.Empty,
                 createdAt = l.CreatedAt,
                 imageUrl = l.ImageUrl,
+                videoUrl = l.VideoUrl,
                 location = l.Location,
                 condition = l.Condition,
                 status = l.Status,
@@ -331,6 +333,7 @@ public class ListingsController : ControllerBase
             ImageUrl = string.IsNullOrWhiteSpace(dto.ImageUrl)
                 ? (dto.CategoryId == 8 || dto.Title.Contains("Послуг") ? "/images/placeholder-service.svg" : "/images/placeholder.svg")
                 : dto.ImageUrl.Trim(),
+            VideoUrl = string.IsNullOrWhiteSpace(dto.VideoUrl) ? null : dto.VideoUrl.Trim(),
             IsFeatured = false, // Тільки адміністратор може призначати статус VIP
             Status = "Active",
             CreatedAt = DateTime.UtcNow
@@ -410,6 +413,44 @@ public class ListingsController : ControllerBase
         }
 
         return Ok(new { imageUrls = uploadedUrls });
+    }
+
+    [HttpPost("upload-video")]
+    [Authorize]
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("CreateListingLimit")]
+    [RequestSizeLimit(100 * 1024 * 1024)]
+    public async Task<IActionResult> UploadVideo(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest(new { error = "Файл відео не вибрано або він порожній" });
+        }
+
+        var (isValid, err) = FileUploadValidator.ValidateVideo(file);
+        if (!isValid)
+        {
+            return BadRequest(new { error = err ?? "Неприпустимий формат відео" });
+        }
+
+        string webRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        string uploadsFolder = Path.Combine(webRootPath, "uploads", "videos");
+        if (!Directory.Exists(uploadsFolder))
+        {
+            Directory.CreateDirectory(uploadsFolder);
+        }
+
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var cleanName = System.Text.RegularExpressions.Regex.Replace(Path.GetFileNameWithoutExtension(file.FileName), @"[^a-zA-Z0-9_\-]", "");
+        var uniqueFileName = $"{Guid.NewGuid()}{(string.IsNullOrEmpty(cleanName) ? "" : "_" + cleanName)}{extension}";
+        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        var videoUrl = $"/uploads/videos/{uniqueFileName}";
+        return Ok(new { videoUrl });
     }
 }
 

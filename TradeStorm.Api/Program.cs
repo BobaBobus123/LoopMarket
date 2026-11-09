@@ -326,6 +326,7 @@ using (var scope = app.Services.CreateScope())
             }
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Categories ADD COLUMN Icon TEXT;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Categories ADD COLUMN ParentId INTEGER;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Listings ADD COLUMN VideoUrl TEXT;"); } catch {}
         }
         catch {}
     }
@@ -338,6 +339,7 @@ using (var scope = app.Services.CreateScope())
             db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""OrderCode"" VARCHAR(30);");
             db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""Icon"" VARCHAR(100);");
             db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""ParentId"" INTEGER;");
+            db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Listings"" ADD COLUMN IF NOT EXISTS ""VideoUrl"" TEXT;");
         }
         catch {}
     }

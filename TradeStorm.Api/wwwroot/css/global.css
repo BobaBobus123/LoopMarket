@@ -1552,3 +1552,137 @@ body.has-sticky-bar .mobile-bottom-bar {
     padding-left: 44px !important;
     box-sizing: border-box !important;
 }
+
+
+/* ==========================================================================
+   VIDEO SHOWCASE & BADGES FOR BRAND & SELLER LISTINGS
+   ========================================================================== */
+.btn-video-tab {
+    background: var(--surface);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-video-tab:hover {
+    border-color: #2563eb;
+    color: var(--text-main);
+    background: var(--surface-hover);
+}
+
+.btn-video-tab.active {
+    background: rgba(37, 99, 235, 0.1);
+    border-color: #2563eb;
+    color: #2563eb;
+    box-shadow: 0 0 0 1px #2563eb;
+}
+
+.video-dropzone {
+    border: 2px dashed rgba(37, 99, 235, 0.4);
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 22px 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.video-dropzone:hover {
+    border-color: #2563eb;
+    background: rgba(37, 99, 235, 0.05);
+    transform: translateY(-1px);
+}
+
+.btn-video-apply {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0 18px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.btn-video-apply:hover {
+    background: #1d4ed8;
+}
+
+.card-badge-video {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(15, 23, 42, 0.88) !important;
+    color: #ffffff !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px !important;
+    padding: 3px 8px !important;
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    z-index: 3 !important;
+    letter-spacing: 0.3px;
+}
+
+.thumb-video {
+    position: relative;
+    border: 2px solid #2563eb !important;
+    background: #0f172a !important;
+    color: #ffffff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    width: 68px !important;
+    height: 68px !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+}
+
+.thumb-video:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+}
+
+.thumb-video.active {
+    box-shadow: 0 0 0 2px #2563eb, 0 4px 14px rgba(37, 99, 235, 0.45) !important;
+}
+
+.thumb-video .tv-play {
+    width: 24px;
+    height: 24px;
+    background: #2563eb;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.thumb-video .tv-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
