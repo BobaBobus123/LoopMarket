@@ -399,15 +399,37 @@
             }
 
         main {
-            padding: 2.5rem 5%;
-            max-width: 1400px;
+            padding: 2rem 24px 40px;
+            max-width: 1360px;
             margin: 0 auto;
             flex-grow: 1;
             width: 100%;
+            box-sizing: border-box;
             display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 30px;
+            grid-template-columns: 320px minmax(0, 1fr);
+            gap: 28px;
             align-items: start;
+        }
+
+        /* ORDER CARD RESPONSIVE CONTENT GRID */
+        .order-content-grid {
+            display: grid;
+            grid-template-columns: 80px minmax(0, 1fr) 220px;
+            gap: 20px;
+            align-items: center;
+        }
+
+        @media (max-width: 992px) {
+            .order-content-grid {
+                grid-template-columns: 80px minmax(0, 1fr) !important;
+            }
+            .order-card-price-box {
+                grid-column: 1 / -1 !important;
+                text-align: left !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+            }
         }
 
         
@@ -1303,7 +1325,7 @@
 
         .header-content {
             width: 100%;
-            max-width: 1600px;
+            max-width: 1360px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -3088,41 +3110,41 @@
                             </span>
                         </div>
 
-                        <div style="display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap;">
-                            <img src="${img}" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; border: 1px solid var(--border-color); flex-shrink: 0;" onclick="window.location.href='/details.html?id=${o.listingId}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
+                        <div class="order-content-grid">
+                            <img src="${img}" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; border: 1.5px solid var(--border-color); flex-shrink: 0; cursor: pointer;" onclick="window.location.href='/details.html?id=${encodeURIComponent(o.listingCode || o.listingId)}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
                             
-                            <div style="flex: 1; min-width: 240px;">
-                                <a href="/details.html?id=${o.listingId}" style="text-decoration: none; font-weight: 800; font-size: 1.1rem; color: var(--text-main); display: block; margin-bottom: 6px;">
-                                    ${o.listingTitle}
+                            <div style="min-width: 0;">
+                                <a href="/details.html?id=${encodeURIComponent(o.listingCode || o.listingId)}" style="text-decoration: none; font-weight: 800; font-size: 1.05rem; color: var(--text-main); display: block; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    ${escapeHtml(o.listingTitle)}
                                 </a>
-                                <div style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
-                                    <div><strong>${o.isService ? '📍 Адреса виконання:' : '📍 Місто доставки:'}</strong> ${o.deliveryCity}</div>
-                                    <div><strong>${o.isService ? '⏱ Обсяг робіт:' : '🏢 Відділення / адреса:'}</strong> ${o.deliveryBranch}</div>
-                                    <div><strong>💳 Оплата:</strong> ${o.paymentMethod}</div>
-                                    ${o.comment ? `<div><strong>💬 Коментар:</strong> <em>${o.comment}</em></div>` : ''}
-                                    ${o.trackingNumber ? `<div><strong>🏷 Номер ТТН:</strong> <code style="background: var(--bg-color); padding: 2px 6px; border-radius: 4px; font-weight: bold;">${o.trackingNumber}</code> <button type="button" onclick="trackNovaPoshtaTtn('${o.trackingNumber}')" style="margin-left: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; border-radius: 6px; border: 1px solid #ef4444; background: rgba(239,68,68,0.1); color: #ef4444; cursor: pointer;">📦 Відстежити ТТН</button></div>` : 
+                                <div style="font-size: 0.86rem; color: var(--text-muted); line-height: 1.45;">
+                                    <div><strong>${o.isService ? '📍 Адреса виконання:' : '📍 Місто доставки:'}</strong> ${escapeHtml(o.deliveryCity)}</div>
+                                    <div><strong>${o.isService ? '⏱ Обсяг робіт:' : '🏢 Відділення:'}</strong> ${escapeHtml(o.deliveryBranch)}</div>
+                                    <div><strong>💳 Оплата:</strong> ${escapeHtml(o.paymentMethod)}</div>
+                                    ${o.comment ? `<div><strong>💬 Коментар:</strong> <em>${escapeHtml(o.comment)}</em></div>` : ''}
+                                    ${o.trackingNumber ? `<div><strong>🏷 Номер ТТН:</strong> <code style="background: var(--bg-color); padding: 2px 6px; border-radius: 4px; font-weight: bold;">${o.trackingNumber}</code> <button type="button" onclick="trackNovaPoshtaTtn('${o.trackingNumber}')" style="margin-left: 6px; padding: 2px 8px; font-size: 0.72rem; font-weight: 700; border-radius: 6px; border: 1px solid #ef4444; background: rgba(239,68,68,0.1); color: #ef4444; cursor: pointer;">📦 Відстежити ТТН</button></div>` : 
                                       ((o.deliveryBranch && (o.deliveryBranch.includes('зустріч') || o.deliveryBranch.includes('Самовивіз'))) || (o.paymentMethod && o.paymentMethod.includes('зустрічі'))) ? 
                                       `<div style="color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 0.8rem; background: rgba(16,185,129,0.1); padding: 2px 8px; border-radius: 6px;">🤝 Особиста зустріч (ТТН не потрібна)</div>` : ''}
                                 </div>
                             </div>
 
-                            <div style="text-align: right; min-width: 160px; display: flex; flex-direction: column; justify-content: space-between; align-self: stretch;">
+                            <div class="order-card-price-box" style="text-align: right; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 14px; padding: 12px 16px;">
                                 <div>
-                                    <div style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Сума замовлення / заробіток</div>
-                                    <div style="font-size: 1.45rem; font-weight: 800; color: var(--primary-light); display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
+                                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.3px;">Сума замовлення</div>
+                                    <div style="font-size: 1.4rem; font-weight: 900; color: var(--primary-light); display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin: 2px 0 6px;">
                                         <span>${o.totalPrice} ₴</span>
                                         ${subTab === 'sales' ? `
-                                            <button type="button" onclick="openEditPriceModal(${o.id}, ${o.totalPrice})" title="Змінити узгоджену суму заробітку за це замовлення" style="background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: 0.2s;">
-                                                ✏️ Змінити
+                                            <button type="button" onclick="openEditPriceModal(${o.id}, ${o.totalPrice})" title="Змінити суму" style="background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 1px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">
+                                                ✏️
                                             </button>
                                         ` : ''}
                                     </div>
                                 </div>
 
-                                <div style="margin-top: 12px; font-size: 0.82rem; color: var(--text-muted);">
+                                <div style="font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 6px; margin-top: 4px;">
                                     ${subTab === 'sales' ? 
-                                        `<div><strong>Замовник:</strong> ${o.buyerName}</div><div>📞 ${o.buyerPhone}</div>` : 
-                                        `<div><strong>Виконавець/Продавець:</strong> ${o.sellerName || 'Користувач'}</div>${o.sellerPhone ? `<div>📞 ${o.sellerPhone}</div>` : ''}`
+                                        `<div><b>Клієнт:</b> ${escapeHtml(o.buyerName)}</div>` : 
+                                        `<div><b>Продавець:</b> ${escapeHtml(o.sellerName || 'Користувач')}</div>`
                                     }
                                 </div>
                             </div>

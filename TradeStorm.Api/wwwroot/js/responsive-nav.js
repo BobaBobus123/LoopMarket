@@ -519,13 +519,41 @@
                 color: #ef4444;
                 background: rgba(239, 68, 68, 0.12);
             }
+            .loop-olx-skyscraper {
+                position: fixed;
+                top: 86px;
+                width: clamp(240px, 18vw, 320px);
+                max-height: calc(100vh - 110px);
+                z-index: 995;
+                background: var(--surface, #1e293b);
+                border: 1.5px solid var(--border-color, #334155);
+                border-radius: 18px;
+                box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
+                overflow-y: auto;
+                overflow-x: hidden;
+                transition: transform 0.25s ease, opacity 0.25s ease;
+                animation: loopSkyscraperSlide 0.35s ease;
+                display: flex;
+                flex-direction: column;
+            }
+            .skyscraper-media {
+                width: 100%;
+                margin-bottom: 10px;
+                border-radius: 12px;
+                overflow: hidden;
+                background: #020617;
+                border: 1px solid var(--border-color, #334155);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
             .skyscraper-media img {
                 width: 100%;
-                max-height: 220px;
-                object-fit: cover;
+                height: auto;
+                max-height: 480px;
+                object-fit: contain;
                 border-radius: 12px;
-                margin-bottom: 10px;
-                border: 1px solid var(--border-color, #334155);
+                display: block;
             }
             .skyscraper-brand-box {
                 background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(37, 99, 235, 0.12) 100%);
@@ -611,7 +639,7 @@
         const desc = (item.message || 'Залучайте тисячі покупців щодня на LoopMarket.').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const actionUrl = (item.actionUrl || 'https://t.me/LoopMarketSupport').replace(/"/g, '&quot;');
         const actionText = (item.actionText || 'Розмістити рекламу 📢').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const imgUrl = item.imageUrl ? item.imageUrl.trim() : '';
+        const imgUrl = (item.imageUrl && item.imageUrl.trim()) ? item.imageUrl.trim() : '/images/loop-ad-banner.svg';
 
         adWrap.innerHTML = `
             <div class="skyscraper-inner">

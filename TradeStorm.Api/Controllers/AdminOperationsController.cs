@@ -192,7 +192,9 @@ public class AdminOperationsController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(dto.Message))
         {
-            return BadRequest(new { error = "Текст оголошення не може бути порожнім" });
+            dto.Message = !string.IsNullOrWhiteSpace(dto.Title) 
+                ? dto.Title 
+                : (!string.IsNullOrWhiteSpace(dto.ImageUrl) ? "Рекламний банер LoopMarket" : "Повідомлення платформи");
         }
 
         DateTime? expiresAt = null;
@@ -225,6 +227,15 @@ public class AdminOperationsController : ControllerBase
             IsActive = dto.IsActive,
             CreatedAt = now
         };
+
+        // Якщо створюється новий рекламний банер — деактивуємо старі рекламні оголошення
+        if (type == "promo" || placement.StartsWith("sidebar") || placement == "catalog")
+        {
+            var oldAds = await _context.SiteAnnouncements
+                .Where(a => a.IsActive && (a.Type == "promo" || a.Placement.StartsWith("sidebar") || a.Placement == "catalog"))
+                .ToListAsync();
+            foreach (var old in oldAds) old.IsActive = false;
+        }
 
         _context.SiteAnnouncements.Add(banner);
         await _context.SaveChangesAsync();

@@ -908,8 +908,19 @@
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                             <div class="admin-form-group">
-                                <label>🖼️ URL зображення / банера (опціонально)</label>
-                                <input type="url" id="adBannerImageInput" class="admin-form-input" placeholder="https://... (JPG, PNG, WebP)" oninput="updateAdBannerLivePreview()">
+                                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+                                    <label style="margin: 0;">🖼️ Зображення банера</label>
+                                    <div style="display: flex; gap: 6px;">
+                                        <button type="button" onclick="applyDefaultLoopMarketAdPreset()" style="background: rgba(16,185,129,0.12); color: #059669; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer;">
+                                            💎 Фірмовий банер LoopMarket
+                                        </button>
+                                        <button type="button" onclick="document.getElementById('adBannerFileInput').click()" style="background: rgba(37,99,235,0.08); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
+                                            📁 Файл з ПК
+                                        </button>
+                                    </div>
+                                </div>
+                                <input type="file" id="adBannerFileInput" accept="image/*" style="display: none;" onchange="handleAdBannerFileUpload(this)">
+                                <input type="text" id="adBannerImageInput" class="admin-form-input" value="/images/loop-ad-banner.svg" placeholder="/images/loop-ad-banner.svg або https://..." oninput="updateAdBannerLivePreview()">
                             </div>
                             <div class="admin-form-group">
                                 <label>🧭 Позиція розміщення на екрані *</label>
@@ -2993,6 +3004,46 @@
             document.getElementById('subtabPanelAd').style.display = (subtab === 'ad') ? 'block' : 'none';
             document.getElementById('subtabPanelInfo').style.display = (subtab === 'info') ? 'block' : 'none';
             document.getElementById('subtabPanelBroadcast').style.display = (subtab === 'broadcast') ? 'block' : 'none';
+        };
+
+        
+        window.applyDefaultLoopMarketAdPreset = function() {
+            document.getElementById('adBannerImageInput').value = '/images/loop-ad-banner.svg';
+            document.getElementById('adBannerTitleInput').value = 'Тут могла бути ваша реклама!';
+            document.getElementById('adBannerMessageInput').value = 'Залучайте тисячі покупців щодня на LoopMarket. Розміщуйте товари вашого бренду, банери чи акційні пропозиції.';
+            document.getElementById('adBannerActionTextInput').value = 'Розмістити рекламу 📢';
+            document.getElementById('adBannerActionUrlInput').value = 'https://t.me/LoopMarketSupport';
+            document.getElementById('adBannerPlacementSelect').value = 'sidebar_right';
+            updateAdBannerLivePreview();
+            LoopToast.info("Застосовано фірмовий банер LoopMarket з офіційним логотипом!");
+        };
+
+        window.handleAdBannerFileUpload = async function(input) {
+            const file = input.files && input.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('files', file);
+
+            try {
+                LoopToast.info("Завантаження зображення...");
+                const res = await adminFetch('/api/listings/upload-multiple', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.imageUrls && data.imageUrls.length > 0) {
+                        document.getElementById('adBannerImageInput').value = data.imageUrls[0];
+                        updateAdBannerLivePreview();
+                        LoopToast.success("Зображення успішно завантажено на сервер!");
+                    }
+                } else {
+                    LoopToast.error("Не вдалося завантажити файл зображення");
+                }
+            } catch(e) {
+                LoopToast.error("Помилка зв'язку при завантаженні файлу");
+            }
         };
 
         window.updateAdBannerLivePreview = function() {

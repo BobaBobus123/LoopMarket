@@ -450,13 +450,16 @@
             border: 1.5px solid var(--border-color);
             box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
             display: grid;
-            grid-template-columns: 300px minmax(0, 1fr) 330px; /* 3-column layout: dialogs + chat + details */
+            grid-template-columns: 320px minmax(0, 1fr) 0px; /* 3-column layout: dialogs + chat + details */
             overflow: hidden;
             min-height: 0;
             min-width: 0;
             transition: grid-template-columns 0.25s ease;
         }
 
+        .messenger-card.chat-open {
+            grid-template-columns: 320px minmax(0, 1fr) 330px !important;
+        }
         .messenger-card.details-collapsed {
             grid-template-columns: 300px minmax(0, 1fr) 0px !important;
         }
@@ -2001,7 +2004,7 @@
             </div>
 
             <!-- ПРАВА КОЛОНКА 3: ДЕТАЛІ ДІАЛОГУ ТА ОГОЛОШЕННЯ -->
-            <aside class="messenger-details-pane" id="detailsPane">
+            <aside class="messenger-details-pane" id="detailsPane" style="display: none;">
                 <!-- Шапка правої панелі -->
                 <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);">
                     <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
@@ -2161,6 +2164,13 @@
         const token = localStorage.getItem('loopToken');
         let currentUserId = null;
         let activeReceiverId = null;
+            const mCardClose = document.querySelector('.messenger-card');
+            if (mCardClose) {
+                mCardClose.classList.remove('chat-open');
+                mCardClose.classList.add('details-collapsed');
+            }
+            const dPaneClose = document.getElementById('detailsPane');
+            if (dPaneClose) dPaneClose.style.display = 'none';
         let activeItemContext = null;
         let allDialogsCache = [];
         let currentFilterTab = 'all';
@@ -2511,6 +2521,13 @@
             partnerId = parseInt(partnerId);
             if (!partnerId) return;
             activeReceiverId = partnerId;
+            const mCard = document.querySelector('.messenger-card');
+            if (mCard) {
+                mCard.classList.remove('details-collapsed');
+                mCard.classList.add('chat-open');
+            }
+            const dPane = document.getElementById('detailsPane');
+            if (dPane) dPane.style.display = 'flex';
             window.currentSelectedItemId = itemId ? parseInt(itemId) : null;
             adaptMobilePaneOnSelect();
 
