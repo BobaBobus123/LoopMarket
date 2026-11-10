@@ -1291,8 +1291,6 @@
             #analyticsContainerTab > div:first-child {
                 grid-template-columns: 1fr !important;
             }
-        }
-    
 
             .header-center {
                 display: none;
@@ -3196,10 +3194,12 @@
                         const igMatch = videoUrl.match(/(?:instagram\.com|instagr\.am)\/(?:p|reel|reels|tv)\/([a-zA-Z0-9_\-]+)/i);
                         if (igMatch) {
                             return `
-                                <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); color: white; text-align: center; position: relative;">
-                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">▶</div>
-                                    <span style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.6px; margin-top: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">REEL</span>
-                                    <span class="card-badge-video" style="top: 8px; left: 8px;" title="Instagram Reel"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Reel</span>
+                                <div style="width: 100%; height: 100%; position: relative; overflow: hidden; background: #0b0f19;">
+                                    <iframe src="https://www.instagram.com/p/${igMatch[1]}/embed/" style="width: 100%; height: 420px; border: none; margin-top: -52px; pointer-events: none;" scrolling="no" frameborder="0" loading="lazy"></iframe>
+                                    <span class="card-badge-video" style="top: 8px; left: 8px; z-index: 2; pointer-events: none;" title="Instagram Reel"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Reel</span>
+                                    <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 2;">
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">▶</div>
+                                    </div>
                                 </div>
                             `;
                         }
