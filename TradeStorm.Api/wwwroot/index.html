@@ -11,7 +11,27 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
+    <script>
+    (function() {
+        try {
+            if (localStorage.getItem('loop_catalog_promo_dismissed') !== 'true') {
+                const s = document.getElementById('catalogPromoSlot');
+                if (s) s.style.display = 'block';
+            }
+        } catch(e) {}
+    })();
+    window.dismissCatalogPromo = function() {
+        const slot = document.getElementById('catalogPromoSlot');
+        if (slot) {
+            slot.style.transition = 'all 0.3s ease';
+            slot.style.opacity = '0';
+            slot.style.transform = 'translateY(-10px)';
+            setTimeout(() => { slot.style.display = 'none'; }, 280);
+        }
+        try { localStorage.setItem('loop_catalog_promo_dismissed', 'true'); } catch(e) {}
+    };
+    </script>
+<script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
 
     <style>
         :root {
@@ -2792,7 +2812,7 @@
             </div>
 
             <!-- OLX-STYLE PROMO / ADVERTISEMENT BANNER SLOT -->
-            <div id="catalogPromoSlot" class="catalog-promo-slot">
+            <div id="catalogPromoSlot" class="catalog-promo-slot" style="display: none;">
                 <div class="olx-promo-banner" id="olxPromoBanner">
                     <div class="olx-promo-left">
                         <div class="olx-promo-logo-box">
@@ -2808,7 +2828,7 @@
                         <a href="https://t.me/LoopMarketSupport" target="_blank" class="olx-promo-btn">
                             <span>Розмістити рекламу 📢</span>
                         </a>
-                        <button type="button" class="olx-promo-close" onclick="dismissCatalogPromo()" title="Закрити рекламу">&times;</button>
+                        <button type="button" class="olx-promo-close" onclick="window.dismissCatalogPromo ? window.dismissCatalogPromo() : (this.closest('.catalog-promo-slot').style.display='none')" title="Закрити рекламу">&times;</button>
                     </div>
                 </div>
             </div>

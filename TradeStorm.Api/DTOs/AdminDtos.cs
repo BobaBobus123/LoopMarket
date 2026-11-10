@@ -60,7 +60,10 @@ public class BroadcastDto
 {
     public string Title { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
+    public string TargetAudience { get; set; } = "all"; // "all", "sellers", "buyers"
     public bool SendTelegram { get; set; } = true;
+    public bool SendInApp { get; set; } = true;
+    public bool SendLiveToast { get; set; } = true;
 }
 
 public class SiteAnnouncementDto

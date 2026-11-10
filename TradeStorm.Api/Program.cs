@@ -11,6 +11,7 @@ using TradeStorm.Api.Hubs;
 using TradeStorm.Api.Repositories;
 using TradeStorm.Api.Services;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.HttpOverrides;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -201,10 +202,23 @@ builder.Services.AddRateLimiter(options =>
 
     var isTestEnvironment = builder.Environment.IsEnvironment("Testing") || AppDomain.CurrentDomain.FriendlyName.Contains("testhost");
 
+    // Хелпер отримання реального IP відвідувача з урахуванням Cloudflare (CF-Connecting-IP) та Reverse Proxy (X-Forwarded-For)
+    string ResolveClientIp(HttpContext ctx)
+    {
+        if (ctx.Request.Headers.TryGetValue("CF-Connecting-IP", out var cfIp) && !string.IsNullOrWhiteSpace(cfIp))
+            return cfIp.ToString().Trim();
+        if (ctx.Request.Headers.TryGetValue("X-Forwarded-For", out var fwdIp) && !string.IsNullOrWhiteSpace(fwdIp))
+        {
+            var first = fwdIp.ToString().Split(',')[0].Trim();
+            if (!string.IsNullOrWhiteSpace(first)) return first;
+        }
+        return ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+    }
+
     // Обмеження для автентифікації та реєстрації (15 запитів на хвилину на IP у продакшені, безліміт у тестах)
     options.AddPolicy("AuthRateLimit", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
-            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            ResolveClientIp(httpContext),
             _ => new FixedWindowRateLimiterOptions
             {
                 PermitLimit = isTestEnvironment ? 5000 : 15,
@@ -215,7 +229,7 @@ builder.Services.AddRateLimiter(options =>
     // Обмеження для створення оголошень та завантаження фото (15 запитів на хвилину)
     options.AddPolicy("CreateListingLimit", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
-            httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? ResolveClientIp(httpContext),
             _ => new FixedWindowRateLimiterOptions
             {
                 PermitLimit = 15,
@@ -226,7 +240,7 @@ builder.Services.AddRateLimiter(options =>
     // Обмеження для відправки повідомлень у чаті (60 повідомлень на хвилину)
     options.AddPolicy("MessagesLimit", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
-            httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? ResolveClientIp(httpContext),
             _ => new FixedWindowRateLimiterOptions
             {
                 PermitLimit = 60,
@@ -237,7 +251,7 @@ builder.Services.AddRateLimiter(options =>
     // Глобальне обмеження для захисту від DDoS та скрапінгу (150 запитів на хвилину на IP)
     options.AddPolicy("GlobalApiLimit", httpContext =>
         RateLimitPartition.GetSlidingWindowLimiter(
-            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            ResolveClientIp(httpContext),
             _ => new SlidingWindowRateLimiterOptions
             {
                 PermitLimit = 150,
@@ -424,14 +438,27 @@ using (var scope = app.Services.CreateScope())
 app.UseExceptionHandler();
 app.UseStatusCodePagesWithReExecute("/404.html");
 
-// Заголовки безпеки (OWASP Security Headers)
+// Cloudflare & Reverse Proxy Forwarded Headers (отримання справжнього IP клієнта та HTTPS протоколу)
+var forwardedOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+forwardedOptions.KnownIPNetworks.Clear();
+forwardedOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedOptions);
+
+// Заголовки безпеки (OWASP & Cloudflare Anti-DDoS / Anti-Tamper Security Headers)
 app.Use(async (context, next) =>
 {
-    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-    context.Response.Headers.Append("X-Frame-Options", "DENY");
-    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
-    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
-    context.Response.Headers.Append("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["X-Frame-Options"] = "DENY";
+    context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
+    context.Response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
+    if (context.Request.IsHttps || (context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) && proto == "https"))
+    {
+        context.Response.Headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload";
+    }
     await next();
 });
 

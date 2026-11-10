@@ -610,7 +610,7 @@
                 transform: translateY(-1px);
                 box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
             }
-            @media (max-width: 1300px) {
+            @media (max-width: 1199px) {
                 .loop-olx-skyscraper {
                     display: none !important;
                 }
@@ -622,7 +622,13 @@
     function renderOlxSkyscraperAd(item) {
         if (!item || item.placement === 'hidden') return;
         const dismissedKey = 'loop_ad_skyscraper_dismissed_' + (item.id || 'curr');
-        if (sessionStorage.getItem(dismissedKey) === 'true') {
+        if (sessionStorage.getItem(dismissedKey) === 'true' || localStorage.getItem(dismissedKey) === 'true') {
+            return;
+        }
+
+        // On laptops and mobile screens (< 1200px), display in catalog promo slot instead of fixed overlay
+        if (window.innerWidth < 1200) {
+            renderCatalogPromoBanner(item);
             return;
         }
 
@@ -674,6 +680,7 @@
         if (closeBtn) {
             closeBtn.onclick = function() {
                 sessionStorage.setItem(dismissedKey, 'true');
+                localStorage.setItem(dismissedKey, 'true');
                 adWrap.classList.add('closing');
                 setTimeout(() => adWrap.remove(), 250);
             };
@@ -734,8 +741,11 @@
             slot.style.transform = 'translateY(-10px)';
             setTimeout(() => { slot.style.display = 'none'; }, 250);
         }
-        localStorage.setItem('loop_catalog_promo_dismissed_' + id, 'true');
+        localStorage.setItem('loop_catalog_promo_dismissed_' + (id || 'curr'), 'true');
         localStorage.setItem('loop_catalog_promo_dismissed', 'true');
+    };
+    window.dismissCatalogPromo = function(id) {
+        window.dismissCustomCatalogPromo(id || 'default');
     };
 
     async function checkSiteAnnouncement() {
@@ -751,6 +761,50 @@
             if (!res.ok) return;
             const data = await res.json();
             if (!data || !data.hasActive) return;
+
+            // Explicit handling for Ad Banner (Skyscraper or Catalog)
+            if (data.adBanner) {
+                if (data.adBanner.placement === 'catalog') {
+                    renderCatalogPromoBanner(data.adBanner);
+                } else if (data.adBanner.placement === 'sidebar_right' || data.adBanner.placement === 'sidebar_left') {
+                    renderOlxSkyscraperAd(data.adBanner);
+                }
+            }
+
+            // Explicit handling for Info Banner (Header or Modal)
+            if (data.infoBanner) {
+                const info = data.infoBanner;
+                const dismissedKey = 'loop_dismissed_announcement_' + info.id;
+                if (localStorage.getItem(dismissedKey) !== 'true') {
+                    if (info.placement === 'top' || info.placement === 'header' || !info.placement) {
+                        const bannerId = 'siteAnnouncementBanner_' + info.id;
+                        if (!document.getElementById(bannerId)) {
+                            const banner = document.createElement('div');
+                            banner.id = bannerId;
+                            let bg = 'linear-gradient(90deg, #d97706 0%, #f59e0b 100%)';
+                            let icon = '⚠️';
+                            if (info.type === 'danger') { bg = 'linear-gradient(90deg, #dc2626 0%, #ef4444 100%)'; icon = '🚫'; }
+                            else if (info.type === 'promo' || info.type === 'success') { bg = 'linear-gradient(90deg, #059669 0%, #10b981 100%)'; icon = '🏷️'; }
+                            else if (info.type === 'info') { bg = 'linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%)'; icon = 'ℹ️'; }
+
+                            banner.style.cssText = 'background: ' + bg + '; color: #ffffff; padding: 11px 18px; font-size: 0.88rem; font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px; z-index: 1000; position: relative; box-shadow: 0 3px 12px rgba(0,0,0,0.18); flex-wrap: wrap;';
+                            const actionBtn = (info.actionUrl && info.actionText) 
+                                ? `<a href="${info.actionUrl}" target="_blank" style="margin-left: 8px; background: rgba(255,255,255,0.22); color: white; padding: 3px 12px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 0.82rem; border: 1px solid rgba(255,255,255,0.4); display: inline-flex; align-items: center; gap: 4px;">${info.actionText} &rarr;</a>` 
+                                : '';
+                            const titleHtml = info.title ? `<strong style="font-weight: 800; letter-spacing: 0.3px;">${info.title}:</strong> ` : '';
+                            banner.innerHTML = `<span>${icon} ${titleHtml}${info.message}</span>${actionBtn}<button class="close-ann-btn" title="Закрити оголошення" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.35rem; line-height: 1; margin-left: 12px; opacity: 0.9; padding: 2px 6px; border-radius: 4px;">&times;</button>`;
+                            const cBtn = banner.querySelector('.close-ann-btn');
+                            if (cBtn) {
+                                cBtn.onclick = function() {
+                                    localStorage.setItem(dismissedKey, 'true');
+                                    banner.remove();
+                                };
+                            }
+                            document.body.prepend(banner);
+                        }
+                    }
+                }
+            }
 
             const items = data.announcements || (data.message ? [data] : []);
 

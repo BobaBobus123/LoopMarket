@@ -125,6 +125,9 @@ public class AdminOperationsController : ControllerBase
 
         if (primary == null) return Ok(new { hasActive = false, announcements = new object[0] });
 
+        var infoBanner = activeList.FirstOrDefault(a => a.Placement == "top" || a.Placement == "header" || a.Placement == "modal");
+        var adBanner = activeList.FirstOrDefault(a => a.Placement.StartsWith("sidebar") || a.Placement == "catalog" || a.Type == "promo");
+
         return Ok(new
         {
             hasActive = true,
@@ -139,6 +142,32 @@ public class AdminOperationsController : ControllerBase
             imageUrl = primary.ImageUrl,
             expiresAt = primary.ExpiresAt,
             createdAt = primary.CreatedAt,
+            infoBanner = infoBanner != null ? new
+            {
+                id = infoBanner.Id,
+                title = infoBanner.Title,
+                message = infoBanner.Message,
+                type = infoBanner.Type,
+                targetPage = infoBanner.TargetPage,
+                placement = infoBanner.Placement,
+                actionText = infoBanner.ActionText,
+                actionUrl = infoBanner.ActionUrl,
+                imageUrl = infoBanner.ImageUrl,
+                expiresAt = infoBanner.ExpiresAt
+            } : null,
+            adBanner = adBanner != null ? new
+            {
+                id = adBanner.Id,
+                title = adBanner.Title,
+                message = adBanner.Message,
+                type = adBanner.Type,
+                targetPage = adBanner.TargetPage,
+                placement = adBanner.Placement,
+                actionText = adBanner.ActionText,
+                actionUrl = adBanner.ActionUrl,
+                imageUrl = adBanner.ImageUrl,
+                expiresAt = adBanner.ExpiresAt
+            } : null,
             announcements = activeList.Select(a => new
             {
                 id = a.Id,
@@ -228,13 +257,21 @@ public class AdminOperationsController : ControllerBase
             CreatedAt = now
         };
 
-        // Якщо створюється новий рекламний банер — деактивуємо старі рекламні оголошення
+        // Якщо створюється новий рекламний банер — деактивуємо лише старі рекламні банери
         if (type == "promo" || placement.StartsWith("sidebar") || placement == "catalog")
         {
             var oldAds = await _context.SiteAnnouncements
                 .Where(a => a.IsActive && (a.Type == "promo" || a.Placement.StartsWith("sidebar") || a.Placement == "catalog"))
                 .ToListAsync();
             foreach (var old in oldAds) old.IsActive = false;
+        }
+        else
+        {
+            // Якщо створюється інфо-банер або системне повідомлення — деактивуємо лише старі інфо-банери
+            var oldInfo = await _context.SiteAnnouncements
+                .Where(a => a.IsActive && a.Type != "promo" && !a.Placement.StartsWith("sidebar") && a.Placement != "catalog")
+                .ToListAsync();
+            foreach (var old in oldInfo) old.IsActive = false;
         }
 
         _context.SiteAnnouncements.Add(banner);
@@ -307,49 +344,80 @@ public class AdminOperationsController : ControllerBase
             return BadRequest(new { error = "Повідомлення розсилки не може бути порожнім" });
         }
 
-        var users = await _context.Users.ToListAsync();
+        var query = _context.Users.AsQueryable();
+        if (dto.TargetAudience == "sellers")
+        {
+            query = query.Where(u => u.Role == UserRoles.Seller || u.Role == UserRoles.Admin);
+        }
+        else if (dto.TargetAudience == "buyers")
+        {
+            query = query.Where(u => u.Role == UserRoles.Buyer);
+        }
+
+        var users = await query.ToListAsync();
         int inAppCount = 0;
         int telegramCount = 0;
+        var now = DateTime.UtcNow;
 
-        foreach (var user in users)
+        if (dto.SendInApp)
         {
-            // Внутрішнє сповіщення
-            var notif = new Notification
+            var notifs = users.Select(user => new Notification
             {
                 UserId = user.Id,
                 Title = string.IsNullOrWhiteSpace(dto.Title) ? "Оголошення LoopMarket" : dto.Title,
                 Message = dto.Message,
                 Link = "/index.html",
                 IsRead = false,
-                CreatedAt = DateTime.UtcNow
-            };
-            _context.Notifications.Add(notif);
-            inAppCount++;
+                CreatedAt = now
+            }).ToList();
 
-            // Telegram сповіщення
-            if (dto.SendTelegram && user.TelegramChatId != 0 && user.ReceiveTelegramNotifications)
+            _context.Notifications.AddRange(notifs);
+            inAppCount = notifs.Count;
+            await _context.SaveChangesAsync();
+        }
+
+        if (dto.SendTelegram)
+        {
+            foreach (var user in users)
             {
-                try
+                if (user.TelegramChatId != 0 && user.ReceiveTelegramNotifications)
                 {
-                    string tgText = $"📢 <b>{dto.Title}</b>\n\n{dto.Message}\n\n<i>З повагою, команда безпеки Loop Market</i>";
-                    await _telegramService.SendNotificationAsync(user.TelegramChatId, tgText);
-                    telegramCount++;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[Broadcast TG Error] User {user.Id}: {ex.Message}");
+                    try
+                    {
+                        string tgText = $"📢 <b>{dto.Title}</b>\n\n{dto.Message}\n\n<i>З повагою, команда безпеки Loop Market</i>";
+                        await _telegramService.SendNotificationAsync(user.TelegramChatId, tgText);
+                        telegramCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Broadcast TG Error] User {user.Id}: {ex.Message}");
+                    }
                 }
             }
         }
 
-        await _context.SaveChangesAsync();
-        await LogAuditAsync("Broadcast", "System", null, $"Надіслано {inAppCount} користувачам, TG: {telegramCount}");
+        if (dto.SendLiveToast)
+        {
+            try
+            {
+                await _hubContext.Clients.All.SendAsync("ReceiveSystemBroadcast", new
+                {
+                    title = string.IsNullOrWhiteSpace(dto.Title) ? "Оголошення платформи" : dto.Title,
+                    message = dto.Message,
+                    createdAt = now
+                });
+            }
+            catch {}
+        }
+
+        await LogAuditAsync("Broadcast", "System", null, $"Audience: {dto.TargetAudience}, InApp: {inAppCount}, TG: {telegramCount}, LiveToast: {dto.SendLiveToast}");
 
         return Ok(new
         {
             message = "Масову розсилку успішно завершено!",
             inAppDelivered = inAppCount,
-            telegramDelivered = telegramCount
+            telegramDelivered = telegramCount,
+            liveToastSent = dto.SendLiveToast
         });
     }
 

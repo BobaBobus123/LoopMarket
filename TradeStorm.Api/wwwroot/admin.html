@@ -1104,19 +1104,43 @@
                 </div>
 
                 <form onsubmit="handleSendBroadcast(event)" style="max-width: 800px;">
-                    <div class="admin-form-group">
-                        <label>Тема розсилки *</label>
-                        <input type="text" id="broadcastTitleInput" class="admin-form-input" required placeholder="Важливе оновлення безпеки угод LoopMarket">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div class="admin-form-group">
+                            <label>Тема розсилки *</label>
+                            <input type="text" id="broadcastTitleInput" class="admin-form-input" required placeholder="Важливе оновлення безпеки угод LoopMarket">
+                        </div>
+                        <div class="admin-form-group">
+                            <label>Цільова аудиторія</label>
+                            <select id="broadcastAudienceSelect" class="admin-form-select">
+                                <option value="all" selected>👥 Всі зареєстровані користувачі</option>
+                                <option value="sellers">🛍️ Тільки продавці (і майстри послуг)</option>
+                                <option value="buyers">🛒 Тільки покупці</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="admin-form-group">
                         <label>Текст розсилки *</label>
                         <textarea id="broadcastMessageInput" class="admin-form-textarea" rows="4" required placeholder="Шановні користувачі, для вашої безпеки запущено оновлені правила..."></textarea>
                     </div>
-                    <div class="admin-form-group" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 12px;">
-                        <input type="checkbox" id="broadcastTgCheckbox" checked style="width: 18px; height: 18px; accent-color: var(--admin-primary); cursor: pointer;">
-                        <label for="broadcastTgCheckbox" style="margin: 0; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
-                            🤖 Дублювати розсилку у підключені Telegram-боти користувачів
-                        </label>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 14px;">
+                        <div class="admin-form-group" style="margin: 0; display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 12px;">
+                            <input type="checkbox" id="broadcastInAppCheckbox" checked style="width: 18px; height: 18px; accent-color: #10b981; cursor: pointer;">
+                            <label for="broadcastInAppCheckbox" style="margin: 0; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
+                                🔔 Внутрішнє сповіщення (дзвіночок)
+                            </label>
+                        </div>
+                        <div class="admin-form-group" style="margin: 0; display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 12px;">
+                            <input type="checkbox" id="broadcastToastCheckbox" checked style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
+                            <label for="broadcastToastCheckbox" style="margin: 0; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
+                                ⚡ Live Toast (хто зараз онлайн)
+                            </label>
+                        </div>
+                        <div class="admin-form-group" style="margin: 0; display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 12px;">
+                            <input type="checkbox" id="broadcastTgCheckbox" checked style="width: 18px; height: 18px; accent-color: #06b6d4; cursor: pointer;">
+                            <label for="broadcastTgCheckbox" style="margin: 0; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
+                                🤖 Telegram-боти користувачів
+                            </label>
+                        </div>
                     </div>
                     <button type="submit" id="btnSubmitBroadcast" class="btn-action success" style="padding: 12px 24px; font-weight: 800; font-size: 0.95rem; margin-top: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 4px 14px rgba(16,185,129,0.35);">
                         🚀 Відправити всім користувачам
@@ -3237,7 +3261,7 @@
                         : '<span class="status-badge" style="background: rgba(100,116,139,0.15); color: #64748b;">⚪ Знято адміном</span>');
 
                 const pageLabel = a.targetPage === 'home' ? '🏠 Каталог / Головна' : (a.targetPage === 'details' ? '📦 Товар' : (a.targetPage === 'services' ? '🛠️ Послуги' : '🌐 Всі сторінки'));
-                const placeLabel = a.placement === 'catalog' ? '📰 У каталозі' : (a.placement === 'modal' ? '🪟 Модальне вікно' : '🔝 Верхній банер');
+                const placeLabel = a.placement === 'sidebar_right' ? '➡️ Справа (Skyscraper)' : (a.placement === 'sidebar_left' ? '⬅️ Зліва (Skyscraper)' : (a.placement === 'catalog' ? '📰 У каталозі' : (a.placement === 'modal' ? '🪟 Модальне вікно' : '🔝 Верхній банер')));
 
                 const expiresLabel = a.expiresAt 
                     ? new Date(a.expiresAt).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
@@ -3363,29 +3387,51 @@
 
         async function handleSendBroadcast(e) {
             e.preventDefault();
-            const title = document.getElementById('broadcastTitleInput').value.trim();
-            const message = document.getElementById('broadcastMessageInput').value.trim();
-            const sendTelegram = document.getElementById('broadcastTgCheckbox').checked;
+            const title = document.getElementById('broadcastTitleInput')?.value?.trim() || '';
+            const message = document.getElementById('broadcastMessageInput')?.value?.trim() || '';
+            const targetAudience = document.getElementById('broadcastAudienceSelect')?.value || 'all';
+            const sendInApp = document.getElementById('broadcastInAppCheckbox') ? document.getElementById('broadcastInAppCheckbox').checked : true;
+            const sendLiveToast = document.getElementById('broadcastToastCheckbox') ? document.getElementById('broadcastToastCheckbox').checked : true;
+            const sendTelegram = document.getElementById('broadcastTgCheckbox') ? document.getElementById('broadcastTgCheckbox').checked : true;
 
-            const confirmed = await LoopDialog.confirm(`Відправити повідомлення ВСІМ зареєстрованим користувачам? (Telegram: ${sendTelegram ? 'Так' : 'Ні'})`, "Підтвердження масової розсилки");
+            if (!message) {
+                LoopToast.error("Введіть текст повідомлення для розсилки");
+                return;
+            }
+
+            const audienceText = targetAudience === 'sellers' ? 'тільки продавцям' : (targetAudience === 'buyers' ? 'тільки покупцям' : 'всім користувачам');
+            const confirmed = await LoopDialog.confirm(`Відправити розсилку (${audienceText})?\nКанали: В додатку (${sendInApp ? '✓' : '✗'}), SignalR онлайн (${sendLiveToast ? '✓' : '✗'}), Telegram (${sendTelegram ? '✓' : '✗'})`, "Підтвердження масової розсилки");
             if (!confirmed) return;
+
+            const btn = document.getElementById('btnSubmitBroadcast');
+            if (btn) { btn.disabled = true; btn.innerText = '⏳ Відправка розсилки...'; }
 
             try {
                 const res = await adminFetch('/api/admin/broadcast', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ title, message, sendTelegram })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, message, targetAudience, sendInApp, sendLiveToast, sendTelegram })
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    LoopToast.success(`Розсилку завершено! Внутрішніх: ${data.inAppDelivered}, Telegram: ${data.telegramDelivered}`);
+                    LoopToast.success(`Розсилку успішно завершено! Внутрішніх: ${data.inAppDelivered}, Telegram: ${data.telegramDelivered}`);
+                    const statusBox = document.getElementById('broadcastStatusBox');
+                    if (statusBox) {
+                        statusBox.style.display = 'block';
+                        statusBox.style.background = 'rgba(16,185,129,0.12)';
+                        statusBox.style.color = '#059669';
+                        statusBox.style.border = '1px solid rgba(16,185,129,0.3)';
+                        statusBox.innerHTML = `✅ <strong>Масову розсилку надіслано!</strong> Отримали в додатку: <strong>${data.inAppDelivered}</strong>, в Telegram-боті: <strong>${data.telegramDelivered}</strong>${data.liveToastSent ? ', передано онлайн SignalR користувачам' : ''}.`;
+                    }
                     document.getElementById('broadcastTitleInput').value = '';
                     document.getElementById('broadcastMessageInput').value = '';
                 } else {
-                    LoopToast.error(data.error || "Помилка відправки");
+                    LoopToast.error(data.error || "Помилка відправки розсилки");
                 }
             } catch (err) {
-                LoopToast.error("Помилка сервера");
+                LoopToast.error("Помилка зв'язку з сервером");
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = '🚀 Відправити розсилку'; }
             }
         }
 
