@@ -794,6 +794,21 @@
             </div>
 
             <div class="admin-card">
+                <div style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center;">
+                    <span style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Фільтр:</span>
+                    <button type="button" id="annFilterBtnAll" class="admin-tab active" onclick="filterAnnouncementsTable('all')" style="padding: 5px 12px; font-size: 0.8rem; border-radius: 8px;">
+                        Всі (<span id="countAnnAll">0</span>)
+                    </button>
+                    <button type="button" id="annFilterBtnActive" class="admin-tab" onclick="filterAnnouncementsTable('active')" style="padding: 5px 12px; font-size: 0.8rem; border-radius: 8px;">
+                        🟢 Тільки активні (<span id="countAnnActive">0</span>)
+                    </button>
+                    <button type="button" id="annFilterBtnAd" class="admin-tab" onclick="filterAnnouncementsTable('ad')" style="padding: 5px 12px; font-size: 0.8rem; border-radius: 8px;">
+                        🏷️ Реклама (<span id="countAnnAd">0</span>)
+                    </button>
+                    <button type="button" id="annFilterBtnInfo" class="admin-tab" onclick="filterAnnouncementsTable('info')" style="padding: 5px 12px; font-size: 0.8rem; border-radius: 8px;">
+                        ℹ️ Інформаційні (<span id="countAnnInfo">0</span>)
+                    </button>
+                </div>
                 <div class="table-responsive">
                     <table class="admin-table">
                         <thead>
@@ -919,7 +934,15 @@
                 <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; align-items: start;">
                     <form onsubmit="handleSetAdBanner(event)">
                         <div class="admin-form-group">
-                            <label>Заголовок реклами *</label>
+                            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
+                            <label style="margin: 0;">Заголовок реклами *</label>
+                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">⚡ Шаблони:</span>
+                                <button type="button" onclick="applyAdBannerTemplate('official')" style="background: rgba(16,185,129,0.12); color: #059669; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">💎 Фірмовий Loop ADS</button>
+                                <button type="button" onclick="applyAdBannerTemplate('pro')" style="background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🚀 PRO-продавець</button>
+                                <button type="button" onclick="applyAdBannerTemplate('safety')" style="background: rgba(217,119,6,0.12); color: #d97706; border: 1px solid rgba(217,119,6,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🛡️ Безпека угод</button>
+                            </div>
+                        </div>
                             <input type="text" id="adBannerTitleInput" class="admin-form-input" required value="Тут могла бути ваша реклама!" oninput="updateAdBannerLivePreview()">
                         </div>
 
@@ -1067,6 +1090,15 @@
 
                     <div class="admin-form-group">
                         <label>Заголовок повідомлення</label>
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
+                            <label style="margin: 0;">Заголовок інфо-банера *</label>
+                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">⚡ Шаблони:</span>
+                                <button type="button" onclick="applyInfoBannerTemplate('maintenance')" style="background: rgba(217,119,6,0.12); color: #d97706; border: 1px solid rgba(217,119,6,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🛠️ Техроботи</button>
+                                <button type="button" onclick="applyInfoBannerTemplate('fraud_alert')" style="background: rgba(220,38,38,0.12); color: #dc2626; border: 1px solid rgba(220,38,38,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🚫 Антифішинг</button>
+                                <button type="button" onclick="applyInfoBannerTemplate('release')" style="background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🎉 Оновлення 5.0</button>
+                            </div>
+                        </div>
                         <input type="text" id="infoBannerTitleInput" class="admin-form-input" placeholder="Наприклад: Оновлення платформи 2.0 або Технічні роботи">
                     </div>
 
@@ -1106,7 +1138,15 @@
                 <form onsubmit="handleSendBroadcast(event)" style="max-width: 800px;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
                         <div class="admin-form-group">
-                            <label>Тема розсилки *</label>
+                            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
+                            <label style="margin: 0;">Тема розсилки *</label>
+                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">⚡ Шаблони:</span>
+                                <button type="button" onclick="applyBroadcastTemplate('security')" style="background: rgba(220,38,38,0.12); color: #dc2626; border: 1px solid rgba(220,38,38,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🔒 Кібербезпека</button>
+                                <button type="button" onclick="applyBroadcastTemplate('features')" style="background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🚀 Новий функціонал</button>
+                                <button type="button" onclick="applyBroadcastTemplate('sellers')" style="background: rgba(16,185,129,0.12); color: #059669; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🛍️ Для продавців</button>
+                            </div>
+                        </div>
                             <input type="text" id="broadcastTitleInput" class="admin-form-input" required placeholder="Важливе оновлення безпеки угод LoopMarket">
                         </div>
                         <div class="admin-form-group">
@@ -1329,7 +1369,16 @@
                     <div style="margin-top: 4px;">🎫 <b>Тема звернення:</b> <span id="replyTicketReason">—</span></div>
                 </div>
                 <div class="admin-form-group">
-                    <label>Текст офіційної відповіді користувачу *</label>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+                    <label style="margin: 0;">Текст офіційної відповіді користувачу *</label>
+                    <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('fraud')" style="background: rgba(220,38,38,0.12); color: #dc2626; border: 1px solid rgba(220,38,38,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🚫 Бан шахрая</button>
+                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('rules')" style="background: rgba(217,119,6,0.12); color: #d97706; border: 1px solid rgba(217,119,6,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">⚠️ Видалено за правила</button>
+                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('evidence')" style="background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">❓ Мало доказів</button>
+                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('delivery')" style="background: rgba(16,185,129,0.12); color: #059669; border: 1px solid rgba(16,185,129,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">📦 Доставка / НП</button>
+                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('resolved')" style="background: rgba(100,116,139,0.15); color: #475569; border: 1px solid rgba(100,116,139,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">✅ Вирішено</button>
+                    </div>
+                </div>
                     <textarea id="replyMessageText" class="admin-form-input" rows="5" placeholder="Введіть текст офіційної відповіді. Вона надійде користувачеві у внутрішній чат сайту та офіційний Telegram-бот платформи без розкриття ваших особистих контактів..." required style="resize: vertical;"></textarea>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; font-size: 0.88rem;">
@@ -2906,7 +2955,107 @@
         // TAB 5: BROADCAST & ANNOUNCEMENTS
         let allAnnouncementsList = [];
 
-        async function loadAnnouncementsList() {
+        
+        // ==================== ADMIN QUICK TEMPLATES SYSTEM ====================
+        window.applyComplaintReplyTemplate = function(type) {
+            const txt = document.getElementById('replyMessageText');
+            if (!txt) return;
+
+            if (type === 'fraud') {
+                txt.value = "Доброго дня! Дякуємо за вашу пильність. Наша служба безпеки перевірила вказаного користувача. Його профіль заблоковано назавжди без права відновлення за порушення правил безпеки платформи та спробу шахрайства. Якщо ви зазнали матеріальних збитків, зверніться до нашої служби підтримки для отримання офіційної виписки для правоохоронних органів.\n\nЗ повагою, Служба безпеки LoopMarket.";
+            } else if (type === 'rules') {
+                txt.value = "Доброго дня! Дякуємо за звернення. Оголошення було ретельно перевірено та видалено з платформи через невідповідність правилам розміщення товарів (недостовірний опис або порушення умов публікації). Автору винесено суворе попередження.\n\nЗ повагою, Команда модерації LoopMarket.";
+            } else if (type === 'evidence') {
+                txt.value = "Доброго дня! Дякуємо за звернення. На даний момент наданих даних недостатньо для вжиття санкцій до користувача. Будь ласка, надішліть додаткові докази (скріншоти листування, квитанцію про оплату або номер ТТН) у відповідь на це повідомлення або в наш офіційний Telegram: @LoopMarketSupport.\n\nЗ повагою, Команда підтримки LoopMarket.";
+            } else if (type === 'delivery') {
+                txt.value = "Доброго дня! Ми зафіксували проблему з вашим замовленням. За нашими даними посилка наразі обробляється поштовою службою Нова Пошта. Ми направили офіційний запит перевізнику. Ваші кошти залишаються під надійним захистом LoopMarket до моменту фактичного отримання товару.\n\nЗ повагою, Служба турботи LoopMarket.";
+            } else if (type === 'resolved') {
+                txt.value = "Доброго дня! Повідомляємо, що ваше звернення успішно опрацьовано, питання вирішено. Статус замовлення та кошти синхронізовано у системі. Дякуємо, що ви з нами!\n\nЗ повагою, Команда LoopMarket.";
+            }
+            LoopToast.info("Шаблон відповіді успішно підставлено!");
+        };
+
+        window.applyAdBannerTemplate = function(type) {
+            if (type === 'official') {
+                document.getElementById('adBannerTitleInput').value = 'Тут могла бути ваша реклама!';
+                document.getElementById('adBannerMessageInput').value = 'Залучайте тисячі покупців щодня на LoopMarket. Розміщуйте товари вашого бренду, банери чи акційні пропозиції.';
+                document.getElementById('adBannerImageInput').value = '/images/loop-ad-banner.svg';
+                document.getElementById('adBannerActionTextInput').value = 'Розмістити рекламу 📢';
+                document.getElementById('adBannerActionUrlInput').value = 'https://t.me/LoopMarketSupport';
+                document.getElementById('adBannerPlacementSelect').value = 'sidebar_right';
+            } else if (type === 'pro') {
+                document.getElementById('adBannerTitleInput').value = 'Підвищуйте продажі з PRO-акаунтом!';
+                document.getElementById('adBannerMessageInput').value = 'Отримуйте в 5 разів більше переглядів, пріоритет у пошуку каталогу та довіру покупців з бейджем «Надійний продавець».';
+                document.getElementById('adBannerImageInput').value = '/images/loop-ad-banner.svg';
+                document.getElementById('adBannerActionTextInput').value = 'Підключити PRO ⚡';
+                document.getElementById('adBannerActionUrlInput').value = '/profile.html?tab=settings';
+                document.getElementById('adBannerPlacementSelect').value = 'catalog';
+            } else if (type === 'safety') {
+                document.getElementById('adBannerTitleInput').value = 'Купуйте безпечно з Loop Захистом!';
+                document.getElementById('adBannerMessageInput').value = 'Накладений платіж та перевірка товару у відділенні Нової Пошти. Жодних сумнівних передоплат стороннім особам.';
+                document.getElementById('adBannerImageInput').value = '/images/loop-ad-banner.svg';
+                document.getElementById('adBannerActionTextInput').value = 'Як це працює 🛡️';
+                document.getElementById('adBannerActionUrlInput').value = '/safety.html';
+                document.getElementById('adBannerPlacementSelect').value = 'sidebar_right';
+            }
+            updateAdBannerLivePreview();
+            LoopToast.info("Шаблон реклами застосовано!");
+        };
+
+        window.applyInfoBannerTemplate = function(type) {
+            if (type === 'maintenance') {
+                document.getElementById('infoBannerTitleInput').value = 'Технічне обслуговування';
+                document.getElementById('infoBannerMessageInput').value = 'Сьогодні з 02:00 до 04:00 на платформі триватимуть планові роботи для оптимізації серверів. Деякі функції можуть бути тимчасово недоступні.';
+                document.getElementById('infoBannerTypeSelect').value = 'warning';
+                document.getElementById('infoBannerPlacementSelect').value = 'top';
+                document.getElementById('infoBannerActionTextInput').value = 'Дізнатися більше';
+                document.getElementById('infoBannerActionUrlInput').value = '/about.html';
+            } else if (type === 'fraud_alert') {
+                document.getElementById('infoBannerTitleInput').value = 'Увага: Правила кібербезпеки!';
+                document.getElementById('infoBannerMessageInput').value = 'Ніколи не пересилайте паролі, SMS-коди та не вводьте реквізити карти на невідомих сторонніх сайтах. Усі безпечні розрахунки здійснюються виключно всередині LoopMarket.';
+                document.getElementById('infoBannerTypeSelect').value = 'danger';
+                document.getElementById('infoBannerPlacementSelect').value = 'top';
+                document.getElementById('infoBannerActionTextInput').value = 'Правила безпеки 🛡️';
+                document.getElementById('infoBannerActionUrlInput').value = '/safety.html';
+            } else if (type === 'release') {
+                document.getElementById('infoBannerTitleInput').value = 'Зустрічайте оновлення LoopMarket 5.0!';
+                document.getElementById('infoBannerMessageInput').value = 'Ми повністю оновили інтерфейс платформи, додали шрифти Unbounded + Manrope та багаторівневий захист від навантаження. Приємного користування!';
+                document.getElementById('infoBannerTypeSelect').value = 'info';
+                document.getElementById('infoBannerPlacementSelect').value = 'top';
+                document.getElementById('infoBannerActionTextInput').value = 'Переглянути каталог';
+                document.getElementById('infoBannerActionUrlInput').value = '/index.html';
+            }
+            LoopToast.info("Шаблон інфо-банера застосовано!");
+        };
+
+        window.applyBroadcastTemplate = function(type) {
+            if (type === 'security') {
+                document.getElementById('broadcastTitleInput').value = 'Офіційне застереження служби безпеки LoopMarket';
+                document.getElementById('broadcastMessageInput').value = 'Шановні користувачі! Нагадуємо базові правила безпеки: ніколи не переходьте за посиланнями у сторонніх месенджерах та не вводьте CVV-код на невідомих сайтах. Усі замовлення та повідомлення фіксуються виключно в кабінеті LoopMarket.';
+            } else if (type === 'features') {
+                document.getElementById('broadcastTitleInput').value = 'Нові можливості на платформі LoopMarket';
+                document.getElementById('broadcastMessageInput').value = 'Ми раді повідомити про оновлення функціоналу: додано розумний пошук, миттєві SignalR сповіщення та стабільну роботу на всіх пристроях. Перевірте оновлення у своєму профілі!';
+            } else if (type === 'sellers') {
+                document.getElementById('broadcastTitleInput').value = 'Спеціальна пропозиція для активних продавців';
+                document.getElementById('broadcastMessageInput').value = 'Розміщуйте нові товари цього тижня та отримуйте безкоштовне закріплення у ТОП каталогу на 3 дні. Бажаємо успішних продажів та задоволених покупців!';
+                const aud = document.getElementById('broadcastAudienceSelect');
+                if (aud) aud.value = 'sellers';
+            }
+            LoopToast.info("Шаблон розсилки застосовано!");
+        };
+
+        let currentAnnFilter = 'all';
+
+        window.filterAnnouncementsTable = function(filter) {
+            currentAnnFilter = filter;
+            document.getElementById('annFilterBtnAll')?.classList.toggle('active', filter === 'all');
+            document.getElementById('annFilterBtnActive')?.classList.toggle('active', filter === 'active');
+            document.getElementById('annFilterBtnAd')?.classList.toggle('active', filter === 'ad');
+            document.getElementById('annFilterBtnInfo')?.classList.toggle('active', filter === 'info');
+            renderAnnouncementsTable(allAnnouncementsList);
+        };
+
+async function loadAnnouncementsList() {
             const tbody = document.getElementById('announcementsTableBody');
             const badge = document.getElementById('announcementsCountBadge');
             if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: var(--text-muted);">Завантаження списку оголошень...</td></tr>';
@@ -3233,16 +3382,40 @@
         };
 
 
-        function renderAnnouncementsTable(list) {
+        function renderAnnouncementsTable(rawList) {
             const tbody = document.getElementById('announcementsTableBody');
             if (!tbody) return;
 
-            if (!list || list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 32px; color: var(--text-muted);">На платформі немає створених банерів чи оголошень. Створіть перший у формі вище!</td></tr>';
+            const list = rawList || [];
+            const now = new Date();
+
+            const totalCount = list.length;
+            const activeCount = list.filter(a => a.isActive && (!a.expiresAt || new Date(a.expiresAt) > now)).length;
+            const adCount = list.filter(a => a.type === 'promo' || (a.placement && a.placement.startsWith('sidebar')) || a.placement === 'catalog').length;
+            const infoCount = list.filter(a => a.type !== 'promo' && (!a.placement || a.placement === 'top' || a.placement === 'header' || a.placement === 'modal')).length;
+
+            const cAll = document.getElementById('countAnnAll'); if (cAll) cAll.innerText = totalCount;
+            const cActive = document.getElementById('countAnnActive'); if (cActive) cActive.innerText = activeCount;
+            const cAd = document.getElementById('countAnnAd'); if (cAd) cAd.innerText = adCount;
+            const cInfo = document.getElementById('countAnnInfo'); if (cInfo) cInfo.innerText = infoCount;
+
+            let filtered = list;
+            if (currentAnnFilter === 'active') {
+                filtered = list.filter(a => a.isActive && (!a.expiresAt || new Date(a.expiresAt) > now));
+            } else if (currentAnnFilter === 'ad') {
+                filtered = list.filter(a => a.type === 'promo' || (a.placement && a.placement.startsWith('sidebar')) || a.placement === 'catalog');
+            } else if (currentAnnFilter === 'info') {
+                filtered = list.filter(a => a.type !== 'promo' && (!a.placement || a.placement === 'top' || a.placement === 'header' || a.placement === 'modal'));
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                    ${list.length === 0 ? 'На платформі немає створених банерів чи оголошень. Створіть перший у формі вище!' : 'За обраним фільтром не знайдено банерів.'}
+                </td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = list.map(a => {
+            tbody.innerHTML = filtered.map(a => {
                 const isExpired = a.isExpired;
                 const isActive = a.isActive && !isExpired;
 
