@@ -1826,6 +1826,352 @@
             .lightbox-hint { display: none; }
         }
 
+    
+        /* MIN HEIGHT FOR DESCRIPTION TO PREVENT ABRUPT EMPTY GAPS */
+        #productDescriptionBlock {
+            min-height: 140px;
+        }
+
+        /* 1. ХАРАКТЕРИСТИКИ ТА ПАРАМЕТРИ ОГОЛОШЕННЯ */
+        .specs-details-block {
+            padding: 24px 28px !important;
+            margin-top: 0;
+            background: var(--surface);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .specs-block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .specs-block-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            font-family: 'Unbounded', sans-serif;
+            letter-spacing: -0.3px;
+        }
+
+        .specs-icon-badge {
+            font-size: 1.3rem;
+        }
+
+        .specs-verified-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+
+        .specs-chips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 12px;
+        }
+
+        .spec-chip-card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .spec-chip-card:hover {
+            border-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .spec-chip-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .spec-chip-value {
+            font-size: 0.96rem;
+            font-weight: 800;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+
+        /* 2. LOOP ЗАХИСТ - БЛОК БЕЗПЕЧНИХ УГОД ТА ДОВІРИ */
+        .trust-guarantee-block {
+            padding: 24px 28px !important;
+            margin-top: 0;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%), var(--surface) !important;
+            border-radius: 20px;
+            border: 1.5px solid rgba(37, 99, 235, 0.2) !important;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.06);
+        }
+
+        .trust-block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .trust-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .trust-shield-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+        }
+
+        .trust-title {
+            font-size: 1.22rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+            font-family: 'Unbounded', sans-serif;
+            letter-spacing: -0.3px;
+        }
+
+        .trust-subtitle {
+            font-size: 0.84rem;
+            color: var(--text-muted);
+            margin: 2px 0 0;
+        }
+
+        .trust-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #2563eb;
+            background: rgba(37, 99, 235, 0.12);
+            border: 1px solid rgba(37, 99, 235, 0.28);
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .trust-features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        @media (max-width: 680px) {
+            .trust-features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .trust-feature-card {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .trust-feature-card:hover {
+            border-color: #10b981;
+        }
+
+        .t-feat-icon {
+            font-size: 1.4rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .t-feat-title {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 3px;
+        }
+
+        .t-feat-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+
+        /* 3. СХОЖІ ОГОЛОШЕННЯ */
+        .similar-listings-block {
+            padding: 24px 28px !important;
+            margin-top: 0;
+            background: var(--surface);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .similar-block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .similar-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .similar-title {
+            font-size: 1.22rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+            font-family: 'Unbounded', sans-serif;
+            letter-spacing: -0.3px;
+        }
+
+        .similar-view-all {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #2563eb;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .similar-view-all:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        .similar-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        .similar-item-card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            overflow: hidden;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .similar-item-card:hover {
+            transform: translateY(-3px);
+            border-color: #2563eb;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .similar-item-img-wrap {
+            width: 100%;
+            height: 130px;
+            background: var(--surface);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .similar-item-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .similar-item-card:hover .similar-item-img {
+            transform: scale(1.05);
+        }
+
+        .similar-item-body {
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .similar-item-price {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .similar-item-title {
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 38px;
+        }
+
+        .similar-item-loc {
+            font-size: 0.74rem;
+            color: var(--text-dim);
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        @media (max-width: 992px) {
+            #productSpecsBlock {
+                order: 5 !important;
+            }
+            #productTrustBlock {
+                order: 6 !important;
+            }
+            #similarListingsBlock {
+                order: 7 !important;
+            }
+        }
+
     </style>
     <link rel="stylesheet" href="/css/global.css?v=5.1">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
@@ -1946,6 +2292,84 @@
                         </span>
                     </div>
                     <div id="videoDetailPlayer" style="width: 100%; border-radius: 14px; overflow: hidden; background: #000; box-shadow: 0 4px 20px rgba(0,0,0,0.25);"></div>
+                </div>
+
+                <!-- 1. ХАРАКТЕРИСТИКИ ТА ПАРАМЕТРИ ОГОЛОШЕННЯ -->
+                <div class="description-block specs-details-block" id="productSpecsBlock">
+                    <div class="specs-block-header">
+                        <div class="specs-block-title">
+                            <span class="specs-icon-badge">📋</span>
+                            <span id="specsHeaderTitle">Характеристики та деталі</span>
+                        </div>
+                        <span class="specs-verified-tag">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            Верифіковані дані
+                        </span>
+                    </div>
+                    <div class="specs-chips-grid" id="specsChipsGrid">
+                        <!-- Динамічно заповнюється JS -->
+                    </div>
+                </div>
+
+                <!-- 2. ОФІЦІЙНИЙ ГАРАНТІЙНИЙ БЛОК: LOOP ЗАХИСТ -->
+                <div class="description-block trust-guarantee-block" id="productTrustBlock">
+                    <div class="trust-block-header">
+                        <div class="trust-title-wrap">
+                            <div class="trust-shield-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="trust-title">Loop Захист • Безпечні покупки</h3>
+                                <p class="trust-subtitle">Ваші кошти та покупки на 100% захищені сервісом ескроу</p>
+                            </div>
+                        </div>
+                        <span class="trust-badge-pill">Офіційна гарантія</span>
+                    </div>
+
+                    <div class="trust-features-grid">
+                        <div class="trust-feature-card">
+                            <div class="t-feat-icon">🔒</div>
+                            <div class="t-feat-content">
+                                <div class="t-feat-title">Безпечна оплата онлайн</div>
+                                <div class="t-feat-desc">Гроші зберігаються на транзитному рахунку до успішної перевірки товару у відділенні.</div>
+                            </div>
+                        </div>
+                        <div class="trust-feature-card">
+                            <div class="t-feat-icon">📦</div>
+                            <div class="t-feat-content">
+                                <div class="t-feat-title">Огляд перед оплатою</div>
+                                <div class="t-feat-desc">Ви маєте повне право оглянути та перевірити покупку безпосередньо у відділенні перевізника.</div>
+                            </div>
+                        </div>
+                        <div class="trust-feature-card">
+                            <div class="t-feat-icon">↩️</div>
+                            <div class="t-feat-content">
+                                <div class="t-feat-title">Гарантоване повернення коштів</div>
+                                <div class="t-feat-desc">Якщо товар не підійшов або пошкоджений — кошти миттєво повертаються на вашу картку.</div>
+                            </div>
+                        </div>
+                        <div class="trust-feature-card">
+                            <div class="t-feat-icon">🛡️</div>
+                            <div class="t-feat-content">
+                                <div class="t-feat-title">Цілодобова підтримка 24/7</div>
+                                <div class="t-feat-desc">Швидкий арбітраж та захист від шахрайства нашою власною службою безпеки LoopMarket.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. СХОЖІ ОГОЛОШЕННЯ ТА РЕКОМЕНДАЦІЇ -->
+                <div class="description-block similar-listings-block" id="similarListingsBlock">
+                    <div class="similar-block-header">
+                        <div class="similar-title-wrap">
+                            <span style="font-size: 1.3rem;">🛍️</span>
+                            <h3 class="similar-title">Схожі пропозиції на LoopMarket</h3>
+                        </div>
+                        <a href="/index.html" class="similar-view-all" id="similarCategoryLink">Дивитися більше →</a>
+                    </div>
+                    <div class="similar-cards-grid" id="similarCardsGrid">
+                        <!-- Динамічно завантажуються JS -->
+                    </div>
                 </div>
             </div>
 
@@ -2970,6 +3394,11 @@
                 }
 
                 loadCurrencyRates();
+
+                // Рендеринг характеристик та схожих пропозицій для збалансованого і наповненого інтерфейсу
+                renderProductSpecs(item, isServiceListing);
+                loadSimilarListings(item.categoryId, item.id);
+
 
                 const locEl = document.getElementById('itemLocation');
                 if (locEl) locEl.innerText = item.location || 'Кременчук';
@@ -5105,6 +5534,120 @@
         }
         updateUnreadChatBadge();
         setInterval(updateUnreadChatBadge, 15000);
+
+    
+        // ==================== РЕНДЕР ХАРАКТЕРИСТИК, LOOP ЗАХИСТУ ТА СХОЖИХ ПРОПОЗИЦІЙ ====================
+        function renderProductSpecs(item, isServiceListing) {
+            const grid = document.getElementById('specsChipsGrid');
+            if (!grid || !item) return;
+
+            const categoryName = item.categoryName || (isServiceListing ? "Послуги та робота" : "Товари");
+            const conditionVal = isServiceListing ? (item.condition || "Послуга") : (item.condition || "Вживане");
+            const shippingVal = isServiceListing 
+                ? (item.isShippingAvailable ? "Можливий виїзд до клієнта" : "Онлайн / на локації виконавця")
+                : (item.isShippingAvailable ? "Нова Пошта, Укрпошта, Meest" : "Самовивіз / Особиста зустріч");
+            const locationVal = item.location || "Кременчук / Україна";
+            const paymentVal = isServiceListing 
+                ? "Loop Захист (Безпечна угода)" 
+                : "Loop Захист (Безпечна покупка) / Післяплата";
+            const codeVal = `#LP-${item.id}`;
+
+            const chips = [
+                { icon: "📁", label: isServiceListing ? "Категорія послуги" : "Категорія товару", val: categoryName },
+                { icon: "✨", label: isServiceListing ? "Формат роботи" : "Стан товару", val: conditionVal },
+                { icon: "🚚", label: isServiceListing ? "Виїзд / Локація" : "Спосіб доставки", val: shippingVal },
+                { icon: "📍", label: "Місто відправки / Локація", val: locationVal },
+                { icon: "💳", label: "Варіанти оплати", val: paymentVal },
+                { icon: "🆔", label: "Номер оголошення", val: codeVal }
+            ];
+
+            grid.innerHTML = chips.map(c => `
+                <div class="spec-chip-card">
+                    <div class="spec-chip-label"><span>${c.icon}</span> <span>${escapeHtml(c.label)}</span></div>
+                    <div class="spec-chip-value">${escapeHtml(c.val)}</div>
+                </div>
+            `).join('');
+
+            const headerTitle = document.getElementById('specsHeaderTitle');
+            if (headerTitle) {
+                headerTitle.innerText = isServiceListing ? "Параметри та умови послуги" : "Характеристики та деталі";
+            }
+        }
+
+        async function loadSimilarListings(categoryId, currentId) {
+            const grid = document.getElementById('similarCardsGrid');
+            const block = document.getElementById('similarListingsBlock');
+            const catLink = document.getElementById('similarCategoryLink');
+            if (!grid || !block) return;
+
+            if (catLink && categoryId) {
+                catLink.href = `/index.html?category=${categoryId}`;
+            }
+
+            try {
+                let url = categoryId 
+                    ? `/api/listings?categoryId=${categoryId}&pageSize=6`
+                    : `/api/listings?pageSize=6`;
+                let res = await fetch(url);
+                if (!res.ok) {
+                    res = await fetch('/api/listings?pageSize=6');
+                }
+                if (!res.ok) return;
+
+                const data = await res.json();
+                let items = (data.listings || data || []).filter(x => x.id !== currentId);
+
+                // Якщо в категорії мало товарів, добираємо з загального списку
+                if (items.length < 3 && categoryId) {
+                    try {
+                        const fallbackRes = await fetch('/api/listings?pageSize=6');
+                        if (fallbackRes.ok) {
+                            const fallbackData = await fallbackRes.json();
+                            const extra = (fallbackData.listings || fallbackData || []).filter(x => x.id !== currentId && !items.some(it => it.id === x.id));
+                            items = items.concat(extra).slice(0, 4);
+                        }
+                    } catch(e) {}
+                }
+
+                items = items.slice(0, 4);
+
+                if (!items.length) {
+                    block.style.display = 'none';
+                    return;
+                }
+
+                block.style.display = 'block';
+                grid.innerHTML = items.map(it => {
+                    let photo = '/images/no-photo.svg';
+                    if (it.imageUrl) {
+                        photo = it.imageUrl.split(';')[0].trim();
+                    } else if (it.imageUrls && it.imageUrls.length) {
+                        photo = it.imageUrls[0];
+                    }
+                    const isServ = it.categoryId === 8 || (it.condition && it.condition.includes('Послуга'));
+                    const priceFormatted = isServ ? `${it.price} ₴ / послуга` : `${it.price} ₴`;
+
+                    return `
+                        <a href="/details.html?id=${it.id}" class="similar-item-card">
+                            <div class="similar-item-img-wrap">
+                                <img src="${escapeHtml(photo)}" class="similar-item-img" alt="${escapeHtml(it.title)}" onerror="this.src='/images/no-photo.svg';">
+                            </div>
+                            <div class="similar-item-body">
+                                <div class="similar-item-price">${escapeHtml(priceFormatted)}</div>
+                                <div class="similar-item-title">${escapeHtml(it.title)}</div>
+                                <div class="similar-item-loc">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    <span>${escapeHtml(it.location || 'Україна')}</span>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+            } catch(e) {
+                console.warn("Could not load similar listings:", e);
+                block.style.display = 'none';
+            }
+        }
 
     </script>
 
