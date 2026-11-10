@@ -3451,10 +3451,31 @@
                     url = url.trim();
                     if (!url) return null;
 
-                    if (url.startsWith('/uploads/videos/') || url.match(/\.(mp4|webm|mov|m4v|mkv)(\?.*)?$/i)) {
+                    if (url.startsWith('/uploads/videos/') || url.match(/\.(mp4|webm|mov|m4v|mkv|ogg)(\?.*)?$/i)) {
                         return { type: 'video', url: url };
                     }
 
+                    // Instagram (Reels, Posts, IGTV)
+                    const igMatch = url.match(/(?:instagram\.com|instagr\.am)\/(?:p|reel|reels|tv)\/([a-zA-Z0-9_-]+)/i);
+                    if (igMatch && igMatch[1]) {
+                        return {
+                            type: 'instagram',
+                            id: igMatch[1],
+                            embedUrl: `https://www.instagram.com/p/${igMatch[1]}/embed/`
+                        };
+                    }
+
+                    // TikTok
+                    const ttMatch = url.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/i);
+                    if (ttMatch && ttMatch[1]) {
+                        return {
+                            type: 'tiktok',
+                            id: ttMatch[1],
+                            embedUrl: `https://www.tiktok.com/embed/v2/${ttMatch[1]}`
+                        };
+                    }
+
+                    // YouTube & Shorts
                     const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/i);
                     if (ytMatch && ytMatch[1]) {
                         return {
@@ -3464,6 +3485,7 @@
                         };
                     }
 
+                    // Vimeo
                     const vimeoMatch = url.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|album\/(\d+)\/video\/|)(\d+)(?:$|\/|\?)/i);
                     if (vimeoMatch && vimeoMatch[3]) {
                         return {
@@ -3499,10 +3521,12 @@
                     const videoPlayerBox = document.getElementById('videoDetailPlayer');
                     if (videoSection && videoPlayerBox && parsedVideo) {
                         videoSection.style.display = 'block';
-                        if (parsedVideo.type === 'youtube' || parsedVideo.type === 'vimeo') {
-                            videoPlayerBox.innerHTML = `<iframe src="${parsedVideo.embedUrl}" style="width: 100%; height: 440px; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                        if (parsedVideo.type === 'instagram' || parsedVideo.type === 'tiktok') {
+                            videoPlayerBox.innerHTML = `<iframe src="${parsedVideo.embedUrl}" style="width: 100%; max-width: 440px; height: 540px; border: none; border-radius: 14px; margin: 0 auto; display: block;" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" scrolling="no" frameborder="0" allowfullscreen></iframe>`;
+                        } else if (parsedVideo.type === 'youtube' || parsedVideo.type === 'vimeo') {
+                            videoPlayerBox.innerHTML = `<iframe src="${parsedVideo.embedUrl}" style="width: 100%; height: 440px; border: none; border-radius: 14px;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
                         } else {
-                            videoPlayerBox.innerHTML = `<video src="${parsedVideo.url}" controls playsinline preload="metadata" style="width: 100%; max-height: 480px; background: #000;"></video>`;
+                            videoPlayerBox.innerHTML = `<video src="${parsedVideo.url}" controls playsinline preload="metadata" style="width: 100%; max-height: 480px; background: #000; border-radius: 14px;"></video>`;
                         }
                     }
                 } else {
@@ -3556,7 +3580,9 @@
                         if (zoomBadge) zoomBadge.style.display = 'none';
                         if (videoWrapEl) {
                             videoWrapEl.style.display = 'block';
-                            if (media.parsedType === 'youtube' || media.parsedType === 'vimeo') {
+                            if (media.parsedType === 'instagram' || media.parsedType === 'tiktok') {
+                                videoWrapEl.innerHTML = `<iframe src="${media.embedUrl}" style="width: 100%; max-width: 440px; height: 540px; border: none; border-radius: 16px; margin: 0 auto; display: block;" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" scrolling="no" frameborder="0" allowfullscreen></iframe>`;
+                            } else if (media.parsedType === 'youtube' || media.parsedType === 'vimeo') {
                                 videoWrapEl.innerHTML = `<iframe src="${media.embedUrl}" style="width: 100%; height: 500px; border: none; border-radius: 16px;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
                             } else {
                                 videoWrapEl.innerHTML = `<video src="${media.url}" controls playsinline autoplay preload="metadata" style="width: 100%; height: 500px; object-fit: contain; background: #000; border-radius: 16px;"></video>`;

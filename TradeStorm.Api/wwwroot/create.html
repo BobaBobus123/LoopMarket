@@ -1397,7 +1397,7 @@
                                 📁 Завантажити відеофайл (MP4 / WebM)
                             </button>
                             <button type="button" id="tabVideoLink" class="btn-video-tab" onclick="switchVideoMode('link')">
-                                🔗 Посилання (YouTube / Shorts / TikTok)
+                                🔗 Посилання (Instagram / Reels / YouTube / TikTok)
                             </button>
                         </div>
 
@@ -1414,7 +1414,7 @@
                         <!-- 2. Video Link Mode -->
                         <div id="videoLinkModeBox" style="display: none;">
                             <div style="display: flex; gap: 8px;">
-                                <input type="url" id="videoLinkInput" class="modern-input" placeholder="Вставте посилання на YouTube, Shorts або TikTok (наприклад: https://youtube.com/watch?v=...)" oninput="onVideoLinkChange(this.value)">
+                                <input type="url" id="videoLinkInput" class="modern-input" placeholder="Вставте посилання на Instagram (Reel/допис), YouTube або TikTok (наприклад: https://instagram.com/reel/...)" oninput="onVideoLinkChange(this.value)">
                                 <button type="button" class="btn-video-apply" onclick="applyVideoLink()">Перевірити</button>
                             </div>
                         </div>
@@ -2097,10 +2097,31 @@
             url = url.trim();
             if (!url) return null;
 
-            if (url.startsWith('/uploads/videos/') || url.match(/\.(mp4|webm|mov|m4v|mkv)(\?.*)?$/i)) {
+            if (url.startsWith('/uploads/videos/') || url.match(/\.(mp4|webm|mov|m4v|mkv|ogg)(\?.*)?$/i)) {
                 return { type: 'video', url: url };
             }
 
+            // Instagram (Reels, Posts, IGTV)
+            const igMatch = url.match(/(?:instagram\.com|instagr\.am)\/(?:p|reel|reels|tv)\/([a-zA-Z0-9_-]+)/i);
+            if (igMatch && igMatch[1]) {
+                return {
+                    type: 'instagram',
+                    id: igMatch[1],
+                    embedUrl: `https://www.instagram.com/p/${igMatch[1]}/embed/`
+                };
+            }
+
+            // TikTok
+            const ttMatch = url.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/i);
+            if (ttMatch && ttMatch[1]) {
+                return {
+                    type: 'tiktok',
+                    id: ttMatch[1],
+                    embedUrl: `https://www.tiktok.com/embed/v2/${ttMatch[1]}`
+                };
+            }
+
+            // YouTube & Shorts
             const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/i);
             if (ytMatch && ytMatch[1]) {
                 return {
@@ -2110,6 +2131,7 @@
                 };
             }
 
+            // Vimeo
             const vimeoMatch = url.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|album\/(\d+)\/video\/|)(\d+)(?:$|\/|\?)/i);
             if (vimeoMatch && vimeoMatch[3]) {
                 return {
@@ -2154,7 +2176,7 @@
             }
             const parsed = parseVideoSource(val);
             if (!parsed) {
-                showToast('Невірне посилання', 'Підтримуються YouTube, Shorts, TikTok або прямі посилання на MP4', '⚠️', true);
+                showToast('Невірне посилання', 'Підтримуються Instagram (Reels/дописи), YouTube, Shorts, TikTok або файли MP4', '⚠️', true);
                 return;
             }
             selectedVideoFile = null;
@@ -2165,7 +2187,7 @@
         window.applyVideoLink = applyVideoLink;
 
         function onVideoLinkChange(val) {
-            if (val && (val.includes('youtube.com') || val.includes('youtu.be') || val.includes('vimeo.com'))) {
+            if (val && (val.includes('instagram.com') || val.includes('instagr.am') || val.includes('tiktok.com') || val.includes('youtube.com') || val.includes('youtu.be') || val.includes('vimeo.com'))) {
                 applyVideoLink();
             }
         }
@@ -2183,8 +2205,10 @@
             }
 
             const parsed = parseVideoSource(urlOrBlob);
-            if (parsed && (parsed.type === 'youtube' || parsed.type === 'vimeo')) {
-                playerBox.innerHTML = `<iframe src="${parsed.embedUrl}" style="width: 100%; height: 320px; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+            if (parsed && (parsed.type === 'instagram' || parsed.type === 'tiktok')) {
+                playerBox.innerHTML = `<iframe src="${parsed.embedUrl}" style="width: 100%; max-width: 440px; height: 520px; border: none; border-radius: 14px; margin: 0 auto; display: block;" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" frameborder="0" scrolling="no" allowfullscreen></iframe>`;
+            } else if (parsed && (parsed.type === 'youtube' || parsed.type === 'vimeo')) {
+                playerBox.innerHTML = `<iframe src="${parsed.embedUrl}" style="width: 100%; height: 320px; border: none; border-radius: 12px;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
             } else {
                 playerBox.innerHTML = `<video src="${urlOrBlob}" controls playsinline preload="metadata" style="max-width: 100%; max-height: 320px; width: 100%; border-radius: 10px; background: #000;"></video>`;
             }
