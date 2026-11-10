@@ -1353,7 +1353,10 @@
             const favs = getFavorites();
 
             container.innerHTML = listingsToRender.map(item => {
-                const imgUrl = item.imageUrl ? item.imageUrl.split(';')[0] : '/images/placeholder.svg';
+                const rawImg = item.imageUrl ? item.imageUrl.split(';')[0].trim() : '';
+                const hasRealImg = Boolean(rawImg && !rawImg.includes('placeholder') && !rawImg.includes('no-photo'));
+                const hasVideo = Boolean(item.videoUrl && item.videoUrl.trim());
+                const imgUrl = hasRealImg ? rawImg : '/images/placeholder.svg';
                 const locationText = item.location ? item.location.split(',')[0] : 'Кременчук';
                 const isFav = favs.includes(item.id);
                 const favIcon = isFav ? ICONS.heartFilled : ICONS.heartOutline;
@@ -1361,8 +1364,15 @@
 
                 return `
                     <div class="card">
-                        <div class="card-img-wrapper">
-                            <img src="${imgUrl}" class="card-img" onclick="window.location.href='/details.html?id=${item.code || item.id}'" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
+                        <div class="card-img-wrapper" onclick="window.location.href='/details.html?id=${item.code || item.id}'">
+                            ${!hasRealImg && hasVideo ? `
+                                <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #090d16 0%, #1e293b 100%); color: #38bdf8; font-weight: 800; text-align: center; gap: 8px;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(56,189,248,0.2); border: 2px solid rgba(56,189,248,0.5); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">▶</div>
+                                    <span style="font-size: 0.75rem; letter-spacing: 0.5px; text-transform: uppercase;">ВІДЕООГЛЯД</span>
+                                </div>
+                            ` : `
+                                <img src="${imgUrl}" class="card-img" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
+                            `}
                             <button onclick="toggleFavorite(${item.id}, event)" class="btn-fav" title="Додати в обране">${favIcon}</button>
                             ${isService ? '<span style="position: absolute; top: 10px; left: 10px; background: #2563eb; color: white; font-size: 0.72rem; font-weight: 800; padding: 4px 8px; border-radius: 6px;">🛠 Послуга</span>' : ''}
                             ${item.videoUrl ? '<span class="card-badge-video" title="Є відеопрезентація"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Відео</span>' : ''}
