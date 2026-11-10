@@ -3,7 +3,9 @@
 <head>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -42,7 +44,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Manrope', 'Segoe UI', system-ui, sans-serif;
         }
 
         body, header, .creation-card, .modern-input, .photo-upload, footer, .nav-pill {
@@ -1499,7 +1501,7 @@
                     showToast('Помилка', err.error || 'Не вдалося активувати підписку', '❌');
                 }
             } catch(e) {
-                showToast('Помилка', 'Збій зв\\'язку з платіжним сервером', '❌');
+                showToast('Помилка', "Збій зв'язку з платіжним сервером", '❌');
             } finally {
                 if (btn) {
                     btn.disabled = false;
