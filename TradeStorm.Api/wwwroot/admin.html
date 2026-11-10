@@ -2373,7 +2373,13 @@
                         <td>
                             <div style="font-weight: 700; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                                 ${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}
-                                ${u.isPremium ? `<span style="display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 6px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.15)); color: #d97706; font-size: 0.72rem; font-weight: 800; border: 1px solid rgba(245, 158, 11, 0.4);" title="${u.premiumUntil ? 'До ' + new Date(u.premiumUntil).toLocaleDateString('uk-UA') : 'PRO'}">👑 PRO</span>` : ''}
+                                ${u.isPremium ? (
+                                    (u.premiumPlan === 'brand_annual' || u.premiumPlan === 'brand')
+                                        ? `<span style="display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 6px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(37, 99, 235, 0.15)); color: #10b981; font-size: 0.72rem; font-weight: 800; border: 1px solid rgba(16, 185, 129, 0.4);" title="${u.premiumUntil ? 'До ' + new Date(u.premiumUntil).toLocaleDateString('uk-UA') : 'Бренд'}">💎 Бренд</span>`
+                                        : (u.premiumPlan === 'vip_lifetime')
+                                            ? `<span style="display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 6px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.15)); color: #8b5cf6; font-size: 0.72rem; font-weight: 800; border: 1px solid rgba(139, 92, 246, 0.4);" title="VIP Безліміт">🌟 VIP</span>`
+                                            : `<span style="display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 6px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.15)); color: #d97706; font-size: 0.72rem; font-weight: 800; border: 1px solid rgba(245, 158, 11, 0.4);" title="${u.premiumUntil ? 'До ' + new Date(u.premiumUntil).toLocaleDateString('uk-UA') : 'PRO'}">👑 PRO</span>`
+                                ) : ''}
                             </div>
                             ${u.isBanned && u.banReason ? `<div style="font-size: 0.72rem; color: #ef4444; margin-top: 2px;">Причина: ${escapeHtml(u.banReason)}</div>` : ''}
                         </td>
@@ -2400,7 +2406,7 @@
                         </td>
                         <td style="text-align: right; white-space: nowrap;">
                             <button class="btn-action ${u.isPremium ? 'warning' : 'neutral'}" onclick="openAdminProModal(${u.id}, '${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}', '${escapeHtml(u.email)}', ${!!u.isPremium}, '${escapeHtml(u.premiumPlan || 'pro_monthly')}', '${u.premiumUntil || ''}')" title="Керування підпискою PRO (надати або зняти)" style="padding: 4px 8px; font-weight: 800; font-size: 0.75rem; border-radius: 8px; color: ${u.isPremium ? '#d97706' : 'var(--text-main)'};">
-                                👑 PRO
+                                ${u.isPremium ? ((u.premiumPlan === 'brand_annual' || u.premiumPlan === 'brand') ? '💎 Бренд' : (u.premiumPlan === 'vip_lifetime' ? '🌟 VIP' : '👑 PRO')) : '👑 PRO'}
                             </button>
                             <button class="btn-action primary" onclick="openUserListingsModal(${u.id}, '${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}', '${escapeHtml(u.email)}')" title="Переглянути оголошення користувача">
                                 📦

@@ -2420,7 +2420,7 @@
                     <div>
                         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 3px;" id="sellerRoleTitle">Продавець</p>
                         <h4 id="sellerName" style="font-size: 1.2rem; color: var(--text-main);">Ім'я</h4>
-                        <p style="font-size: 0.85rem; color: var(--primary-light); font-weight: bold; margin-top: 3px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Перевірений користувач</p>
+                        <p id="sellerTrustBadge" style="font-size: 0.85rem; color: var(--primary-light); font-weight: bold; margin-top: 3px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Перевірений користувач</p>
                     </div>
                 </div>
 
@@ -3158,6 +3158,19 @@
 
     <script>
                 
+        
+        // Safe HTML escaping
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+        window.escapeHtml = escapeHtml;
+
         const ICONS = {
             sun: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
             moon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
@@ -3858,7 +3871,26 @@
 
                 // Продавець / Виконавець
                 const sellerRoleEl = document.getElementById('sellerRoleTitle');
-                if (sellerRoleEl) sellerRoleEl.innerText = isServiceListing ? "Виконавець / Майстер" : "Продавець";
+                const sellerTrustBadgeEl = document.getElementById('sellerTrustBadge');
+                const isSellerBrand = item.seller?.isPremium && (item.seller?.premiumPlan === 'brand_annual' || item.seller?.premiumPlan === 'brand' || item.seller?.premiumPlan === 'vip_lifetime');
+
+                if (isSellerBrand) {
+                    if (sellerRoleEl) {
+                        sellerRoleEl.innerHTML = '<span style="color: #10b981; font-weight: 800;">💎 Офіційний Бренд</span>';
+                    }
+                    if (sellerTrustBadgeEl) {
+                        sellerTrustBadgeEl.innerHTML = '<span style="color: #10b981; font-weight: 800;">💎 Верифікований Бренд / Виробник</span>';
+                    }
+                } else if (item.seller?.isPremium) {
+                    if (sellerRoleEl) {
+                        sellerRoleEl.innerHTML = '<span style="color: #f59e0b; font-weight: 800;">👑 PRO-продавець</span>';
+                    }
+                    if (sellerTrustBadgeEl) {
+                        sellerTrustBadgeEl.innerHTML = '<span style="color: #f59e0b; font-weight: 800;">👑 Перевірений PRO-партнер</span>';
+                    }
+                } else {
+                    if (sellerRoleEl) sellerRoleEl.innerText = isServiceListing ? "Виконавець / Майстер" : "Продавець";
+                }
 
                 const sellerFirst = item.seller?.firstName || (isServiceListing ? 'Майстер' : 'Продавець');
                 const sellerLast = item.seller?.lastName || '';

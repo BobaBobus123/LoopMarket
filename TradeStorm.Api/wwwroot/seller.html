@@ -778,7 +778,7 @@
             </div>
             <div class="profile-info">
                 <h1 id="sellerName">Завантаження...</h1>
-                <p class="role">
+                <p class="role" id="sellerRoleBadge">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
                     Перевірений користувач Loop
                 </p>
@@ -1116,6 +1116,30 @@
                 const sLast = sellerInfo ? (sellerInfo.lastName || '') : '';
                 const fullName = `${sFirst} ${sLast}`.trim();
                 document.getElementById('sellerName').innerText = fullName;
+
+                const roleBadgeEl = document.getElementById('sellerRoleBadge');
+                const isBrand = sellerInfo && sellerInfo.isPremium && (sellerInfo.premiumPlan === 'brand_annual' || sellerInfo.premiumPlan === 'brand' || sellerInfo.premiumPlan === 'vip_lifetime');
+                if (roleBadgeEl) {
+                    if (isBrand) {
+                        roleBadgeEl.innerHTML = '<span style="color: #10b981; font-weight: 800; font-size: 0.95rem;">💎 Офіційний Бренд & Магазин</span>';
+                    } else if (sellerInfo && sellerInfo.isPremium) {
+                        roleBadgeEl.innerHTML = '<span style="color: #f59e0b; font-weight: 800; font-size: 0.95rem;">👑 Верифікований PRO-продавець</span>';
+                    }
+                }
+
+                if (sellerInfo && sellerInfo.bio) {
+                    let bioBox = document.getElementById('sellerBioBox');
+                    if (!bioBox) {
+                        const pInfo = document.querySelector('.profile-info');
+                        if (pInfo) {
+                            bioBox = document.createElement('div');
+                            bioBox.id = 'sellerBioBox';
+                            bioBox.style.cssText = 'margin-top: 10px; font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; background: var(--bg-color); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color);';
+                            pInfo.appendChild(bioBox);
+                        }
+                    }
+                    if (bioBox) bioBox.innerText = sellerInfo.bio;
+                }
 
                 const sInitials = (((sFirst || 'U')[0]) || 'U').toUpperCase();
                 const savedAvatar = localStorage.getItem(`userAvatar_${targetSellerId}`) || (sellerInfo ? sellerInfo.avatarUrl : null);
