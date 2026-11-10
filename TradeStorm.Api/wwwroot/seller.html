@@ -1365,12 +1365,32 @@
                 return `
                     <div class="card">
                         <div class="card-img-wrapper" onclick="window.location.href='/details.html?id=${item.code || item.id}'">
-                            ${!hasRealImg && hasVideo ? `
-                                <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #090d16 0%, #1e293b 100%); color: #38bdf8; font-weight: 800; text-align: center; gap: 8px;">
-                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(56,189,248,0.2); border: 2px solid rgba(56,189,248,0.5); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">▶</div>
-                                    <span style="font-size: 0.75rem; letter-spacing: 0.5px; text-transform: uppercase;">ВІДЕООГЛЯД</span>
-                                </div>
-                            ` : `
+                            ${!hasRealImg && hasVideo ? (() => {
+                                const vUrl = item.videoUrl.trim();
+                                const ytMatch = vUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([a-zA-Z0-9_\-]{11})/i);
+                                if (ytMatch && ytMatch[1]) {
+                                    return `
+                                        <img src="https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg" class="card-img" alt="${escapeHtml(item.title)}">
+                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;">
+                                            <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem;">▶</div>
+                                        </div>
+                                    `;
+                                }
+                                if (vUrl.startsWith('/uploads/') || vUrl.match(/\.(mp4|webm|mov|m4v)(\?.*)?$/i)) {
+                                    return `
+                                        <video src="${escapeHtml(vUrl)}#t=0.5" preload="metadata" muted playsinline style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;"></video>
+                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;">
+                                            <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem;">▶</div>
+                                        </div>
+                                    `;
+                                }
+                                return `
+                                    <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); color: white; text-align: center;">
+                                        <div style="width: 42px; height: 42px; border-radius: 50%; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">▶</div>
+                                        <span style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.6px; margin-top: 4px;">INSTAGRAM REEL</span>
+                                    </div>
+                                `;
+                            })() : `
                                 <img src="${imgUrl}" class="card-img" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
                             `}
                             <button onclick="toggleFavorite(${item.id}, event)" class="btn-fav" title="Додати в обране">${favIcon}</button>

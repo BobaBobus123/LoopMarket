@@ -3158,6 +3158,56 @@
             if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
 
+                function getProfileCardMediaHtml(item) {
+                    const rawImg = item.imageUrl ? item.imageUrl.split(';')[0].trim() : '';
+                    const hasRealImg = Boolean(rawImg && !rawImg.includes('placeholder') && !rawImg.includes('no-photo'));
+                    const videoUrl = (item.videoUrl && item.videoUrl.trim()) || '';
+
+                    if (hasRealImg) {
+                        return `
+                            <img src="${escapeHtml(rawImg)}" class="card-img" alt="${escapeHtml(item.title)}" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
+                            ${videoUrl ? '<span class="card-badge-video" title="Є відеопрезентація"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Відео</span>' : ''}
+                        `;
+                    }
+
+                    if (videoUrl) {
+                        const ytMatch = videoUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([a-zA-Z0-9_\-]{11})/i);
+                        if (ytMatch && ytMatch[1]) {
+                            const ytThumb = `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
+                            return `
+                                <img src="${ytThumb}" class="card-img" alt="${escapeHtml(item.title)}" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
+                                <span class="card-badge-video" title="YouTube відео"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> YouTube</span>
+                                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;">
+                                    <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem;">▶</div>
+                                </div>
+                            `;
+                        }
+
+                        if (videoUrl.startsWith('/uploads/') || videoUrl.match(/\.(mp4|webm|mov|m4v)(\?.*)?$/i)) {
+                            return `
+                                <video src="${escapeHtml(videoUrl)}#t=0.5" preload="metadata" muted playsinline style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;"></video>
+                                <span class="card-badge-video" title="Відеоогляд"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Відео</span>
+                                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;">
+                                    <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem;">▶</div>
+                                </div>
+                            `;
+                        }
+
+                        const igMatch = videoUrl.match(/(?:instagram\.com|instagr\.am)\/(?:p|reel|reels|tv)\/([a-zA-Z0-9_\-]+)/i);
+                        if (igMatch) {
+                            return `
+                                <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); color: white; text-align: center; position: relative;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">▶</div>
+                                    <span style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.6px; margin-top: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">REEL</span>
+                                    <span class="card-badge-video" style="top: 8px; left: 8px;" title="Instagram Reel"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Reel</span>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    return `<img src="/images/placeholder.svg" class="card-img" alt="${escapeHtml(item.title)}">`;
+                }
+
                 function renderMyListings() {
                     const container = document.getElementById('myListingsContainer');
                     const paginationWrapper = document.getElementById('myListingsPagination');
@@ -3179,24 +3229,10 @@
                     const endIdx = startIdx + MY_PAGE_SIZE;
                     const pageItems = myListings.slice(startIdx, endIdx);
 
-                    container.innerHTML = pageItems.map(item => {
-                        const rawImg = item.imageUrl ? item.imageUrl.split(';')[0].trim() : '';
-                        const hasRealImg = Boolean(rawImg && !rawImg.includes('placeholder') && !rawImg.includes('no-photo'));
-                        const hasVideo = Boolean(item.videoUrl && item.videoUrl.trim());
-                        const imgUrl = hasRealImg ? rawImg : '/images/placeholder.svg';
-
-                        return `
+                    container.innerHTML = pageItems.map(item => `
                         <div class="card">
                             <div class="card-img-wrapper" onclick="window.location.href='/details.html?id=${item.code || item.id}'">
-                                ${!hasRealImg && hasVideo ? `
-                                    <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #090d16 0%, #1e293b 100%); color: #38bdf8; font-weight: 800; text-align: center; gap: 8px;">
-                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(56,189,248,0.2); border: 2px solid rgba(56,189,248,0.5); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">▶</div>
-                                        <span style="font-size: 0.75rem; letter-spacing: 0.5px; text-transform: uppercase;">ВІДЕООГЛЯД</span>
-                                    </div>
-                                ` : `
-                                    <img src="${imgUrl}" class="card-img" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
-                                `}
-                                ${hasVideo ? '<span class="card-badge-video" title="Є відеопрезентація"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Відео</span>' : ''}
+                                ${getProfileCardMediaHtml(item)}
                             </div>
                             <div class="card-content">
                                 <div class="card-title">${item.title}</div>
@@ -3206,8 +3242,8 @@
                                     <button onclick="deleteListing('${item.code || item.id}')" class="btn-delete">${ICONS.trash} Видалити</button>
                                 </div>
                             </div>
-                        </div>`;
-                    }).join('');
+                        </div>
+                    `).join('');
 
                     if (totalPages > 1) {
                         if (paginationWrapper) paginationWrapper.style.display = 'flex';
@@ -3252,24 +3288,10 @@
                     const endIdx = startIdx + FAV_PAGE_SIZE;
                     const pageItems = userFavoriteItems.slice(startIdx, endIdx);
 
-                    container.innerHTML = pageItems.map(item => {
-                        const rawImg = item.imageUrl ? item.imageUrl.split(';')[0].trim() : '';
-                        const hasRealImg = Boolean(rawImg && !rawImg.includes('placeholder') && !rawImg.includes('no-photo'));
-                        const hasVideo = Boolean(item.videoUrl && item.videoUrl.trim());
-                        const imgUrl = hasRealImg ? rawImg : '/images/no-photo.svg';
-
-                        return `
+                    container.innerHTML = pageItems.map(item => `
                         <div class="card" id="fav-card-${item.id}">
                             <div class="card-img-wrapper" onclick="window.location.href='/details.html?id=${item.code || item.id}'">
-                                ${!hasRealImg && hasVideo ? `
-                                    <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #090d16 0%, #1e293b 100%); color: #38bdf8; font-weight: 800; text-align: center; gap: 8px;">
-                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(56,189,248,0.2); border: 2px solid rgba(56,189,248,0.5); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">▶</div>
-                                        <span style="font-size: 0.75rem; letter-spacing: 0.5px; text-transform: uppercase;">ВІДЕООГЛЯД</span>
-                                    </div>
-                                ` : `
-                                    <img src="${imgUrl}" class="card-img" onerror="this.onerror=null; this.src='/images/no-photo.svg';">
-                                `}
-                                ${hasVideo ? '<span class="card-badge-video" title="Є відеопрезентація"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Відео</span>' : ''}
+                                ${getProfileCardMediaHtml(item)}
                                 <button type="button" onclick="toggleFavorite(${item.id}, event)" class="btn-fav active" title="Видалити з обраного" style="background: rgba(239, 68, 68, 0.18); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4);">
                                     ${ICONS.heartFilled}
                                 </button>
@@ -3279,8 +3301,8 @@
                                 <div class="card-title" onclick="window.location.href='/details.html?id=${item.code || item.id}'">${escapeHtml(item.title)}</div>
                                 <div class="card-price">${Number(item.price).toLocaleString('uk-UA')} ₴</div>
                             </div>
-                        </div>`;
-                    }).join('');
+                        </div>
+                    `).join('');
 
                     if (totalPages > 1) {
                         if (paginationWrapper) paginationWrapper.style.display = 'flex';

@@ -1871,9 +1871,11 @@
                 }
                 document.getElementById('isShippingAvailable').checked = !!item.isShippingAvailable;
 
-                // 4. Завантажуємо фотографії та відео
+                // 4. Завантажуємо фотографії та відео (фільтруємо системні заглушки)
                 const rawImgs = item.imageUrls || (item.imageUrl ? item.imageUrl.split(';') : []);
-                existingPhotos = rawImgs.map(u => u.trim()).filter(Boolean);
+                existingPhotos = rawImgs
+                    .map(u => u.trim())
+                    .filter(u => u && !u.includes('placeholder') && !u.includes('no-photo'));
                 renderAllPhotos();
 
                 if (item.videoUrl) {
@@ -1972,8 +1974,9 @@
                     }
                 }
 
-                let finalImageUrls = [...existingPhotos, ...newlyUploadedUrls];
-                if (finalImageUrls.length === 0) {
+                let finalImageUrls = [...existingPhotos, ...newlyUploadedUrls]
+                    .filter(u => u && !u.includes('placeholder') && !u.includes('no-photo'));
+                if (finalImageUrls.length === 0 && !attachedVideoUrl && !selectedVideoFile) {
                     finalImageUrls = [isCurrentService ? '/images/placeholder-service.svg' : '/images/placeholder.svg'];
                 }
 

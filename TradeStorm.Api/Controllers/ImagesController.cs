@@ -17,10 +17,12 @@ namespace TradeStorm.Api.Controllers;
 public class ImagesController : ControllerBase
 {
     private readonly IWebHostEnvironment _environment;
+    private readonly TradeStorm.Api.Data.AppDbContext _db;
 
-    public ImagesController(IWebHostEnvironment environment)
+    public ImagesController(IWebHostEnvironment environment, TradeStorm.Api.Data.AppDbContext db)
     {
         _environment = environment;
+        _db = db;
     }
 
     [HttpPost]
@@ -42,9 +44,29 @@ public class ImagesController : ControllerBase
         var uniqueFileName = $"{Guid.NewGuid()}{extension}";
         var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-        using (var fileStream = new FileStream(filePath, FileMode.Create))
+        using (var memoryStream = new MemoryStream())
         {
-            await file.CopyToAsync(fileStream);
+            await file.CopyToAsync(memoryStream);
+            var fileBytes = memoryStream.ToArray();
+
+            await System.IO.File.WriteAllBytesAsync(filePath, fileBytes);
+
+            try
+            {
+                var stored = new TradeStorm.Api.Models.StoredFile
+                {
+                    FileName = uniqueFileName,
+                    ContentType = file.ContentType ?? "image/jpeg",
+                    Data = fileBytes,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _db.StoredFiles.Add(stored);
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[StoredFile] DB persist warning: {ex.Message}");
+            }
         }
 
         var fileUrl = $"/uploads/{uniqueFileName}";

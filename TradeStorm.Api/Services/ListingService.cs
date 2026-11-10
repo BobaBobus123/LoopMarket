@@ -38,17 +38,41 @@ public class ListingService : IListingService
         return await _listingRepository.GetByIdWithDetailsAsync(id);
     }
 
+    private static string? ResolveListingImageUrl(List<string>? imageUrls, string? videoUrl, int categoryId, string title)
+    {
+        var cleanUrls = imageUrls?
+            .Where(u => !string.IsNullOrWhiteSpace(u) && !u.Contains("placeholder") && !u.Contains("no-photo"))
+            .Select(u => u.Trim())
+            .ToList();
+
+        if (cleanUrls != null && cleanUrls.Count > 0)
+        {
+            return string.Join(";", cleanUrls);
+        }
+
+        if (!string.IsNullOrWhiteSpace(videoUrl))
+        {
+            var ytMatch = System.Text.RegularExpressions.Regex.Match(videoUrl, @"(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([a-zA-Z0-9_\-]{11})");
+            if (ytMatch.Success)
+            {
+                return $"https://img.youtube.com/vi/{ytMatch.Groups[1].Value}/hqdefault.jpg";
+            }
+            return null;
+        }
+
+        return (categoryId == 8 || title.Contains("Послуг")) ? "/images/placeholder-service.svg" : "/images/placeholder.svg";
+    }
+
     public async Task<Listing> CreateListingAsync(int sellerId, CreateListingDto dto)
     {
+        var video = string.IsNullOrWhiteSpace(dto.VideoUrl) ? null : dto.VideoUrl.Trim();
         var listing = new Listing
         {
             Title = dto.Title.Trim(),
             Description = dto.Description.Trim(),
             Price = dto.Price,
-            ImageUrl = dto.ImageUrls != null && dto.ImageUrls.Any() 
-                ? string.Join(";", dto.ImageUrls) 
-                : (dto.CategoryId == 8 || dto.Title.Contains("Послуг") ? "/images/placeholder-service.svg" : "/images/placeholder.svg"),
-            VideoUrl = string.IsNullOrWhiteSpace(dto.VideoUrl) ? null : dto.VideoUrl.Trim(),
+            ImageUrl = ResolveListingImageUrl(dto.ImageUrls, video, dto.CategoryId, dto.Title),
+            VideoUrl = video,
             CategoryId = dto.CategoryId,
             Condition = dto.Condition,
             Location = string.IsNullOrWhiteSpace(dto.Location) ? "Не вказано" : dto.Location.Trim(),
@@ -82,16 +106,12 @@ public class ListingService : IListingService
         listing.Location = string.IsNullOrWhiteSpace(dto.Location) ? "Не вказано" : dto.Location.Trim();
         listing.IsShippingAvailable = dto.IsShippingAvailable;
 
+        var video = dto.VideoUrl != null ? (string.IsNullOrWhiteSpace(dto.VideoUrl) ? null : dto.VideoUrl.Trim()) : listing.VideoUrl;
+        listing.VideoUrl = video;
+
         if (dto.ImageUrls != null)
         {
-            listing.ImageUrl = dto.ImageUrls.Any() 
-                ? string.Join(";", dto.ImageUrls) 
-                : (listing.CategoryId == 8 || listing.Title.Contains("Послуг") ? "/images/placeholder-service.svg" : "/images/placeholder.svg");
-        }
-
-        if (dto.VideoUrl != null)
-        {
-            listing.VideoUrl = string.IsNullOrWhiteSpace(dto.VideoUrl) ? null : dto.VideoUrl.Trim();
+            listing.ImageUrl = ResolveListingImageUrl(dto.ImageUrls, video, dto.CategoryId, dto.Title);
         }
 
         if (!string.IsNullOrWhiteSpace(dto.Status))

@@ -485,9 +485,29 @@ public class ListingsController : ControllerBase
                 var uniqueFileName = $"{Guid.NewGuid()}{(string.IsNullOrEmpty(cleanName) ? "" : "_" + cleanName)}{extension}";
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                using (var memoryStream = new MemoryStream())
                 {
-                    await file.CopyToAsync(stream);
+                    await file.CopyToAsync(memoryStream);
+                    var fileBytes = memoryStream.ToArray();
+
+                    await System.IO.File.WriteAllBytesAsync(filePath, fileBytes);
+
+                    try
+                    {
+                        var stored = new TradeStorm.Api.Models.StoredFile
+                        {
+                            FileName = uniqueFileName,
+                            ContentType = file.ContentType ?? "image/jpeg",
+                            Data = fileBytes,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        _context.StoredFiles.Add(stored);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[StoredFile] DB persist warning: {ex.Message}");
+                    }
                 }
                 uploadedUrls.Add($"/uploads/{uniqueFileName}");
             }

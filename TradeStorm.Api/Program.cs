@@ -509,6 +509,47 @@ app.MapHealthChecks("/health");
 
 app.MapControllers();
 
+// Ендпоінт автоматичного відновлення збережених медіафайлів із бази даних (захист від втрати даних на Render)
+app.MapGet("/uploads/{fileName}", async (string fileName, TradeStorm.Api.Data.AppDbContext db, IWebHostEnvironment env) =>
+{
+    var cleanFileName = Path.GetFileName(fileName);
+    var webRoot = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+    var uploadsFolder = Path.Combine(webRoot, "uploads");
+    var filePath = Path.Combine(uploadsFolder, cleanFileName);
+
+    if (File.Exists(filePath))
+    {
+        var ext = Path.GetExtension(cleanFileName).ToLowerInvariant();
+        var ct = ext switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            ".gif" => "image/gif",
+            ".jfif" => "image/jpeg",
+            ".svg" => "image/svg+xml",
+            ".mp4" => "video/mp4",
+            _ => "application/octet-stream"
+        };
+        return Results.File(filePath, ct);
+    }
+
+    var stored = await db.StoredFiles.FirstOrDefaultAsync(f => f.FileName == cleanFileName);
+    if (stored != null && stored.Data != null && stored.Data.Length > 0)
+    {
+        try
+        {
+            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+            await File.WriteAllBytesAsync(filePath, stored.Data);
+        }
+        catch { }
+
+        return Results.Bytes(stored.Data, stored.ContentType);
+    }
+
+    return Results.NotFound();
+});
+
 
 
 // Службовий ендпоінт аудиту безпеки та конфігурації секретів (Етапи 5, 6, 7) - захищено для адміністраторів

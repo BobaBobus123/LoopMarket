@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<Complaint> Complaints { get; set; }
     public DbSet<AdminAuditLog> AdminAuditLogs { get; set; }
     public DbSet<SiteAnnouncement> SiteAnnouncements { get; set; }
+    public DbSet<StoredFile> StoredFiles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
