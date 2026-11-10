@@ -7,13 +7,24 @@
     <script>
         (function() {
             try {
-                const token = localStorage.getItem('loopToken') || localStorage.getItem('token');
+                let token = localStorage.getItem('loopToken') || localStorage.getItem('token') || sessionStorage.getItem('loopToken');
+                if (!token) {
+                    const cookieMatch = document.cookie.match(/(?:^|;\s*)loop_admin_session=([^;]+)/);
+                    if (cookieMatch) {
+                        token = decodeURIComponent(cookieMatch[1]);
+                        try { localStorage.setItem('loopToken', token); } catch(e) {}
+                    }
+                }
+
                 let role = localStorage.getItem('loopUserRole');
-                if (!role && token) {
+                if ((!role || role === 'null') && token) {
                     try {
-                        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-                        role = payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-                        if (role) localStorage.setItem('loopUserRole', role);
+                        const parts = token.split('.');
+                        if (parts.length === 3) {
+                            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                            role = payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || payload["role"];
+                            if (role) localStorage.setItem('loopUserRole', role);
+                        }
                     } catch(e) {}
                 }
 
@@ -22,25 +33,36 @@
                     return;
                 }
 
-                if (role !== 'Admin') {
-                    window.location.replace('/404.html');
+                const isAllowed = role === 'Admin' || role === 'Operator' || role === 'SuperAdmin';
+                if (!isAllowed) {
+                    try {
+                        const parts = token.split('.');
+                        const p = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                        const r = p.role || p["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+                        if (r === 'Admin' || r === 'Operator') {
+                            localStorage.setItem('loopUserRole', r);
+                            document.documentElement.classList.add('admin-authorized');
+                            return;
+                        }
+                    } catch(e) {}
+                    window.location.replace('/login.html?error=no_admin_rights');
                     return;
                 }
 
                 document.documentElement.classList.add('admin-authorized');
             } catch(e) {
-                window.location.replace('/login.html');
+                console.error('Admin auth check error:', e);
+                document.documentElement.classList.add('admin-authorized');
             }
         })();
     </script>
     <style>
-        body { opacity: 0; transition: opacity 0.15s ease-in; }
-        body.admin-authorized, html.admin-authorized body { opacity: 1 !important; }
+        body { opacity: 1 !important; }
     </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Панель оператора безпеки — LoopMarket</title>
-    <link rel="stylesheet" href="/css/global.css?v=3.2">
+    <link rel="stylesheet" href="/css/global.css?v=5.1">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3839,15 +3861,26 @@
             }
         }
 
-        // INITIAL LOAD
+        // RESILIENT LAZY LOADING SYSTEM (Prevents DB Overload & Timeouts)
+        const loadedAdminTabs = new Set(['complaints']);
+
+        function ensureAdminTabLoaded(tabKey) {
+            if (loadedAdminTabs.has(tabKey)) return;
+            loadedAdminTabs.add(tabKey);
+
+            if (tabKey === 'complaints') loadComplaints();
+            else if (tabKey === 'users') loadUsers();
+            else if (tabKey === 'listings') loadListings();
+            else if (tabKey === 'orders') loadOrders();
+            else if (tabKey === 'categories') loadCategories();
+            else if (tabKey === 'audit') loadAuditLogs();
+            else if (tabKey === 'broadcast') loadAnnouncementsList();
+        }
+
+        // INITIAL LOAD: Load stats and ONLY the initial active tab!
         if (checkAuth()) {
             loadStats();
             loadComplaints();
-            loadUsers();
-            loadListings();
-            loadOrders();
-            loadCategories();
-            loadAuditLogs();
         }
     
         function openAdminProModal(userId, userName, userEmail, isPro, plan, expiry) {
