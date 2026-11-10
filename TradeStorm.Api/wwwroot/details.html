@@ -2311,52 +2311,7 @@
                     </div>
                 </div>
 
-                <!-- 2. ОФІЦІЙНИЙ ГАРАНТІЙНИЙ БЛОК: LOOP ЗАХИСТ -->
-                <div class="description-block trust-guarantee-block" id="productTrustBlock">
-                    <div class="trust-block-header">
-                        <div class="trust-title-wrap">
-                            <div class="trust-shield-icon">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="trust-title">Loop Захист • Безпечні покупки</h3>
-                                <p class="trust-subtitle">Ваші кошти та покупки на 100% захищені сервісом ескроу</p>
-                            </div>
-                        </div>
-                        <span class="trust-badge-pill">Офіційна гарантія</span>
-                    </div>
-
-                    <div class="trust-features-grid">
-                        <div class="trust-feature-card">
-                            <div class="t-feat-icon">🔒</div>
-                            <div class="t-feat-content">
-                                <div class="t-feat-title">Безпечна оплата онлайн</div>
-                                <div class="t-feat-desc">Гроші зберігаються на транзитному рахунку до успішної перевірки товару у відділенні.</div>
-                            </div>
-                        </div>
-                        <div class="trust-feature-card">
-                            <div class="t-feat-icon">📦</div>
-                            <div class="t-feat-content">
-                                <div class="t-feat-title">Огляд перед оплатою</div>
-                                <div class="t-feat-desc">Ви маєте повне право оглянути та перевірити покупку безпосередньо у відділенні перевізника.</div>
-                            </div>
-                        </div>
-                        <div class="trust-feature-card">
-                            <div class="t-feat-icon">↩️</div>
-                            <div class="t-feat-content">
-                                <div class="t-feat-title">Гарантоване повернення коштів</div>
-                                <div class="t-feat-desc">Якщо товар не підійшов або пошкоджений — кошти миттєво повертаються на вашу картку.</div>
-                            </div>
-                        </div>
-                        <div class="trust-feature-card">
-                            <div class="t-feat-icon">🛡️</div>
-                            <div class="t-feat-content">
-                                <div class="t-feat-title">Цілодобова підтримка 24/7</div>
-                                <div class="t-feat-desc">Швидкий арбітраж та захист від шахрайства нашою власною службою безпеки LoopMarket.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
 
                 <!-- 3. СХОЖІ ОГОЛОШЕННЯ ТА РЕКОМЕНДАЦІЇ -->
                 <div class="description-block similar-listings-block" id="similarListingsBlock">
@@ -4187,26 +4142,37 @@
                     }
                 }
 
-                window.toggleDetailFavorite = function () {
+                window.toggleDetailFavorite = async function () {
                     if (!currentListingId) return;
-
-                    let favs = JSON.parse(localStorage.getItem('loopFavorites') || '[]');
-                    const isFav = favs.includes(currentListingId);
+                    const numId = Number(currentListingId);
+                    let favs = (JSON.parse(localStorage.getItem('loopFavorites') || '[]')).map(Number);
+                    const isFav = favs.includes(numId);
 
                     if (isFav) {
-                        favs = favs.filter(f => f !== currentListingId);
+                        favs = favs.filter(f => f !== numId);
                     } else {
-                        favs.push(currentListingId);
+                        favs.push(numId);
                     }
 
                     localStorage.setItem('loopFavorites', JSON.stringify(favs));
-                    document.getElementById('detailFavBtn').innerHTML = isFav ? ICONS.heartOutline : ICONS.heartFilled;
+                    const favBtn = document.getElementById('detailFavBtn');
+                    if (favBtn) {
+                        favBtn.innerHTML = isFav ? ICONS.heartOutline : ICONS.heartFilled;
+                        favBtn.classList.toggle('active', !isFav);
+                    }
 
-                    if (token) {
-                        fetch('/api/favorites/' + currentListingId, {
-                            method: 'POST',
-                            headers: { 'Authorization': 'Bearer ' + token }
-                        }).catch(() => {});
+                    if (typeof LoopToast !== 'undefined') {
+                        LoopToast.success(isFav ? "Видалено з обраного" : "Додано в обране ❤️");
+                    }
+
+                    const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
+                    if (curToken) {
+                        try {
+                            await fetch('/api/favorites/' + numId, {
+                                method: 'POST',
+                                headers: { 'Authorization': 'Bearer ' + curToken }
+                            });
+                        } catch(e) {}
                     }
                 };
 
@@ -5580,8 +5546,8 @@
                 : (item.isShippingAvailable ? "Нова Пошта, Укрпошта, Meest" : "Самовивіз / Особиста зустріч");
             const locationVal = item.location || "Кременчук / Україна";
             const paymentVal = isServiceListing 
-                ? "Loop Захист (Безпечна угода)" 
-                : "Loop Захист (Безпечна покупка) / Післяплата";
+                ? "Оплата за домовленістю / Карткою" 
+                : "Післяплата (при отриманні) / Самовивіз";
             const codeVal = `#LP-${item.id}`;
 
             const chips = [

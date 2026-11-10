@@ -1026,7 +1026,36 @@ public class UsersController : ControllerBase
 
                           : $"Адміністратор скасував статус PRO користувача {user.Email}.");
 
+        if (dto.IsPremium)
+        {
+            var planTitle = user.PremiumPlan switch
+            {
+                "brand_annual" or "brand" => "💎 Офіційний Бренд & Бізнес",
+                "vip_lifetime" => "🌟 VIP Партнер / Безліміт",
+                _ => "👑 LoopMarket PRO"
+            };
 
+            var notif = new Notification
+            {
+                UserId = user.Id,
+                Title = $"🎉 Вітаємо! Вам надано статус «{planTitle}»",
+                Message = $"Адміністрація платформи активувала для вас статус {planTitle}. Тепер вам доступне пріоритетне розміщення оголошень, офіційний бейдж у каталозі та можливість додавати відеоогляди (Reels, Shorts, MP4) до ваших товарів!",
+                Link = "/profile.html",
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            };
+            _context.Notifications.Add(notif);
+
+            if (user.TelegramChatId != 0 && user.ReceiveTelegramNotifications)
+            {
+                try
+                {
+                    await _telegramService.SendNotificationAsync(user.TelegramChatId,
+                        $"🎉 <b>Вітаємо у спільноті LoopMarket!</b>\n\nАдміністрація платформи щойно надала вашому акаунту офіційний статус <b>{planTitle}</b>!\n\n✨ <b>Що вам тепер доступно:</b>\n• Офіційний верифікований бейдж у каталозі\n• Пріоритет у пошуку\n• <b>Завантаження відеооглядів (Reels / TikTok / MP4) до кожного оголошення</b>\n• Персональна бренд-сторінка\n\nБажаємо успішних та прибуткових продажів на LoopMarket! 🚀");
+                }
+                catch { }
+            }
+        }
 
         await _context.SaveChangesAsync();
 

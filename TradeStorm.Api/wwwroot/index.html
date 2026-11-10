@@ -3207,30 +3207,39 @@
 
         function getFavorites() { return JSON.parse(localStorage.getItem('loopFavorites') || '[]'); }
 
-        window.toggleFavorite = function (id, event) {
+        window.toggleFavorite = async function (id, event) {
             if (event) {
                 event.stopPropagation();
                 event.preventDefault();
             }
-            let favs = getFavorites();
-            const isFav = favs.includes(id);
+            const numId = Number(id);
+            let favs = (JSON.parse(localStorage.getItem('loopFavorites') || '[]')).map(Number);
+            const isFav = favs.includes(numId);
 
             if (isFav) {
-                favs = favs.filter(f => f !== id);
+                favs = favs.filter(f => f !== numId);
             } else {
-                favs.push(id);
+                favs.push(numId);
             }
             localStorage.setItem('loopFavorites', JSON.stringify(favs));
 
             if (event && event.currentTarget) {
                 event.currentTarget.innerHTML = isFav ? ICONS.heartOutline : ICONS.heartFilled;
+                event.currentTarget.classList.toggle('active', !isFav);
             }
 
-            if (token) {
-                fetch('/api/favorites/' + id, {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + token }
-                }).catch(() => {});
+            if (typeof LoopToast !== 'undefined') {
+                LoopToast.success(isFav ? "Видалено з обраного" : "Додано в обране ❤️");
+            }
+
+            const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
+            if (curToken) {
+                try {
+                    await fetch('/api/favorites/' + numId, {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + curToken }
+                    });
+                } catch(e) {}
             }
         };
 

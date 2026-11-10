@@ -1142,12 +1142,7 @@
                 </p>
             </div>
 
-            
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <a href="/login.html?returnUrl=/create.html?restore=1" class="btn-primary" style="text-decoration: none; padding: 8px 16px; font-size: 0.84rem; border-radius: 8px; white-space: nowrap;">Увійти зараз</a>
-                </div>
-            </div>
+
 
             <!-- STEP 1: TYPE SELECTOR -->
             <div class="type-selector-grid">
@@ -1935,10 +1930,25 @@
             if (isUserPremium) {
                 if (lockBanner) lockBanner.style.display = 'none';
                 if (statusBadge) {
-                    statusBadge.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.22))';
-                    statusBadge.style.color = '#059669';
-                    statusBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-                    statusBadge.innerHTML = '👑 PRO-продавець: Додавання відео активне';
+                    const isBrand = statusData && (statusData.plan === 'brand_annual' || statusData.plan === 'brand');
+                    const isVip = statusData && (statusData.plan === 'vip_lifetime' || statusData.isLifetime);
+                    
+                    if (isBrand) {
+                        statusBadge.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(37, 99, 235, 0.15))';
+                        statusBadge.style.color = '#10b981';
+                        statusBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                        statusBadge.innerHTML = '💎 Офіційний Бренд: Завантаження відео активне ✅';
+                    } else if (isVip) {
+                        statusBadge.style.background = 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15))';
+                        statusBadge.style.color = '#8b5cf6';
+                        statusBadge.style.borderColor = 'rgba(139, 92, 246, 0.4)';
+                        statusBadge.innerHTML = '🌟 VIP Партнер: Завантаження відео безлімітно ✅';
+                    } else {
+                        statusBadge.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.22))';
+                        statusBadge.style.color = '#059669';
+                        statusBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                        statusBadge.innerHTML = '👑 PRO-продавець: Додавання відео активне ✅';
+                    }
                 }
             } else {
                 if (lockBanner) lockBanner.style.display = 'flex';
@@ -1946,7 +1956,7 @@
                     statusBadge.style.background = 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.22))';
                     statusBadge.style.color = '#d97706';
                     statusBadge.style.borderColor = 'rgba(245, 158, 11, 0.4)';
-                    statusBadge.innerHTML = '👑 Тільки для передплатників PRO';
+                    statusBadge.innerHTML = '👑 Доступно для PRO та Бренд акаунтів';
                 }
             }
         }
