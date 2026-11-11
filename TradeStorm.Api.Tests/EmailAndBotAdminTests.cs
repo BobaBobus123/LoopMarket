@@ -347,4 +347,71 @@ public class EmailAndBotAdminTests : IClassFixture<CustomWebApplicationFactory>
             Assert.Equal(0, reloaded!.TelegramChatId);
         }
     }
+
+    [Fact]
+    public async Task EmailWebhook_RejectsHtmlLoginOrMissingDoPostOrDevUrl_AndBotEmailDiagnosticWorks()
+    {
+        // 1. /dev Apps Script URL rejected with clear hint
+        var devConfig = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Email:WebhookUrl"] = "https://script.google.com/macros/s/fake-deploy/dev",
+                ["Smtp:User"] = "loopmarketua@gmail.com"
+            })
+            .Build();
+        var dummyHandler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{\"ok\":true}") });
+        var devSvc = new EmailService(devConfig, NullLogger<EmailService>.Instance, new StubHttpClientFactory(dummyHandler));
+        Assert.False(await devSvc.SendVerificationCodeAsync("buyer@gmail.com", "Олег", "123456"));
+        Assert.Contains("/dev", devSvc.GetDiagnostics().LastAttempt?.Detail ?? "");
+
+        // 2. HTTP 200 HTML "Script function not found: doPost" rejected instead of faking success
+        var missingDoPostHandler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("<!doctype html><html><body>Script function not found: doPost</body></html>", Encoding.UTF8, "text/html")
+        });
+        var execConfig = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Email:WebhookUrl"] = "https://script.google.com/macros/s/fake-deploy/exec",
+                ["Smtp:User"] = "loopmarketua@gmail.com"
+            })
+            .Build();
+        var missingDoPostSvc = new EmailService(execConfig, NullLogger<EmailService>.Instance, new StubHttpClientFactory(missingDoPostHandler));
+        Assert.False(await missingDoPostSvc.SendVerificationCodeAsync("buyer@gmail.com", "Олег", "123456"));
+        Assert.Contains("doPost", missingDoPostSvc.GetDiagnostics().LastAttempt?.Detail ?? "");
+
+        // 3. HTTP 200 JSON {"ok":false,"error":"Quota exceeded"} rejected accurately
+        var jsonErrHandler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("{\"ok\":false,\"error\":\"Quota exceeded\"}", Encoding.UTF8, "application/json")
+        });
+        var jsonErrSvc = new EmailService(execConfig, NullLogger<EmailService>.Instance, new StubHttpClientFactory(jsonErrHandler));
+        Assert.False(await jsonErrSvc.SendVerificationCodeAsync("buyer@gmail.com", "Олег", "123456"));
+        Assert.Contains("Quota exceeded", jsonErrSvc.GetDiagnostics().LastAttempt?.Detail ?? "");
+
+        // 4. Valid HTTP 200 JSON {"ok":true} succeeds
+        var okSvc = new EmailService(execConfig, NullLogger<EmailService>.Instance, new StubHttpClientFactory(dummyHandler));
+        Assert.True(await okSvc.SendVerificationCodeAsync("buyer@gmail.com", "Олег", "123456"));
+        Assert.Equal("GmailWebhookHttps", okSvc.GetDiagnostics().LastAttempt?.Provider);
+
+        // 5. Telegram bot /email command responds to Admin & non-admin adm_test_email callback is ignored
+        var botService = _factory.Services.GetRequiredService<TelegramBotService>();
+        long adminChatId = 661099;
+        await CreateVerifiedUserWithRoleAsync(UserRoles.Admin, adminChatId);
+        var botClient = DispatchProxy.Create<ITelegramBotClient, BotStubProxy>();
+        var stub = (BotStubProxy)(object)botClient;
+
+        await botService.ProcessUpdateWithClientAsync(botClient, new Update
+        {
+            Id = 7099,
+            Message = new TgMessage
+            {
+                Chat = new TgChat { Id = adminChatId },
+                From = new TgUser { Id = adminChatId, FirstName = "AdminDiag" },
+                Text = "/email"
+            }
+        }, CancellationToken.None);
+
+        Assert.Contains(stub.Messages, m => (m.Text ?? "").Contains("ДІАГНОСТИКА ПОШТОВОГО СЕРВІСУ") && (m.Text ?? "").Contains("GMAIL_WEBHOOK_URL"));
+    }
 }

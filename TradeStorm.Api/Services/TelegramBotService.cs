@@ -537,6 +537,12 @@ public class TelegramBotService : BackgroundService
             return;
         }
 
+        if (data == "adm_test_email")
+        {
+            await SendAdminEmailDiagnosticsAsync(botClient, chatId, _scopeFactory, null, runTest: true, cancellationToken);
+            return;
+        }
+
         if (data.StartsWith("adm_unlink_tg_") && int.TryParse(data.Substring(14), out int unlinkUserId))
         {
             using var scope = _scopeFactory.CreateScope();
@@ -2251,6 +2257,16 @@ public class TelegramBotService : BackgroundService
             return;
         }
 
+        // 7.4 📧 Діагностика та тест відправки Email напряму з сервера Render
+        if (lowerText == "/email" || lowerText.StartsWith("/email ") || lowerText.Contains("тест пошти"))
+        {
+            string? explicitTarget = lowerText.StartsWith("/email ")
+                ? rawText.Substring(7).Trim()
+                : null;
+            await SendAdminEmailDiagnosticsAsync(botClient, chatId, _scopeFactory, explicitTarget, runTest: !string.IsNullOrWhiteSpace(explicitTarget), cancellationToken);
+            return;
+        }
+
         // 7.5 🔐 Управління адмінами та пояснення прив'язок Telegram
         if (lowerText == "/admins" || lowerText.Contains("адміни бота") || lowerText.Contains("адміни"))
         {
@@ -2421,6 +2437,96 @@ public class TelegramBotService : BackgroundService
             cancellationToken: ct);
     }
 
+    private static async Task SendAdminEmailDiagnosticsAsync(
+        ITelegramBotClient botClient,
+        long chatId,
+        IServiceScopeFactory scopeFactory,
+        string? targetEmailOverride,
+        bool runTest,
+        CancellationToken ct)
+    {
+        using var scope = scopeFactory.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var emailSvc = scope.ServiceProvider.GetService<IEmailService>();
+
+        if (emailSvc is not EmailService concrete)
+        {
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: $"📧 <b>ДІАГНОСТИКА ПОШТИ</b>\n\nСервіс: {(emailSvc != null ? "підключено (тестовий провайдер)" : "відсутній")}",
+                parseMode: ParseMode.Html,
+                cancellationToken: ct);
+            return;
+        }
+
+        string targetEmail = !string.IsNullOrWhiteSpace(targetEmailOverride) && targetEmailOverride.Contains('@')
+            ? targetEmailOverride.Trim()
+            : (await db.Users.AsNoTracking()
+                .Where(u => u.Role == UserRoles.Admin && u.TelegramChatId == chatId && !string.IsNullOrEmpty(u.Email))
+                .Select(u => u.Email)
+                .FirstOrDefaultAsync(ct)
+              ?? await db.Users.AsNoTracking()
+                .Where(u => u.Role == UserRoles.Admin && !string.IsNullOrEmpty(u.Email))
+                .OrderBy(u => u.Id)
+                .Select(u => u.Email)
+                .FirstOrDefaultAsync(ct)
+              ?? concrete.GetDiagnostics().FromEmail);
+
+        bool? testSent = null;
+        if (runTest)
+        {
+            testSent = await concrete.SendDiagnosticTestAsync(targetEmail);
+        }
+
+        var d = concrete.GetDiagnostics();
+        static string Flag(bool v) => v ? "✅" : "❌";
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("📧 <b>ДІАГНОСТИКА ПОШТОВОГО СЕРВІСУ</b>");
+        sb.AppendLine("━━━━━━━━━━━━━━━━━━");
+        if (testSent.HasValue)
+        {
+            sb.AppendLine(testSent.Value
+                ? $"✅ <b>Тестовий лист НАДІСЛАНО</b> на <code>{System.Net.WebUtility.HtmlEncode(targetEmail)}</code>"
+                : $"❌ <b>Помилка тестової відправки</b> на <code>{System.Net.WebUtility.HtmlEncode(targetEmail)}</code>");
+            sb.AppendLine();
+        }
+
+        sb.AppendLine($"• Середовище Render: <b>{(d.IsRenderEnvironment ? "Так" : "Ні")}</b>");
+        sb.AppendLine($"• GMAIL_WEBHOOK_URL (Apps Script 443): {Flag(d.HasGmailWebhookUrl)}");
+        sb.AppendLine($"• BREVO_API_KEY (HTTPS 443): {Flag(d.HasBrevoApiKey)}");
+        sb.AppendLine($"• RESEND_API_KEY (HTTPS 443): {Flag(d.HasResendApiKey)}");
+        sb.AppendLine($"• GMAIL_REFRESH_TOKEN (OAuth 443): {Flag(d.HasGmailOAuthRefreshToken)}");
+        sb.AppendLine($"• SMTP_PASS ({System.Net.WebUtility.HtmlEncode(d.SmtpHost)}:{d.SmtpPort}): {Flag(d.HasSmtpCredentials)}" +
+                      (d.IsRenderEnvironment ? " <i>(SMTP заблоковано на Render Free)</i>" : ""));
+        sb.AppendLine();
+
+        if (d.LastAttempt != null)
+        {
+            sb.AppendLine("🔎 <b>Остання спроба відправки:</b>");
+            sb.AppendLine($"• Провайдер: <code>{System.Net.WebUtility.HtmlEncode(d.LastAttempt.Provider)}</code>");
+            sb.AppendLine($"• Статус: {(d.LastAttempt.Success ? "✅ Успіх" : "❌ Помилка")}");
+            sb.AppendLine($"• Деталі: <code>{System.Net.WebUtility.HtmlEncode(d.LastAttempt.Detail)}</code>");
+        }
+        else
+        {
+            sb.AppendLine("<i>Спроб відправки після запуску сервера ще не було. Натисніть кнопку тесту нижче.</i>");
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("<i>Порада: можна також надіслати <code>/email address@gmail.com</code> для перевірки на будь-яку адресу.</i>");
+
+        await botClient.SendMessage(
+            chatId: chatId,
+            text: sb.ToString(),
+            parseMode: ParseMode.Html,
+            replyMarkup: new InlineKeyboardMarkup(new[]
+            {
+                new[] { InlineKeyboardButton.WithCallbackData($"📨 Надіслати тест на {targetEmail}", "adm_test_email") }
+            }),
+            cancellationToken: ct);
+    }
+
     private static ReplyKeyboardMarkup GetAdminKeyboard()
     {
         return new ReplyKeyboardMarkup(new[]
@@ -2428,7 +2534,8 @@ public class TelegramBotService : BackgroundService
             new[] { new KeyboardButton("📊 Статистика платформи"), new KeyboardButton("🚨 Активні звернення та тікети") },
             new[] { new KeyboardButton("🚚 Останні замовлення"), new KeyboardButton("👥 Останні користувачі") },
             new[] { new KeyboardButton("📢 Надіслати розсилку"), new KeyboardButton("🌐 Відкрити веб-адмінку") },
-            new[] { new KeyboardButton("🔐 Адміни бота"), new KeyboardButton("👤 Режим користувача") }
+            new[] { new KeyboardButton("📧 Тест пошти"), new KeyboardButton("🔐 Адміни бота") },
+            new[] { new KeyboardButton("👤 Режим користувача") }
         })
         {
             ResizeKeyboard = true

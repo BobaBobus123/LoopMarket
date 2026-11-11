@@ -2989,7 +2989,10 @@
                     if (data.retryAfterSeconds) startFpCooldown(data.retryAfterSeconds);
                     return;
                 }
-                showFpAlert(data.message || 'Новий код надіслано на пошту.', 'info');
+                showFpAlert(
+                    data.message || 'Новий код надіслано на пошту.',
+                    data.emailSent === false ? 'error' : 'info'
+                );
                 startFpCooldown(data.cooldownSeconds || 60);
             } catch {
                 showFpAlert("Помилка з'єднання із сервером.");

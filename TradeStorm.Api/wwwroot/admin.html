@@ -921,6 +921,9 @@
                 <button type="button" id="subtabBtnBroadcast" class="admin-tab" onclick="switchMarketingSubTab('broadcast')" style="padding: 8px 16px; font-size: 0.88rem; font-weight: 800; border-radius: 10px;">
                     <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> 3. Масова розсилка (В додатку & Telegram)
                 </button>
+                <button type="button" id="subtabBtnEmail" class="admin-tab" onclick="switchMarketingSubTab('email')" style="padding: 8px 16px; font-size: 0.88rem; font-weight: 800; border-radius: 10px;">
+                    <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> 4. Пошта (Gmail / API Тест)
+                </button>
             </div>
 
             <!-- SECTION 1: РЕКЛАМНИЙ БАНЕР (OLX SKYSCRAPER & CATALOG) -->
@@ -1231,6 +1234,35 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <!-- SECTION 4: EMAIL DIAGNOSTICS & TEST -->
+            <div id="subtabPanelEmail" class="admin-card" style="padding: 26px; margin-bottom: 24px; display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--text-main);">
+                            <svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> Діагностика поштового сервісу (Gmail / Render HTTPS)
+                        </h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 0;">
+                            Перевіряє, які змінні середовища бачить сервер Render та показує точну причину, якщо листи не доходять.
+                        </p>
+                    </div>
+                    <button type="button" class="btn-action neutral" onclick="loadEmailDiagnostics()" style="padding: 8px 14px;">Оновити статус</button>
+                </div>
+
+                <div id="emailDiagnosticsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 18px;">
+                    <div style="padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem;">Натисніть «Оновити статус»...</div>
+                </div>
+
+                <div id="emailLastAttemptBox" style="display: none; padding: 14px 16px; border-radius: 12px; margin-bottom: 18px; font-size: 0.85rem; line-height: 1.5; word-break: break-word;"></div>
+
+                <form onsubmit="handleAdminEmailTest(event)" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; max-width: 680px;">
+                    <div style="flex: 1; min-width: 240px;">
+                        <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 5px; color: var(--text-secondary);">Адреса для тестового листа (порожньо = пошта поточного адміна)</label>
+                        <input type="email" id="adminTestEmailInput" class="admin-form-input" placeholder="loopmarketua@gmail.com">
+                    </div>
+                    <button type="submit" id="btnRunEmailTest" class="btn-action primary" style="padding: 10px 18px;">Надіслати тестовий лист</button>
+                </form>
             </div>
         </section>
 
@@ -3295,10 +3327,86 @@ async function loadAnnouncementsList() {
             document.getElementById('subtabBtnAd')?.classList.toggle('active', subtab === 'ad');
             document.getElementById('subtabBtnInfo')?.classList.toggle('active', subtab === 'info');
             document.getElementById('subtabBtnBroadcast')?.classList.toggle('active', subtab === 'broadcast');
+            document.getElementById('subtabBtnEmail')?.classList.toggle('active', subtab === 'email');
 
             document.getElementById('subtabPanelAd').style.display = (subtab === 'ad') ? 'block' : 'none';
             document.getElementById('subtabPanelInfo').style.display = (subtab === 'info') ? 'block' : 'none';
             document.getElementById('subtabPanelBroadcast').style.display = (subtab === 'broadcast') ? 'block' : 'none';
+            const emailPanel = document.getElementById('subtabPanelEmail');
+            if (emailPanel) emailPanel.style.display = (subtab === 'email') ? 'block' : 'none';
+            if (subtab === 'email') loadEmailDiagnostics();
+        };
+
+        function renderEmailDiagnostics(d) {
+            const grid = document.getElementById('emailDiagnosticsGrid');
+            const box = document.getElementById('emailLastAttemptBox');
+            if (!grid || !d) return;
+
+            const badge = (ok, yesText, noText) => ok
+                ? `<span style="color:#10b981;font-weight:800;">OK: ${yesText}</span>`
+                : `<span style="color:#ef4444;font-weight:700;">OFF: ${noText}</span>`;
+
+            grid.innerHTML = `
+                <div style="padding:12px;border-radius:10px;border:1px solid var(--border-color);background:var(--bg-color);"><div style="font-size:0.74rem;color:var(--text-muted);">GMAIL_WEBHOOK_URL (Apps Script)</div>${badge(d.hasGmailWebhookUrl, 'Задано', 'Не задано')}</div>
+                <div style="padding:12px;border-radius:10px;border:1px solid var(--border-color);background:var(--bg-color);"><div style="font-size:0.74rem;color:var(--text-muted);">BREVO_API_KEY (HTTPS 443)</div>${badge(d.hasBrevoApiKey, 'Задано', 'Не задано')}</div>
+                <div style="padding:12px;border-radius:10px;border:1px solid var(--border-color);background:var(--bg-color);"><div style="font-size:0.74rem;color:var(--text-muted);">RESEND_API_KEY (HTTPS 443)</div>${badge(d.hasResendApiKey, 'Задано', 'Не задано')}</div>
+                <div style="padding:12px;border-radius:10px;border:1px solid var(--border-color);background:var(--bg-color);"><div style="font-size:0.74rem;color:var(--text-muted);">GMAIL_REFRESH_TOKEN (OAuth)</div>${badge(d.hasGmailOAuthRefreshToken, 'Задано', 'Не задано')}</div>
+                <div style="padding:12px;border-radius:10px;border:1px solid var(--border-color);background:var(--bg-color);"><div style="font-size:0.74rem;color:var(--text-muted);">SMTP_PASS (${escapeHtml(d.smtpHost || 'smtp.gmail.com')}:${d.smtpPort || 587})</div>${badge(d.hasSmtpCredentials, 'Задано', 'Не задано')}${d.isRenderEnvironment ? '<div style="font-size:0.7rem;color:#f59e0b;margin-top:2px;">Render Free блокує SMTP 25/465/587</div>' : ''}</div>
+            `;
+
+            if (box) {
+                if (d.lastAttempt) {
+                    const ok = !!d.lastAttempt.success;
+                    box.style.display = 'block';
+                    box.style.background = ok ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
+                    box.style.border = ok ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(239,68,68,0.35)';
+                    box.style.color = ok ? '#059669' : '#dc2626';
+                    box.innerHTML = `<strong>${ok ? 'Остання відправка успішна' : 'Помилка останньої відправки'}</strong> (<code>${escapeHtml(d.lastAttempt.provider || '')}</code>)<br><span>${escapeHtml(d.lastAttempt.detail || '')}</span>`;
+                } else {
+                    box.style.display = 'block';
+                    box.style.background = 'rgba(59,130,246,0.08)';
+                    box.style.border = '1px solid rgba(59,130,246,0.25)';
+                    box.style.color = 'var(--text-secondary)';
+                    box.textContent = 'Спроб відправки після рестарту ще не зафіксовано. Натисніть «Надіслати тестовий лист» для перевірки.';
+                }
+            }
+        }
+
+        window.loadEmailDiagnostics = async function() {
+            try {
+                const res = await adminFetch('/api/admin/email-status');
+                const data = await res.json();
+                if (res.ok && data.diagnostics) {
+                    renderEmailDiagnostics(data.diagnostics);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+        window.handleAdminEmailTest = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnRunEmailTest');
+            const toEmail = document.getElementById('adminTestEmailInput')?.value?.trim() || '';
+            if (btn) { btn.disabled = true; btn.textContent = 'Надсилання...'; }
+            try {
+                const res = await adminFetch('/api/admin/email-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ toEmail: toEmail || null })
+                });
+                const data = await res.json();
+                if (data.diagnostics) renderEmailDiagnostics(data.diagnostics);
+                if (res.ok && data.sent) {
+                    LoopToast.success(`Тестовий лист надіслано на ${data.targetEmail}`);
+                } else {
+                    LoopToast.error(data.error || data.diagnostics?.lastAttempt?.detail || 'Не вдалося надіслати тестовий лист');
+                }
+            } catch (err) {
+                LoopToast.error('Помилка перевірки пошти');
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Надіслати тестовий лист'; }
+            }
         };
 
         

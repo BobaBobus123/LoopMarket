@@ -465,6 +465,18 @@ public class EmailService : IEmailService
     {
         try
         {
+            if (!Uri.TryCreate(webhookUrl, UriKind.Absolute, out var parsedUri) ||
+                (parsedUri.Scheme != Uri.UriSchemeHttp && parsedUri.Scheme != Uri.UriSchemeHttps))
+            {
+                return (false, "Некоректний формат GMAIL_WEBHOOK_URL (потрібен повний https:// URL).");
+            }
+
+            if (parsedUri.Host.Contains("script.google.com", StringComparison.OrdinalIgnoreCase) &&
+                parsedUri.AbsolutePath.TrimEnd('/').EndsWith("/dev", StringComparison.OrdinalIgnoreCase))
+            {
+                return (false, "Використано тестовий /dev URL Google Apps Script. Потрібен робочий /exec URL (Deploy -> Web app -> Manage deployments).");
+            }
+
             var client = CreateHttpClient();
             var payload = JsonSerializer.Serialize(new
             {
@@ -477,10 +489,60 @@ public class EmailService : IEmailService
             using var content = new StringContent(payload, Encoding.UTF8, "application/json");
             using var res = await client.PostAsync(webhookUrl, content);
             var body = await res.Content.ReadAsStringAsync();
+            var finalHost = res.RequestMessage?.RequestUri?.Host ?? "";
+            var mediaType = res.Content.Headers.ContentType?.MediaType ?? "";
+            var trimmedBody = body.TrimStart();
+
             if (!res.IsSuccessStatusCode)
             {
-                return (false, $"HTTP {(int)res.StatusCode}: {body}");
+                return (false, $"HTTP {(int)res.StatusCode}: {TruncateDetail(body)}");
             }
+
+            if (finalHost.Contains("accounts.google.com", StringComparison.OrdinalIgnoreCase))
+            {
+                return (false, "Google Apps Script перенаправив на accounts.google.com. У налаштуваннях розгортання встановіть 'Who has access: Anyone (Усі)'.");
+            }
+
+            if (mediaType.Contains("html", StringComparison.OrdinalIgnoreCase) ||
+                trimmedBody.StartsWith("<", StringComparison.Ordinal))
+            {
+                if (body.Contains("Script function not found: doPost", StringComparison.OrdinalIgnoreCase) || body.Contains("не найдена: doPost", StringComparison.OrdinalIgnoreCase) || body.Contains("не знайдено: doPost", StringComparison.OrdinalIgnoreCase))
+                {
+                    return (false, "Google Apps Script повернув помилку: функцію doPost не знайдено (збережіть код Ctrl+S і створіть нову версію розгортання).");
+                }
+                if (body.Contains("ServiceLogin", StringComparison.OrdinalIgnoreCase) ||
+                    body.Contains("accounts.google.com", StringComparison.OrdinalIgnoreCase) ||
+                    body.Contains("Authorization is required", StringComparison.OrdinalIgnoreCase))
+                {
+                    return (false, "Google Apps Script вимагає авторизації. Перевірте доступ 'Anyone (Усі)' та пройдіть підтвердження скрипта.");
+                }
+                return (false, $"Вебхук повернув HTML-сторінку замість JSON-відповіді: {TruncateDetail(StripHtmlTags(body))}");
+            }
+
+            if (trimmedBody.StartsWith("{", StringComparison.Ordinal))
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(trimmedBody);
+                    if (doc.RootElement.TryGetProperty("ok", out var okProp) && okProp.ValueKind == JsonValueKind.False)
+                    {
+                        var errText = doc.RootElement.TryGetProperty("error", out var errProp)
+                            ? errProp.GetString()
+                            : "Apps Script повернув ok=false";
+                        return (false, string.IsNullOrWhiteSpace(errText) ? "Webhook returned ok=false" : errText!);
+                    }
+                    if (doc.RootElement.TryGetProperty("error", out var errOnlyProp) &&
+                        errOnlyProp.ValueKind == JsonValueKind.String &&
+                        !string.IsNullOrWhiteSpace(errOnlyProp.GetString()))
+                    {
+                        return (false, errOnlyProp.GetString()!);
+                    }
+                }
+                catch (JsonException)
+                {
+                }
+            }
+
             return (true, string.Empty);
         }
         catch (Exception ex)
@@ -488,6 +550,12 @@ public class EmailService : IEmailService
             return (false, ex.Message);
         }
     }
+
+    private static string StripHtmlTags(string html)
+        => Regex.Replace(Regex.Replace(html, @"<[^>]+>", " "), @"\s+", " ").Trim();
+
+    private static string TruncateDetail(string text, int maxLen = 220)
+        => text.Length <= maxLen ? text : text[..maxLen] + "...";
 
     private async Task<(bool Ok, string Error)> TrySendViaGmailApiAsync(
         string clientId, string clientSecret, string refreshToken,

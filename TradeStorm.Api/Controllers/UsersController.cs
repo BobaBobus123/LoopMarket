@@ -203,31 +203,54 @@ public class UsersController : ControllerBase
         return $"{shown}***{domain}";
     }
 
-    private async Task DispatchPasswordResetMessagesAsync(User user, string sessionToken, string code, string requestIp)
+    private async Task<bool> DispatchPasswordResetMessagesAsync(User user, string sessionToken, string code, string requestIp)
     {
-        var tasks = new System.Collections.Generic.List<Task>();
+        bool emailSent = true;
+        Task<bool>? emailTask = null;
+        Task? tgTask = null;
 
         if (_emailService != null)
         {
-            tasks.Add(Task.Run(async () =>
-            {
-                try { await _emailService.SendPasswordResetCodeAsync(user.Email, user.FirstName, code, requestIp); } catch { }
-            }));
+            emailTask = SafeSendResetEmailAsync(user, code, requestIp);
         }
 
         if (user.TelegramChatId != 0 && _telegramService.HasBotToken)
         {
-            tasks.Add(_telegramService.SendPasswordResetGuardAsync(
+            tgTask = _telegramService.SendPasswordResetGuardAsync(
                 user.TelegramChatId,
                 sessionToken,
                 user.FirstName,
                 MaskEmailAddress(user.Email),
-                requestIp));
+                requestIp);
         }
 
-        if (tasks.Count > 0)
+        if (emailTask != null && tgTask != null)
         {
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(emailTask, tgTask);
+            emailSent = await emailTask;
+        }
+        else if (emailTask != null)
+        {
+            emailSent = await emailTask;
+        }
+        else if (tgTask != null)
+        {
+            await tgTask;
+        }
+
+        return emailSent;
+    }
+
+    private async Task<bool> SafeSendResetEmailAsync(User user, string code, string requestIp)
+    {
+        if (_emailService == null) return false;
+        try
+        {
+            return await _emailService.SendPasswordResetCodeAsync(user.Email, user.FirstName, code, requestIp);
+        }
+        catch
+        {
+            return false;
         }
     }
 
@@ -623,9 +646,16 @@ public class UsersController : ControllerBase
         session.ExpiresAt = now.AddMinutes(10);
 
         await _context.SaveChangesAsync();
-        await DispatchPasswordResetMessagesAsync(user, session.SessionToken, code, ResolveRequestIp());
+        bool emailSent = await DispatchPasswordResetMessagesAsync(user, session.SessionToken, code, ResolveRequestIp());
 
-        return Ok(new { message = "Новий код підтвердження надіслано на пошту.", cooldownSeconds = 60 });
+        return Ok(new
+        {
+            emailSent,
+            message = emailSent
+                ? "Новий код підтвердження надіслано на пошту."
+                : "Не вдалося доставити лист на пошту. Перевірте статус поштового сервісу в адмінці або скористайтесь Telegram.",
+            cooldownSeconds = 60
+        });
     }
 
     /// <summary>
@@ -2785,30 +2815,29 @@ public class UsersController : ControllerBase
 
 
 
+        bool emailSent = true;
         if (_emailService != null)
-
         {
-
-            await _emailService.SendVerificationCodeAsync(user.Email, user.FirstName, code);
-
+            try
+            {
+                emailSent = await _emailService.SendVerificationCodeAsync(user.Email, user.FirstName, code);
+            }
+            catch
+            {
+                emailSent = false;
+            }
         }
 
-
-
-        await LogAuditAsync("SendEmailVerificationCode", "User", user.Id, $"Код надіслано на {user.Email}");
-
-
+        await LogAuditAsync("SendEmailVerificationCode", "User", user.Id, $"Код для {user.Email} (emailSent={emailSent})");
 
         return Ok(new
-
         {
-
-            message = "Код підтвердження успішно надіслано на вашу пошту",
-
+            emailSent,
+            message = emailSent
+                ? "Код підтвердження успішно надіслано на вашу пошту"
+                : "Не вдалося надіслати лист на пошту. Перевірте налаштування пошти в адмін-панелі або підтвердьте через Telegram.",
             expiresAt = user.EmailVerificationCodeExpiresAt,
-
             devHint = (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" || user.Email.Contains("test_") || Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing") ? code : null
-
         });
 
     }
