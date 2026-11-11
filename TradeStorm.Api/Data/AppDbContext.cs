@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<AdminAuditLog> AdminAuditLogs { get; set; }
     public DbSet<SiteAnnouncement> SiteAnnouncements { get; set; }
     public DbSet<StoredFile> StoredFiles { get; set; }
+    public DbSet<PasswordResetSession> PasswordResetSessions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -127,5 +128,12 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Review>()
             .HasIndex(r => r.TargetUserId);
+
+        modelBuilder.Entity<PasswordResetSession>()
+            .HasIndex(p => p.SessionToken)
+            .IsUnique();
+
+        modelBuilder.Entity<PasswordResetSession>()
+            .HasIndex(p => new { p.UserId, p.CreatedAt });
     }
 }

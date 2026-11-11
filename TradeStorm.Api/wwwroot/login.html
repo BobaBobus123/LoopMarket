@@ -631,6 +631,264 @@
 
         }
 
+        .fp-label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .fp-label-row label {
+            margin-bottom: 0;
+        }
+
+        .btn-forgot-link {
+            background: none;
+            border: none;
+            padding: 0;
+            color: var(--primary-light, #10b981);
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+
+        .btn-forgot-link:hover {
+            opacity: 0.85;
+            text-decoration: underline;
+        }
+
+        .fp-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .fp-modal-overlay.active {
+            display: flex;
+        }
+
+        .fp-modal-card {
+            background: var(--surface);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            width: 100%;
+            max-width: 470px;
+            padding: 26px 24px;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.38);
+            position: relative;
+        }
+
+        .fp-modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .fp-modal-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .fp-shield-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(16, 185, 129, 0.14);
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .fp-modal-close {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .fp-modal-close:hover {
+            color: var(--text-main);
+            border-color: var(--text-muted);
+        }
+
+        .fp-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .fp-step-pill {
+            padding: 7px 8px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-body);
+            color: var(--text-muted);
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .fp-step-pill.active {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.12);
+            color: #10b981;
+        }
+
+        .fp-step-pill.done {
+            border-color: rgba(16, 185, 129, 0.5);
+            background: rgba(16, 185, 129, 0.22);
+            color: var(--text-main);
+        }
+
+        .fp-alert {
+            display: none;
+            padding: 11px 13px;
+            border-radius: 10px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 14px;
+        }
+
+        .fp-alert.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.38);
+            color: #ef4444;
+        }
+
+        .fp-alert.info {
+            display: block;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            color: #3b82f6;
+        }
+
+        .fp-alert.success {
+            display: block;
+            background: rgba(16, 185, 129, 0.14);
+            border: 1px solid rgba(16, 185, 129, 0.42);
+            color: #10b981;
+        }
+
+        .fp-tg-guard-box {
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            background: rgba(59, 130, 246, 0.08);
+            border-radius: 12px;
+            padding: 13px;
+            margin-bottom: 14px;
+            font-size: 0.85rem;
+            line-height: 1.45;
+        }
+
+        .fp-tg-guard-box.approved {
+            border-color: rgba(16, 185, 129, 0.45);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .fp-tg-guard-box.revoked {
+            border-color: rgba(239, 68, 68, 0.45);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .fp-pass-wrap {
+            position: relative;
+        }
+
+        .fp-pass-wrap .modern-input {
+            padding-right: 42px;
+        }
+
+        .fp-eye-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fp-eye-btn:hover {
+            color: var(--text-main);
+        }
+
+        .fp-req-list {
+            list-style: none;
+            padding: 0;
+            margin: 8px 0 14px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 10px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .fp-req-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .fp-req-item.ok {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .fp-secondary-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-main);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .fp-secondary-btn:hover:not(:disabled) {
+            border-color: var(--text-muted);
+            background: rgba(148, 163, 184, 0.08);
+        }
+
+        .fp-secondary-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
     </style>
 
 </head>
@@ -732,7 +990,13 @@
 
                         <div class="form-group">
 
-                            <label>Пароль</label>
+                            <div class="fp-label-row">
+
+                                <label for="logPassword">Пароль</label>
+
+                                <button type="button" class="btn-forgot-link" onclick="openForgotPasswordModal()">Забули пароль?</button>
+
+                            </div>
 
                             <input type="password" id="logPassword" class="modern-input" required placeholder="••••••••" autocomplete="new-password" value="">
 
@@ -1098,6 +1362,132 @@
 
         </div>
 
+    </div>
+
+    <!-- Модальне вікно безпечного відновлення пароля -->
+    <div id="forgotPasswordModal" class="fp-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="fpModalTitle" onclick="if (event.target === this) closeForgotPasswordModal()">
+        <div class="fp-modal-card">
+            <div class="fp-modal-header">
+                <div class="fp-modal-title-wrap">
+                    <div class="fp-shield-badge">
+                        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+                    </div>
+                    <div>
+                        <h3 id="fpModalTitle" style="margin:0; font-size:1.15rem; font-weight:800;">Відновлення пароля</h3>
+                        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Багаторівневий захист та підтвердження власника</div>
+                    </div>
+                </div>
+                <button type="button" class="fp-modal-close" aria-label="Закрити вікно" onclick="closeForgotPasswordModal()">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="fp-steps">
+                <div id="fpStepBadge1" class="fp-step-pill active">1. Запит</div>
+                <div id="fpStepBadge2" class="fp-step-pill">2. Перевірка</div>
+                <div id="fpStepBadge3" class="fp-step-pill">3. Новий пароль</div>
+            </div>
+
+            <div id="fpAlertBox" class="fp-alert" role="alert"></div>
+
+            <!-- Крок 1: Пошта та BotShield CAPTCHA -->
+            <form id="fpStep1" onsubmit="submitForgotStart(event)">
+                <div class="form-group">
+                    <label for="fpEmail">Електронна пошта акаунта</label>
+                    <input type="email" id="fpEmail" class="modern-input" required placeholder="name@example.com" autocomplete="email">
+                </div>
+
+                <input type="text" id="fpHoneypot" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;">
+
+                <div class="form-group">
+                    <div class="fp-label-row">
+                        <label style="display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                            Перевірка безпеки (сума чисел)
+                        </label>
+                        <button type="button" onclick="loadForgotCaptcha()" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:0.78rem; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                            Оновити
+                        </button>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div id="fpCaptchaSvgContainer" style="flex-shrink:0; min-height:42px;"></div>
+                        <input type="number" id="fpCaptchaAnswer" class="modern-input" required placeholder="?" style="max-width:110px; text-align:center; font-weight:800; font-size:1.1rem;">
+                    </div>
+                    <input type="hidden" id="fpCaptchaToken" value="">
+                </div>
+
+                <button type="submit" id="fpBtnStart" class="btn-submit">Отримати код відновлення</button>
+            </form>
+
+            <!-- Крок 2: Код з пошти + Останні цифри телефону + Telegram Guard -->
+            <form id="fpStep2" style="display:none;" onsubmit="submitForgotVerify(event)">
+                <div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:14px; line-height:1.45;">
+                    Ми надіслали 6-значний одноразовий код на вказану пошту (дійсний 10 хвилин). Заповніть усі фактори перевірки нижче.
+                </div>
+
+                <div class="form-group">
+                    <label for="fpEmailCode">6-значний код з електронної пошти</label>
+                    <input type="text" id="fpEmailCode" class="modern-input" required maxlength="6" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" placeholder="000000" style="text-align:center; letter-spacing:6px; font-weight:800; font-size:1.15rem;">
+                </div>
+
+                <div class="form-group" id="fpPhoneDigitsGroup">
+                    <label for="fpPhoneLastDigits">Останні 4 цифри прив'язаного номера телефону</label>
+                    <input type="text" id="fpPhoneLastDigits" class="modern-input" maxlength="4" inputmode="numeric" placeholder="Наприклад: 4829" style="letter-spacing:3px; font-weight:700;">
+                    <div style="font-size:0.76rem; color:var(--text-muted); margin-top:4px;">Потрібно для підтвердження, що пошту не зламано сторонніми.</div>
+                </div>
+
+                <div id="fpTelegramGuardBox" class="fp-tg-guard-box" style="display:none;">
+                    <div style="display:flex; align-items:center; gap:8px; font-weight:800; margin-bottom:6px;">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                        <span id="fpTgTitleText">Захист власника через Telegram</span>
+                    </div>
+                    <div id="fpTgStatusText" style="color:var(--text-muted); margin-bottom:8px;">
+                        На ваш прив'язаний Telegram надіслано запит з кнопками. Натисніть «Так, це я підтверджую скидання» в боті <strong>@LoopMarket_Verify_bot</strong>.
+                    </div>
+                    <a id="fpTgBotLink" href="https://t.me/LoopMarket_Verify_bot" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:6px; padding:6px 11px; border-radius:8px; background:#0088cc; color:#fff; font-weight:700; font-size:0.8rem; text-decoration:none;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
+                        Відкрити Telegram-бота
+                    </a>
+                </div>
+
+                <button type="submit" id="fpBtnVerify" class="btn-submit">Підтвердити особу</button>
+                <button type="button" id="fpBtnResend" class="fp-secondary-btn" onclick="resendForgotCode()">Надіслати код повторно (<span id="fpResendCountdown">60</span> с)</button>
+                <button type="button" class="fp-secondary-btn" onclick="backToForgotStep1()">Вказати іншу пошту</button>
+            </form>
+
+            <!-- Крок 3: Новий надійний пароль -->
+            <form id="fpStep3" style="display:none;" onsubmit="submitForgotConfirm(event)">
+                <div class="form-group">
+                    <label for="fpNewPassword">Новий надійний пароль</label>
+                    <div class="fp-pass-wrap">
+                        <input type="password" id="fpNewPassword" class="modern-input" required minlength="8" autocomplete="new-password" placeholder="Мінімум 8 символів" oninput="updateFpPasswordStrength()">
+                        <button type="button" class="fp-eye-btn" aria-label="Показати пароль" onclick="toggleFpPasswordVisibility('fpNewPassword')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:6px;">
+                    <label for="fpConfirmPassword">Повторіть новий пароль</label>
+                    <div class="fp-pass-wrap">
+                        <input type="password" id="fpConfirmPassword" class="modern-input" required minlength="8" autocomplete="new-password" placeholder="Введіть пароль ще раз" oninput="updateFpPasswordStrength()">
+                        <button type="button" class="fp-eye-btn" aria-label="Показати повтор пароля" onclick="toggleFpPasswordVisibility('fpConfirmPassword')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <ul class="fp-req-list">
+                    <li id="fpReqLen" class="fp-req-item">Мінімум 8 символів</li>
+                    <li id="fpReqLetter" class="fp-req-item">Щонайменше 1 літера</li>
+                    <li id="fpReqDigit" class="fp-req-item">Щонайменше 1 цифра</li>
+                    <li id="fpReqMatch" class="fp-req-item">Паролі співпадають</li>
+                </ul>
+
+                <button type="submit" id="fpBtnConfirm" class="btn-submit">Зберегти новий пароль</button>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -2297,6 +2687,445 @@
             }
 
         }
+
+        // =====================================================================
+        // БЕЗПЕЧНЕ ВІДНОВЛЕННЯ ПАРОЛЯ (FORGOT PASSWORD MULTI-FACTOR FLOW)
+        // =====================================================================
+        const fpState = {
+            email: '',
+            sessionToken: '',
+            resetProofToken: '',
+            requiresPhoneCheck: true,
+            requiresTelegramApproval: false,
+            isTelegramApproved: false,
+            isRevoked: false,
+            verifyPendingAuto: false,
+            cooldownTimer: null,
+            pollTimer: null
+        };
+
+        function stopFpTimers() {
+            if (fpState.cooldownTimer) {
+                clearInterval(fpState.cooldownTimer);
+                fpState.cooldownTimer = null;
+            }
+            if (fpState.pollTimer) {
+                clearInterval(fpState.pollTimer);
+                fpState.pollTimer = null;
+            }
+        }
+
+        function showFpAlert(message, type = 'error') {
+            const box = document.getElementById('fpAlertBox');
+            if (!box) return;
+            if (!message) {
+                box.className = 'fp-alert';
+                box.textContent = '';
+                return;
+            }
+            box.className = `fp-alert ${type}`;
+            box.textContent = message;
+        }
+
+        function setFpStep(step) {
+            for (let i = 1; i <= 3; i++) {
+                const panel = document.getElementById(`fpStep${i}`);
+                const badge = document.getElementById(`fpStepBadge${i}`);
+                if (panel) panel.style.display = i === step ? 'block' : 'none';
+                if (badge) {
+                    badge.classList.remove('active', 'done');
+                    if (i < step) badge.classList.add('done');
+                    else if (i === step) badge.classList.add('active');
+                }
+            }
+        }
+
+        function openForgotPasswordModal() {
+            stopFpTimers();
+            fpState.sessionToken = '';
+            fpState.resetProofToken = '';
+            fpState.requiresPhoneCheck = true;
+            fpState.requiresTelegramApproval = false;
+            fpState.isTelegramApproved = false;
+            fpState.isRevoked = false;
+            fpState.verifyPendingAuto = false;
+
+            const loginEmail = (document.getElementById('logEmail')?.value || '').trim();
+            const fpEmail = document.getElementById('fpEmail');
+            if (fpEmail) fpEmail.value = loginEmail;
+
+            ['fpCaptchaAnswer', 'fpEmailCode', 'fpPhoneLastDigits', 'fpNewPassword', 'fpConfirmPassword', 'fpHoneypot'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+
+            const verifyBtn = document.getElementById('fpBtnVerify');
+            if (verifyBtn) verifyBtn.disabled = false;
+
+            showFpAlert('');
+            setFpStep(1);
+            updateFpPasswordStrength();
+            loadForgotCaptcha();
+
+            const modal = document.getElementById('forgotPasswordModal');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeForgotPasswordModal() {
+            stopFpTimers();
+            fpState.resetProofToken = '';
+            const modal = document.getElementById('forgotPasswordModal');
+            if (modal) modal.classList.remove('active');
+            ['fpEmailCode', 'fpNewPassword', 'fpConfirmPassword', 'fpCaptchaAnswer'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+        }
+
+        function backToForgotStep1() {
+            stopFpTimers();
+            fpState.sessionToken = '';
+            fpState.resetProofToken = '';
+            fpState.verifyPendingAuto = false;
+            showFpAlert('');
+            setFpStep(1);
+            loadForgotCaptcha();
+        }
+
+        async function loadForgotCaptcha() {
+            try {
+                const res = await fetch('/api/auth/captcha');
+                if (!res.ok) return;
+                const data = await res.json();
+                const container = document.getElementById('fpCaptchaSvgContainer');
+                const tokenInput = document.getElementById('fpCaptchaToken');
+                const answerInput = document.getElementById('fpCaptchaAnswer');
+                if (container) container.innerHTML = data.svg;
+                if (tokenInput) tokenInput.value = data.token;
+                if (answerInput) answerInput.value = '';
+            } catch {
+            }
+        }
+
+        function startFpCooldown(seconds) {
+            if (fpState.cooldownTimer) clearInterval(fpState.cooldownTimer);
+            let left = Math.max(0, Number(seconds) || 60);
+            const btn = document.getElementById('fpBtnResend');
+            const span = document.getElementById('fpResendCountdown');
+            const render = () => {
+                if (!btn) return;
+                if (left > 0 && !fpState.isRevoked) {
+                    btn.disabled = true;
+                    btn.innerHTML = `Надіслати код повторно (<span id="fpResendCountdown">${left}</span> с)`;
+                } else {
+                    btn.disabled = fpState.isRevoked;
+                    btn.textContent = 'Надіслати код повторно';
+                }
+            };
+            render();
+            if (span) span.textContent = String(left);
+            fpState.cooldownTimer = setInterval(() => {
+                left--;
+                if (left <= 0) {
+                    clearInterval(fpState.cooldownTimer);
+                    fpState.cooldownTimer = null;
+                }
+                render();
+            }, 1000);
+        }
+
+        function updateFpTelegramBox(state) {
+            const box = document.getElementById('fpTelegramGuardBox');
+            const title = document.getElementById('fpTgTitleText');
+            const status = document.getElementById('fpTgStatusText');
+            const botLink = document.getElementById('fpTgBotLink');
+            if (!box) return;
+
+            if (!fpState.requiresTelegramApproval) {
+                box.style.display = 'none';
+                return;
+            }
+
+            box.style.display = 'block';
+            box.classList.remove('approved', 'revoked');
+
+            if (state === 'revoked') {
+                box.classList.add('revoked');
+                if (title) title.textContent = 'Запит заблоковано власником!';
+                if (status) status.textContent = 'Скидання пароля скасовано через Telegram-бота. Усі відкриті запити анульовано.';
+                if (botLink) botLink.style.display = 'none';
+            } else if (state === 'approved') {
+                box.classList.add('approved');
+                if (title) title.textContent = 'Власника акаунта підтверджено в Telegram';
+                if (status) status.textContent = 'Підтвердження отримано. Введіть код із пошти та продовжуйте зміну пароля.';
+                if (botLink) botLink.style.display = 'none';
+            } else {
+                if (title) title.textContent = 'Захист власника через Telegram';
+                if (status) status.innerHTML = 'На ваш прив\'язаний Telegram надіслано запит з кнопками. Натисніть «Так, це я підтверджую скидання» в боті <strong>@LoopMarket_Verify_bot</strong>.';
+                if (botLink) botLink.style.display = 'inline-flex';
+            }
+        }
+
+        function startFpTelegramPolling() {
+            if (fpState.pollTimer) clearInterval(fpState.pollTimer);
+            if (!fpState.requiresTelegramApproval) return;
+
+            fpState.pollTimer = setInterval(async () => {
+                if (document.hidden || !fpState.sessionToken || fpState.isRevoked) return;
+                try {
+                    const res = await fetch(`/api/users/forgot-password/status?sessionToken=${encodeURIComponent(fpState.sessionToken)}`);
+                    if (!res.ok) return;
+                    const data = await res.json();
+
+                    if (data.isRevoked) {
+                        fpState.isRevoked = true;
+                        stopFpTimers();
+                        updateFpTelegramBox('revoked');
+                        const verifyBtn = document.getElementById('fpBtnVerify');
+                        const resendBtn = document.getElementById('fpBtnResend');
+                        if (verifyBtn) verifyBtn.disabled = true;
+                        if (resendBtn) resendBtn.disabled = true;
+                        showFpAlert('Запит на відновлення заблоковано власником акаунта через Telegram або через ліміт спроб.', 'error');
+                        return;
+                    }
+
+                    if (data.isExpired) {
+                        stopFpTimers();
+                        showFpAlert('Термін дії сесії відновлення минув. Розпочніть процедуру спочатку.', 'error');
+                        return;
+                    }
+
+                    if (data.isTelegramApproved && !fpState.isTelegramApproved) {
+                        fpState.isTelegramApproved = true;
+                        updateFpTelegramBox('approved');
+                        if (fpState.verifyPendingAuto) {
+                            await submitForgotVerify(null, true);
+                        }
+                    }
+                } catch {
+                }
+            }, 2500);
+        }
+
+        async function submitForgotStart(event) {
+            event.preventDefault();
+            showFpAlert('');
+            const btn = document.getElementById('fpBtnStart');
+            const email = (document.getElementById('fpEmail')?.value || '').trim().toLowerCase();
+            const captchaToken = document.getElementById('fpCaptchaToken')?.value || '';
+            const captchaAnswer = (document.getElementById('fpCaptchaAnswer')?.value || '').trim();
+            const honeypotTrap = document.getElementById('fpHoneypot')?.value || '';
+
+            if (!email) {
+                showFpAlert('Введіть електронну пошту.');
+                return;
+            }
+
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch('/api/users/forgot-password/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, honeypotTrap, captchaToken, captchaAnswer })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    showFpAlert(data.error || 'Не вдалося ініціювати відновлення пароля.');
+                    loadForgotCaptcha();
+                    return;
+                }
+
+                fpState.email = email;
+                fpState.sessionToken = data.sessionToken || '';
+                fpState.requiresPhoneCheck = data.requiresPhoneCheck !== false;
+                fpState.requiresTelegramApproval = !!data.requiresTelegramApproval;
+                fpState.isTelegramApproved = false;
+                fpState.isRevoked = false;
+                fpState.verifyPendingAuto = false;
+
+                const phoneGroup = document.getElementById('fpPhoneDigitsGroup');
+                const phoneInput = document.getElementById('fpPhoneLastDigits');
+                if (phoneGroup) phoneGroup.style.display = fpState.requiresPhoneCheck ? 'block' : 'none';
+                if (phoneInput) {
+                    phoneInput.required = fpState.requiresPhoneCheck;
+                    phoneInput.value = '';
+                }
+
+                const botLink = document.getElementById('fpTgBotLink');
+                if (botLink && data.telegramBotUrl) botLink.href = data.telegramBotUrl;
+
+                updateFpTelegramBox('waiting');
+                setFpStep(2);
+                showFpAlert(data.message || 'Код відновлення надіслано на пошту.', 'info');
+                startFpCooldown(data.cooldownSeconds || 60);
+                startFpTelegramPolling();
+            } catch {
+                showFpAlert("Помилка з'єднання із сервером. Спробуйте ще раз.");
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        async function resendForgotCode() {
+            if (!fpState.sessionToken || fpState.isRevoked) return;
+            const btn = document.getElementById('fpBtnResend');
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch('/api/users/forgot-password/resend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionToken: fpState.sessionToken })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    showFpAlert(data.error || 'Не вдалося повторно надіслати код.');
+                    if (data.retryAfterSeconds) startFpCooldown(data.retryAfterSeconds);
+                    return;
+                }
+                showFpAlert(data.message || 'Новий код надіслано на пошту.', 'info');
+                startFpCooldown(data.cooldownSeconds || 60);
+            } catch {
+                showFpAlert("Помилка з'єднання із сервером.");
+            }
+        }
+
+        async function submitForgotVerify(event, isAutoRetry = false) {
+            if (event) event.preventDefault();
+            if (fpState.isRevoked) return;
+
+            const code = (document.getElementById('fpEmailCode')?.value || '').replace(/\D/g, '');
+            const phoneLastDigits = (document.getElementById('fpPhoneLastDigits')?.value || '').replace(/\D/g, '');
+            const btn = document.getElementById('fpBtnVerify');
+
+            if (code.length !== 6) {
+                if (!isAutoRetry) showFpAlert('Введіть повний 6-значний код із листа.');
+                return;
+            }
+            if (fpState.requiresPhoneCheck && phoneLastDigits.length < 4) {
+                if (!isAutoRetry) showFpAlert('Введіть останні 4 цифри прив\'язаного номера телефону.');
+                return;
+            }
+
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch('/api/users/forgot-password/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionToken: fpState.sessionToken,
+                        code,
+                        phoneLastDigits
+                    })
+                });
+                const data = await res.json().catch(() => ({}));
+
+                if (res.status === 202 && data.telegramPending) {
+                    fpState.verifyPendingAuto = true;
+                    showFpAlert(data.error || 'Пошту й телефон підтверджено! Натисніть кнопку підтвердження в Telegram-боті.', 'info');
+                    return;
+                }
+
+                if (!res.ok) {
+                    fpState.verifyPendingAuto = false;
+                    if (data.isRevoked) {
+                        fpState.isRevoked = true;
+                        stopFpTimers();
+                        updateFpTelegramBox('revoked');
+                    }
+                    showFpAlert(data.error || 'Помилка перевірки даних власника.');
+                    return;
+                }
+
+                fpState.resetProofToken = data.resetProofToken || '';
+                stopFpTimers();
+                showFpAlert('Особу власника підтверджено! Встановіть новий пароль.', 'success');
+                setFpStep(3);
+                updateFpPasswordStrength();
+            } catch {
+                showFpAlert("Помилка з'єднання із сервером.");
+            } finally {
+                if (btn && !fpState.isRevoked) btn.disabled = false;
+            }
+        }
+
+        function toggleFpPasswordVisibility(inputId) {
+            const el = document.getElementById(inputId);
+            if (!el) return;
+            el.type = el.type === 'password' ? 'text' : 'password';
+        }
+
+        function updateFpPasswordStrength() {
+            const pwd = document.getElementById('fpNewPassword')?.value || '';
+            const confirm = document.getElementById('fpConfirmPassword')?.value || '';
+            const rules = {
+                fpReqLen: pwd.length >= 8,
+                fpReqLetter: /\p{L}/u.test(pwd),
+                fpReqDigit: /\d/.test(pwd),
+                fpReqMatch: pwd.length > 0 && pwd === confirm
+            };
+            Object.entries(rules).forEach(([id, ok]) => {
+                const item = document.getElementById(id);
+                if (item) item.classList.toggle('ok', ok);
+            });
+            return Object.values(rules).every(Boolean);
+        }
+
+        async function submitForgotConfirm(event) {
+            event.preventDefault();
+            showFpAlert('');
+            if (!updateFpPasswordStrength()) {
+                showFpAlert('Перевірте вимоги до пароля: мінімум 8 символів, щонайменше 1 літера, 1 цифра та збіг обох полів.');
+                return;
+            }
+
+            const newPassword = document.getElementById('fpNewPassword')?.value || '';
+            const confirmPassword = document.getElementById('fpConfirmPassword')?.value || '';
+            const btn = document.getElementById('fpBtnConfirm');
+            if (btn) btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/users/forgot-password/confirm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionToken: fpState.sessionToken,
+                        resetProofToken: fpState.resetProofToken,
+                        newPassword,
+                        confirmPassword
+                    })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    showFpAlert(data.error || 'Не вдалося оновити пароль.');
+                    return;
+                }
+
+                const resetEmail = fpState.email;
+                closeForgotPasswordModal();
+                const logEmail = document.getElementById('logEmail');
+                const logPass = document.getElementById('logPassword');
+                if (logEmail && resetEmail) logEmail.value = resetEmail;
+                if (logPass) logPass.value = '';
+                const errMsg = document.getElementById('errorMsg');
+                if (errMsg) {
+                    errMsg.style.color = '#10b981';
+                    errMsg.innerText = data.message || 'Пароль успішно змінено! Увійдіть з новим паролем.';
+                }
+            } catch {
+                showFpAlert("Помилка з'єднання із сервером.");
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('forgotPasswordModal');
+                if (modal && modal.classList.contains('active')) {
+                    closeForgotPasswordModal();
+                }
+            }
+        });
 
     </script>
 

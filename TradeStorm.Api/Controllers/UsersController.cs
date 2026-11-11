@@ -8,7 +8,13 @@ using System.Linq;
 
 using System.Security.Claims;
 
+using System.Security.Cryptography;
+
+using System.Text;
+
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Configuration;
 
 using Microsoft.AspNetCore.Authorization;
 
@@ -106,6 +112,27 @@ public class UsersController : ControllerBase
 
     }
 
+
+
+    private void ClearAuthCookies()
+    {
+        try
+        {
+            var isHttps = Request.IsHttps;
+            var expiredOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = isHttps,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddDays(-1),
+                Path = "/"
+            };
+            Response.Cookies.Delete("loopToken", expiredOptions);
+            Response.Cookies.Delete("loopRefreshToken", expiredOptions);
+        }
+        catch { }
+    }
+
     private readonly AppDbContext _context;
 
     private readonly ITokenService _tokenService;
@@ -116,24 +143,92 @@ public class UsersController : ControllerBase
 
     private readonly IEmailService? _emailService;
 
+    private readonly IConfiguration? _configuration;
+
     private readonly PasswordHasher<User> _passwordHasher = new();
 
 
 
-    public UsersController(AppDbContext context, ITokenService tokenService, TelegramBotService telegramService, ICaptchaService? captchaService = null, IEmailService? emailService = null)
-
+    public UsersController(
+        AppDbContext context,
+        ITokenService tokenService,
+        TelegramBotService telegramService,
+        ICaptchaService? captchaService = null,
+        IEmailService? emailService = null,
+        IConfiguration? configuration = null)
     {
-
         _context = context;
-
         _tokenService = tokenService;
-
         _telegramService = telegramService;
-
         _captchaService = captchaService;
-
         _emailService = emailService;
+        _configuration = configuration;
+    }
 
+    private string ResolveRequestIp()
+    {
+        if (Request.Headers.TryGetValue("CF-Connecting-IP", out var cfIp) && !string.IsNullOrWhiteSpace(cfIp))
+            return cfIp.ToString().Trim();
+        if (Request.Headers.TryGetValue("X-Forwarded-For", out var fwdIp) && !string.IsNullOrWhiteSpace(fwdIp))
+        {
+            var first = fwdIp.ToString().Split(',')[0].Trim();
+            if (!string.IsNullOrWhiteSpace(first)) return first;
+        }
+        return HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+    }
+
+    private string ComputeResetHmac(string sessionToken, string value)
+    {
+        var secret = _configuration?["Jwt:Key"] ?? "LoopMarket_Reset_Fallback_Secret_Key_2026_!";
+        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
+        var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes($"{sessionToken}:{value}"));
+        return Convert.ToHexString(hash).ToLowerInvariant();
+    }
+
+    private static bool FixedTimeHexEquals(string? a, string? b)
+    {
+        if (string.IsNullOrWhiteSpace(a) || string.IsNullOrWhiteSpace(b)) return false;
+        var bytesA = Encoding.UTF8.GetBytes(a);
+        var bytesB = Encoding.UTF8.GetBytes(b);
+        return bytesA.Length == bytesB.Length && CryptographicOperations.FixedTimeEquals(bytesA, bytesB);
+    }
+
+    private static string MaskEmailAddress(string email)
+    {
+        var atIdx = email.IndexOf('@');
+        if (atIdx <= 1) return email;
+        var local = email[..atIdx];
+        var domain = email[atIdx..];
+        var shown = local.Length >= 2 ? local[..2] : local[..1];
+        return $"{shown}***{domain}";
+    }
+
+    private async Task DispatchPasswordResetMessagesAsync(User user, string sessionToken, string code, string requestIp)
+    {
+        var tasks = new System.Collections.Generic.List<Task>();
+
+        if (_emailService != null)
+        {
+            tasks.Add(Task.Run(async () =>
+            {
+                try { await _emailService.SendPasswordResetCodeAsync(user.Email, user.FirstName, code, requestIp); } catch { }
+            }));
+        }
+
+        if (user.TelegramChatId != 0 && _telegramService.HasBotToken)
+        {
+            tasks.Add(_telegramService.SendPasswordResetGuardAsync(
+                user.TelegramChatId,
+                sessionToken,
+                user.FirstName,
+                MaskEmailAddress(user.Email),
+                requestIp));
+        }
+
+        if (tasks.Count > 0)
+        {
+            await Task.WhenAll(tasks);
+        }
     }
 
 
@@ -318,6 +413,467 @@ public class UsersController : ControllerBase
 
 
     
+
+    // =====================================================================
+    // ВІДНОВЛЕННЯ ПАРОЛЯ З ПЕРЕВІРКОЮ ВЛАСНИКА АКАУНТА (FORGOT PASSWORD)
+    // =====================================================================
+
+    /// <summary>
+    /// Крок 1: Ініціалізація безпечного скидання пароля (BotShield CAPTCHA + анти-перебір)
+    /// </summary>
+    [HttpPost("forgot-password/start")]
+    [AllowAnonymous]
+    [EnableRateLimiting("AuthRateLimit")]
+    public async Task<IActionResult> StartPasswordReset([FromBody] StartPasswordResetDto dto)
+    {
+        if (dto == null || string.IsNullOrWhiteSpace(dto.Email))
+        {
+            return BadRequest(new { error = "Введіть коректну електронну пошту" });
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.HoneypotTrap))
+        {
+            return BadRequest(new { error = "Підозріла активність" });
+        }
+
+        if (_captchaService != null && !_captchaService.ValidateCaptcha(dto.CaptchaToken, dto.CaptchaAnswer))
+        {
+            return BadRequest(new { error = "Неправильна відповідь капчі або час її дії минув. Оновіть завдання." });
+        }
+
+        var normalizedEmail = dto.Email.Trim().ToLowerInvariant();
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+        var ip = ResolveRequestIp();
+        var ua = Request.Headers["User-Agent"].ToString();
+        if (ua.Length > 250) ua = ua[..250];
+
+        var sessionToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(16)).ToLowerInvariant();
+
+        // Анти-перебір акаунтів: для неіснуючих чи заблокованих акаунтів повертаємо ідентичну нейтральну відповідь
+        if (user == null || user.IsBanned)
+        {
+            return Ok(new
+            {
+                sessionToken = sessionToken,
+                requiresPhoneCheck = true,
+                requiresTelegramApproval = false,
+                cooldownSeconds = 60,
+                expiresInSeconds = 600,
+                telegramBotUrl = "https://t.me/LoopMarket_Verify_bot",
+                message = "Якщо акаунт із такою адресою існує, ми надіслали одноразовий код відновлення на пошту."
+            });
+        }
+
+        var now = DateTime.UtcNow;
+        var recentSession = await _context.PasswordResetSessions
+            .Where(s => s.UserId == user.Id && !s.IsCompleted && !s.IsRevoked && s.ExpiresAt > now)
+            .OrderByDescending(s => s.CreatedAt)
+            .FirstOrDefaultAsync();
+
+        if (recentSession != null && (now - recentSession.LastSentAt) < TimeSpan.FromSeconds(45))
+        {
+            var waitSec = Math.Max(1, 45 - (int)(now - recentSession.LastSentAt).TotalSeconds);
+            return StatusCode(StatusCodes.Status429TooManyRequests, new
+            {
+                error = $"Зачекайте {waitSec} сек. перед повторним запитом на відновлення пароля.",
+                retryAfterSeconds = waitSec
+            });
+        }
+
+        var staleSessions = await _context.PasswordResetSessions
+            .Where(s => s.UserId == user.Id && !s.IsCompleted && !s.IsRevoked)
+            .ToListAsync();
+        foreach (var stale in staleSessions)
+        {
+            stale.IsRevoked = true;
+        }
+
+        var code = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+        var phoneDigits = new string((user.PhoneNumber ?? string.Empty).Where(char.IsDigit).ToArray());
+        bool requiresPhoneCheck = phoneDigits.Length >= 4;
+        bool requiresTelegramApproval = user.TelegramChatId != 0 && _telegramService.HasBotToken;
+
+        var session = new PasswordResetSession
+        {
+            UserId = user.Id,
+            SessionToken = sessionToken,
+            OtpHash = ComputeResetHmac(sessionToken, code),
+            RequiresPhoneCheck = requiresPhoneCheck,
+            RequiresTelegramApproval = requiresTelegramApproval,
+            RequestIp = ip,
+            UserAgent = ua,
+            CreatedAt = now,
+            LastSentAt = now,
+            ExpiresAt = now.AddMinutes(10)
+        };
+
+        _context.PasswordResetSessions.Add(session);
+        _context.AdminAuditLogs.Add(new AdminAuditLog
+        {
+            AdminId = user.Id,
+            AdminEmail = user.Email,
+            Action = "PasswordResetRequested",
+            TargetType = "User",
+            TargetId = user.Id,
+            Details = $"Запит на відновлення пароля з IP {ip} (PhoneCheck={requiresPhoneCheck}, TelegramGuard={requiresTelegramApproval}).",
+            CreatedAt = now
+        });
+
+        await _context.SaveChangesAsync();
+        await DispatchPasswordResetMessagesAsync(user, sessionToken, code, ip);
+
+        return Ok(new
+        {
+            sessionToken = sessionToken,
+            requiresPhoneCheck = requiresPhoneCheck,
+            requiresTelegramApproval = requiresTelegramApproval,
+            cooldownSeconds = 60,
+            expiresInSeconds = 600,
+            telegramBotUrl = "https://t.me/LoopMarket_Verify_bot",
+            message = "Якщо акаунт із такою адресою існує, ми надіслали одноразовий код відновлення на пошту."
+        });
+    }
+
+    /// <summary>
+    /// Опитування стану Telegram-підтвердження/блокування власником акаунта
+    /// </summary>
+    [HttpGet("forgot-password/status")]
+    [AllowAnonymous]
+    [EnableRateLimiting("PollingLimit")]
+    public async Task<IActionResult> GetPasswordResetStatus([FromQuery] string sessionToken)
+    {
+        if (string.IsNullOrWhiteSpace(sessionToken))
+        {
+            return BadRequest(new { error = "Недійсна сесія" });
+        }
+
+        var session = await _context.PasswordResetSessions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.SessionToken == sessionToken.Trim());
+
+        if (session == null)
+        {
+            return Ok(new
+            {
+                requiresTelegramApproval = false,
+                isTelegramApproved = false,
+                isRevoked = false,
+                isCompleted = false,
+                isExpired = false,
+                expiresInSeconds = 600
+            });
+        }
+
+        var remaining = Math.Max(0, (int)(session.ExpiresAt - DateTime.UtcNow).TotalSeconds);
+        return Ok(new
+        {
+            requiresTelegramApproval = session.RequiresTelegramApproval,
+            isTelegramApproved = session.IsTelegramApproved,
+            isRevoked = session.IsRevoked,
+            isCompleted = session.IsCompleted,
+            isExpired = remaining == 0,
+            expiresInSeconds = remaining
+        });
+    }
+
+    /// <summary>
+    /// Крок 2: Повторна відправка одноразового коду відновлення (кулдаун 60 сек)
+    /// </summary>
+    [HttpPost("forgot-password/resend")]
+    [AllowAnonymous]
+    [EnableRateLimiting("AuthRateLimit")]
+    public async Task<IActionResult> ResendPasswordResetCode([FromBody] ResendPasswordResetDto dto)
+    {
+        if (dto == null || string.IsNullOrWhiteSpace(dto.SessionToken))
+        {
+            return BadRequest(new { error = "Недійсний запит" });
+        }
+
+        var session = await _context.PasswordResetSessions
+            .FirstOrDefaultAsync(s => s.SessionToken == dto.SessionToken.Trim());
+
+        if (session == null)
+        {
+            return Ok(new { message = "Якщо сесія активна, новий код відправлено на пошту." });
+        }
+
+        if (session.IsRevoked || session.IsCompleted)
+        {
+            return BadRequest(new { error = "Цю сесію відновлення вже скасовано або завершено. Почніть спочатку." });
+        }
+
+        var now = DateTime.UtcNow;
+        var elapsed = now - session.LastSentAt;
+        if (elapsed < TimeSpan.FromSeconds(45))
+        {
+            var waitSec = Math.Max(1, 45 - (int)elapsed.TotalSeconds);
+            return StatusCode(StatusCodes.Status429TooManyRequests, new
+            {
+                error = $"Зачекайте {waitSec} сек. перед повторною відправкою коду.",
+                retryAfterSeconds = waitSec
+            });
+        }
+
+        var user = await _context.Users.FindAsync(session.UserId);
+        if (user == null || user.IsBanned)
+        {
+            return Ok(new { message = "Якщо сесія активна, новий код відправлено на пошту." });
+        }
+
+        var code = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+        session.OtpHash = ComputeResetHmac(session.SessionToken, code);
+        session.FailedAttempts = 0;
+        session.IsEmailVerified = false;
+        session.IsPhoneVerified = false;
+        session.ProofTokenHash = null;
+        session.LastSentAt = now;
+        session.ExpiresAt = now.AddMinutes(10);
+
+        await _context.SaveChangesAsync();
+        await DispatchPasswordResetMessagesAsync(user, session.SessionToken, code, ResolveRequestIp());
+
+        return Ok(new { message = "Новий код підтвердження надіслано на пошту.", cooldownSeconds = 60 });
+    }
+
+    /// <summary>
+    /// Крок 2: Багатофакторна перевірка коду з пошти, цифр телефону та Telegram-підтвердження власника
+    /// </summary>
+    [HttpPost("forgot-password/verify")]
+    [AllowAnonymous]
+    [EnableRateLimiting("AuthRateLimit")]
+    public async Task<IActionResult> VerifyPasswordReset([FromBody] VerifyPasswordResetDto dto)
+    {
+        if (dto == null || string.IsNullOrWhiteSpace(dto.SessionToken) || string.IsNullOrWhiteSpace(dto.Code))
+        {
+            return BadRequest(new { error = "Введіть 6-значний код підтвердження" });
+        }
+
+        var session = await _context.PasswordResetSessions
+            .FirstOrDefaultAsync(s => s.SessionToken == dto.SessionToken.Trim());
+
+        if (session == null || session.IsCompleted)
+        {
+            return BadRequest(new { error = "Невірний код підтвердження або дані власника акаунта." });
+        }
+
+        if (session.IsRevoked)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = "Запит на скидання пароля заблоковано власником акаунта або через перевищення ліміту спроб.",
+                isRevoked = true
+            });
+        }
+
+        if (session.ExpiresAt < DateTime.UtcNow)
+        {
+            return BadRequest(new { error = "Термін дії коду минув (10 хв). Почніть відновлення заново." });
+        }
+
+        if (session.FailedAttempts >= 5)
+        {
+            session.IsRevoked = true;
+            await _context.SaveChangesAsync();
+            return StatusCode(StatusCodes.Status429TooManyRequests, new
+            {
+                error = "Перевищено ліміт спроб (5). Запит заблоковано з міркувань безпеки.",
+                isRevoked = true
+            });
+        }
+
+        var user = await _context.Users.FindAsync(session.UserId);
+        if (user == null || user.IsBanned)
+        {
+            return BadRequest(new { error = "Невірний код підтвердження або дані власника акаунта." });
+        }
+
+        bool otpMatches = FixedTimeHexEquals(session.OtpHash, ComputeResetHmac(session.SessionToken, dto.Code.Trim()));
+        bool phoneMatches = true;
+        if (session.RequiresPhoneCheck)
+        {
+            var userDigits = new string((user.PhoneNumber ?? string.Empty).Where(char.IsDigit).ToArray());
+            var inputDigits = new string((dto.PhoneLastDigits ?? string.Empty).Where(char.IsDigit).ToArray());
+            phoneMatches = inputDigits.Length >= 4 && userDigits.Length >= 4 &&
+                           userDigits.EndsWith(inputDigits, StringComparison.Ordinal);
+        }
+
+        if (!otpMatches || !phoneMatches)
+        {
+            session.FailedAttempts++;
+            if (session.FailedAttempts >= 5)
+            {
+                session.IsRevoked = true;
+                _context.AdminAuditLogs.Add(new AdminAuditLog
+                {
+                    AdminId = user.Id,
+                    AdminEmail = user.Email,
+                    Action = "PasswordResetLockedAttempts",
+                    TargetType = "User",
+                    TargetId = user.Id,
+                    Details = $"Сесію відновлення пароля для {user.Email} заблоковано після 5 невдалих спроб (IP: {ResolveRequestIp()}).",
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            int left = Math.Max(0, 5 - session.FailedAttempts);
+            return BadRequest(new
+            {
+                error = left == 0
+                    ? "Перевищено ліміт спроб (5). Запит заблоковано з міркувань безпеки."
+                    : $"Невірний код підтвердження або останні цифри номера телефону. Залишилось спроб: {left}.",
+                attemptsRemaining = left,
+                isRevoked = session.IsRevoked
+            });
+        }
+
+        session.IsEmailVerified = true;
+        session.IsPhoneVerified = true;
+
+        if (session.RequiresTelegramApproval && !session.IsTelegramApproved)
+        {
+            await _context.SaveChangesAsync();
+            return StatusCode(StatusCodes.Status202Accepted, new
+            {
+                verified = false,
+                telegramPending = true,
+                error = "Пошту та телефон підтверджено! Тепер натисніть «✅ Так, це я підтверджую скидання» в Telegram-боті @LoopMarket_Verify_bot."
+            });
+        }
+
+        var proofToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(24)).ToLowerInvariant();
+        session.ProofTokenHash = ComputeResetHmac(session.SessionToken, proofToken);
+        session.ExpiresAt = DateTime.UtcNow.AddMinutes(5);
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            verified = true,
+            resetProofToken = proofToken
+        });
+    }
+
+    /// <summary>
+    /// Крок 3: Встановлення нового надійного пароля та завершення всіх старих сесій
+    /// </summary>
+    [HttpPost("forgot-password/confirm")]
+    [AllowAnonymous]
+    [EnableRateLimiting("AuthRateLimit")]
+    public async Task<IActionResult> ConfirmPasswordReset([FromBody] ConfirmPasswordResetDto dto)
+    {
+        if (dto == null || string.IsNullOrWhiteSpace(dto.SessionToken) ||
+            string.IsNullOrWhiteSpace(dto.ResetProofToken) || string.IsNullOrWhiteSpace(dto.NewPassword))
+        {
+            return BadRequest(new { error = "Заповніть усі обов'язкові поля" });
+        }
+
+        var newPassword = dto.NewPassword.Trim();
+        if (newPassword.Length < 8 || newPassword.Length > 128 ||
+            !newPassword.Any(char.IsLetter) || !newPassword.Any(char.IsDigit))
+        {
+            return BadRequest(new { error = "Пароль повинен містити мінімум 8 символів, хоча б одну літеру та одну цифру." });
+        }
+
+        if (!string.IsNullOrEmpty(dto.ConfirmPassword) && dto.ConfirmPassword.Trim() != newPassword)
+        {
+            return BadRequest(new { error = "Паролі не співпадають" });
+        }
+
+        var session = await _context.PasswordResetSessions
+            .FirstOrDefaultAsync(s => s.SessionToken == dto.SessionToken.Trim());
+
+        if (session == null || session.IsCompleted || session.IsRevoked || session.ExpiresAt < DateTime.UtcNow)
+        {
+            return Unauthorized(new { error = "Сесія скидання пароля недійсна, заблокована або прострочена." });
+        }
+
+        if (!session.IsEmailVerified ||
+            (session.RequiresPhoneCheck && !session.IsPhoneVerified) ||
+            (session.RequiresTelegramApproval && !session.IsTelegramApproved) ||
+            !FixedTimeHexEquals(session.ProofTokenHash, ComputeResetHmac(session.SessionToken, dto.ResetProofToken.Trim())))
+        {
+            return Unauthorized(new { error = "Верифікація власника акаунта не завершена." });
+        }
+
+        var user = await _context.Users.FindAsync(session.UserId);
+        if (user == null || user.IsBanned)
+        {
+            return Unauthorized(new { error = "Користувача не знайдено або акаунт заблоковано." });
+        }
+
+        try
+        {
+            var sameCheck = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, newPassword);
+            if (sameCheck != PasswordVerificationResult.Failed || user.PasswordHash == newPassword)
+            {
+                return BadRequest(new { error = "Новий пароль повинен відрізнятися від старого." });
+            }
+        }
+        catch { }
+
+        user.PasswordHash = _passwordHasher.HashPassword(user, newPassword);
+        user.RefreshToken = null;
+        user.RefreshTokenExpiryTime = null;
+        user.EmailVerificationCode = null;
+        user.EmailVerificationCodeExpiresAt = null;
+        user.IsEmailVerified = true;
+
+        session.IsCompleted = true;
+        session.CompletedAt = DateTime.UtcNow;
+        session.ProofTokenHash = null;
+
+        var remainingOpen = await _context.PasswordResetSessions
+            .Where(s => s.UserId == user.Id && s.Id != session.Id && !s.IsCompleted && !s.IsRevoked)
+            .ToListAsync();
+        foreach (var open in remainingOpen)
+        {
+            open.IsRevoked = true;
+        }
+
+        var ip = ResolveRequestIp();
+        _context.Notifications.Add(new Notification
+        {
+            UserId = user.Id,
+            Title = "Пароль акаунта змінено",
+            Message = $"Пароль вашого профілю успішно оновлено ({DateTime.UtcNow:HH:mm 'UTC'}). Всі попередні сесії завершено.",
+            Link = "/profile.html"
+        });
+
+        _context.AdminAuditLogs.Add(new AdminAuditLog
+        {
+            AdminId = user.Id,
+            AdminEmail = user.Email,
+            Action = "PasswordResetCompleted",
+            TargetType = "User",
+            TargetId = user.Id,
+            Details = $"Пароль успішно скинуто та оновлено власником {user.Email} з IP {ip}.",
+            CreatedAt = DateTime.UtcNow
+        });
+
+        await _context.SaveChangesAsync();
+        ClearAuthCookies();
+
+        if (_emailService != null)
+        {
+            _ = Task.Run(async () =>
+            {
+                try { await _emailService.SendPasswordChangedAlertAsync(user.Email, user.FirstName, ip); } catch { }
+            });
+        }
+
+        if (user.TelegramChatId != 0 && _telegramService.HasBotToken)
+        {
+            _ = _telegramService.SendNotificationAsync(
+                user.TelegramChatId,
+                $"🔐 <b>Пароль вашого акаунта Loop Market успішно змінено!</b>\n🌐 IP: <code>{System.Net.WebUtility.HtmlEncode(ip)}</code>\nУсі старі сеанси входу завершено. Якщо це зробили не ви — негайно зверніться до @LoopMarketSupport.");
+        }
+
+        return Ok(new
+        {
+            success = true,
+            message = "Пароль успішно змінено! Тепер ви можете увійти з новим паролем."
+        });
+    }
 
     /// <summary>
 

@@ -272,6 +272,59 @@ public class TelegramBotService : BackgroundService
         }
     }
 
+    public Task SendPasswordResetGuardAsync(
+        long telegramChatId,
+        string sessionToken,
+        string firstName,
+        string maskedEmail,
+        string requestIp,
+        CancellationToken cancellationToken = default)
+    {
+        if (_botClient == null || telegramChatId == 0) return Task.CompletedTask;
+        return SendPasswordResetGuardWithClientAsync(_botClient, telegramChatId, sessionToken, firstName, maskedEmail, requestIp, cancellationToken);
+    }
+
+    public async Task SendPasswordResetGuardWithClientAsync(
+        ITelegramBotClient botClient,
+        long telegramChatId,
+        string sessionToken,
+        string firstName,
+        string maskedEmail,
+        string requestIp,
+        CancellationToken cancellationToken = default)
+    {
+        var safeName = System.Net.WebUtility.HtmlEncode(string.IsNullOrWhiteSpace(firstName) ? "Користувачу" : firstName);
+        var safeEmail = System.Net.WebUtility.HtmlEncode(maskedEmail);
+        var safeIp = System.Net.WebUtility.HtmlEncode(string.IsNullOrWhiteSpace(requestIp) ? "невідомо" : requestIp);
+        var timeUtc = DateTime.UtcNow.ToString("HH:mm:ss 'UTC'");
+
+        var keyboard = new InlineKeyboardMarkup(new[]
+        {
+            new[] { InlineKeyboardButton.WithCallbackData("✅ Так, це я підтверджую скидання", $"pr_ok_{sessionToken}") },
+            new[] { InlineKeyboardButton.WithCallbackData("🚨 Це НЕ я! Заблокувати зміну", $"pr_no_{sessionToken}") }
+        });
+
+        try
+        {
+            await botClient.SendMessage(
+                chatId: telegramChatId,
+                text: $"🔐 <b>ЗАПИТ НА ВІДНОВЛЕННЯ ПАРОЛЯ ({safeName})</b>\n\n" +
+                      $"Хтось ініціював скидання пароля для вашого профілю <b>{safeEmail}</b>.\n" +
+                      $"🌐 IP: <code>{safeIp}</code>\n" +
+                      $"🕒 Час: <code>{timeUtc}</code>\n\n" +
+                      "Для захисту від викрадення акаунта підтвердьте, що це дійсно ви:\n" +
+                      "• Натисніть <b>«✅ Так, це я підтверджую скидання»</b>, якщо запит ваш.\n" +
+                      "• Натисніть <b>«🚨 Це НЕ я! Заблокувати зміну»</b>, щоб негайно скасувати запит та завершити всі активні сеанси.",
+                parseMode: ParseMode.Html,
+                replyMarkup: keyboard,
+                cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Помилка відправки захисту скидання пароля в Telegram: {ex.Message}");
+        }
+    }
+
     public async Task SendNotificationAsync(long telegramChatId, string message)
     {
         if (_botClient == null) return;
@@ -332,6 +385,107 @@ public class TelegramBotService : BackgroundService
             await botClient.AnswerCallbackQuery(callback.Id, cancellationToken: cancellationToken);
         }
         catch { }
+
+        // 🔐 ПІДТВЕРДЖЕННЯ АБО БЛОКУВАННЯ СКИДАННЯ ПАРОЛЯ ВЛАСНИКОМ АКАУНТА
+        if (data.StartsWith("pr_ok_") || data.StartsWith("pr_no_"))
+        {
+            bool approve = data.StartsWith("pr_ok_");
+            var resetToken = data.Substring(6).Trim();
+
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var session = await db.PasswordResetSessions
+                .FirstOrDefaultAsync(s => s.SessionToken == resetToken, cancellationToken);
+
+            if (session == null || session.IsCompleted || session.ExpiresAt < DateTime.UtcNow)
+            {
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: "⏳ <b>Сесія відновлення пароля вже завершена або застаріла.</b>",
+                    parseMode: ParseMode.Html,
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
+            var owner = await db.Users.FindAsync(new object[] { session.UserId }, cancellationToken);
+            if (owner == null || owner.TelegramChatId == 0 || owner.TelegramChatId != chatId)
+            {
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: "⛔ <b>Доступ заборонено:</b> цей запит належить іншому власнику акаунта.",
+                    parseMode: ParseMode.Html,
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
+            if (session.IsRevoked)
+            {
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: "🛡️ Цей запит на скидання пароля вже було заблоковано раніше.",
+                    parseMode: ParseMode.Html,
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
+            if (approve)
+            {
+                session.IsTelegramApproved = true;
+                await db.SaveChangesAsync(cancellationToken);
+
+                if (callback.Message != null)
+                {
+                    try { await botClient.EditMessageReplyMarkup(chatId, callback.Message.MessageId, replyMarkup: null, cancellationToken: cancellationToken); } catch { }
+                }
+
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: "✅ <b>Власника акаунта підтверджено!</b>\n\n" +
+                          "Поверніться на сайт Loop Market, введіть код із листа та встановіть новий надійний пароль.",
+                    parseMode: ParseMode.Html,
+                    cancellationToken: cancellationToken);
+            }
+            else
+            {
+                var openSessions = await db.PasswordResetSessions
+                    .Where(s => s.UserId == owner.Id && !s.IsCompleted && !s.IsRevoked)
+                    .ToListAsync(cancellationToken);
+                foreach (var s in openSessions)
+                {
+                    s.IsRevoked = true;
+                }
+
+                owner.RefreshToken = null;
+                owner.RefreshTokenExpiryTime = null;
+
+                db.AdminAuditLogs.Add(new AdminAuditLog
+                {
+                    AdminId = owner.Id,
+                    AdminEmail = owner.Email,
+                    Action = "PasswordResetDeniedByOwner",
+                    TargetType = "User",
+                    TargetId = owner.Id,
+                    Details = $"Власник {owner.Email} заблокував запит на скидання пароля через Telegram-бота (IP запиту: {session.RequestIp ?? "невідомо"}).",
+                    CreatedAt = DateTime.UtcNow
+                });
+
+                await db.SaveChangesAsync(cancellationToken);
+
+                if (callback.Message != null)
+                {
+                    try { await botClient.EditMessageReplyMarkup(chatId, callback.Message.MessageId, replyMarkup: null, cancellationToken: cancellationToken); } catch { }
+                }
+
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: "🛡️ <b>Зміну пароля ЗАБЛОКОВАНО!</b>\n\n" +
+                          "Усі активні запити відновлення скасовано, а сеанси входу завершено.\n" +
+                          "Рекомендуємо також змінити пароль від вашої електронної пошти.",
+                    parseMode: ParseMode.Html,
+                    cancellationToken: cancellationToken);
+            }
+            return;
+        }
 
         // 🛡️ АДМІН-КОЛБЕКИ (ВИРІШЕННЯ ТІКЕТІВ ТА БАН)
         if (data.StartsWith("adm_rep_") && int.TryParse(data.Substring(8), out int repId))
