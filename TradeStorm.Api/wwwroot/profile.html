@@ -2646,7 +2646,13 @@
                                 document.getElementById('editFirstName').value = meData.firstName;
                                 document.getElementById('editLastName').value = meData.lastName || '';
                             }
-                            if (meData.phoneNumber) {
+                            const cleanMePhone = meData.phoneNumber
+                                ? ('+' + String(meData.phoneNumber).replace(/\D/g, ''))
+                                : '';
+                            if (cleanMePhone && cleanMePhone !== '+') {
+                                const pInput = document.getElementById('editPhone');
+                                if (pInput) pInput.value = cleanMePhone;
+                            } else if (meData.phoneNumber) {
                                 const pInput = document.getElementById('editPhone');
                                 if (pInput) pInput.value = meData.phoneNumber;
                             }
@@ -2655,7 +2661,7 @@
                             const secEmail = document.getElementById('secEmailText');
                             if (secEmail) secEmail.innerText = meData.email || '—';
                             const secPhone = document.getElementById('secPhoneText');
-                            if (secPhone) secPhone.innerText = meData.phoneNumber || '—';
+                            if (secPhone) secPhone.innerText = (cleanMePhone && cleanMePhone !== '+') ? cleanMePhone : (meData.phoneNumber || '—');
 
                             const brandBadge = document.getElementById('brandStatusBadge');
                             const isBrandUser = meData.isPremium && (meData.premiumPlan === 'brand_annual' || meData.premiumPlan === 'brand' || meData.premiumPlan === 'vip_lifetime');

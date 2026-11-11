@@ -145,7 +145,14 @@ public class ListingRepository : Repository<Listing>, IListingRepository
             l.categoryId,
             l.sellerId,
             l.viewsCount,
-            l.seller
+            seller = l.seller != null ? new
+            {
+                l.seller.id,
+                l.seller.firstName,
+                l.seller.lastName,
+                l.seller.avatarUrl,
+                phoneNumber = TradeStorm.Api.Services.PhoneNumberHelper.Normalize(l.seller.phoneNumber)
+            } : null
         }).ToList();
 
         return (totalCount, items);

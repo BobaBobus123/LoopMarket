@@ -134,7 +134,7 @@ public class ListingsController : ControllerBase
                 firstName = l.Seller.FirstName,
                 lastName = l.Seller.LastName,
                 avatarUrl = l.Seller.AvatarUrl,
-                phoneNumber = l.Seller.PhoneNumber
+                phoneNumber = PhoneNumberHelper.Normalize(l.Seller.PhoneNumber)
             } : null
         };
 

@@ -403,6 +403,8 @@ using (var scope = app.Services.CreateScope())
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN ActionText TEXT;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN ActionUrl TEXT;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN ImageUrl TEXT;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"CREATE INDEX IF NOT EXISTS IX_Messages_Sender_Receiver_Id ON Messages(SenderId, ReceiverId, Id);"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"CREATE INDEX IF NOT EXISTS IX_Messages_Receiver_IsRead ON Messages(ReceiverId, IsRead);"); } catch {}
         }
         catch {}
     }
@@ -429,6 +431,8 @@ using (var scope = app.Services.CreateScope())
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""ActionText"" VARCHAR(100);"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""ActionUrl"" VARCHAR(500);"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""ImageUrl"" TEXT;"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"CREATE INDEX IF NOT EXISTS ""IX_Messages_Sender_Receiver_Id"" ON ""Messages""(""SenderId"", ""ReceiverId"", ""Id"");"); } catch {}
+            try { db.Database.ExecuteSqlRaw(@"CREATE INDEX IF NOT EXISTS ""IX_Messages_Receiver_IsRead"" ON ""Messages""(""ReceiverId"", ""IsRead"");"); } catch {}
         }
         catch {}
     }

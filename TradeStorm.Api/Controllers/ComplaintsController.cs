@@ -82,7 +82,7 @@ public class ComplaintsController : ControllerBase
             query = query.Where(c => c.Status == status);
         }
 
-        var list = await query
+        var rawList = await query
             .OrderByDescending(c => c.CreatedAt)
             .Select(c => new
             {
@@ -104,6 +104,26 @@ public class ComplaintsController : ControllerBase
                 resolutionNotes = c.ResolutionNotes
             })
             .ToListAsync();
+
+        var list = rawList.Select(c => new
+        {
+            c.id,
+            c.reporterId,
+            c.reporterName,
+            c.reporterEmail,
+            c.targetUserId,
+            c.targetUserName,
+            c.targetUserEmail,
+            targetUserPhone = TradeStorm.Api.Services.PhoneNumberHelper.Normalize(c.targetUserPhone) ?? string.Empty,
+            c.isTargetUserBanned,
+            c.listingId,
+            c.listingTitle,
+            c.reason,
+            c.details,
+            c.status,
+            c.createdAt,
+            c.resolutionNotes
+        }).ToList();
 
         return Ok(list);
     }

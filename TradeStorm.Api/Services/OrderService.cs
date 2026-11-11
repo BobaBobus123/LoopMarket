@@ -322,7 +322,7 @@ public class OrderService : IOrderService
             TotalPrice = o.TotalPrice,
             Status = o.Status,
             BuyerName = o.BuyerName,
-            BuyerPhone = o.BuyerPhone,
+            BuyerPhone = PhoneNumberHelper.Normalize(o.BuyerPhone) ?? o.BuyerPhone,
             DeliveryCity = o.DeliveryCity,
             DeliveryBranch = o.DeliveryBranch,
             PaymentMethod = o.PaymentMethod,
@@ -332,7 +332,7 @@ public class OrderService : IOrderService
             BuyerId = o.BuyerId,
             SellerId = o.SellerId,
             SellerName = sellerName,
-            SellerPhone = sellerPhone,
+            SellerPhone = PhoneNumberHelper.Normalize(sellerPhone),
             IsService = isService
         };
     }

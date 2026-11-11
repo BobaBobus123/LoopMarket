@@ -1649,32 +1649,33 @@
             box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
         }
 
-        /* EMOJI QUICK ROW */
-        .emoji-quick-bar {
-            position: absolute;
-            bottom: 74px;
-            left: 20px;
+        /* PROGRESSIVE LOAD MORE BUTTON */
+        .btn-load-more-chat {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 999px;
             background: var(--surface);
-            border: 1.5px solid var(--border-color);
-            border-radius: 14px;
-            padding: 6px 10px;
-            box-shadow: var(--shadow-lg);
-            display: none;
-            gap: 8px;
-            z-index: 100;
-        }
-
-        .emoji-pill {
-            font-size: 1.3rem;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 700;
             cursor: pointer;
-            padding: 4px 6px;
-            border-radius: 8px;
-            transition: transform 0.15s;
+            transition: all 0.18s;
+            margin: 4px auto;
         }
 
-        .emoji-pill:hover {
-            transform: scale(1.25);
+        .btn-load-more-chat:hover:not(:disabled) {
+            border-color: #2563eb;
+            color: #2563eb;
             background: var(--surface-hover);
+        }
+
+        .btn-load-more-chat:disabled {
+            opacity: 0.6;
+            cursor: default;
         }
 
         /* REVIEWS MODAL */
@@ -1811,13 +1812,7 @@
                 width: auto !important;
                 z-index: 200005 !important;
             }
-            .emoji-quick-bar {
-                left: 10px !important;
-                right: 10px !important;
-                bottom: 64px !important;
-                flex-wrap: wrap !important;
-                max-width: calc(100vw - 20px) !important;
-            }
+
             .chat-stream-area {
                 padding: 12px 10px !important;
             }
@@ -2011,7 +2006,7 @@
                 </div>
 
                 <!-- Список активних діалогів -->
-                <div class="dialogs-scroll-area" id="dialogsContainer">
+                <div class="dialogs-scroll-area" id="dialogsContainer" onscroll="handleDialogsScroll()">
                     <p style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.88rem;">Завантаження діалогів...</p>
                 </div>
             </div>
@@ -2049,9 +2044,9 @@
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                             <span>Профіль</span>
                         </a>
-                        <a href="#" id="btnCallSeller" class="btn-header-action" title="Зателефонувати" style="display: none;">
+                        <a href="#" id="btnCallSeller" class="btn-header-action" onclick="return handleRevealChatPhone(event)" title="Показати номер телефону" style="display: none;">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                            <span>Дзвінок</span>
+                            <span id="btnCallSellerText">Показати номер</span>
                         </a>
                         <button type="button" class="btn-header-action" onclick="openReviewModal()" title="Оцінити роботу автора">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -2127,25 +2122,9 @@
 
                 <!-- ПАНЕЛЬ ВВЕДЕННЯ ПОВІДОМЛЕННЯ -->
                 <div class="chat-input-bar" id="inputBar" style="display: none;">
-                    <!-- Меню емодзі -->
-                    <div class="emoji-quick-bar" id="emojiQuickBar">
-                        <span class="emoji-pill" onclick="insertEmoji('👋')">👋</span>
-                        <span class="emoji-pill" onclick="insertEmoji('🤝')">🤝</span>
-                        <span class="emoji-pill" onclick="insertEmoji('👍')">👍</span>
-                        <span class="emoji-pill" onclick="insertEmoji('📦')">📦</span>
-                        <span class="emoji-pill" onclick="insertEmoji('🛠')">🛠</span>
-                        <span class="emoji-pill" onclick="insertEmoji('📍')">📍</span>
-                        <span class="emoji-pill" onclick="insertEmoji('🔥')">🔥</span>
-                        <span class="emoji-pill" onclick="insertEmoji('✅')">✅</span>
-                    </div>
-
                     <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="handlePhotoSelect(event)">
                     <button type="button" class="btn-input-tool" title="Прикріпити фото" onclick="document.getElementById('photoInput').click()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                    </button>
-
-                    <button type="button" class="btn-input-tool" title="Швидкі реакції" onclick="toggleEmojiQuickBar()">
-                        😊
                     </button>
 
                     <input type="text" class="main-msg-input" id="messageInput" placeholder="Напишіть повідомлення... (Enter для надсилання)" autocomplete="off">
@@ -2185,6 +2164,7 @@
                             <span>★ 5.0</span>
                             <span style="color: var(--text-muted); font-weight: 500;">(надійний продавець)</span>
                         </div>
+                        <div id="detailsPhoneWrap" style="width: 100%; margin-bottom: 8px; display: none;"></div>
                         <div style="display: flex; gap: 8px; width: 100%;">
                             <a href="#" id="detailsBtnProfile" class="btn btn-outline btn-sm" style="flex: 1; text-decoration: none; justify-content: center; font-size: 0.8rem; padding: 7px 10px;">
                                 👤 Профіль
@@ -2396,32 +2376,54 @@
         document.documentElement.setAttribute('data-theme', savedTheme);
         updateThemeButton(savedTheme);
 
+        // Стан прогресивного завантаження діалогів та історії
+        const DIALOGS_PAGE_SIZE = 15;
+        const MESSAGES_PAGE_SIZE = 30;
+        let dialogsLoadedCount = 0;
+        let dialogsHasMore = false;
+        let totalDialogsServerCount = 0;
+        let isLoadingDialogs = false;
+        let lastDialogsSignature = '';
+
+        let oldestLoadedMsgId = null;
+        let latestLoadedMsgId = 0;
+        let hasMoreHistory = false;
+        let isLoadingOlderHistory = false;
+        let isPollingIncremental = false;
+        let totalChatMessagesCount = 0;
+
         // SIGNALR З'ЄДНАННЯ
         let connection = null;
         try {
             connection = new signalR.HubConnectionBuilder()
-                .withUrl("/chathub")
+                .withUrl("/chathub", {
+                    accessTokenFactory: () => localStorage.getItem('loopToken') || localStorage.getItem('token') || token || ''
+                })
                 .withAutomaticReconnect()
                 .build();
 
-            connection.on("ReceiveMessage", (senderId, receiverId, text) => {
+            connection.on("ReceiveMessage", async (senderId, receiverId, text) => {
                 const sid = parseInt(senderId);
-                const rid = parseInt(receiverId);
 
-                // Якщо повідомлення відправили ми самі — воно вже додано оптимістично, уникаємо дублювання
                 if (sid === currentUserId) {
-                    loadDialogs();
+                    if (activeReceiverId === parseInt(receiverId)) {
+                        await pollNewMessagesIncremental();
+                    }
+                    loadDialogs(false, true);
                     return;
                 }
 
                 if (sid === activeReceiverId) {
-                    appendMessage(text, 'received', new Date(), false);
-                    fetch(`/api/messages/mark-read/${activeReceiverId}`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    }).catch(() => {});
+                    await pollNewMessagesIncremental();
+                    const curTok = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
+                    if (curTok) {
+                        fetch(`/api/messages/mark-read/${activeReceiverId}`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${curTok}` }
+                        }).catch(() => {});
+                    }
                 }
-                loadDialogs();
+                loadDialogs(false, true);
                 loadNotifications();
             });
 
@@ -2450,6 +2452,11 @@
 
         function showDialogsListMobile() {
             activeReceiverId = null;
+            oldestLoadedMsgId = null;
+            latestLoadedMsgId = 0;
+            hasMoreHistory = false;
+            isLoadingOlderHistory = false;
+            totalChatMessagesCount = 0;
             setChatInputVisible(false);
             const dPane = document.getElementById('detailsPane');
             const dOverlay = document.getElementById('detailsPaneOverlay');
@@ -2474,6 +2481,11 @@
             const btn = document.getElementById('btnScrollBottom');
             const badge = document.getElementById('scrollBottomUnread');
             if (!chatArea || !btn) return;
+
+            if (chatArea.scrollTop <= 60 && hasMoreHistory && !isLoadingOlderHistory && activeReceiverId) {
+                loadOlderMessages();
+            }
+
             const distFromBottom = chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight;
             if (distFromBottom > 150) {
                 btn.classList.add('visible');
@@ -2514,38 +2526,25 @@
             const sellerParam = params.get('partner') || params.get('seller') || params.get('sellerId') || params.get('userId') || params.get('user') || params.get('chat') || params.get('partnerId');
             const itemParam = params.get('item') || params.get('itemId') || params.get('listingId');
 
-            await loadDialogs();
+            await loadDialogs(false, false);
             await loadNotifications();
-            setInterval(loadNotifications, 15000);
-
-            // Фонове опитування історії активного діалогу (доставка повідомлень у реальному часі)
-            setInterval(async () => {
-                if (activeReceiverId) {
-                    try {
-                        const res = await fetch(`/api/messages/history/${activeReceiverId}`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        if (res.ok) {
-                            const history = await res.json();
-                            const currentBubbles = document.querySelectorAll('#chatArea .msg-bubble');
-                            if (history && history.length > currentBubbles.length) {
-                                const newMessages = history.slice(currentBubbles.length);
-                                newMessages.forEach(m => {
-                                    const isSent = m.senderId === currentUserId;
-                                    appendMessage(m.text, isSent ? 'sent' : 'received', m.sentAt, m.isRead, false);
-                                });
-                                updateMessageCounter(history.length);
-                                loadDialogs();
-                            }
-                        }
-                    } catch(e) {}
-                }
-            }, 2500);
-
-            // Періодичне оновлення списку діалогів
             setInterval(() => {
-                loadDialogs();
-            }, 6000);
+                if (!document.hidden) loadNotifications();
+            }, 20000);
+
+            // Інкрементальне фонове опитування лише нових повідомлень (?afterId=...)
+            setInterval(() => {
+                if (!document.hidden && activeReceiverId) {
+                    pollNewMessagesIncremental();
+                }
+            }, 4000);
+
+            // Легке оновлення верхньої частини діалогів без перевантаження сервера
+            setInterval(() => {
+                if (!document.hidden) {
+                    loadDialogs(false, true);
+                }
+            }, 12000);
 
             if (sellerParam) {
                 const targetId = parseInt(sellerParam);
@@ -2564,11 +2563,21 @@
         }
 
 
-        // ЗАВАНТАЖЕННЯ ДІАЛОГІВ
-        async function loadDialogs() {
+        // ПРОГРЕСИВНЕ ЗАВАНТАЖЕННЯ ДІАЛОГІВ
+        async function loadDialogs(append = false, silent = false) {
+            if (isLoadingDialogs) return;
+            isLoadingDialogs = true;
+            const loadMoreBtn = document.getElementById('btnLoadMoreDialogs');
+            if (loadMoreBtn && append) {
+                loadMoreBtn.disabled = true;
+                loadMoreBtn.innerText = 'Завантаження...';
+            }
+
             try {
                 const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
-                const res = await fetch('/api/messages/dialogs', {
+                const reqOffset = append ? dialogsLoadedCount : 0;
+                const reqLimit = append ? DIALOGS_PAGE_SIZE : Math.max(DIALOGS_PAGE_SIZE, dialogsLoadedCount || DIALOGS_PAGE_SIZE);
+                const res = await fetch(`/api/messages/dialogs?offset=${reqOffset}&limit=${reqLimit}`, {
                     headers: { 'Authorization': `Bearer ${curToken}` }
                 });
                 if (res.status === 401) {
@@ -2580,7 +2589,28 @@
                 }
                 if (res.ok) {
                     const data = await res.json();
-                    allDialogsCache = data || [];
+                    const totalHeader = parseInt(res.headers.get('X-Total-Count'));
+                    const hasMoreHeader = (res.headers.get('X-Has-More') || '').toLowerCase() === 'true';
+
+                    if (append) {
+                        const existingIds = new Set(allDialogsCache.map(d => parseInt(d.id)));
+                        const fresh = (data || []).filter(d => !existingIds.has(parseInt(d.id)));
+                        allDialogsCache = allDialogsCache.concat(fresh);
+                        dialogsLoadedCount = allDialogsCache.length;
+                        dialogsHasMore = hasMoreHeader;
+                    } else {
+                        const drafts = (allDialogsCache || []).filter(d => d.isDraft && !(data || []).some(s => parseInt(s.id) === parseInt(d.id)));
+                        allDialogsCache = [...drafts, ...(data || [])];
+                        dialogsLoadedCount = (data || []).length;
+                        dialogsHasMore = hasMoreHeader;
+                    }
+
+                    if (!isNaN(totalHeader)) {
+                        totalDialogsServerCount = totalHeader;
+                    } else {
+                        totalDialogsServerCount = allDialogsCache.length;
+                    }
+
                     if (activeReceiverId) {
                         const cur = allDialogsCache.find(p => parseInt(p.id) === activeReceiverId);
                         if (cur) cur.isWaiting = false;
@@ -2588,8 +2618,46 @@
                 }
             } catch(e) {
                 console.error("Error loading dialogs:", e);
+            } finally {
+                isLoadingDialogs = false;
             }
-            renderDialogs(allDialogsCache);
+
+            const sig = JSON.stringify(allDialogsCache.map(d => [d.id, d.lastMessage, d.lastMessageTime, d.unreadCount, d.isWaiting])) + '|' + activeReceiverId + '|' + dialogsHasMore;
+            if (silent && sig === lastDialogsSignature) return;
+            lastDialogsSignature = sig;
+            applyActiveDialogFilter();
+        }
+
+        function loadMoreDialogs() {
+            if (!dialogsHasMore || isLoadingDialogs) return;
+            loadDialogs(true, false);
+        }
+
+        function handleDialogsScroll() {
+            const container = document.getElementById('dialogsContainer');
+            if (!container || !dialogsHasMore || isLoadingDialogs) return;
+            if (container.scrollHeight - container.scrollTop - container.clientHeight <= 80) {
+                loadMoreDialogs();
+            }
+        }
+
+        function applyActiveDialogFilter() {
+            const q = (document.getElementById('chatSearchInput')?.value || '').toLowerCase().trim();
+            let list = allDialogsCache;
+            if (currentFilterTab === 'unread') {
+                list = list.filter(p => p.isWaiting);
+            } else if (currentFilterTab === 'services') {
+                list = list.filter(p => (p.lastMessage && p.lastMessage.toLowerCase().includes('послуг')) || p.isService);
+            } else if (currentFilterTab === 'products') {
+                list = list.filter(p => !p.isService);
+            }
+            if (q) {
+                list = list.filter(p => {
+                    const name = `${p.firstName || ''} ${p.lastName || ''}`.toLowerCase();
+                    return name.includes(q) || (p.lastMessage && p.lastMessage.toLowerCase().includes(q));
+                });
+            }
+            renderDialogs(list);
         }
 
         // РЕНДЕР АВАТАРА
@@ -2607,7 +2675,7 @@
         function renderDialogs(partners) {
             const container = document.getElementById('dialogsContainer');
             const totalPill = document.getElementById('totalDialogsCount');
-            if (totalPill) totalPill.innerText = partners.length;
+            if (totalPill) totalPill.innerText = totalDialogsServerCount || partners.length;
 
             if (!partners || !partners.length) {
                 container.innerHTML = `
@@ -2619,12 +2687,18 @@
                 return;
             }
 
+            const prevScroll = container.scrollTop;
+            const loadMoreHtml = dialogsHasMore
+                ? `<div style="padding: 10px 12px; text-align: center;"><button type="button" id="btnLoadMoreDialogs" class="btn-load-more-chat" onclick="loadMoreDialogs()">Завантажити ще діалоги</button></div>`
+                : '';
+
             container.innerHTML = partners.map(p => {
                 const isCurrent = p.id === activeReceiverId;
                 const timeStr = p.lastMessageTime ? formatTime(p.lastMessageTime) : '';
                 const fullName = `${p.firstName || 'Користувач'} ${p.lastName || ''}`.trim();
                 const showBadge = (p.isWaiting || (p.unreadCount && p.unreadCount > 0)) && !isCurrent;
                 const badgeText = (p.unreadCount && p.unreadCount > 0) ? (p.unreadCount > 99 ? '99+' : p.unreadCount) : '•';
+                const snippetRaw = (p.lastMessage && String(p.lastMessage).startsWith('data:image/')) ? '📷 Фотографія' : (p.lastMessage || 'Натисніть для листування');
                 return `
                     <div class="chat-item ${isCurrent ? 'active' : ''} ${showBadge ? 'unread' : ''}" data-user-id="${p.id}" onclick="selectDialog(${p.id})">
                         <div class="chat-avatar-box">
@@ -2637,13 +2711,14 @@
                                 <span class="chat-item-time">${timeStr}</span>
                             </div>
                             <div class="chat-item-snippet-row">
-                                <span class="chat-item-last-msg">${p.isDraft ? '<span class="new-draft-pill">Новий діалог</span>' : (p.lastMessage || 'Натисніть для листування')}</span>
+                                <span class="chat-item-last-msg">${p.isDraft ? '<span class="new-draft-pill">Новий діалог</span>' : escapeHtml(snippetRaw)}</span>
                                 ${showBadge ? `<span class="unread-msg-badge">${badgeText}</span>` : ''}
                             </div>
                         </div>
                     </div>
                 `;
-            }).join('');
+            }).join('') + loadMoreHtml;
+            container.scrollTop = prevScroll;
         }
 
         function formatTime(iso) {
@@ -2659,12 +2734,7 @@
 
         // ФІЛЬТРАЦІЯ
         function filterDialogs(query) {
-            const q = (query || '').toLowerCase().trim();
-            const filtered = allDialogsCache.filter(p => {
-                const name = `${p.firstName || ''} ${p.lastName || ''}`.toLowerCase();
-                return name.includes(q) || (p.lastMessage && p.lastMessage.toLowerCase().includes(q));
-            });
-            renderDialogs(filtered);
+            applyActiveDialogFilter();
         }
 
         function openFirstDialog() {
@@ -2679,16 +2749,7 @@
             currentFilterTab = tab;
             document.querySelectorAll('.chat-filter-tab').forEach(b => b.classList.remove('active'));
             if (btn) btn.classList.add('active');
-
-            if (tab === 'unread') {
-                renderDialogs(allDialogsCache.filter(p => p.isWaiting));
-            } else if (tab === 'services') {
-                renderDialogs(allDialogsCache.filter(p => (p.lastMessage && p.lastMessage.toLowerCase().includes('послуг')) || p.isService));
-            } else if (tab === 'products') {
-                renderDialogs(allDialogsCache.filter(p => !p.isService));
-            } else {
-                renderDialogs(allDialogsCache);
-            }
+            applyActiveDialogFilter();
         }
 
         // ГОЛОВНА ФУНКЦІЯ: ОБРАТИ ДІАЛОГ / ВІДКРИТИ ЧАТ З ПРОДАВЦЕМ
@@ -2797,14 +2858,10 @@
             document.getElementById('headerActions').style.display = 'flex';
             document.getElementById('btnSellerProfile').href = `/seller.html?id=${partnerId}`;
 
-            const phone = partnerData ? (partnerData.phoneNumber || (listingItem && listingItem.seller ? listingItem.seller.phoneNumber : null)) : null;
-            const callBtn = document.getElementById('btnCallSeller');
-            if (phone) {
-                callBtn.href = `tel:+${phone}`;
-                callBtn.style.display = 'inline-flex';
-            } else {
-                callBtn.style.display = 'none';
-            }
+            const rawPhone = partnerData ? (partnerData.phoneNumber || (listingItem && listingItem.seller ? listingItem.seller.phoneNumber : null)) : null;
+            window.activePartnerPhone = formatPhoneSinglePlus(rawPhone);
+            window.isChatPhoneRevealed = false;
+            syncChatPhoneButtons();
 
             // 4. Заповнюємо банер оголошення (якщо передано item або знайдено)
             const badge = document.getElementById('productBadge');
@@ -3039,19 +3096,80 @@
             `).join('');
         }
 
-        // ЗАВАНТАЖЕННЯ ІСТОРІЇ
+        // ПОБУДОВА HTML ОДНОГО ПОВІДОМЛЕННЯ
+        function buildMessageBubbleHtml(text, type, timeString, isRead = false, msgId = null) {
+            let contentHtml = '';
+            let isOrderCard = false;
+            const orderCardHtml = renderOrderCardInChat(text);
+            if (orderCardHtml) {
+                contentHtml = orderCardHtml;
+                isOrderCard = true;
+            } else {
+                const isSafeImage = /^data:image\/(png|jpeg|jpg|webp|gif|bmp);base64,[A-Za-z0-9+/=]+$/.test(text);
+                if (isSafeImage) {
+                    contentHtml = `<img src="${text}" class="msg-photo-thumb" onclick="openPhotoModal(this.src)">`;
+                } else {
+                    contentHtml = escapeHtml(text);
+                }
+            }
+
+            const time = new Date(timeString || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const checkIcon = isRead ?
+                `<span class="msg-status-icon read" title="Прочитано" aria-label="Прочитано">
+                    <svg width="17" height="13" viewBox="0 0 18 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1.5 7.5L5 11L12.5 3.5"/>
+                        <path d="M6.5 7.5L10 11L17.5 3.5"/>
+                    </svg>
+                </span>` :
+                `<span class="msg-status-icon sent" title="Надіслано" aria-label="Надіслано">
+                    <svg width="15" height="13" viewBox="0 0 15 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 7.5L5.5 11L13 3.5"/>
+                    </svg>
+                </span>`;
+
+            const statusHtml = (type === 'sent') ? checkIcon : '';
+            return `<div class="msg-bubble msg-${type} ${isOrderCard ? 'has-order-card' : ''}" ${msgId ? `data-msg-id="${msgId}"` : ''}><div class="msg-text">${contentHtml}</div><div class="msg-time-row"><span>${time}</span>${statusHtml}</div></div>`;
+        }
+
+        function ensureOlderMsgsBar(chatArea, show) {
+            const existing = document.getElementById('olderMsgsBar');
+            if (!show) {
+                if (existing) existing.remove();
+                return;
+            }
+            if (existing) {
+                const btn = existing.querySelector('button');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = '↑ Завантажити попередні повідомлення';
+                }
+                return;
+            }
+            const barHtml = `<div id="olderMsgsBar" style="text-align: center; padding: 6px 0;"><button type="button" class="btn-load-more-chat" onclick="loadOlderMessages()">↑ Завантажити попередні повідомлення</button></div>`;
+            chatArea.insertAdjacentHTML('afterbegin', barHtml);
+        }
+
+        // ПРОГРЕСИВНЕ ЗАВАНТАЖЕННЯ ОСТАННІХ ПОВІДОМЛЕНЬ ДІАЛОГУ
         async function loadChatHistory(partnerId, partnerName) {
             const chatArea = document.getElementById('chatArea');
             const btnScroll = document.getElementById('btnScrollBottom');
             const badgeScroll = document.getElementById('scrollBottomUnread');
+            oldestLoadedMsgId = null;
+            latestLoadedMsgId = 0;
+            hasMoreHistory = false;
+            isLoadingOlderHistory = false;
+            totalChatMessagesCount = 0;
             chatArea.innerHTML = '<div style="margin: auto; text-align: center; color: var(--text-muted); font-size: 0.88rem;">Завантаження листування...</div>';
 
             try {
                 const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
-                const res = await fetch(`/api/messages/history/${partnerId}`, {
+                const res = await fetch(`/api/messages/history/${partnerId}?limit=${MESSAGES_PAGE_SIZE}`, {
                     headers: { 'Authorization': `Bearer ${curToken}` }
                 });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
                 const history = await res.json();
+                const hasMoreHeader = (res.headers.get('X-Has-More') || '').toLowerCase() === 'true';
+                const totalHeader = parseInt(res.headers.get('X-Total-Count'));
 
                 if (!history || !history.length) {
                     chatArea.innerHTML = `
@@ -3069,6 +3187,13 @@
                 }
 
                 chatArea.innerHTML = '';
+                hasMoreHistory = hasMoreHeader;
+                oldestLoadedMsgId = history[0].id;
+                latestLoadedMsgId = history[history.length - 1].id;
+                totalChatMessagesCount = !isNaN(totalHeader) ? totalHeader : history.length;
+
+                ensureOlderMsgsBar(chatArea, hasMoreHistory);
+
                 let firstUnreadMsgId = null;
                 let unreadCount = 0;
 
@@ -3081,13 +3206,11 @@
                     }
                     appendMessage(m.text, isSent ? 'sent' : 'received', m.sentAt, m.isRead, false, m.id);
                 });
-                updateMessageCounter(history.length);
+                updateMessageCounter(totalChatMessagesCount);
 
-                // Якщо є непрочитані повідомлення від співрозмовника:
                 if (unreadCount > 0 && firstUnreadMsgId) {
                     const firstUnreadEl = chatArea.querySelector(`[data-msg-id="${firstUnreadMsgId}"]`);
                     if (firstUnreadEl) {
-                        // Відкриваємо чат саме з першого непрочитаного повідомлення
                         firstUnreadEl.scrollIntoView({ behavior: 'auto', block: 'start' });
                         setTimeout(() => {
                             const distFromBottom = chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight;
@@ -3106,11 +3229,8 @@
                         }, 50);
                     } else {
                         chatArea.scrollTop = chatArea.scrollHeight;
-                        if (btnScroll) btnScroll.classList.remove('visible');
-                        if (badgeScroll) badgeScroll.style.display = 'none';
                     }
                 } else {
-                    // Якщо всі повідомлення прочитано — ОДРАЗУ показуємо кінець чату БЕЗ прокрутки
                     chatArea.scrollTop = chatArea.scrollHeight;
                     if (btnScroll) btnScroll.classList.remove('visible');
                     if (badgeScroll) badgeScroll.style.display = 'none';
@@ -3119,6 +3239,106 @@
             } catch(e) {
                 console.error("Error loading chat history:", e);
                 chatArea.innerHTML = '<div style="margin: auto; text-align: center; color: #ef4444;">Не вдалося завантажити повідомлення</div>';
+            }
+        }
+
+        // ПІДВАНТАЖЕННЯ СТАРІШИХ ПОВІДОМЛЕНЬ ПРИ ПРОКРУТЦІ ВГОРУ
+        async function loadOlderMessages() {
+            if (!activeReceiverId || !hasMoreHistory || isLoadingOlderHistory || !oldestLoadedMsgId) return;
+            isLoadingOlderHistory = true;
+            const chatArea = document.getElementById('chatArea');
+            const bar = document.getElementById('olderMsgsBar');
+            const barBtn = bar ? bar.querySelector('button') : null;
+            if (barBtn) {
+                barBtn.disabled = true;
+                barBtn.innerText = 'Завантаження...';
+            }
+
+            try {
+                const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
+                const res = await fetch(`/api/messages/history/${activeReceiverId}?limit=${MESSAGES_PAGE_SIZE}&beforeId=${oldestLoadedMsgId}`, {
+                    headers: { 'Authorization': `Bearer ${curToken}` }
+                });
+                if (!res.ok) return;
+
+                const olderBatch = await res.json();
+                const hasMoreHeader = (res.headers.get('X-Has-More') || '').toLowerCase() === 'true';
+                hasMoreHistory = hasMoreHeader;
+
+                if (olderBatch && olderBatch.length > 0) {
+                    const prevScrollHeight = chatArea.scrollHeight;
+                    oldestLoadedMsgId = olderBatch[0].id;
+
+                    let batchHtml = '';
+                    olderBatch.forEach(m => {
+                        if (chatArea.querySelector(`[data-msg-id="${m.id}"]`)) return;
+                        const isSent = m.senderId === currentUserId;
+                        batchHtml += buildMessageBubbleHtml(m.text, isSent ? 'sent' : 'received', m.sentAt, m.isRead, m.id);
+                    });
+
+                    if (batchHtml) {
+                        const wrapper = document.createElement('div');
+                        wrapper.innerHTML = batchHtml;
+                        const frag = document.createDocumentFragment();
+                        while (wrapper.firstChild) {
+                            frag.appendChild(wrapper.firstChild);
+                        }
+                        if (bar && bar.parentElement === chatArea) {
+                            bar.after(frag);
+                        } else {
+                            chatArea.prepend(frag);
+                        }
+                        chatArea.scrollTop += (chatArea.scrollHeight - prevScrollHeight);
+                    }
+                }
+                ensureOlderMsgsBar(chatArea, hasMoreHistory);
+            } catch (e) {
+                console.error("Error loading older messages:", e);
+            } finally {
+                isLoadingOlderHistory = false;
+            }
+        }
+
+        // ІНКРЕМЕНТАЛЬНА СИНХРОНІЗАЦІЯ ЛИШЕ НОВИХ ПОВІДОМЛЕНЬ
+        async function pollNewMessagesIncremental() {
+            if (!activeReceiverId || isPollingIncremental) return;
+            isPollingIncremental = true;
+            try {
+                const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
+                const url = `/api/messages/history/${activeReceiverId}?afterId=${latestLoadedMsgId || 0}`;
+                const res = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${curToken}` }
+                });
+                if (!res.ok) return;
+                const newMessages = await res.json();
+                if (!newMessages || !newMessages.length) return;
+
+                const chatArea = document.getElementById('chatArea');
+                let appendedAny = false;
+                newMessages.forEach(m => {
+                    if (m.id > latestLoadedMsgId) latestLoadedMsgId = m.id;
+                    if (chatArea.querySelector(`[data-msg-id="${m.id}"]`)) return;
+
+                    const isSent = m.senderId === currentUserId;
+                    if (isSent) {
+                        const optimistic = Array.from(chatArea.querySelectorAll('.msg-bubble.msg-sent:not([data-msg-id])'))
+                            .find(el => el.dataset.rawText === m.text);
+                        if (optimistic) {
+                            optimistic.setAttribute('data-msg-id', m.id);
+                            return;
+                        }
+                    }
+
+                    appendMessage(m.text, isSent ? 'sent' : 'received', m.sentAt, m.isRead, true, m.id);
+                    appendedAny = true;
+                });
+
+                if (appendedAny) {
+                    loadDialogs(false, true);
+                }
+            } catch(e) {
+            } finally {
+                isPollingIncremental = false;
             }
         }
 
@@ -3328,40 +3548,15 @@
             const emptyEl = chatArea.querySelector('.chat-empty-state');
             if (emptyEl) chatArea.innerHTML = '';
 
-            let contentHtml = '';
-            let isOrderCard = false;
-            const orderCardHtml = renderOrderCardInChat(text);
-            if (orderCardHtml) {
-                contentHtml = orderCardHtml;
-                isOrderCard = true;
-            } else {
-                const isSafeImage = /^data:image\/(png|jpeg|jpg|webp|gif|bmp);base64,[A-Za-z0-9+/=]+$/.test(text);
-                if (isSafeImage) {
-                    contentHtml = `<img src="${text}" class="msg-photo-thumb" onclick="openPhotoModal(this.src)">`;
-                } else {
-                    contentHtml = escapeHtml(text);
-                }
+            if (msgId && chatArea.querySelector(`[data-msg-id="${msgId}"]`)) {
+                return null;
             }
 
-            const time = new Date(timeString || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const checkIcon = isRead ? 
-                `<span class="msg-status-icon read" title="Прочитано" aria-label="Прочитано">
-                    <svg width="17" height="13" viewBox="0 0 18 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M1.5 7.5L5 11L12.5 3.5"/>
-                        <path d="M6.5 7.5L10 11L17.5 3.5"/>
-                    </svg>
-                </span>` : 
-                `<span class="msg-status-icon sent" title="Надіслано" aria-label="Надіслано">
-                    <svg width="15" height="13" viewBox="0 0 15 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M2 7.5L5.5 11L13 3.5"/>
-                    </svg>
-                </span>`;
-
-            const statusHtml = (type === 'sent') ? checkIcon : '';
-
-            const bubbleHtml = `<div class="msg-bubble msg-${type} ${isOrderCard ? 'has-order-card' : ''}" ${msgId ? `data-msg-id="${msgId}"` : ''}><div class="msg-text">${contentHtml}</div><div class="msg-time-row"><span>${time}</span>${statusHtml}</div></div>`;
-
+            const bubbleHtml = buildMessageBubbleHtml(text, type, timeString, isRead, msgId);
             chatArea.insertAdjacentHTML('beforeend', bubbleHtml);
+            const inserted = chatArea.lastElementChild;
+            if (inserted) inserted.dataset.rawText = text;
+            if (msgId && msgId > latestLoadedMsgId) latestLoadedMsgId = msgId;
 
             if (autoUpdateCount) {
                 const distFromBottom = chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight;
@@ -3377,9 +3572,10 @@
                         badge.style.display = 'inline-flex';
                     }
                 }
-                const total = chatArea.querySelectorAll('.msg-bubble').length;
-                updateMessageCounter(total);
+                totalChatMessagesCount = Math.max(totalChatMessagesCount + 1, chatArea.querySelectorAll('.msg-bubble').length);
+                updateMessageCounter(totalChatMessagesCount);
             }
+            return inserted;
         }
 
         function escapeHtml(str) {
@@ -3387,6 +3583,64 @@
             const p = document.createElement('p');
             p.textContent = str;
             return p.innerHTML;
+        }
+
+        function formatPhoneSinglePlus(raw) {
+            if (!raw) return '';
+            const str = String(raw).trim();
+            const digits = str.replace(/\D/g, '');
+            if (digits) return '+' + digits;
+            const stripped = str.replace(/^\++/, '');
+            return stripped ? '+' + stripped : '';
+        }
+
+        function syncChatPhoneButtons() {
+            const phone = window.activePartnerPhone || '';
+            const callBtn = document.getElementById('btnCallSeller');
+            const callBtnText = document.getElementById('btnCallSellerText');
+            const detailsWrap = document.getElementById('detailsPhoneWrap');
+
+            if (!phone) {
+                if (callBtn) callBtn.style.display = 'none';
+                if (detailsWrap) {
+                    detailsWrap.style.display = 'none';
+                    detailsWrap.innerHTML = '';
+                }
+                return;
+            }
+
+            if (callBtn) {
+                callBtn.style.display = 'inline-flex';
+                if (window.isChatPhoneRevealed) {
+                    callBtn.href = 'tel:' + phone;
+                    callBtn.title = 'Зателефонувати ' + phone;
+                    if (callBtnText) callBtnText.innerText = phone;
+                } else {
+                    callBtn.href = '#';
+                    callBtn.title = 'Показати номер телефону';
+                    if (callBtnText) callBtnText.innerText = 'Показати номер';
+                }
+            }
+
+            if (detailsWrap) {
+                detailsWrap.style.display = 'block';
+                if (window.isChatPhoneRevealed) {
+                    detailsWrap.innerHTML = `<a href="tel:${escapeHtml(phone)}" class="btn btn-outline btn-sm" style="width: 100%; box-sizing: border-box; text-decoration: none; justify-content: center; font-size: 0.82rem; padding: 7px 10px; color: #10b981; border-color: rgba(16,185,129,0.45); font-weight: 800;">📞 ${escapeHtml(phone)}</a>`;
+                } else {
+                    detailsWrap.innerHTML = `<button type="button" id="detailsBtnRevealPhone" onclick="handleRevealChatPhone(event)" class="btn btn-outline btn-sm" style="width: 100%; box-sizing: border-box; justify-content: center; font-size: 0.8rem; padding: 7px 10px;">📞 Показати номер телефону</button>`;
+                }
+            }
+        }
+
+        function handleRevealChatPhone(e) {
+            if (!window.activePartnerPhone) return false;
+            if (!window.isChatPhoneRevealed) {
+                if (e && e.preventDefault) e.preventDefault();
+                window.isChatPhoneRevealed = true;
+                syncChatPhoneButtons();
+                return false;
+            }
+            return true;
         }
 
         // НАДСИЛАННЯ ПОВІДОМЛЕННЯ
@@ -3402,7 +3656,7 @@
             if (!text) return;
 
             // 1. Оптимістично додаємо в чат
-            appendMessage(text, 'sent', new Date(), false);
+            const optimisticEl = appendMessage(text, 'sent', new Date(), false);
             if (!customText && input) input.value = '';
 
             // 2. Спроба SignalR
@@ -3419,7 +3673,7 @@
             // 3. REST ендпоінт викликається ТІЛЬКИ як fallback, якщо SignalR не підключено
             if (!signalRSent) {
                 try {
-                    await fetch('/api/messages/send', {
+                    const sendRes = await fetch('/api/messages/send', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -3430,10 +3684,17 @@
                             text: text
                         })
                     });
+                    if (sendRes.ok) {
+                        const savedMsg = await sendRes.json();
+                        if (savedMsg && savedMsg.id) {
+                            if (optimisticEl) optimisticEl.setAttribute('data-msg-id', savedMsg.id);
+                            if (savedMsg.id > latestLoadedMsgId) latestLoadedMsgId = savedMsg.id;
+                        }
+                    }
                 } catch(e) {}
             }
 
-            loadDialogs();
+            loadDialogs(false, true);
         }
 
         function sendQuickText(text) {
@@ -3457,6 +3718,11 @@
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 activeReceiverId = null;
+                oldestLoadedMsgId = null;
+                latestLoadedMsgId = 0;
+                hasMoreHistory = false;
+                isLoadingOlderHistory = false;
+                totalChatMessagesCount = 0;
                 setChatInputVisible(false);
                 const dPaneDel = document.getElementById('detailsPane');
                 if (dPaneDel) dPaneDel.style.display = 'none';
@@ -3517,18 +3783,7 @@
             document.getElementById('photoModal').style.display = 'flex';
         }
 
-        // ШВИДКІ ЕМОДЗІ
-        function toggleEmojiQuickBar() {
-            const bar = document.getElementById('emojiQuickBar');
-            bar.style.display = (bar.style.display === 'flex') ? 'none' : 'flex';
-        }
 
-        function insertEmoji(em) {
-            const inp = document.getElementById('messageInput');
-            inp.value += em;
-            inp.focus();
-            document.getElementById('emojiQuickBar').style.display = 'none';
-        }
 
         // ENTER KEY
         document.getElementById('messageInput').addEventListener('keypress', function(e) {
@@ -3639,10 +3894,7 @@
                 const dd = document.getElementById('notifDropdown');
                 if (dd) dd.style.display = 'none';
             }
-            if (!e.target.closest('.emoji-quick-bar') && !e.target.closest('[onclick="toggleEmojiQuickBar()"]')) {
-                const eb = document.getElementById('emojiQuickBar');
-                if (eb) eb.style.display = 'none';
-            }
+
         };
     </script>
     <!-- Realtime In-App Push Notifications -->

@@ -1353,7 +1353,7 @@ public class UsersController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(dto.LastName)) user.LastName = dto.LastName.Trim();
 
-        if (!string.IsNullOrWhiteSpace(dto.PhoneNumber)) user.PhoneNumber = dto.PhoneNumber.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.PhoneNumber)) user.PhoneNumber = PhoneNumberHelper.Normalize(dto.PhoneNumber);
 
         
 
@@ -1617,7 +1617,7 @@ public class UsersController : ControllerBase
 
             LastName = dto.LastName?.Trim() ?? string.Empty,
 
-            PhoneNumber = cleanPhone ?? dto.PhoneNumber?.Trim(),
+            PhoneNumber = PhoneNumberHelper.Normalize(cleanPhone ?? dto.PhoneNumber),
 
             Role = role,
 
@@ -2082,7 +2082,7 @@ public class UsersController : ControllerBase
 
             bio = user.Bio,
 
-            phoneNumber = user.PhoneNumber,
+            phoneNumber = PhoneNumberHelper.Normalize(user.PhoneNumber),
 
             isPhoneVerified = user.IsPhoneVerified,
 
@@ -2377,7 +2377,7 @@ public class UsersController : ControllerBase
 
             bio = user.Bio,
 
-            phoneNumber = user.PhoneNumber,
+            phoneNumber = PhoneNumberHelper.Normalize(user.PhoneNumber),
 
             isPhoneVerified = user.IsPhoneVerified,
 
@@ -2762,7 +2762,7 @@ public class UsersController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(dto.FirstName)) user.FirstName = dto.FirstName.Trim();
         if (dto.LastName != null) user.LastName = dto.LastName.Trim();
-        if (!string.IsNullOrWhiteSpace(dto.PhoneNumber)) user.PhoneNumber = dto.PhoneNumber.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.PhoneNumber)) user.PhoneNumber = PhoneNumberHelper.Normalize(dto.PhoneNumber);
         if (dto.Bio != null) user.Bio = dto.Bio.Trim();
         if (dto.ReceiveTelegramNotifications.HasValue) user.ReceiveTelegramNotifications = dto.ReceiveTelegramNotifications.Value;
 

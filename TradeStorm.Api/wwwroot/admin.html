@@ -2117,7 +2117,7 @@
                                 <span style="color: #ef4444; font-weight: 700;">Підозрюваний:</span>
                                 <div>
                                     <b>${escapeHtml(c.targetUserName)}</b>
-                                    <span style="font-size: 0.78rem; color: var(--text-muted);"> (${escapeHtml(c.targetUserPhone || c.targetUserEmail)})</span>
+                                    <span style="font-size: 0.78rem; color: var(--text-muted);"> (${escapeHtml(formatAdminPhone(c.targetUserPhone) || c.targetUserEmail)})</span>
                                     ${c.isTargetUserBanned ? '<span class="status-badge banned" style="margin-left: 4px; padding: 1px 6px;">БАН</span>' : ''}
                                 </div>
                             </div>
@@ -2385,7 +2385,7 @@
                         </td>
                         <td><code>${escapeHtml(u.email)}</code></td>
                         <td>
-                            <b>${escapeHtml(u.phoneNumber || '—')}</b>
+                            <b>${escapeHtml(formatAdminPhone(u.phoneNumber) || '—')}</b>
                             ${u.telegramChatId && u.telegramChatId !== 0 ? `<div style="font-size: 0.72rem; color: #2563eb; font-weight: 700; margin-top: 2px;">✈️ TG: ${u.telegramChatId}</div>` : `<div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">✈️ TG: —</div>`}
                         </td>
                         <td>
@@ -2528,7 +2528,7 @@
             document.getElementById('editUserEmail').value = user.email || '';
             document.getElementById('editUserFirstName').value = user.firstName || '';
             document.getElementById('editUserLastName').value = user.lastName || '';
-            document.getElementById('editUserPhone').value = user.phoneNumber || '';
+            document.getElementById('editUserPhone').value = formatAdminPhone(user.phoneNumber) || '';
             document.getElementById('editUserTelegramChatId').value = user.telegramChatId || 0;
             document.getElementById('editUserRole').value = user.role || 'User';
             const elEmailVer = document.getElementById('editUserEmailVerified');
@@ -2792,7 +2792,7 @@
                         <td><b>${l.price} ₴</b></td>
                         <td><span class="status-badge user">${escapeHtml(l.categoryName || 'Інше')}</span></td>
                         <td><b>${escapeHtml(l.sellerName)}</b></td>
-                        <td><code style="font-size: 0.8rem;">${escapeHtml(l.sellerPhone || l.sellerEmail || '—')}</code></td>
+                        <td><code style="font-size: 0.8rem;">${escapeHtml(formatAdminPhone(l.sellerPhone) || l.sellerEmail || '—')}</code></td>
                         <td style="color: var(--text-muted); font-size: 0.82rem;">${date}</td>
                         <td>
                             ${isFeatured ? '<span class="status-badge featured">⭐ ТОП</span>' : '<span class="status-badge active">Звичайне</span>'}
@@ -2898,11 +2898,11 @@
                         <td><b>${escapeHtml(o.listingTitle)}</b></td>
                         <td>
                             <div>${escapeHtml(o.buyerName)}</div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(o.buyerPhone || '')}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(formatAdminPhone(o.buyerPhone))}</div>
                         </td>
                         <td>
                             <div>${escapeHtml(o.sellerName)}</div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(o.sellerPhone || '')}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(formatAdminPhone(o.sellerPhone))}</div>
                         </td>
                         <td><b style="color: #10b981;">${o.totalPrice} ₴</b></td>
                         <td>${tracking}</td>
@@ -3890,6 +3890,11 @@ async function loadAnnouncementsList() {
             }
         }
 
+        function formatAdminPhone(raw) {
+            if (!raw) return '';
+            const digits = String(raw).replace(/\D/g, '');
+            return digits ? ('+' + digits) : String(raw).replace(/^\++/, '+');
+        }
         function escapeHtml(str) {
             if (!str) return '';
             return String(str)

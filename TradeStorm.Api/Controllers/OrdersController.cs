@@ -146,7 +146,7 @@ public class OrdersController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AdminGetAllOrders([FromServices] AppDbContext db)
     {
-        var orders = await db.Orders
+        var rawOrders = await db.Orders
             .Include(o => o.Buyer)
             .Include(o => o.Seller)
             .Include(o => o.Listing)
@@ -169,6 +169,24 @@ public class OrdersController : ControllerBase
                 createdAt = o.CreatedAt
             })
             .ToListAsync();
+
+        var orders = rawOrders.Select(o => new
+        {
+            o.id,
+            o.listingId,
+            o.listingTitle,
+            o.listingImageUrl,
+            o.buyerId,
+            o.buyerName,
+            buyerPhone = TradeStorm.Api.Services.PhoneNumberHelper.Normalize(o.buyerPhone) ?? string.Empty,
+            o.sellerId,
+            o.sellerName,
+            sellerPhone = TradeStorm.Api.Services.PhoneNumberHelper.Normalize(o.sellerPhone) ?? string.Empty,
+            o.status,
+            o.totalPrice,
+            o.trackingNumber,
+            o.createdAt
+        }).ToList();
 
         return Ok(orders);
     }

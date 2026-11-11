@@ -6,6 +6,7 @@ using System.Security.Claims;
 using TradeStorm.Api.Data;
 using TradeStorm.Api.Hubs;
 using TradeStorm.Api.Models;
+using TradeStorm.Api.Services;
 
 namespace TradeStorm.Api.Controllers;
 
@@ -82,18 +83,81 @@ public class MessagesController : ControllerBase
         });
     }
 
-    // Отримати історію повідомлень
+    // Отримати історію повідомлень з підтримкою прогресивного завантаження
 
     [HttpGet("history/{partnerId}")]
-    public async Task<IActionResult> GetMessageHistory(int partnerId)
+    public async Task<IActionResult> GetMessageHistory(
+        int partnerId,
+        [FromQuery] int? limit = null,
+        [FromQuery] int? beforeId = null,
+        [FromQuery] int? afterId = null)
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdString, out int currentUserId)) return Unauthorized();
 
-        var messages = await _context.Messages
+        var convQuery = _context.Messages
+            .AsNoTracking()
             .Where(m => (m.SenderId == currentUserId && m.ReceiverId == partnerId) ||
-                        (m.SenderId == partnerId && m.ReceiverId == currentUserId))
+                        (m.SenderId == partnerId && m.ReceiverId == currentUserId));
+
+        if (afterId.HasValue)
+        {
+            var incremental = await convQuery
+                .Where(m => m.Id > afterId.Value)
+                .OrderBy(m => m.Id)
+                .Take(100)
+                .Select(m => new
+                {
+                    id = m.Id,
+                    senderId = m.SenderId,
+                    receiverId = m.ReceiverId,
+                    text = m.Text,
+                    sentAt = m.SentAt,
+                    isRead = m.IsRead
+                })
+                .ToListAsync();
+
+            return Ok(incremental);
+        }
+
+        if (limit.HasValue || beforeId.HasValue)
+        {
+            int pageSize = Math.Clamp(limit ?? 30, 1, 100);
+            if (!beforeId.HasValue)
+            {
+                int totalCount = await convQuery.CountAsync();
+                Response.Headers["X-Total-Count"] = totalCount.ToString();
+            }
+
+            var pageQuery = beforeId.HasValue
+                ? convQuery.Where(m => m.Id < beforeId.Value)
+                : convQuery;
+
+            var descBatch = await pageQuery
+                .OrderByDescending(m => m.Id)
+                .Take(pageSize + 1)
+                .Select(m => new
+                {
+                    id = m.Id,
+                    senderId = m.SenderId,
+                    receiverId = m.ReceiverId,
+                    text = m.Text,
+                    sentAt = m.SentAt,
+                    isRead = m.IsRead
+                })
+                .ToListAsync();
+
+            bool hasMore = descBatch.Count > pageSize;
+            if (hasMore) descBatch.RemoveAt(descBatch.Count - 1);
+            descBatch.Reverse();
+
+            Response.Headers["X-Has-More"] = hasMore.ToString().ToLowerInvariant();
+            return Ok(descBatch);
+        }
+
+        var messages = await convQuery
             .OrderBy(m => m.SentAt)
+            .ThenBy(m => m.Id)
             .Select(m => new
             {
                 id = m.Id,
@@ -105,49 +169,91 @@ public class MessagesController : ControllerBase
             })
             .ToListAsync();
 
+        Response.Headers["X-Total-Count"] = messages.Count.ToString();
+        Response.Headers["X-Has-More"] = "false";
         return Ok(messages);
     }
 
     [HttpGet("dialogs")]
-    public async Task<IActionResult> GetDialogs()
+    public async Task<IActionResult> GetDialogs([FromQuery] int offset = 0, [FromQuery] int limit = 20)
     {
         try
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(userIdClaim, out int currentUserId)) return Unauthorized();
 
-            var partnerIds = await _context.Messages
+            int safeOffset = Math.Max(0, offset);
+            int safeLimit = Math.Clamp(limit, 1, 100);
+
+            var convoQuery = _context.Messages
+                .AsNoTracking()
                 .Where(m => m.SenderId == currentUserId || m.ReceiverId == currentUserId)
-                .Select(m => m.SenderId == currentUserId ? m.ReceiverId : m.SenderId)
-                .Distinct()
+                .GroupBy(m => m.SenderId == currentUserId ? m.ReceiverId : m.SenderId)
+                .Select(g => new
+                {
+                    PartnerId = g.Key,
+                    LastMsgId = g.Max(m => m.Id)
+                })
+                .OrderByDescending(x => x.LastMsgId);
+
+            int totalCount = await convoQuery.CountAsync();
+            var pageEntries = await convoQuery
+                .Skip(safeOffset)
+                .Take(safeLimit)
                 .ToListAsync();
 
-            if (!partnerIds.Any())
+            Response.Headers["X-Total-Count"] = totalCount.ToString();
+            Response.Headers["X-Has-More"] = (safeOffset + pageEntries.Count < totalCount).ToString().ToLowerInvariant();
+
+            if (!pageEntries.Any())
             {
                 return Ok(new List<DialogDto>());
             }
 
+            var pagePartnerIds = pageEntries.Select(x => x.PartnerId).ToList();
+            var lastMsgIds = pageEntries.Select(x => x.LastMsgId).ToList();
+
+            var lastMessages = await _context.Messages
+                .AsNoTracking()
+                .Where(m => lastMsgIds.Contains(m.Id))
+                .ToDictionaryAsync(m => m.Id);
+
+            var unreadMap = await _context.Messages
+                .AsNoTracking()
+                .Where(m => m.ReceiverId == currentUserId && !m.IsRead && pagePartnerIds.Contains(m.SenderId))
+                .GroupBy(m => m.SenderId)
+                .Select(g => new { PartnerId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.PartnerId, x => x.Count);
+
             var partners = await _context.Users
-                .Where(u => partnerIds.Contains(u.Id))
+                .AsNoTracking()
+                .Where(u => pagePartnerIds.Contains(u.Id))
+                .Select(u => new
+                {
+                    u.Id,
+                    u.FirstName,
+                    u.LastName,
+                    u.AvatarUrl,
+                    u.PhoneNumber
+                })
                 .ToDictionaryAsync(u => u.Id);
 
             var dialogsList = new List<DialogDto>();
 
-            foreach (var partnerId in partnerIds)
+            foreach (var entry in pageEntries)
             {
-                if (!partners.TryGetValue(partnerId, out var partner)) continue;
+                if (!partners.TryGetValue(entry.PartnerId, out var partner)) continue;
 
-                var lastMessage = await _context.Messages
-                    .Where(m => (m.SenderId == currentUserId && m.ReceiverId == partnerId) ||
-                                (m.SenderId == partnerId && m.ReceiverId == currentUserId))
-                    .OrderByDescending(m => m.SentAt)
-                    .FirstOrDefaultAsync();
+                lastMessages.TryGetValue(entry.LastMsgId, out var lastMessage);
+                unreadMap.TryGetValue(entry.PartnerId, out int unreadCount);
 
-                var unreadCount = await _context.Messages
-                    .Where(m => m.SenderId == partnerId && m.ReceiverId == currentUserId && !m.IsRead)
-                    .CountAsync();
-
-                bool isWaiting = unreadCount > 0;
+                string snippet = "Немає повідомлень";
+                if (lastMessage != null && !string.IsNullOrEmpty(lastMessage.Text))
+                {
+                    snippet = lastMessage.Text.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase)
+                        ? "📷 Фотографія"
+                        : lastMessage.Text;
+                }
 
                 dialogsList.Add(new DialogDto
                 {
@@ -155,10 +261,10 @@ public class MessagesController : ControllerBase
                     FirstName = partner.FirstName,
                     LastName = partner.LastName,
                     AvatarUrl = partner.AvatarUrl,
-                    PhoneNumber = partner.PhoneNumber,
-                    LastMessage = lastMessage != null ? lastMessage.Text : "Немає повідомлень",
+                    PhoneNumber = PhoneNumberHelper.Normalize(partner.PhoneNumber),
+                    LastMessage = snippet,
                     LastMessageTime = lastMessage?.SentAt ?? DateTime.MinValue,
-                    IsWaiting = isWaiting,
+                    IsWaiting = unreadCount > 0,
                     UnreadCount = unreadCount
                 });
             }

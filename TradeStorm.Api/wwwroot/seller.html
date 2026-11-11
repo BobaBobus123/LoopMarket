@@ -1153,12 +1153,15 @@
                 }
 
                 // Кнопка дзвінка
-                const phone = sellerInfo ? (sellerInfo.phoneNumber || (sellerListings[0] && sellerListings[0].seller ? sellerListings[0].seller.phoneNumber : null)) : null;
+                const rawPhone = sellerInfo ? (sellerInfo.phoneNumber || (sellerListings[0] && sellerListings[0].seller ? sellerListings[0].seller.phoneNumber : null)) : null;
+                const normalizedPhone = formatPhoneSinglePlus(rawPhone);
                 const contactBtn = document.getElementById('sellerContactBtn');
                 if (contactBtn) {
-                    if (phone) {
-                        contactBtn.innerHTML = `<a href="tel:+${phone}" class="contact-btn">${ICONS.phone} Зателефонувати (+${phone})</a>`;
+                    if (normalizedPhone) {
+                        window._sellerProfilePhone = normalizedPhone;
+                        contactBtn.innerHTML = `<button type="button" id="btnRevealSellerPhone" class="contact-btn" style="cursor:pointer;" onclick="revealSellerProfilePhone(this)">${ICONS.phone} Показати номер телефону</button>`;
                     } else {
+                        window._sellerProfilePhone = '';
                         contactBtn.innerHTML = '';
                     }
                 }
@@ -1207,6 +1210,24 @@
             p.textContent = str;
             return p.innerHTML;
         }
+
+        function formatPhoneSinglePlus(raw) {
+            if (!raw) return '';
+            const str = String(raw).trim();
+            const digits = str.replace(/\D/g, '');
+            if (digits) return '+' + digits;
+            const stripped = str.replace(/^\++/, '');
+            return stripped ? '+' + stripped : '';
+        }
+        window.revealSellerProfilePhone = function(btn) {
+            const phone = window._sellerProfilePhone;
+            if (!phone || !btn) return;
+            const link = document.createElement('a');
+            link.href = 'tel:' + phone;
+            link.className = 'contact-btn';
+            link.innerHTML = `${ICONS.phone} ${escapeHtml(phone)} <span style="opacity:0.8;font-weight:600;font-size:0.82em;">(Зателефонувати)</span>`;
+            btn.replaceWith(link);
+        };
 
         
         function renderSellerReviewsData(data) {

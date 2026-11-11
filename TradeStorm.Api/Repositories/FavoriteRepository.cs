@@ -18,7 +18,7 @@ public class FavoriteRepository : Repository<Favorite>, IFavoriteRepository
 
     public async Task<IReadOnlyList<object>> GetUserFavoritesAsync(int userId)
     {
-        return await _dbSet
+        var raw = await _dbSet
             .Where(f => f.UserId == userId)
             .OrderByDescending(f => f.CreatedAt)
             .Include(f => f.Listing)
@@ -52,6 +52,32 @@ public class FavoriteRepository : Repository<Favorite>, IFavoriteRepository
                 } : null
             })
             .ToListAsync();
+
+        return raw.Select(f => (object)new
+        {
+            f.id,
+            f.title,
+            f.description,
+            f.price,
+            f.imageUrl,
+            f.condition,
+            f.location,
+            f.isShippingAvailable,
+            f.status,
+            f.createdAt,
+            f.categoryName,
+            f.categoryId,
+            f.sellerId,
+            f.favoritedAt,
+            seller = f.seller != null ? new
+            {
+                f.seller.id,
+                f.seller.firstName,
+                f.seller.lastName,
+                f.seller.avatarUrl,
+                phoneNumber = TradeStorm.Api.Services.PhoneNumberHelper.Normalize(f.seller.phoneNumber)
+            } : null
+        }).ToList();
     }
 
     public async Task<IReadOnlyList<int>> GetUserFavoriteListingIdsAsync(int userId)
