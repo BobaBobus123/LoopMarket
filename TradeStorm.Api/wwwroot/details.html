@@ -426,18 +426,29 @@
 
         .product-top-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.35fr) minmax(370px, 460px);
+            grid-template-columns: minmax(0, 1.15fr) minmax(400px, 540px);
             gap: 28px;
             align-items: start;
             width: 100%;
         }
 
+        .product-top-grid.portrait-media-grid {
+            grid-template-columns: minmax(340px, 410px) minmax(0, 1fr);
+        }
+
         .details-lower-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.35fr) minmax(370px, 460px);
+            grid-template-columns: minmax(0, 1.15fr) minmax(360px, 480px);
             gap: 28px;
-            align-items: stretch;
+            align-items: start;
             width: 100%;
+        }
+
+        .details-lower-main {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-width: 0;
         }
 
         .details-lower-side {
@@ -449,6 +460,7 @@
 
         @media (max-width: 992px) {
             .product-top-grid,
+            .product-top-grid.portrait-media-grid,
             .details-lower-grid {
                 grid-template-columns: 1fr;
                 gap: 18px;
@@ -470,10 +482,10 @@
 
         .description-block {
             margin-top: 0;
-            line-height: 1.8;
-            font-size: 1.05rem;
+            line-height: 1.7;
+            font-size: 1.02rem;
             background: var(--surface);
-            padding: 28px;
+            padding: 22px 26px;
             border-radius: 20px;
             border: 1px solid var(--border-color);
             color: var(--text-main);
@@ -486,12 +498,24 @@
             border: 1px solid var(--border-color);
         }
 
+        .image-showcase.compact-video-stage {
+            padding: 14px;
+        }
+
+        .main-stage-wrapper.is-portrait-video {
+            background: transparent;
+        }
+
+        .main-stage-wrapper.is-single-media {
+            margin-bottom: 0;
+        }
+
         .main-image {
             width: 100%;
             border-radius: 16px;
             object-fit: contain;
-            min-height: 380px;
-            max-height: 620px;
+            min-height: 300px;
+            max-height: 500px;
             height: auto;
             margin-bottom: 0;
             background: #060911;
@@ -696,17 +720,6 @@
                 color: var(--surface);
             }
 
-        .description-block {
-            margin-top: 30px;
-            line-height: 1.8;
-            font-size: 1.1rem;
-            background: var(--surface);
-            padding: 30px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-        }
-
         .safety-box {
             background: var(--trust-bg);
             border: 1px solid var(--border-color);
@@ -832,17 +845,28 @@
             }
 
             .details-lower-grid {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 16px !important;
                 order: 3 !important;
             }
 
-            .description-block {
+            .details-lower-main {
+                display: contents !important;
+            }
+
+            #productDescriptionBlock {
                 order: 1 !important;
                 width: 100% !important;
                 margin-top: 0 !important;
             }
 
-            .details-lower-side {
+            .reviews-box-modern {
                 order: 2 !important;
+            }
+
+            .safety-box {
+                order: 3 !important;
             }
 
             .header-center {
@@ -1853,11 +1877,6 @@
         }
 
     
-        /* MIN HEIGHT FOR DESCRIPTION TO PREVENT ABRUPT EMPTY GAPS */
-        #productDescriptionBlock {
-            min-height: 140px;
-        }
-
         /* 1. ХАРАКТЕРИСТИКИ ТА ПАРАМЕТРИ ОГОЛОШЕННЯ */
         .specs-details-block {
             padding: 24px 28px !important;
@@ -2287,11 +2306,11 @@
 
         <div class="product-layout" id="productContent" style="display: none;">
             <!-- ВЕРХНЯ СИМЕТРИЧНА СІТКА 2-Х КОЛОНОК (ГАЛЕРЕЯ ТА КАРТКА ПОКУПКИ/ПРОДАВЦЯ) -->
-            <div class="product-top-grid">
+            <div class="product-top-grid" id="productTopGrid">
                 <div class="gallery-column">
                     <div class="image-showcase">
                         <div class="main-stage-wrapper" id="mainStageWrapper">
-                            <div id="mainVideoWrap" style="display: none; width: 100%; border-radius: 18px; overflow: hidden; background: #000; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.15);"></div>
+                            <div id="mainVideoWrap" style="display: none; width: 100%; border-radius: 16px; overflow: hidden; background: transparent; position: relative;"></div>
                             <img id="mainImage" src="" class="main-image" onerror="this.onerror=null; this.src='/images/placeholder.svg';" onclick="openLightboxZoom()" title="Натисніть для наближення">
                             
                             <!-- Навігаційні стрілки скролу фото/відео -->
@@ -2368,9 +2387,16 @@
 
             <!-- ОПИС ТОВАРУ ТА ВІДГУКИ НА ВСЮ ШИРИНУ ЕКРАНА -->
             <div class="details-lower-grid">
-                <div class="description-block" id="productDescriptionBlock" style="height: 100%; box-sizing: border-box;">
-                    <h3 style="margin-bottom: 15px; font-size: 1.5rem;" id="descTitle">Опис товару</h3>
-                    <p id="itemDesc" style="white-space: pre-wrap;"></p>
+                <div class="details-lower-main">
+                    <div class="description-block" id="productDescriptionBlock">
+                        <h3 style="margin-bottom: 12px; font-size: 1.35rem;" id="descTitle">Опис товару</h3>
+                        <p id="itemDesc" style="white-space: pre-wrap; margin: 0;"></p>
+                    </div>
+
+                    <div class="safety-box" style="margin-top: 0;">
+                        <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Правила безпеки</h4>
+                        Ніколи не переказуйте гроші наперед. Користуйтеся післяплатою або зустрічайтеся особисто.
+                    </div>
                 </div>
 
                 <div class="details-lower-side">
@@ -2388,11 +2414,6 @@
                         <div id="sellerReviewsList" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; padding-right: 4px;">
                             <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 10px;">Завантаження відгуків...</p>
                         </div>
-                    </div>
-
-                    <div class="safety-box" style="margin-top: 0;">
-                        <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Правила безпеки</h4>
-                        Ніколи не переказуйте гроші наперед. Користуйтеся післяплатою або зустрічайтеся особисто.
                     </div>
                 </div>
             </div>
@@ -3545,6 +3566,16 @@
                     currentListingMediaList.push({ type: 'image', url: fallbackPlaceholder });
                 }
 
+                const topGridEl = document.getElementById('productTopGrid');
+                const showcaseEl = document.querySelector('.image-showcase');
+                const stageEl = document.getElementById('mainStageWrapper');
+                const hasOnlyPortraitEmbed = currentListingMediaList.length === 1
+                    && currentListingMediaList[0].type === 'video'
+                    && (currentListingMediaList[0].parsedType === 'instagram' || currentListingMediaList[0].parsedType === 'tiktok');
+                if (topGridEl) topGridEl.classList.toggle('portrait-media-grid', hasOnlyPortraitEmbed);
+                if (showcaseEl) showcaseEl.classList.toggle('compact-video-stage', hasOnlyPortraitEmbed);
+                if (stageEl) stageEl.classList.toggle('is-single-media', currentListingMediaList.length <= 1);
+
                 function showMediaSlide(index) {
                     if (!currentListingMediaList.length) return;
                     if (index < 0) index = currentListingMediaList.length - 1;
@@ -3554,6 +3585,7 @@
                     const media = currentListingMediaList[index];
                     const mainImageEl = document.getElementById('mainImage');
                     const videoWrapEl = document.getElementById('mainVideoWrap');
+                    const mainStageEl = document.getElementById('mainStageWrapper');
                     const counterBadge = document.getElementById('galleryCounterBadge');
                     const zoomBadge = document.getElementById('galleryZoomBadge');
                     const prevBtn = document.getElementById('galleryPrevBtn');
@@ -3573,6 +3605,7 @@
                     }
 
                     if (media.type === 'image') {
+                        if (mainStageEl) mainStageEl.classList.remove('is-portrait-video');
                         if (videoWrapEl) {
                             videoWrapEl.style.display = 'none';
                             videoWrapEl.innerHTML = '';
@@ -3583,30 +3616,43 @@
                         }
                         if (zoomBadge) zoomBadge.style.display = 'inline-flex';
                     } else if (media.type === 'video') {
+                        const isPortraitEmbed = (media.parsedType === 'instagram' || media.parsedType === 'tiktok');
+                        if (mainStageEl) mainStageEl.classList.toggle('is-portrait-video', isPortraitEmbed);
                         if (mainImageEl) mainImageEl.style.display = 'none';
                         if (zoomBadge) zoomBadge.style.display = 'none';
                         if (videoWrapEl) {
                             videoWrapEl.style.display = 'flex';
                             videoWrapEl.style.justifyContent = 'center';
                             videoWrapEl.style.alignItems = 'center';
-                            videoWrapEl.style.background = '#000';
-                            videoWrapEl.style.minHeight = '420px';
-                            if (media.parsedType === 'instagram' || media.parsedType === 'tiktok') {
+                            videoWrapEl.style.background = 'transparent';
+                            videoWrapEl.style.minHeight = '0';
+                            if (isPortraitEmbed) {
                                 videoWrapEl.innerHTML = `
-                                    <div style="width: 100%; display: flex; justify-content: center; align-items: center; padding: 10px 0; background: #000; overflow: hidden; border-radius: 16px;">
-                                        <iframe src="${media.embedUrl}" style="width: 100%; max-width: 440px; height: 560px; border: none; border-radius: 14px; margin: 0 auto; display: block; box-shadow: 0 4px 24px rgba(0,0,0,0.4);" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" scrolling="no" frameborder="0" allowfullscreen></iframe>
+                                    <div style="width: 100%; max-width: 360px; margin: 0 auto; border-radius: 16px; overflow: hidden; background: transparent;">
+                                        <iframe src="${media.embedUrl}" style="width: 100%; height: min(490px, 72vh); border: none; border-radius: 16px; display: block;" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" scrolling="no" frameborder="0" allowfullscreen></iframe>
                                     </div>
                                 `;
                             } else if (media.parsedType === 'youtube' || media.parsedType === 'vimeo') {
                                 videoWrapEl.innerHTML = `
-                                    <div style="width: 100%; aspect-ratio: 16/9; max-height: 560px; background: #000; border-radius: 16px; overflow: hidden;">
+                                    <div style="width: 100%; aspect-ratio: 16/9; max-height: 490px; background: #000; border-radius: 16px; overflow: hidden;">
                                         <iframe src="${media.embedUrl}" style="width: 100%; height: 100%; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                                     </div>
                                 `;
                             } else {
                                 videoWrapEl.innerHTML = `
-                                    <video src="${media.url}" controls playsinline autoplay preload="metadata" style="width: 100%; max-height: 560px; object-fit: contain; background: #000; border-radius: 16px; display: block; margin: 0 auto;"></video>
+                                    <video src="${media.url}" controls playsinline autoplay preload="metadata" style="width: auto; max-width: 100%; max-height: 490px; background: #000; border-radius: 16px; display: block; margin: 0 auto;"></video>
                                 `;
+                                const vEl = videoWrapEl.querySelector('video');
+                                if (vEl) {
+                                    vEl.addEventListener('loadedmetadata', () => {
+                                        const isPortrait = vEl.videoHeight > vEl.videoWidth;
+                                        if (mainStageEl) mainStageEl.classList.toggle('is-portrait-video', isPortrait);
+                                        if (isPortrait && currentListingMediaList.length === 1) {
+                                            if (topGridEl) topGridEl.classList.add('portrait-media-grid');
+                                            if (showcaseEl) showcaseEl.classList.add('compact-video-stage');
+                                        }
+                                    }, { once: true });
+                                }
                             }
                         }
                     }
@@ -3635,6 +3681,7 @@
 
                 // Відмальовка мініатюр
                 if (thumbContainer && currentListingMediaList.length > 1) {
+                    thumbContainer.style.display = 'flex';
                     thumbContainer.innerHTML = '';
                     currentListingMediaList.forEach((media, idx) => {
                         if (media.type === 'image') {
@@ -3659,6 +3706,7 @@
                     });
                 } else if (thumbContainer) {
                     thumbContainer.innerHTML = '';
+                    thumbContainer.style.display = 'none';
                 }
 
                 // Ініціалізація першого слайда
