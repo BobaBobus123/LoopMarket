@@ -1850,7 +1850,7 @@
 
                 const data = await res.json();
 
-                if (res.ok) {
+                if (res.ok && data.emailSent !== false) {
 
                     startResendCountdown(60);
 
@@ -1858,7 +1858,7 @@
 
                     if (errDiv) {
 
-                        errDiv.innerText = data.error || 'Не вдалося надіслати код повторно';
+                        errDiv.innerText = data.message || data.error || 'Не вдалося надіслати код на пошту. Скористайтеся підтвердженням через Telegram!';
 
                         errDiv.style.display = 'block';
 
@@ -2194,6 +2194,13 @@
 
                 if (res.ok) {
                     showEmailVerificationScreen(data.id, email, data.verificationTicket || "", firstName);
+                    if (data.emailSent === false) {
+                        const errEmail = document.getElementById('regEmailVerifyError');
+                        if (errEmail) {
+                            errEmail.innerText = "Поштовий сервер тимчасово недоступний — підтвердіть реєстрацію миттєво через Telegram-бота нижче!";
+                            errEmail.style.display = 'block';
+                        }
+                    }
 
                 } else {
 

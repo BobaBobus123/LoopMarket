@@ -341,28 +341,19 @@ public class UsersController : ControllerBase
 
 
 
-        // Відправляємо код на вказану пошту
+        // Відправляємо код на вказану пошту (з чесним статусом доставки)
 
+        bool emailSent = true;
         if (_emailService != null && !isTestAccount)
-
         {
-
-            _ = Task.Run(async () =>
-
+            try
             {
-
-                try
-
-                {
-
-                    await _emailService.SendVerificationCodeAsync(user.Email, user.FirstName, code);
-
-                }
-
-                catch { }
-
-            });
-
+                emailSent = await _emailService.SendVerificationCodeAsync(user.Email, user.FirstName, code);
+            }
+            catch
+            {
+                emailSent = false;
+            }
         }
 
 
@@ -401,6 +392,8 @@ public class UsersController : ControllerBase
             isPhoneVerified = isTestAccount,
 
             isEmailVerified = isTestAccount,
+
+            emailSent = emailSent,
 
             verificationTicket = ticket,
 
@@ -1163,31 +1156,27 @@ public class UsersController : ControllerBase
 
 
 
+        bool emailSent = true;
         if (_emailService != null)
-
         {
-
-            _ = Task.Run(async () =>
-
+            try
             {
-
-                try
-
-                {
-
-                    await _emailService.SendVerificationCodeAsync(user.Email, user.FirstName, code);
-
-                }
-
-                catch { }
-
-            });
-
+                emailSent = await _emailService.SendVerificationCodeAsync(user.Email, user.FirstName, code);
+            }
+            catch
+            {
+                emailSent = false;
+            }
         }
 
-
-
-        return Ok(new { success = true, message = "Новий код надіслано на вашу пошту!" });
+        return Ok(new
+        {
+            success = emailSent,
+            emailSent = emailSent,
+            message = emailSent
+                ? "Новий код надіслано на вашу пошту!"
+                : "Не вдалося надіслати лист на пошту. Підтвердьте акаунт миттєво через Telegram-бота!"
+        });
 
     }
 

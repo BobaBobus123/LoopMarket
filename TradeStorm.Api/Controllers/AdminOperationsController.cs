@@ -24,19 +24,22 @@ public class AdminOperationsController : ControllerBase
     private readonly IHubContext<ChatHub> _hubContext;
     private readonly IMemoryCache? _cache;
     private readonly IBackgroundTaskQueue? _taskQueue;
+    private readonly IEmailService? _emailService;
 
     public AdminOperationsController(
         AppDbContext context,
         TelegramBotService telegramService,
         IHubContext<ChatHub> hubContext,
         IMemoryCache? cache = null,
-        IBackgroundTaskQueue? taskQueue = null)
+        IBackgroundTaskQueue? taskQueue = null,
+        IEmailService? emailService = null)
     {
         _context = context;
         _telegramService = telegramService;
         _hubContext = hubContext;
         _cache = cache;
         _taskQueue = taskQueue;
+        _emailService = emailService;
     }
 
     private static void InvalidateAnnouncementCache()
@@ -915,4 +918,112 @@ public class AdminOperationsController : ControllerBase
         var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
         return File(bytes, "text/csv; charset=utf-8", $"loopmarket_tickets_{DateTime.UtcNow:yyyyMMdd}.csv");
     }
+
+    [HttpGet("email-status")]
+    [AllowAnonymous]
+    public IActionResult GetEmailDiagnostics([FromQuery] string? token = null)
+    {
+        if (!IsAdminAuthenticated(token)) return Unauthorized(new { error = "Необхідні права адміністратора" });
+
+        if (_emailService is EmailService concrete)
+        {
+            var diag = concrete.GetDiagnostics();
+            return Ok(new
+            {
+                diagnostics = diag,
+                recommendedFreeRenderProviders = new[]
+                {
+                    "GMAIL_WEBHOOK_URL (Google Apps Script надсилає напряму з Gmail по HTTPS 443)",
+                    "BREVO_API_KEY (300 безкоштовних листів/день з адреси Gmail по HTTPS 443)",
+                    "RESEND_API_KEY (HTTPS 443)",
+                    "GMAIL_REFRESH_TOKEN + GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET (Gmail REST API HTTPS 443)"
+                }
+            });
+        }
+
+        return Ok(new { message = "Використовується тестовий поштовий провайдер", hasService = _emailService != null });
+    }
+
+    [HttpPost("email-test")]
+    public async Task<IActionResult> SendDiagnosticTestEmail([FromBody] DiagnosticEmailDto? dto)
+    {
+        var targetEmail = !string.IsNullOrWhiteSpace(dto?.ToEmail) ? dto!.ToEmail!.Trim() : GetAdminEmail();
+        if (string.IsNullOrWhiteSpace(targetEmail) || !targetEmail.Contains('@'))
+        {
+            return BadRequest(new { error = "Вкажіть коректну email-адресу для тесту." });
+        }
+
+        if (_emailService is EmailService concrete)
+        {
+            var ok = await concrete.SendDiagnosticTestAsync(targetEmail);
+            return Ok(new
+            {
+                sent = ok,
+                targetEmail,
+                diagnostics = concrete.GetDiagnostics()
+            });
+        }
+
+        if (_emailService != null)
+        {
+            var ok = await _emailService.SendVerificationCodeAsync(targetEmail, "Admin", "123456");
+            return Ok(new { sent = ok, targetEmail });
+        }
+
+        return StatusCode(503, new { error = "Поштовий сервіс не підключено" });
+    }
+
+    [HttpGet("telegram-admins")]
+    public async Task<IActionResult> GetTelegramAdmins()
+    {
+        var admins = await _context.Users
+            .AsNoTracking()
+            .Where(u => u.Role == UserRoles.Admin)
+            .OrderBy(u => u.Id)
+            .Select(u => new
+            {
+                u.Id,
+                u.FirstName,
+                u.LastName,
+                u.Email,
+                u.PhoneNumber,
+                u.TelegramChatId,
+                u.IsEmailVerified,
+                u.IsPhoneVerified
+            })
+            .ToListAsync();
+
+        return Ok(new
+        {
+            masterSupportUsername = "@LoopMarketSupport",
+            masterSupportChatId = TelegramBotService.MasterSupportChatId,
+            adminUsers = admins
+        });
+    }
+
+    [HttpPost("users/{id}/unlink-telegram")]
+    public async Task<IActionResult> UnlinkUserTelegram(int id)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return NotFound(new { error = "Користувача не знайдено" });
+
+        var oldChatId = user.TelegramChatId;
+        user.TelegramChatId = 0;
+        await _context.SaveChangesAsync();
+
+        await LogAuditAsync("UnlinkTelegram", "User", id, $"Відв'язано TelegramChatId ({oldChatId}) від користувача {user.Email}");
+
+        return Ok(new
+        {
+            success = true,
+            userId = user.Id,
+            oldChatId,
+            message = $"Telegram відв'язано від акаунта #{user.Id} ({user.Email})."
+        });
+    }
+}
+
+public class DiagnosticEmailDto
+{
+    public string? ToEmail { get; set; }
 }

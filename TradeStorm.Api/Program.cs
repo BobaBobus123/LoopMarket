@@ -149,7 +149,8 @@ builder.Services.AddHostedService<QueuedHostedService>();
 // Зовнішня автентифікація OAuth 2.0 (Етап 7)
 builder.Services.AddScoped<IExternalAuthService, ExternalAuthService>();
 builder.Services.AddSingleton<ICaptchaService, CaptchaService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddHttpClient("EmailApiClient", client => { client.Timeout = TimeSpan.FromSeconds(10); });
+builder.Services.AddSingleton<IEmailService, EmailService>();
 
 // Стандартний ASP.NET Core Health Check (Етап 1)
 builder.Services.AddHealthChecks()

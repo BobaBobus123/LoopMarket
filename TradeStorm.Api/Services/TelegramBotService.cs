@@ -29,6 +29,7 @@ public class TelegramBotService : BackgroundService
     public static readonly System.Collections.Concurrent.ConcurrentDictionary<long, bool> UserSupportState = new();
     public static readonly System.Collections.Concurrent.ConcurrentDictionary<long, bool> AdminBroadcastState = new();
     public static readonly System.Collections.Concurrent.ConcurrentDictionary<long, int> AdminReplyingToTicketState = new();
+    public static readonly System.Collections.Concurrent.ConcurrentDictionary<long, bool> AdminUserModeChats = new();
 
     private readonly TelegramBotClient? _botClient;
     private readonly IServiceScopeFactory _scopeFactory;
@@ -487,7 +488,99 @@ public class TelegramBotService : BackgroundService
             return;
         }
 
-        // 🛡️ АДМІН-КОЛБЕКИ (ВИРІШЕННЯ ТІКЕТІВ ТА БАН)
+        // 🛡️ АДМІН-КОЛБЕКИ (ВИРІШЕННЯ ТІКЕТІВ, РОЗМЕЖУВАННЯ АДМІНІВ ТА БАН)
+        if (data.StartsWith("adm_", StringComparison.Ordinal))
+        {
+            using var adminCheckScope = _scopeFactory.CreateScope();
+            var adminCheckDb = adminCheckScope.ServiceProvider.GetRequiredService<AppDbContext>();
+            bool hasAdminAccess = await IsAdminAuthorizedAsync(
+                adminCheckDb,
+                chatId,
+                callback.Message?.Chat.Username,
+                callback.From?.Username,
+                cancellationToken);
+
+            if (!hasAdminAccess)
+            {
+                try { await botClient.AnswerCallbackQuery(callback.Id, "⛔ Доступ заборонено: потрібні права адміністратора.", showAlert: true, cancellationToken: cancellationToken); } catch { }
+                return;
+            }
+        }
+
+        if (data == "adm_mode_user")
+        {
+            AdminUserModeChats[chatId] = true;
+            AdminBroadcastState.TryRemove(chatId, out _);
+            AdminReplyingToTicketState.TryRemove(chatId, out _);
+
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.TelegramChatId == chatId, cancellationToken);
+            bool isV = user != null && user.IsPhoneVerified;
+
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: "👤 <b>Увімкнено режим звичайного користувача!</b>\n\n" +
+                      "Тепер цей Telegram-чат працює як клієнтський акаунт (можна тестувати замовлення, прив'язку номера та меню покупця).\n\n" +
+                      "Щоб миттєво повернути панель адміністратора, надішліть <code>/admin</code>.",
+                parseMode: ParseMode.Html,
+                replyMarkup: GetUserKeyboard(isV, user?.ReceiveTelegramNotifications ?? true),
+                cancellationToken: cancellationToken);
+            return;
+        }
+
+        if (data == "adm_admins")
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            await SendBotAdminsOverviewAsync(botClient, chatId, db, callback.Message?.Chat.Username ?? callback.From?.Username, cancellationToken);
+            return;
+        }
+
+        if (data.StartsWith("adm_unlink_tg_") && int.TryParse(data.Substring(14), out int unlinkUserId))
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var targetAdmin = await db.Users.FindAsync(new object[] { unlinkUserId }, cancellationToken);
+            if (targetAdmin == null)
+            {
+                await botClient.SendMessage(chatId: chatId, text: "⚠️ Акаунт не знайдено.", cancellationToken: cancellationToken);
+                return;
+            }
+
+            long detachedChatId = targetAdmin.TelegramChatId;
+            targetAdmin.TelegramChatId = 0;
+            db.AdminAuditLogs.Add(new AdminAuditLog
+            {
+                AdminId = targetAdmin.Id,
+                AdminEmail = targetAdmin.Email,
+                Action = "TelegramAdminUnlinked",
+                TargetType = "User",
+                TargetId = targetAdmin.Id,
+                Details = $"Відв'язано TelegramChatId {detachedChatId} від адмін-акаунта #{targetAdmin.Id} ({targetAdmin.Email}) через бот.",
+                CreatedAt = DateTime.UtcNow
+            });
+            await db.SaveChangesAsync(cancellationToken);
+
+            if (detachedChatId != 0 && detachedChatId != MasterSupportChatId)
+            {
+                AdminUserModeChats.TryRemove(detachedChatId, out _);
+                try
+                {
+                    await botClient.SendMessage(
+                        chatId: detachedChatId,
+                        text: "🔌 <b>Цей Telegram-чат відв'язано від адмін-профілю сайту.</b>\n\nТепер ви можете користуватися ботом як звичайний користувач.",
+                        parseMode: ParseMode.Html,
+                        replyMarkup: GetUserKeyboard(false),
+                        cancellationToken: cancellationToken);
+                }
+                catch { }
+            }
+
+            await SendBotAdminsOverviewAsync(botClient, chatId, db, callback.Message?.Chat.Username ?? callback.From?.Username, cancellationToken);
+            return;
+        }
+
         if (data.StartsWith("adm_rep_") && int.TryParse(data.Substring(8), out int repId))
         {
             AdminReplyingToTicketState[chatId] = repId;
@@ -791,17 +884,20 @@ public class TelegramBotService : BackgroundService
             return;
         }
 
-        // Перевіряємо, чи є користувач адміністратором
+        // Перевіряємо, чи є користувач адміністратором (і чи не перемкнувся він тимчасово в режим клієнта)
         using (var authScope = _scopeFactory.CreateScope())
         {
             var authDb = authScope.ServiceProvider.GetRequiredService<AppDbContext>();
             var authUser = await authDb.Users.FirstOrDefaultAsync(u => u.TelegramChatId == chatId, cancellationToken);
-            bool isAdminChat = (message.Chat.Username?.Equals("LoopMarketSupport", StringComparison.OrdinalIgnoreCase) == true)
-                               || (MasterSupportChatId != 0 && MasterSupportChatId == chatId)
-                               || (authUser != null && authUser.Role == UserRoles.Admin);
+            bool isAdminChat = IsAdminChatMatch(chatId, message.Chat.Username, message.From?.Username, authUser);
 
-            // Якщо пише адміністратор — обслуговуємо виключно його адмін-функціями (без клієнтських меню)
-            if (isAdminChat)
+            if (isAdminChat && (lowerText == "/admin" || rawText.Equals("🛡️ Адмін-панель", StringComparison.OrdinalIgnoreCase)))
+            {
+                AdminUserModeChats.TryRemove(chatId, out _);
+            }
+
+            // Якщо пише адміністратор і не увімкнено тестовий режим клієнта — обслуговуємо адмін-кокпітом
+            if (isAdminChat && !AdminUserModeChats.ContainsKey(chatId))
             {
                 await HandleAdminMessageAsync(botClient, message, rawText, lowerText, chatId, authDb, authUser, cancellationToken);
                 return;
@@ -2136,6 +2232,32 @@ public class TelegramBotService : BackgroundService
             return;
         }
 
+        // 7.3 👤 Тимчасове перемикання адміна в режим клієнта
+        if (lowerText == "/user" || lowerText == "/usermode" || lowerText.Contains("режим користувача"))
+        {
+            AdminUserModeChats[chatId] = true;
+            AdminBroadcastState.TryRemove(chatId, out _);
+            AdminReplyingToTicketState.TryRemove(chatId, out _);
+
+            bool isV = adminUser != null && adminUser.IsPhoneVerified;
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: "👤 <b>Увімкнено режим звичайного користувача!</b>\n\n" +
+                      "Тепер ви можете користуватися ботом та перевіряти прив'язку як клієнт.\n" +
+                      "Щоб знову відкрити адмін-панель, надішліть команду <code>/admin</code>.",
+                parseMode: ParseMode.Html,
+                replyMarkup: GetUserKeyboard(isV, adminUser?.ReceiveTelegramNotifications ?? true),
+                cancellationToken: cancellationToken);
+            return;
+        }
+
+        // 7.5 🔐 Управління адмінами та пояснення прив'язок Telegram
+        if (lowerText == "/admins" || lowerText.Contains("адміни бота") || lowerText.Contains("адміни"))
+        {
+            await SendBotAdminsOverviewAsync(botClient, chatId, db, message.Chat.Username ?? message.From?.Username, cancellationToken);
+            return;
+        }
+
         // 8. 🌐 Відкрити веб-адмінку
         if (lowerText.Contains("адмін") || lowerText.Contains("панель") || lowerText == "/admin")
         {
@@ -2216,13 +2338,97 @@ public class TelegramBotService : BackgroundService
         }
     }
 
+    private static bool IsAdminChatMatch(long chatId, string? chatUsername, string? fromUsername, TradeStorm.Api.Models.User? authUser)
+    {
+        return string.Equals(chatUsername, "LoopMarketSupport", StringComparison.OrdinalIgnoreCase)
+               || string.Equals(fromUsername, "LoopMarketSupport", StringComparison.OrdinalIgnoreCase)
+               || (MasterSupportChatId != 0 && MasterSupportChatId == chatId)
+               || (authUser != null && authUser.Role == UserRoles.Admin);
+    }
+
+    private static async Task<bool> IsAdminAuthorizedAsync(
+        AppDbContext db, long chatId, string? chatUsername, string? fromUsername, CancellationToken ct)
+    {
+        if (string.Equals(chatUsername, "LoopMarketSupport", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(fromUsername, "LoopMarketSupport", StringComparison.OrdinalIgnoreCase) ||
+            (MasterSupportChatId != 0 && MasterSupportChatId == chatId))
+        {
+            return true;
+        }
+
+        return await db.Users.AsNoTracking()
+            .AnyAsync(u => u.TelegramChatId == chatId && u.Role == UserRoles.Admin, ct);
+    }
+
+    private static async Task SendBotAdminsOverviewAsync(
+        ITelegramBotClient botClient,
+        long chatId,
+        AppDbContext db,
+        string? currentUsername,
+        CancellationToken ct)
+    {
+        var adminUsers = await db.Users
+            .AsNoTracking()
+            .Where(u => u.Role == UserRoles.Admin)
+            .OrderBy(u => u.Id)
+            .ToListAsync(ct);
+
+        bool bySupportUsername = string.Equals(currentUsername, "LoopMarketSupport", StringComparison.OrdinalIgnoreCase) ||
+                                 (MasterSupportChatId != 0 && MasterSupportChatId == chatId);
+        var linkedToCurrentChat = adminUsers.FirstOrDefault(u => u.TelegramChatId == chatId);
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("🔐 <b>АДМІНІСТРАТОРИ В TELEGRAM-БОТІ</b>");
+        sb.AppendLine("━━━━━━━━━━━━━━━━━━");
+        sb.AppendLine($"🆔 Ваш поточний Chat ID: <code>{chatId}</code>");
+        if (bySupportUsername)
+            sb.AppendLine("• Доступ через офіційний нік <b>@LoopMarketSupport</b> (працює незалежно від номера телефону).");
+        if (linkedToCurrentChat != null)
+            sb.AppendLine($"• Прив'язаний до адмін-акаунта сайту <b>#{linkedToCurrentChat.Id} ({System.Net.WebUtility.HtmlEncode(linkedToCurrentChat.Email)})</b>.");
+
+        sb.AppendLine();
+        sb.AppendLine($"👑 <b>Адміни на сайті (Role = Admin): {adminUsers.Count}</b>");
+        var actionRows = new List<InlineKeyboardButton[]>();
+
+        foreach (var adm in adminUsers)
+        {
+            var tgState = adm.TelegramChatId != 0 ? $"Chat ID <code>{adm.TelegramChatId}</code>" : "не прив'язано";
+            sb.AppendLine($"• <b>#{adm.Id}</b> {System.Net.WebUtility.HtmlEncode(adm.FirstName)} ({System.Net.WebUtility.HtmlEncode(adm.Email)})");
+            sb.AppendLine($"  📱 <code>{adm.PhoneNumber ?? "немає"}</code> | TG: {tgState}");
+
+            if (adm.TelegramChatId != 0)
+            {
+                actionRows.Add(new[]
+                {
+                    InlineKeyboardButton.WithCallbackData($"🔌 Відв'язати TG від #{adm.Id} ({adm.Email})", $"adm_unlink_tg_{adm.Id}")
+                });
+            }
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("<i>Якщо в обох акаунтах Telegram відкрилась адмінка: один має нік @LoopMarketSupport, а інший прив'язано до адміна сайту за посиланням (?start=verify_ID, яке не перевіряє номер). Натисніть кнопку нижче, щоб відв'язати зайвий чат або перемкнути режим клієнта.</i>");
+
+        actionRows.Add(new[]
+        {
+            InlineKeyboardButton.WithCallbackData("👤 Перемкнути цей чат у режим клієнта", "adm_mode_user")
+        });
+
+        await botClient.SendMessage(
+            chatId: chatId,
+            text: sb.ToString(),
+            parseMode: ParseMode.Html,
+            replyMarkup: new InlineKeyboardMarkup(actionRows),
+            cancellationToken: ct);
+    }
+
     private static ReplyKeyboardMarkup GetAdminKeyboard()
     {
         return new ReplyKeyboardMarkup(new[]
         {
             new[] { new KeyboardButton("📊 Статистика платформи"), new KeyboardButton("🚨 Активні звернення та тікети") },
             new[] { new KeyboardButton("🚚 Останні замовлення"), new KeyboardButton("👥 Останні користувачі") },
-            new[] { new KeyboardButton("📢 Надіслати розсилку"), new KeyboardButton("🌐 Відкрити веб-адмінку") }
+            new[] { new KeyboardButton("📢 Надіслати розсилку"), new KeyboardButton("🌐 Відкрити веб-адмінку") },
+            new[] { new KeyboardButton("🔐 Адміни бота"), new KeyboardButton("👤 Режим користувача") }
         })
         {
             ResizeKeyboard = true

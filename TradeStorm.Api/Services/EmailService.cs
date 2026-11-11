@@ -1,35 +1,140 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Mail;
+using System.Net.Sockets;
+using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace TradeStorm.Api.Services;
 
+public record EmailDeliveryReport(
+    string Provider,
+    bool Success,
+    string Detail,
+    DateTime TimestampUtc);
+
+public record EmailProviderDiagnostics(
+    bool HasSmtpCredentials,
+    bool HasBrevoApiKey,
+    bool HasResendApiKey,
+    bool HasGmailWebhookUrl,
+    bool HasGmailOAuthRefreshToken,
+    string SmtpHost,
+    int SmtpPort,
+    string SmtpUser,
+    string FromEmail,
+    bool IsRenderEnvironment,
+    EmailDeliveryReport? LastAttempt);
+
 public class EmailService : IEmailService
 {
+    private static readonly HttpClient FallbackHttpClient = new(new SocketsHttpHandler
+    {
+        PooledConnectionLifetime = TimeSpan.FromMinutes(2)
+    })
+    {
+        Timeout = TimeSpan.FromSeconds(10)
+    };
+
     private readonly IConfiguration _config;
     private readonly ILogger<EmailService> _logger;
+    private readonly IHttpClientFactory? _httpClientFactory;
+    private EmailDeliveryReport? _lastAttempt;
 
-    public EmailService(IConfiguration config, ILogger<EmailService> logger)
+    public EmailService(IConfiguration config, ILogger<EmailService> logger, IHttpClientFactory? httpClientFactory = null)
     {
         _config = config;
         _logger = logger;
+        _httpClientFactory = httpClientFactory;
+    }
+
+    private HttpClient CreateHttpClient()
+        => _httpClientFactory != null ? _httpClientFactory.CreateClient("EmailApiClient") : FallbackHttpClient;
+
+    private string GetFirstConfigOrEnv(string[] configKeys, string[] envKeys, string defaultValue = "")
+    {
+        foreach (var envKey in envKeys)
+        {
+            var envVal = Environment.GetEnvironmentVariable(envKey);
+            if (!string.IsNullOrWhiteSpace(envVal))
+                return envVal.Trim().Trim('"', '\'');
+        }
+
+        foreach (var cfgKey in configKeys)
+        {
+            var cfgVal = _config[cfgKey];
+            if (!string.IsNullOrWhiteSpace(cfgVal))
+                return cfgVal.Trim().Trim('"', '\'');
+        }
+
+        return defaultValue;
     }
 
     private string GetConfigOrEnv(string configKey, string envKey, string defaultValue = "")
+        => GetFirstConfigOrEnv(new[] { configKey }, new[] { envKey }, defaultValue);
+
+    private static string NormalizeSmtpPassword(string host, string pass)
     {
-        // 1. Пріоритет: змінні середовища (Environment Variables)
-        var envVal = Environment.GetEnvironmentVariable(envKey);
-        if (!string.IsNullOrWhiteSpace(envVal)) return envVal.Trim();
+        var trimmed = pass.Trim();
+        // Google App Passwords display as "xxxx xxxx xxxx xxxx" (19 chars with spaces) — strip spaces automatically
+        if (host.Contains("gmail", StringComparison.OrdinalIgnoreCase) ||
+            Regex.IsMatch(trimmed, @"^(?:[a-zA-Z0-9]{4}\s+){3}[a-zA-Z0-9]{4}$"))
+        {
+            return Regex.Replace(trimmed, @"\s+", "");
+        }
+        return trimmed;
+    }
 
-        // 2. Якщо в Environment порожньо — перевіряємо Configuration (appsettings.*)
-        var cfgVal = _config[configKey];
-        if (!string.IsNullOrWhiteSpace(cfgVal)) return cfgVal.Trim();
+    private static bool IsRenderRuntime()
+        => !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RENDER")) ||
+           !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RENDER_SERVICE_ID"));
 
-        return defaultValue;
+    public EmailProviderDiagnostics GetDiagnostics()
+    {
+        var smtpHost = GetFirstConfigOrEnv(new[] { "Smtp:Host" }, new[] { "SMTP_HOST", "Smtp__Host" }, "smtp.gmail.com");
+        int.TryParse(GetFirstConfigOrEnv(new[] { "Smtp:Port" }, new[] { "SMTP_PORT", "Smtp__Port" }, "587"), out int smtpPort);
+        if (smtpPort <= 0) smtpPort = 587;
+        var smtpUser = GetFirstConfigOrEnv(new[] { "Smtp:User" }, new[] { "SMTP_USER", "Smtp__User" }, "loopmarketua@gmail.com");
+        var smtpPass = GetFirstConfigOrEnv(new[] { "Smtp:Pass" }, new[] { "SMTP_PASS", "Smtp__Pass" });
+        var smtpFrom = ExtractEmail(GetFirstConfigOrEnv(new[] { "Smtp:From" }, new[] { "SMTP_FROM", "Smtp__From" }, smtpUser));
+
+        var brevoKey = GetFirstConfigOrEnv(new[] { "Brevo:ApiKey", "Email:BrevoApiKey" }, new[] { "BREVO_API_KEY" });
+        var resendKey = GetFirstConfigOrEnv(new[] { "Resend:ApiKey", "Email:ResendApiKey" }, new[] { "RESEND_API_KEY" });
+        var webhookUrl = GetFirstConfigOrEnv(new[] { "Email:WebhookUrl", "Gmail:WebhookUrl" }, new[] { "GMAIL_WEBHOOK_URL", "EMAIL_WEBHOOK_URL" });
+        var gmailRefresh = GetFirstConfigOrEnv(new[] { "Gmail:RefreshToken" }, new[] { "GMAIL_REFRESH_TOKEN" });
+        var googleClientId = GetFirstConfigOrEnv(new[] { "Authentication:Google:ClientId" }, new[] { "GOOGLE_CLIENT_ID" });
+        var googleSecret = GetFirstConfigOrEnv(new[] { "Authentication:Google:ClientSecret" }, new[] { "GOOGLE_CLIENT_SECRET" });
+
+        return new EmailProviderDiagnostics(
+            HasSmtpCredentials: !string.IsNullOrWhiteSpace(smtpHost) && !string.IsNullOrWhiteSpace(smtpUser) && !string.IsNullOrWhiteSpace(smtpPass),
+            HasBrevoApiKey: !string.IsNullOrWhiteSpace(brevoKey),
+            HasResendApiKey: !string.IsNullOrWhiteSpace(resendKey),
+            HasGmailWebhookUrl: !string.IsNullOrWhiteSpace(webhookUrl),
+            HasGmailOAuthRefreshToken: !string.IsNullOrWhiteSpace(gmailRefresh) && !string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleSecret),
+            SmtpHost: smtpHost,
+            SmtpPort: smtpPort,
+            SmtpUser: smtpUser,
+            FromEmail: string.IsNullOrWhiteSpace(smtpFrom) ? smtpUser : smtpFrom,
+            IsRenderEnvironment: IsRenderRuntime(),
+            LastAttempt: _lastAttempt);
+    }
+
+    public Task<bool> SendDiagnosticTestAsync(string toEmail)
+    {
+        var html = $@"<div style=""font-family:sans-serif;padding:24px;max-width:520px;border:1px solid #e2e8f0;border-radius:12px;"">
+            <h2 style=""margin:0 0 12px;color:#0f172a;"">LoopMarket — Тест доставки пошти</h2>
+            <p style=""margin:0 0 8px;color:#334155;"">Якщо ви отримали цей лист, поштова інтеграція платформи працює коректно.</p>
+            <p style=""margin:0;color:#64748b;font-size:12px;"">Час перевірки (UTC): {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}</p>
+        </div>";
+        return SendEmailInternalAsync(toEmail, "LoopMarket: Тест поштового сервісу", html, "[DIAGNOSTIC] Test email");
     }
 
     private static string ExtractEmail(string raw)
@@ -239,61 +344,325 @@ public class EmailService : IEmailService
 
     private async Task<bool> SendEmailInternalAsync(string toEmail, string subject, string htmlBody, string devSummary)
     {
-        var smtpHost = GetConfigOrEnv("Smtp:Host", "SMTP_HOST", "smtp.gmail.com");
-        var smtpPortStr = GetConfigOrEnv("Smtp:Port", "SMTP_PORT", "587");
-        var smtpUser = GetConfigOrEnv("Smtp:User", "SMTP_USER", "loopmarketua@gmail.com");
-        var smtpPass = GetConfigOrEnv("Smtp:Pass", "SMTP_PASS");
-        var smtpFrom = GetConfigOrEnv("Smtp:From", "SMTP_FROM", "loopmarketua@gmail.com");
+        var smtpHost = GetFirstConfigOrEnv(new[] { "Smtp:Host" }, new[] { "SMTP_HOST", "Smtp__Host" }, "smtp.gmail.com");
+        var smtpPortStr = GetFirstConfigOrEnv(new[] { "Smtp:Port" }, new[] { "SMTP_PORT", "Smtp__Port" }, "587");
+        var smtpUser = GetFirstConfigOrEnv(new[] { "Smtp:User" }, new[] { "SMTP_USER", "Smtp__User" }, "loopmarketua@gmail.com");
+        var rawSmtpPass = GetFirstConfigOrEnv(new[] { "Smtp:Pass" }, new[] { "SMTP_PASS", "Smtp__Pass" });
+        var smtpFrom = GetFirstConfigOrEnv(new[] { "Smtp:From" }, new[] { "SMTP_FROM", "Smtp__From" }, smtpUser);
+
+        var cleanFrom = ExtractEmail(smtpFrom);
+        if (string.IsNullOrWhiteSpace(cleanFrom)) cleanFrom = ExtractEmail(smtpUser);
+        if (string.IsNullOrWhiteSpace(cleanFrom)) cleanFrom = "loopmarketua@gmail.com";
 
         int.TryParse(smtpPortStr, out int smtpPort);
         if (smtpPort <= 0) smtpPort = 587;
 
-        // Якщо вказано пароль SMTP — відправляємо реальний лист через Gmail SMTP
-        if (!string.IsNullOrWhiteSpace(smtpHost) && !string.IsNullOrWhiteSpace(smtpUser) && !string.IsNullOrWhiteSpace(smtpPass))
+        bool anyProviderConfigured = false;
+        var providerErrors = new List<string>();
+
+        // 1. HTTPS Google Apps Script Gmail Relay (працює на Render Free через порт 443 напряму з Gmail)
+        var webhookUrl = GetFirstConfigOrEnv(new[] { "Email:WebhookUrl", "Gmail:WebhookUrl" }, new[] { "GMAIL_WEBHOOK_URL", "EMAIL_WEBHOOK_URL" });
+        if (!string.IsNullOrWhiteSpace(webhookUrl))
         {
-            try
+            anyProviderConfigured = true;
+            var secret = GetFirstConfigOrEnv(new[] { "Email:WebhookSecret", "Gmail:WebhookSecret" }, new[] { "GMAIL_WEBHOOK_SECRET", "EMAIL_WEBHOOK_SECRET" });
+            var (ok, err) = await TrySendViaWebhookAsync(webhookUrl, secret, toEmail, subject, htmlBody);
+            if (ok)
             {
-                var cleanFrom = ExtractEmail(smtpFrom);
-                if (string.IsNullOrWhiteSpace(cleanFrom)) cleanFrom = ExtractEmail(smtpUser);
-
-                using var client = new SmtpClient(smtpHost, smtpPort)
-                {
-                    Credentials = new NetworkCredential(smtpUser, smtpPass),
-                    EnableSsl = smtpPort != 25,
-                    DeliveryMethod = SmtpDeliveryMethod.Network,
-                    Timeout = 15000
-                };
-
-                using var mail = new MailMessage
-                {
-                    From = new MailAddress(cleanFrom, "LoopMarket"),
-                    Subject = subject,
-                    Body = htmlBody,
-                    IsBodyHtml = true
-                };
-                mail.ReplyToList.Add(new MailAddress("loopmarketua@gmail.com", "LoopMarket"));
-                mail.Headers.Add("X-Auto-Response-Suppress", "All");
-                mail.Headers.Add("Auto-Submitted", "auto-generated");
-                mail.To.Add(toEmail);
-
-                await client.SendMailAsync(mail);
-                _logger.LogInformation("Email sent via SMTP to {Email} ({Subject})", toEmail, subject);
+                _lastAttempt = new EmailDeliveryReport("GmailWebhookHttps", true, "Delivered via HTTPS Webhook", DateTime.UtcNow);
                 return true;
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send email via SMTP to {Email}", toEmail);
-            }
-        }
-        else
-        {
-            _logger.LogWarning("SMTP credentials not fully configured (Host: {Host}, User: {User}, HasPass: {HasPass})",
-                smtpHost, smtpUser, !string.IsNullOrWhiteSpace(smtpPass));
+            providerErrors.Add($"GmailWebhookHttps: {err}");
         }
 
-        // Fallback / Development mode
-        Console.WriteLine($"{devSummary} -> {toEmail}");
-        _logger.LogInformation("[DEV EMAIL] To: {Email}, {Summary}", toEmail, devSummary);
-        return true;
+        // 2. HTTPS Gmail REST API OAuth2 (порт 443)
+        var gmailRefreshToken = GetFirstConfigOrEnv(new[] { "Gmail:RefreshToken" }, new[] { "GMAIL_REFRESH_TOKEN" });
+        var googleClientId = GetFirstConfigOrEnv(new[] { "Authentication:Google:ClientId" }, new[] { "GOOGLE_CLIENT_ID" });
+        var googleClientSecret = GetFirstConfigOrEnv(new[] { "Authentication:Google:ClientSecret" }, new[] { "GOOGLE_CLIENT_SECRET" });
+        if (!string.IsNullOrWhiteSpace(gmailRefreshToken) && !string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
+        {
+            anyProviderConfigured = true;
+            var (ok, err) = await TrySendViaGmailApiAsync(googleClientId, googleClientSecret, gmailRefreshToken, cleanFrom, toEmail, subject, htmlBody);
+            if (ok)
+            {
+                _lastAttempt = new EmailDeliveryReport("GmailRestApi", true, "Delivered via Gmail HTTPS API", DateTime.UtcNow);
+                return true;
+            }
+            providerErrors.Add($"GmailRestApi: {err}");
+        }
+
+        // 3. HTTPS Brevo API (300 безкоштовних листів/день з будь-якого Gmail sender на порт 443)
+        var brevoKey = GetFirstConfigOrEnv(new[] { "Brevo:ApiKey", "Email:BrevoApiKey" }, new[] { "BREVO_API_KEY" });
+        if (!string.IsNullOrWhiteSpace(brevoKey))
+        {
+            anyProviderConfigured = true;
+            var (ok, err) = await TrySendViaBrevoAsync(brevoKey, cleanFrom, toEmail, subject, htmlBody);
+            if (ok)
+            {
+                _lastAttempt = new EmailDeliveryReport("BrevoHttpsApi", true, "Delivered via Brevo HTTPS API", DateTime.UtcNow);
+                return true;
+            }
+            providerErrors.Add($"BrevoHttpsApi: {err}");
+        }
+
+        // 4. HTTPS Resend API (порт 443)
+        var resendKey = GetFirstConfigOrEnv(new[] { "Resend:ApiKey", "Email:ResendApiKey" }, new[] { "RESEND_API_KEY" });
+        if (!string.IsNullOrWhiteSpace(resendKey))
+        {
+            anyProviderConfigured = true;
+            var resendFrom = GetFirstConfigOrEnv(new[] { "Resend:From", "Email:ResendFrom" }, new[] { "RESEND_FROM" }, cleanFrom);
+            var (ok, err) = await TrySendViaResendAsync(resendKey, resendFrom, toEmail, subject, htmlBody);
+            if (ok)
+            {
+                _lastAttempt = new EmailDeliveryReport("ResendHttpsApi", true, "Delivered via Resend HTTPS API", DateTime.UtcNow);
+                return true;
+            }
+            providerErrors.Add($"ResendHttpsApi: {err}");
+        }
+
+        // 5. Прямий SMTP (Gmail App Password) з перевіркою доступності порту та нормалізацією пробілів
+        if (!string.IsNullOrWhiteSpace(smtpHost) && !string.IsNullOrWhiteSpace(smtpUser) && !string.IsNullOrWhiteSpace(rawSmtpPass))
+        {
+            anyProviderConfigured = true;
+            var smtpPass = NormalizeSmtpPassword(smtpHost, rawSmtpPass);
+            // System.Net.Mail.SmtpClient підтримує STARTTLS (587), а не implicit TLS (465)
+            int effectivePort = smtpPort == 465 && smtpHost.Contains("gmail", StringComparison.OrdinalIgnoreCase) ? 587 : smtpPort;
+
+            var (ok, err) = await TrySendViaSmtpAsync(smtpHost, effectivePort, smtpUser, smtpPass, cleanFrom, toEmail, subject, htmlBody);
+            if (ok)
+            {
+                _lastAttempt = new EmailDeliveryReport("Smtp", true, $"Delivered via {smtpHost}:{effectivePort}", DateTime.UtcNow);
+                return true;
+            }
+            providerErrors.Add($"Smtp({smtpHost}:{effectivePort}): {err}");
+        }
+
+        var combinedError = providerErrors.Count > 0
+            ? string.Join(" | ", providerErrors)
+            : "Жодного поштового провайдера не налаштовано (ні SMTP_PASS, ні HTTPS API ключа BREVO_API_KEY / RESEND_API_KEY / GMAIL_WEBHOOK_URL).";
+
+        _lastAttempt = new EmailDeliveryReport(
+            anyProviderConfigured ? "Failed" : "NotConfigured",
+            false,
+            combinedError,
+            DateTime.UtcNow);
+
+        _logger.LogError("Email delivery failed to {Email}. Reason: {Reason}", toEmail, combinedError);
+
+        var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "";
+        if (!anyProviderConfigured &&
+            (envName.Equals("Development", StringComparison.OrdinalIgnoreCase) ||
+             envName.Equals("Testing", StringComparison.OrdinalIgnoreCase)))
+        {
+            Console.WriteLine($"{devSummary} -> {toEmail}");
+            return true;
+        }
+
+        return false;
+    }
+
+    private async Task<(bool Ok, string Error)> TrySendViaWebhookAsync(string webhookUrl, string secret, string toEmail, string subject, string htmlBody)
+    {
+        try
+        {
+            var client = CreateHttpClient();
+            var payload = JsonSerializer.Serialize(new
+            {
+                to = toEmail,
+                subject,
+                html = htmlBody,
+                fromName = "LoopMarket",
+                secret
+            });
+            using var content = new StringContent(payload, Encoding.UTF8, "application/json");
+            using var res = await client.PostAsync(webhookUrl, content);
+            var body = await res.Content.ReadAsStringAsync();
+            if (!res.IsSuccessStatusCode)
+            {
+                return (false, $"HTTP {(int)res.StatusCode}: {body}");
+            }
+            return (true, string.Empty);
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    private async Task<(bool Ok, string Error)> TrySendViaGmailApiAsync(
+        string clientId, string clientSecret, string refreshToken,
+        string fromEmail, string toEmail, string subject, string htmlBody)
+    {
+        try
+        {
+            var client = CreateHttpClient();
+            using var tokenReq = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["client_id"] = clientId,
+                ["client_secret"] = clientSecret,
+                ["refresh_token"] = refreshToken,
+                ["grant_type"] = "refresh_token"
+            });
+            using var tokenRes = await client.PostAsync("https://oauth2.googleapis.com/token", tokenReq);
+            var tokenBody = await tokenRes.Content.ReadAsStringAsync();
+            if (!tokenRes.IsSuccessStatusCode)
+            {
+                return (false, $"OAuth token refresh HTTP {(int)tokenRes.StatusCode}");
+            }
+
+            using var tokenDoc = JsonDocument.Parse(tokenBody);
+            if (!tokenDoc.RootElement.TryGetProperty("access_token", out var atEl))
+            {
+                return (false, "Missing access_token in Google response");
+            }
+            var accessToken = atEl.GetString() ?? "";
+
+            var encodedSubject = $"=?utf-8?B?{Convert.ToBase64String(Encoding.UTF8.GetBytes(subject))}?=";
+            var mime = $"From: LoopMarket <{fromEmail}>\r\n" +
+                       $"To: {toEmail}\r\n" +
+                       $"Reply-To: loopmarketua@gmail.com\r\n" +
+                       $"Subject: {encodedSubject}\r\n" +
+                       "MIME-Version: 1.0\r\n" +
+                       "Content-Type: text/html; charset=utf-8\r\n" +
+                       "Content-Transfer-Encoding: base64\r\n\r\n" +
+                       Convert.ToBase64String(Encoding.UTF8.GetBytes(htmlBody));
+
+            var rawUrlSafe = Convert.ToBase64String(Encoding.UTF8.GetBytes(mime))
+                .Replace('+', '-')
+                .Replace('/', '_')
+                .TrimEnd('=');
+
+            using var sendReq = new HttpRequestMessage(HttpMethod.Post, "https://gmail.googleapis.com/gmail/v1/users/me/messages/send")
+            {
+                Content = new StringContent(JsonSerializer.Serialize(new { raw = rawUrlSafe }), Encoding.UTF8, "application/json")
+            };
+            sendReq.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            using var sendRes = await client.SendAsync(sendReq);
+            if (!sendRes.IsSuccessStatusCode)
+            {
+                var sendErr = await sendRes.Content.ReadAsStringAsync();
+                return (false, $"Gmail API HTTP {(int)sendRes.StatusCode}: {sendErr}");
+            }
+            return (true, string.Empty);
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    private async Task<(bool Ok, string Error)> TrySendViaBrevoAsync(string apiKey, string fromEmail, string toEmail, string subject, string htmlBody)
+    {
+        try
+        {
+            var client = CreateHttpClient();
+            using var req = new HttpRequestMessage(HttpMethod.Post, "https://api.brevo.com/v3/smtp/email");
+            req.Headers.Add("api-key", apiKey);
+            req.Content = new StringContent(JsonSerializer.Serialize(new
+            {
+                sender = new { name = "LoopMarket", email = fromEmail },
+                to = new[] { new { email = toEmail } },
+                replyTo = new { name = "LoopMarket", email = "loopmarketua@gmail.com" },
+                subject,
+                htmlContent = htmlBody
+            }), Encoding.UTF8, "application/json");
+
+            using var res = await client.SendAsync(req);
+            if (!res.IsSuccessStatusCode)
+            {
+                var err = await res.Content.ReadAsStringAsync();
+                return (false, $"HTTP {(int)res.StatusCode}: {err}");
+            }
+            return (true, string.Empty);
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    private async Task<(bool Ok, string Error)> TrySendViaResendAsync(string apiKey, string fromEmail, string toEmail, string subject, string htmlBody)
+    {
+        try
+        {
+            var client = CreateHttpClient();
+            using var req = new HttpRequestMessage(HttpMethod.Post, "https://api.resend.com/emails");
+            req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            var formattedFrom = fromEmail.Contains('<') ? fromEmail : $"LoopMarket <{fromEmail}>";
+            req.Content = new StringContent(JsonSerializer.Serialize(new
+            {
+                from = formattedFrom,
+                to = new[] { toEmail },
+                reply_to = "loopmarketua@gmail.com",
+                subject,
+                html = htmlBody
+            }), Encoding.UTF8, "application/json");
+
+            using var res = await client.SendAsync(req);
+            if (!res.IsSuccessStatusCode)
+            {
+                var err = await res.Content.ReadAsStringAsync();
+                return (false, $"HTTP {(int)res.StatusCode}: {err}");
+            }
+            return (true, string.Empty);
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    private async Task<(bool Ok, string Error)> TrySendViaSmtpAsync(
+        string smtpHost, int smtpPort, string smtpUser, string smtpPass,
+        string cleanFrom, string toEmail, string subject, string htmlBody)
+    {
+        try
+        {
+            // Швидка перевірка TCP-доступності, щоб не чекати 15с на заблокованому фаєрволом порту Render Free
+            using (var tcp = new TcpClient())
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+                try
+                {
+                    await tcp.ConnectAsync(smtpHost, smtpPort, cts.Token);
+                }
+                catch (Exception ex) when (ex is OperationCanceledException or SocketException)
+                {
+                    var renderNote = IsRenderRuntime()
+                        ? " (На безкоштовному тарифі Render вихідні SMTP-порти 25/465/587 заблоковано — підключіть BREVO_API_KEY, RESEND_API_KEY або GMAIL_WEBHOOK_URL через HTTPS 443)"
+                        : "";
+                    return (false, $"TCP connect failed to {smtpHost}:{smtpPort}: {ex.Message}{renderNote}");
+                }
+            }
+
+            using var client = new SmtpClient(smtpHost, smtpPort)
+            {
+                Credentials = new NetworkCredential(smtpUser, smtpPass),
+                EnableSsl = smtpPort != 25,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                Timeout = 8000
+            };
+
+            using var mail = new MailMessage
+            {
+                From = new MailAddress(cleanFrom, "LoopMarket"),
+                Subject = subject,
+                Body = htmlBody,
+                IsBodyHtml = true
+            };
+            mail.ReplyToList.Add(new MailAddress("loopmarketua@gmail.com", "LoopMarket"));
+            mail.Headers.Add("X-Auto-Response-Suppress", "All");
+            mail.Headers.Add("Auto-Submitted", "auto-generated");
+            mail.To.Add(toEmail);
+
+            await client.SendMailAsync(mail);
+            _logger.LogInformation("Email sent via SMTP to {Email} ({Subject})", toEmail, subject);
+            return (true, string.Empty);
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
     }
 }
