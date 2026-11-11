@@ -483,6 +483,101 @@
             min-width: 0;
         }
 
+        .reviews-box-modern .reviews-top-row {
+            margin-bottom: 0;
+            gap: 10px;
+            flex-wrap: wrap;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .reviews-box-modern.is-open .reviews-top-row {
+            margin-bottom: 12px;
+        }
+
+        .reviews-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+
+        .btn-toggle-reviews {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            border-radius: 9px;
+            border: 1px solid var(--border-color);
+            background: var(--surface);
+            color: var(--text-main);
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-toggle-reviews:hover {
+            border-color: var(--primary-light);
+            color: var(--primary-light);
+        }
+
+        .reviews-box-modern.is-open .btn-toggle-reviews {
+            border-color: var(--primary-light);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--primary-light);
+        }
+
+        .reviews-chevron {
+            display: inline-flex;
+            align-items: center;
+            transition: transform 0.2s ease;
+        }
+
+        .reviews-box-modern.is-open .reviews-chevron {
+            transform: rotate(180deg);
+        }
+
+        .reviews-collapsible-body {
+            display: none;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .reviews-box-modern.is-open .reviews-collapsible-body {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .main-stage-wrapper {
+                height: auto !important;
+                max-height: none !important;
+                margin-bottom: 10px !important;
+            }
+
+            .main-stage-wrapper.is-single-media {
+                margin-bottom: 0 !important;
+            }
+
+            #mainVideoWrap iframe,
+            #mainVideoWrap video {
+                max-height: 62vh !important;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .similar-cards-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 10px !important;
+            }
+
+            .similar-item-img-wrap {
+                height: 112px !important;
+            }
+        }
+
         @media (max-width: 992px) {
             .product-top-grid,
             .product-top-grid.portrait-media-grid {
@@ -869,6 +964,15 @@
             .gallery-column {
                 order: 1 !important;
                 width: 100% !important;
+                height: auto !important;
+                min-height: 0 !important;
+                position: static !important;
+            }
+
+            .image-showcase {
+                max-height: none !important;
+                height: auto !important;
+                overflow: visible !important;
             }
 
             .info-panel {
@@ -924,23 +1028,23 @@
             }
 
             .main-image {
-                height: 380px !important;
-                max-height: 52vh !important;
-                min-height: 290px !important;
+                height: clamp(230px, 44vh, 360px) !important;
+                max-height: 46vh !important;
+                min-height: 220px !important;
                 border-radius: 18px !important;
                 border: 1px solid var(--border-color) !important;
                 background: var(--surface) !important;
                 object-fit: contain !important;
-                margin-bottom: 10px !important;
+                margin-bottom: 0 !important;
                 box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
             }
 
             .thumbnails {
                 gap: 8px !important;
-                padding-bottom: 6px !important;
+                padding: 4px 2px 6px !important; margin-top: 6px !important;
             }
 
-            .thumb {
+            .thumb, .thumb-video {
                 width: 68px !important;
                 height: 54px !important;
                 border-radius: 10px !important;
@@ -1891,7 +1995,7 @@
 
         @media (max-width: 768px) {
             .main-image {
-                height: 380px !important;
+                height: clamp(230px, 44vh, 360px) !important;
             }
             .lightbox-nav-btn {
                 width: 42px;
@@ -2253,7 +2357,7 @@
         }
 
 </style>
-    <link rel="stylesheet" href="/css/global.css?v=5.1">
+    <link rel="stylesheet" href="/css/global.css?v=5.2">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
     <script src="/js/loop-dialogs.js"></script>
 </head>
@@ -2425,19 +2529,29 @@
                     </div>
 
                     <div class="details-lower-side">
-                        <div class="reviews-box-modern" style="margin-bottom: 0;">
-                            <div class="reviews-top-row">
+                        <div class="reviews-box-modern" id="sellerReviewsBox" style="margin-bottom: 0;">
+                            <div class="reviews-top-row" onclick="toggleSellerReviews()">
                                 <div class="reviews-score-info">
                                     <span id="sellerAvgStars" style="display:inline-flex;align-items:center;gap:2px;"></span>
-                                    <span id="sellerAvgRating" style="font-weight: 800; font-size: 1.1rem; color: var(--text-main);">0.0</span>
+                                    <span id="sellerAvgRating" style="font-weight: 800; font-size: 1.08rem; color: var(--text-main);">0.0</span>
                                     <span id="sellerTotalReviews" style="color: var(--text-muted); font-size: 0.85rem;">(0 відгуків)</span>
                                 </div>
-                                <button id="rateSellerBtn" onclick="openReviewModal()" class="btn-rate-modern" style="display: none;">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5" style="vertical-align:-2px;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Оцінити
-                                </button>
+                                <div class="reviews-actions-right">
+                                    <button type="button" id="rateSellerBtn" onclick="event.stopPropagation(); openReviewModal();" class="btn-rate-modern" style="display: none;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5" style="vertical-align:-2px;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Оцінити
+                                    </button>
+                                    <button type="button" id="toggleReviewsBtn" class="btn-toggle-reviews" aria-expanded="false" aria-controls="sellerReviewsCollapsible" onclick="event.stopPropagation(); toggleSellerReviews();">
+                                        <span id="toggleReviewsLabel">Показати</span>
+                                        <span class="reviews-chevron" aria-hidden="true">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                        </span>
+                                    </button>
+                                </div>
                             </div>
-                            <div id="sellerReviewsList" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; padding-right: 4px;">
-                                <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 10px;">Завантаження відгуків...</p>
+                            <div class="reviews-collapsible-body" id="sellerReviewsCollapsible">
+                                <div id="sellerReviewsList" style="max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px;">
+                                    <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 10px;">Завантаження відгуків...</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -3721,7 +3835,7 @@
                             const vThumb = document.createElement('div');
                             vThumb.className = `thumb thumb-video ${idx === 0 ? 'active' : ''}`;
                             vThumb.title = 'Дивитися відеопрезентацію';
-                            vThumb.style.cssText = 'position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0f172a; border-radius: 10px; color: white; cursor: pointer; border: 2px solid transparent; width: 86px; height: 68px; flex-shrink: 0;';
+                            vThumb.style.cssText = 'position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0f172a; border-radius: 10px; color: white; cursor: pointer; border: 2px solid transparent; flex-shrink: 0;';
                             vThumb.innerHTML = `
                                 <div style="font-size: 1.2rem; line-height: 1;">▶</div>
                                 <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; margin-top: 2px;">Відео</span>
@@ -4186,13 +4300,42 @@
             initDetailsPage();
         }
 
-        async function initSellerReviews(sellerId) {
+        function formatReviewsCount(count) {
+            const n = Math.abs(Number(count) || 0);
+            const mod100 = n % 100;
+            const mod10 = n % 10;
+            if (mod100 >= 11 && mod100 <= 14) return `(${n} відгуків)`;
+            if (mod10 === 1) return `(${n} відгук)`;
+            if (mod10 >= 2 && mod10 <= 4) return `(${n} відгуки)`;
+            return `(${n} відгуків)`;
+        }
+
+        function setReviewsExpanded(isOpen) {
+            const box = document.getElementById('sellerReviewsBox');
+            const btn = document.getElementById('toggleReviewsBtn');
+            const label = document.getElementById('toggleReviewsLabel');
+            if (!box) return;
+            const open = Boolean(isOpen);
+            box.classList.toggle('is-open', open);
+            if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (label) label.innerText = open ? 'Сховати' : 'Показати';
+        }
+
+        function toggleSellerReviews(forceOpen) {
+            const box = document.getElementById('sellerReviewsBox');
+            if (!box) return;
+            const nextOpen = (typeof forceOpen === 'boolean') ? forceOpen : !box.classList.contains('is-open');
+            setReviewsExpanded(nextOpen);
+        }
+
+        async function initSellerReviews(sellerId, { expand = false } = {}) {
+                    setReviewsExpanded(expand);
                     try {
                         const res = await fetch(`/api/reviews/user/${sellerId}`);
                         const data = await res.json();
 
                         document.getElementById('sellerAvgRating').innerText = data.averageRating;
-                        document.getElementById('sellerTotalReviews').innerText = `(${data.totalReviews} відгуків)`;
+                        document.getElementById('sellerTotalReviews').innerText = formatReviewsCount(data.totalReviews);
                         document.getElementById('sellerAvgStars').innerHTML = renderStars(data.averageRating);
 
                         const list = document.getElementById('sellerReviewsList');
@@ -4259,7 +4402,7 @@
                         if (res.ok) {
                             closeReviewModal();
                             document.getElementById('reviewComment').value = '';
-                            initSellerReviews(currentSellerId);
+                            initSellerReviews(currentSellerId, { expand: true });
                             LoopToast.success('Відгук успішно додано!');
                         } else {
                             const err = await res.json();

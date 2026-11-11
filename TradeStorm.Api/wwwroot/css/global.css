@@ -1222,15 +1222,15 @@ body.in-chat-conversation .mobile-bottom-app-bar {
     .product-layout {
         grid-template-columns: 1fr !important;
         gap: 18px !important;
-        padding: 14px !important;
+        padding: 0 !important;
     }
     
     .image-showcase {
-        max-height: 400px !important;
+        max-height: none !important; height: auto !important; overflow: visible !important;
     }
 
     .main-image {
-        max-height: 380px !important;
+        max-height: min(360px, 46vh) !important; height: auto !important;
     }
 }
 
@@ -1674,8 +1674,8 @@ body.has-sticky-bar .mobile-bottom-bar {
     justify-content: center !important;
     border-radius: 10px !important;
     cursor: pointer !important;
-    width: 68px !important;
-    height: 68px !important;
+    width: 86px;
+    height: 68px;
     overflow: hidden !important;
     flex-shrink: 0 !important;
     transition: transform 0.2s, box-shadow 0.2s !important;
