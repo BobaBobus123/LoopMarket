@@ -39,27 +39,125 @@
 (function () {
     'use strict';
 
+    function decodeJwtPayload(token) {
+        if (!token || typeof token !== 'string' || !token.includes('.')) return null;
+        try {
+            const base64Url = token.split('.')[1];
+            if (!base64Url) return null;
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+            const jsonPayload = decodeURIComponent(
+                atob(padded).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+            );
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function escapeNavHtml(str) {
+        return String(str || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function resolveLoopAccount() {
+        const token = localStorage.getItem('loopToken') || localStorage.getItem('token');
+        let storedUser = null;
+        try {
+            const userJson = localStorage.getItem('loopUser') || localStorage.getItem('user');
+            if (userJson) storedUser = JSON.parse(userJson);
+        } catch (e) {}
+
+        const claims = token ? decodeJwtPayload(token) : null;
+        const roleClaim = claims?.role || claims?.["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+        const isAdmin = localStorage.getItem('loopUserRole') === 'Admin' || roleClaim === 'Admin';
+
+        const id = claims?.["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]
+            || claims?.sub
+            || claims?.nameid
+            || claims?.id
+            || storedUser?.id
+            || null;
+
+        const fullNameFromStored = storedUser
+            ? `${storedUser.firstName || ''} ${storedUser.lastName || ''}`.trim()
+            : '';
+        const name = claims?.["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]
+            || claims?.name
+            || claims?.unique_name
+            || fullNameFromStored
+            || (token ? 'Користувач' : '');
+
+        const email = claims?.["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"]
+            || claims?.email
+            || storedUser?.email
+            || '';
+
+        const avatarUrl = localStorage.getItem('loopUserAvatar')
+            || (id ? localStorage.getItem(`userAvatar_${id}`) : null)
+            || storedUser?.avatarUrl
+            || '';
+
+        return { token, isAdmin, id, name, email, avatarUrl, storedUser };
+    }
+
+    function renderUnifiedDrawerUserCard() {
+        const container = document.getElementById('drawerUserCard');
+        const logoutBtn = document.getElementById('drawerLogoutBtn');
+        const themeRow = document.querySelector('#mobileNavDrawer .drawer-theme-row');
+        if (!container) return;
+
+        const acc = resolveLoopAccount();
+        if (acc.token) {
+            const safeName = escapeNavHtml(acc.name || 'Користувач');
+            const safeEmail = escapeNavHtml(acc.email || 'Авторизований акаунт');
+            const initial = escapeNavHtml((acc.name || 'К').trim().charAt(0).toUpperCase() || 'К');
+            const safeAvatar = acc.avatarUrl ? escapeNavHtml(acc.avatarUrl.trim()) : '';
+
+            container.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    ${safeAvatar ? `
+                        <img src="${safeAvatar}" alt="${safeName}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #10b981; flex-shrink: 0;">
+                    ` : `
+                        <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0;">
+                            ${initial}
+                        </div>
+                    `}
+                    <div style="min-width: 0;">
+                        <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${safeName}</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${safeEmail}</div>
+                    </div>
+                </div>
+            `;
+            if (logoutBtn) logoutBtn.style.display = 'flex';
+            if (themeRow) themeRow.style.marginBottom = '4px';
+        } else {
+            container.innerHTML = `
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Вхід у ваш профіль:</div>
+                <div style="display: flex; gap: 8px;">
+                    <a href="/login.html" class="btn-primary" style="flex: 1; text-decoration: none; text-align: center; padding: 9px 12px; font-size: 0.86rem; border-radius: 10px;">Вхід</a>
+                    <a href="/login.html?tab=register" class="btn-primary" style="flex: 1; text-decoration: none; text-align: center; padding: 9px 12px; font-size: 0.86rem; border-radius: 10px; background: transparent; color: var(--primary-light); border: 1.5px solid var(--border-color);">Реєстрація</a>
+                </div>
+            `;
+            if (logoutBtn) logoutBtn.style.display = 'none';
+            if (themeRow) themeRow.style.marginBottom = '0';
+        }
+    }
+
     function initResponsiveNav() {
         const header = document.querySelector('header');
         if (!header) return;
 
         const currentPath = window.location.pathname.toLowerCase();
-        const token = localStorage.getItem('token') || localStorage.getItem('loopToken');
-        const userJson = localStorage.getItem('loopUser') || localStorage.getItem('user');
-        let user = null;
-        try {
-            if (userJson) user = JSON.parse(userJson);
-        } catch (e) { }
-
-        let isAdmin = localStorage.getItem('loopUserRole') === 'Admin';
-        if (!isAdmin && token) {
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-                if (payload.role === 'Admin' || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] === 'Admin') {
-                    isAdmin = true;
-                }
-            } catch(e) {}
-        }
+        const account = resolveLoopAccount();
+        const token = account.token;
+        const user = account.storedUser;
+        const savedLocalAvatar = account.avatarUrl;
+        const isAdmin = account.isAdmin;
 
         // 1. Ensure Header Content has Mobile Hamburger
         let headerContent = header.querySelector('.header-content');
@@ -107,94 +205,81 @@
             drawer.id = 'mobileNavDrawer';
             drawer.className = 'mobile-nav-drawer';
 
-            const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Користувач' : 'Гість';
-            const userEmail = user?.email || 'Авторизуйтесь для покупок';
-            const savedLocalAvatar = localStorage.getItem('loopUserAvatar') || (user?.id ? localStorage.getItem(`userAvatar_${user.id}`) : null);
-            const userAvatar = savedLocalAvatar || user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=10b981&color=fff&bold=true`;
+            const isServiceNav = window.location.search.includes('type=service');
+            const isHomeNav = (currentPath === '/index.html' || currentPath === '/' || currentPath === '') && !isServiceNav;
 
             drawer.innerHTML = `
-                <div class="mobile-drawer-header">
+                <div class="drawer-header">
                     <a href="/index.html" class="logo" style="text-decoration: none;">
-                        <div class="logo-circle" style="width: 34px; height: 34px; font-size: 1rem;">L</div>
-                        <span style="font-size: 1.2rem; font-weight: 800; color: var(--text-primary);">Loop<span style="color: #10b981;">Market</span></span>
+                        <div class="logo-circle" style="width: 34px; height: 34px; min-width: 34px; min-height: 34px; font-size: 1rem;">L</div>
+                        <span style="font-size: 1.2rem; font-weight: 800; color: var(--text-main);">Loop<span style="color: #10b981;">Market</span></span>
                     </a>
-                    <button class="mobile-drawer-close" id="mobileDrawerCloseBtn" aria-label="Закрити меню">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </button>
+                    <button type="button" class="btn-drawer-close" id="mobileDrawerCloseBtn" aria-label="Закрити меню">✕</button>
                 </div>
 
-                <div class="mobile-user-card" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-subtle); border-radius: 14px; margin-bottom: 16px;">
-                    <img src="${userAvatar}" alt="${userName}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--brand-emerald);">
-                    <div style="flex-grow: 1; overflow: hidden;">
-                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${userName}</div>
-                        <div style="font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${userEmail}</div>
-                    </div>
-                </div>
+                <div class="drawer-user-card" id="drawerUserCard"></div>
 
-                <div class="mobile-drawer-links">
-                    <a href="/index.html" class="mobile-drawer-link ${currentPath === '/index.html' || currentPath === '/' ? 'active' : ''}">
+                <div class="drawer-links">
+                    <a href="/index.html" class="drawer-link ${isHomeNav ? 'active' : ''}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-                        <span>Головна каталог</span>
+                        <span>Головна / Каталог</span>
                     </a>
-                    <a href="/index.html?type=service" class="mobile-drawer-link">
+                    <a href="/index.html?type=service" class="drawer-link ${isServiceNav ? 'active' : ''}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
                         <span>Послуги та сервіси</span>
                     </a>
-                    <a href="/messages.html" class="mobile-drawer-link ${currentPath.includes('messages') ? 'active' : ''}">
+                    <a href="/messages.html" class="drawer-link ${currentPath.includes('messages') ? 'active' : ''}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                         <span>Повідомлення та чат</span>
                     </a>
-                    <a href="/profile.html" class="mobile-drawer-link ${currentPath.includes('profile') ? 'active' : ''}">
+                    <a href="/profile.html" class="drawer-link ${currentPath.includes('profile') ? 'active' : ''}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         <span>Особистий кабінет</span>
                     </a>
-                    <a href="/create.html" class="mobile-drawer-link ${currentPath.includes('create') ? 'active' : ''}" style="color: var(--brand-emerald); font-weight: 700;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-                        <span>+ Подати оголошення</span>
+                    <a href="/create.html" class="drawer-link drawer-sell-link ${currentPath.includes('create') ? 'active' : ''}">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>Подати оголошення</span>
                     </a>
-                    <div style="height: 1px; background: var(--border-subtle); margin: 6px 0;"></div>
+                    <div style="height: 1px; background: var(--border-color); margin: 4px 4px;"></div>
                     ${isAdmin ? `
-                    <a href="/admin.html" class="mobile-drawer-link ${currentPath.includes('admin') ? 'active' : ''}" style="color: #2563eb; font-weight: 800; background: rgba(37,99,235,0.06); border-radius: 10px;">
+                    <a href="/admin.html" class="drawer-link drawer-admin-link ${currentPath.includes('admin') ? 'active' : ''}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         <span>🛡️ Панель оператора</span>
                     </a>
                     ` : ''}
-                    <a href="/safety.html" class="mobile-drawer-link ${currentPath.includes('safety') ? 'active' : ''}">
+                    <a href="/safety.html" class="drawer-link ${currentPath.includes('safety') ? 'active' : ''}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         <span>Безпека угод</span>
                     </a>
-                    <a href="/about.html" class="mobile-drawer-link ${currentPath.includes('about') ? 'active' : ''}">
+                    <a href="/about.html" class="drawer-link ${currentPath.includes('about') ? 'active' : ''}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>
                         <span>Про платформу</span>
                     </a>
-                    ${role === 'Admin' ? `
-                    <a href="/docs.html" class="mobile-drawer-link ${currentPath.includes('docs') ? 'active' : ''}">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                        <span>📚 API Документація</span>
-                    </a>
-                    ` : ''}
                 </div>
 
-                <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 6px;">
-                        <span style="font-size: 0.88rem; font-weight: 600; color: var(--text-secondary);">Тема оформлення</span>
-                        <button class="btn btn-sm btn-outline" onclick="window.toggleTheme ? window.toggleTheme() : null" style="gap: 6px;">
+                <div class="drawer-footer">
+                    <div class="drawer-theme-row">
+                        <span style="font-size: 0.88rem; font-weight: 600; color: var(--text-muted);">Тема оформлення</span>
+                        <button type="button" class="btn-drawer-theme" onclick="window.toggleTheme ? window.toggleTheme() : null">
                             <span>🌓 Змінити</span>
                         </button>
                     </div>
-
-                    ${token ? `
-                        <button class="btn btn-danger" onclick="window.performLoopLogout('/login.html')" style="width: 100%; justify-content: center;">🚪 Вийти з акаунта</button>
-                    ` : `
-                        <a href="/login.html" class="btn btn-primary" style="width: 100%; justify-content: center; text-decoration: none;">
-                            🔑 Увійти / Зареєструватися
-                        </a>
-                    `}
+                    <button type="button" class="btn-drawer-logout" id="drawerLogoutBtn" style="display: none;" onclick="window.performLoopLogout('/login.html')">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                        <span>Вийти з акаунта</span>
+                    </button>
                 </div>
             `;
             document.body.appendChild(drawer);
 
             document.getElementById('mobileDrawerCloseBtn')?.addEventListener('click', closeMobileDrawer);
+            drawer.querySelectorAll('.drawer-link').forEach(link => {
+                link.addEventListener('click', closeMobileDrawer);
+            });
+            if (typeof window.renderDrawerUserInfo !== 'function') {
+                window.renderDrawerUserInfo = renderUnifiedDrawerUserCard;
+            }
+            renderUnifiedDrawerUserCard();
         }
 
         // 3. Inject App-like Mobile Bottom Navigation Bar (< 768px)
@@ -281,7 +366,7 @@
             }
         }
 
-        const initialAv = localStorage.getItem('loopUserAvatar') || (user?.id ? localStorage.getItem(`userAvatar_${user.id}`) : null) || user?.avatarUrl;
+        const initialAv = account.avatarUrl;
         if (initialAv) {
             syncNavProfileAvatar(initialAv);
         }
@@ -291,8 +376,11 @@
             window.addEventListener('loop:avatar-changed', (e) => {
                 const newAv = e.detail && e.detail.avatarUrl;
                 syncNavProfileAvatar(newAv);
-                const drImg = document.querySelector('.mobile-user-card img');
+                const drImg = document.querySelector('.mobile-user-card img, #drawerUserCard img');
                 if (drImg && newAv) drImg.src = newAv;
+                else if (typeof window.renderDrawerUserInfo === 'function') {
+                    try { window.renderDrawerUserInfo(); } catch (err) {}
+                }
                 const bImg = document.querySelector('#mobileBottomBar a[href*="profile"] img, #mobileBottomAppBar a[href*="profile"] img');
                 if (bImg && newAv) bImg.src = newAv;
             });

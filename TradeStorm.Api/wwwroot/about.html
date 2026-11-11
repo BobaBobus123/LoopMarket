@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Про нас | Loop Market</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><circle cx='12' cy='12' r='10'/><path d='M12 6v6l4 2'/></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
@@ -463,8 +463,94 @@
             font-size: 0.82rem;
             color: var(--text-muted);
         }
+        @media (max-width: 768px) {
+            .hero-banner {
+                padding: 32px 16px 28px;
+            }
+            .hero-badge {
+                font-size: 0.72rem;
+                padding: 5px 12px;
+                margin-bottom: 12px;
+            }
+            .hero-title {
+                font-size: 1.65rem;
+                letter-spacing: -0.4px;
+            }
+            .hero-subtitle {
+                font-size: 0.94rem;
+            }
+            .container {
+                padding: 24px 14px 40px;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+                margin-bottom: 28px;
+            }
+            .stat-card {
+                padding: 16px 12px;
+                border-radius: 14px;
+            }
+            .stat-num {
+                font-size: 1.75rem;
+            }
+            .values-grid,
+            .steps-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+                margin-bottom: 28px;
+            }
+            .value-card {
+                padding: 22px 18px;
+                border-radius: 16px;
+            }
+            .steps-box {
+                padding: 24px 16px;
+                border-radius: 18px;
+                margin-bottom: 28px;
+            }
+            .steps-box h2 {
+                font-size: 1.35rem;
+                margin-bottom: 20px;
+            }
+            .about-cta {
+                padding: 28px 18px;
+                border-radius: 18px;
+            }
+            .about-cta h2 {
+                font-size: 1.4rem;
+            }
+            .about-cta p {
+                font-size: 0.94rem;
+                margin-bottom: 18px;
+            }
+            .btn-cta-create {
+                width: 100%;
+                justify-content: center;
+                padding: 13px 20px;
+                font-size: 0.95rem;
+            }
+            footer {
+                padding: 28px 16px 20px;
+            }
+            .footer-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 20px;
+                margin-bottom: 20px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .stats-grid,
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-title {
+                font-size: 1.42rem;
+            }
+        }
     </style>
-    <link rel="stylesheet" href="/css/global.css?v=5.1">
+    <link rel="stylesheet" href="/css/global.css?v=5.3">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
 </head>
 <body>
@@ -643,7 +729,7 @@
 
     <!-- ==================== SCRIPT ==================== -->
     <script>
-        const token = localStorage.getItem('loopToken');
+        const token = localStorage.getItem('loopToken') || localStorage.getItem('token');
         if (token) {
             try {
                 const base64Url = token.split('.')[1];
@@ -696,7 +782,7 @@
         }
         }
     </script>
-    <script src="/js/responsive-nav.js?v=3.0" defer></script>
+    <script src="/js/responsive-nav.js?v=3.1" defer></script>
     <script src="/js/loop-dialogs.js"></script>
 </body>
 </html>
