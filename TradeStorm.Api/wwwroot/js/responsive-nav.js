@@ -1365,11 +1365,30 @@
                 .build();
 
             notifHubConnection.on('ReceiveNotification', (notif) => {
+                if (notif && notif.id && window.LoopPushNotifications && typeof window.LoopPushNotifications.markSeen === 'function') {
+                    window.LoopPushNotifications.markSeen(notif.id);
+                }
                 showInAppToast(notif);
                 loadGlobalNotifications();
             });
 
-            notifHubConnection.start().catch(() => {});
+            notifHubConnection.onreconnecting(() => {
+                window.__loopSignalRConnected = false;
+            });
+            notifHubConnection.onreconnected(() => {
+                window.__loopSignalRConnected = true;
+            });
+            notifHubConnection.onclose(() => {
+                window.__loopSignalRConnected = false;
+            });
+
+            notifHubConnection.start()
+                .then(() => {
+                    window.__loopSignalRConnected = true;
+                })
+                .catch(() => {
+                    window.__loopSignalRConnected = false;
+                });
         } catch(e) {}
     }
 

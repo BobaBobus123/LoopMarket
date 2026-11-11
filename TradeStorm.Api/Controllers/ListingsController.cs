@@ -125,10 +125,20 @@ public class ListingsController : ControllerBase
 
         try
         {
+            await _context.Listings
+                .Where(x => x.Id == numericId)
+                .ExecuteUpdateAsync(s => s.SetProperty(x => x.ViewsCount, x => x.ViewsCount + 1));
             l.ViewsCount++;
-            await _context.SaveChangesAsync();
         }
-        catch { }
+        catch
+        {
+            try
+            {
+                l.ViewsCount++;
+                await _context.SaveChangesAsync();
+            }
+            catch { }
+        }
 
         var result = new
         {
@@ -530,6 +540,11 @@ public class ListingsController : ControllerBase
             return BadRequest(new { error = "Файли для завантаження не вибрано" });
         }
 
+        if (files.Count > 12)
+        {
+            return BadRequest(new { error = "Максимум 12 зображень за одне завантаження" });
+        }
+
         string webRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
         string uploadsFolder = Path.Combine(webRootPath, "uploads");
         if (!Directory.Exists(uploadsFolder))
@@ -538,52 +553,53 @@ public class ListingsController : ControllerBase
         }
 
         var uploadedUrls = new List<string>();
+        var storedBatch = new List<TradeStorm.Api.Models.StoredFile>();
 
         foreach (var file in files)
         {
-            if (file.Length > 0)
+            if (file.Length <= 0 || file.Length > 25 * 1024 * 1024)
             {
-                var (isValid, err) = FileUploadValidator.ValidateImage(file);
-                if (!isValid)
+                continue;
+            }
+
+            var (isValid, err) = FileUploadValidator.ValidateImage(file);
+            if (!isValid)
+            {
+                continue;
+            }
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            var cleanName = System.Text.RegularExpressions.Regex.Replace(Path.GetFileNameWithoutExtension(file.FileName), @"[^a-zA-Z0-9_\-]", "");
+            var uniqueFileName = $"{Guid.NewGuid()}{(string.IsNullOrEmpty(cleanName) ? "" : "_" + cleanName)}{extension}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var memoryStream = new MemoryStream((int)Math.Min(file.Length, 25 * 1024 * 1024)))
+            {
+                await file.CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
+
+                await System.IO.File.WriteAllBytesAsync(filePath, fileBytes);
+                storedBatch.Add(new TradeStorm.Api.Models.StoredFile
                 {
-                    continue; // Пропускаємо небезпечні або непідтримувані файли
-                }
+                    FileName = uniqueFileName,
+                    ContentType = file.ContentType ?? "image/jpeg",
+                    Data = fileBytes,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+            uploadedUrls.Add($"/uploads/{uniqueFileName}");
+        }
 
-                var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-                if (!isValid)
-                {
-                    continue; // Пропускаємо небезпечні або непідтримувані файли
-                }
-
-                var cleanName = System.Text.RegularExpressions.Regex.Replace(Path.GetFileNameWithoutExtension(file.FileName), @"[^a-zA-Z0-9_\-]", "");
-                var uniqueFileName = $"{Guid.NewGuid()}{(string.IsNullOrEmpty(cleanName) ? "" : "_" + cleanName)}{extension}";
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    await file.CopyToAsync(memoryStream);
-                    var fileBytes = memoryStream.ToArray();
-
-                    await System.IO.File.WriteAllBytesAsync(filePath, fileBytes);
-
-                    try
-                    {
-                        var stored = new TradeStorm.Api.Models.StoredFile
-                        {
-                            FileName = uniqueFileName,
-                            ContentType = file.ContentType ?? "image/jpeg",
-                            Data = fileBytes,
-                            CreatedAt = DateTime.UtcNow
-                        };
-                        _context.StoredFiles.Add(stored);
-                        await _context.SaveChangesAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[StoredFile] DB persist warning: {ex.Message}");
-                    }
-                }
-                uploadedUrls.Add($"/uploads/{uniqueFileName}");
+        if (storedBatch.Count > 0)
+        {
+            try
+            {
+                _context.StoredFiles.AddRange(storedBatch);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[StoredFile] DB persist warning: {ex.Message}");
             }
         }
 

@@ -9,6 +9,7 @@ namespace TradeStorm.Api.Controllers;
 [Authorize]
 [Route("api/notifications")]
 [ApiController]
+[Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("PollingLimit")]
 public class NotificationsController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -23,6 +24,7 @@ public class NotificationsController : ControllerBase
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
         var notifs = await _context.Notifications
+            .AsNoTracking()
             .Where(n => n.UserId == userId)
             .OrderByDescending(n => n.CreatedAt)
             .Take(30)
@@ -53,16 +55,20 @@ public class NotificationsController : ControllerBase
     public async Task<IActionResult> MarkAsRead()
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-        var unread = await _context.Notifications
-            .Where(n => n.UserId == userId && !n.IsRead)
-            .ToListAsync();
-
-        foreach (var n in unread)
+        try
         {
-            n.IsRead = true;
+            await _context.Notifications
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead, true));
         }
-
-        await _context.SaveChangesAsync();
+        catch
+        {
+            var unread = await _context.Notifications
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .ToListAsync();
+            foreach (var n in unread) n.IsRead = true;
+            await _context.SaveChangesAsync();
+        }
         return Ok(new { message = "Позначено як прочитані" });
     }
 

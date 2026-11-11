@@ -2531,21 +2531,21 @@
             await loadNotifications();
             setInterval(() => {
                 if (!document.hidden) loadNotifications();
-            }, 20000);
+            }, 45000);
 
             // Інкрементальне фонове опитування лише нових повідомлень (?afterId=...)
             setInterval(() => {
                 if (!document.hidden && activeReceiverId) {
                     pollNewMessagesIncremental();
                 }
-            }, 4000);
+            }, 8000);
 
             // Легке оновлення верхньої частини діалогів без перевантаження сервера
             setInterval(() => {
                 if (!document.hidden) {
                     loadDialogs(false, true);
                 }
-            }, 12000);
+            }, 20000);
 
             if (sellerParam) {
                 const targetId = parseInt(sellerParam);
@@ -3900,8 +3900,8 @@
         };
     </script>
     <!-- Realtime In-App Push Notifications -->
-    <script src="/js/push-notifications.js?v=1.1"></script>
-    <script src="/js/responsive-nav.js?v=3.6" defer></script>
+    <script src="/js/push-notifications.js?v=1.2"></script>
+    <script src="/js/responsive-nav.js?v=3.7" defer></script>
     <script src="/js/loop-dialogs.js?v=1.1"></script>
     <script>
         // ==================== ПОЗНАЧЕННЯ ВСІХ ПОВІДОМЛЕНЬ ПРОЧИТАНИМИ ====================

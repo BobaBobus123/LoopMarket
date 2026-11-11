@@ -68,7 +68,15 @@ public class MessagesController : ControllerBase
 
         try
         {
-            await hubContext.Clients.User(dto.ReceiverId.ToString()).SendAsync("ReceiveMessage", senderId, msg.Text, msg.SentAt);
+            var conns = ChatHub.GetConnectionsForUser(dto.ReceiverId);
+            if (conns.Count > 0)
+            {
+                await hubContext.Clients.Clients(conns).SendAsync("ReceiveMessage", senderId, msg.Text, msg.SentAt);
+            }
+            else
+            {
+                await hubContext.Clients.User(dto.ReceiverId.ToString()).SendAsync("ReceiveMessage", senderId, msg.Text, msg.SentAt);
+            }
         }
         catch { }
 

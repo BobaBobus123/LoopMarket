@@ -12,12 +12,29 @@ public class ChatHub : Hub
 {
     private readonly AppDbContext _context;
     private readonly TelegramBotService _telegramService;
-    private static readonly ConcurrentDictionary<int, string> _userConnections = new();
+    private readonly IBackgroundTaskQueue? _taskQueue;
+    private static readonly ConcurrentDictionary<int, ConcurrentDictionary<string, byte>> _userConnections = new();
 
-    public ChatHub(AppDbContext context, TelegramBotService telegramService)
+    public ChatHub(AppDbContext context, TelegramBotService telegramService, IBackgroundTaskQueue? taskQueue = null)
     {
         _context = context;
         _telegramService = telegramService;
+        _taskQueue = taskQueue;
+    }
+
+    private static void AddConnection(int userId, string connectionId)
+    {
+        var set = _userConnections.GetOrAdd(userId, _ => new ConcurrentDictionary<string, byte>());
+        set[connectionId] = 0;
+    }
+
+    public static IReadOnlyList<string> GetConnectionsForUser(int userId)
+    {
+        if (_userConnections.TryGetValue(userId, out var set) && !set.IsEmpty)
+        {
+            return set.Keys.ToList();
+        }
+        return Array.Empty<string>();
     }
 
     public override Task OnConnectedAsync()
@@ -25,24 +42,20 @@ public class ChatHub : Hub
         var userIdStr = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
         if (int.TryParse(userIdStr, out int userId))
         {
-            _userConnections[userId] = Context.ConnectionId;
-            Console.WriteLine($"✅ Користувач ID {userId} автентифікований в SignalR (ConnectionId: {Context.ConnectionId})");
+            AddConnection(userId, Context.ConnectionId);
         }
         return base.OnConnectedAsync();
     }
 
     public Task RegisterUser(int userId)
     {
-        // Якщо користувач автентифікований, перевіряємо відповідність
         var authUserIdStr = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
         if (int.TryParse(authUserIdStr, out int authUserId) && authUserId != userId)
         {
-            Console.WriteLine($"⚠️ Спроба підміни ID: токен={authUserId}, запит={userId}");
             userId = authUserId;
         }
 
-        _userConnections[userId] = Context.ConnectionId;
-        Console.WriteLine($"✅ Користувач ID {userId} зареєстрований в SignalR (ConnectionId: {Context.ConnectionId})");
+        AddConnection(userId, Context.ConnectionId);
         return Task.CompletedTask;
     }
 
@@ -50,10 +63,9 @@ public class ChatHub : Hub
     {
         foreach (var pair in _userConnections)
         {
-            if (pair.Value == Context.ConnectionId)
+            if (pair.Value.TryRemove(Context.ConnectionId, out _) && pair.Value.IsEmpty)
             {
-                _userConnections.TryRemove(pair.Key, out _);
-                break;
+                _userConnections.TryRemove(new KeyValuePair<int, ConcurrentDictionary<string, byte>>(pair.Key, pair.Value));
             }
         }
         return base.OnDisconnectedAsync(exception);
@@ -69,9 +81,10 @@ public class ChatHub : Hub
 
         if (int.TryParse(receiverIdStr, out int receiverId))
         {
-            if (_userConnections.TryGetValue(receiverId, out var connectionId))
+            var connections = GetConnectionsForUser(receiverId);
+            if (connections.Count > 0)
             {
-                await Clients.Client(connectionId).SendAsync("UserIsTyping", senderIdStr);
+                await Clients.Clients(connections).SendAsync("UserIsTyping", senderIdStr);
             }
         }
     }
@@ -164,33 +177,46 @@ public class ChatHub : Hub
 
                 await _context.SaveChangesAsync();
 
-                // 3. Відправляємо через SignalR отримувачу (якщо онлайн)
-                if (_userConnections.TryGetValue(receiverId, out var receiverConnectionId))
+                // 3. Відправляємо через SignalR на всі відкриті вкладки/пристрої отримувача та відправника
+                var receiverConnections = GetConnectionsForUser(receiverId);
+                if (receiverConnections.Count > 0)
                 {
-                    await Clients.Client(receiverConnectionId).SendAsync("ReceiveMessage", senderIdStr, receiverIdStr, text);
-                    await Clients.Client(receiverConnectionId).SendAsync("ReceiveNotification", notification);
+                    await Clients.Clients(receiverConnections).SendAsync("ReceiveMessage", senderIdStr, receiverIdStr, text);
+                    await Clients.Clients(receiverConnections).SendAsync("ReceiveNotification", notification);
                 }
 
-                // Також відправляємо підтвердження відправнику
-                if (_userConnections.TryGetValue(senderId, out var senderConnectionId))
+                var senderConnections = GetConnectionsForUser(senderId);
+                if (senderConnections.Count > 0)
                 {
-                    await Clients.Client(senderConnectionId).SendAsync("ReceiveMessage", senderIdStr, receiverIdStr, text);
+                    await Clients.Clients(senderConnections).SendAsync("ReceiveMessage", senderIdStr, receiverIdStr, text);
                 }
 
-                // 4. Сповіщення в Telegram
-                var receiver = await _context.Users.FindAsync(receiverId);
+                // 4. Асинхронне сповіщення в Telegram (через чергу, щоб не блокувати SignalR)
+                var receiver = await _context.Users.AsNoTracking()
+                    .Where(u => u.Id == receiverId)
+                    .Select(u => new { u.TelegramChatId, u.ReceiveTelegramNotifications })
+                    .FirstOrDefaultAsync();
+
                 if (receiver != null && receiver.TelegramChatId != 0 && receiver.ReceiveTelegramNotifications)
                 {
-                    // 🛡️ Захист від надсилання сповіщення відправнику про власне повідомлення або на той самий TelegramChatId
-                    var senderUser = sender ?? await _context.Users.FindAsync(senderId);
-                    if (senderUser != null && senderUser.TelegramChatId == receiver.TelegramChatId)
+                    var senderTgId = sender?.TelegramChatId ?? await _context.Users.AsNoTracking()
+                        .Where(u => u.Id == senderId)
+                        .Select(u => u.TelegramChatId)
+                        .FirstOrDefaultAsync();
+
+                    if (senderTgId != receiver.TelegramChatId)
                     {
-                        Console.WriteLine($"⚠️ Пропуск Telegram-сповіщення: у відправника ID {senderId} та отримувача ID {receiverId} однаковий TelegramChatId ({receiver.TelegramChatId})!");
-                    }
-                    else
-                    {
+                        var targetChatId = receiver.TelegramChatId;
                         string notificationText = $"💬 Нове повідомлення від {senderName}:\n\"{text}\"\n\nПерейдіть на Loop Market, щоб відповісти!";
-                        await _telegramService.SendNotificationAsync(receiver.TelegramChatId, notificationText);
+                        if (_taskQueue != null)
+                        {
+                            await _taskQueue.QueueBackgroundWorkItemAsync(async _ =>
+                                await _telegramService.SendNotificationAsync(targetChatId, notificationText));
+                        }
+                        else
+                        {
+                            await _telegramService.SendNotificationAsync(targetChatId, notificationText);
+                        }
                     }
                 }
             }

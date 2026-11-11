@@ -83,6 +83,17 @@ public static class DatabaseSchemaInitializer
             TargetPage = COALESCE(TargetPage, 'all'),
             Placement = COALESCE(Placement, 'top')
             WHERE Title IS NULL OR Message IS NULL OR Type IS NULL OR TargetPage IS NULL OR Placement IS NULL;");
+
+        // Індекси для стабільної роботи під високим навантаженням
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS IX_Users_Email ON Users(Email);");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS IX_Users_PhoneNumber ON Users(PhoneNumber);");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS IX_Users_TelegramChatId ON Users(TelegramChatId);");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS IX_Listings_SellerId_Status ON Listings(SellerId, Status);");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS IX_Listings_Status_CreatedAt ON Listings(Status, CreatedAt);");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS IX_StoredFiles_FileName ON StoredFiles(FileName);");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS IX_Notifications_UserId_IsRead_CreatedAt ON Notifications(UserId, IsRead, CreatedAt);");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS IX_Reviews_TargetUserId ON Reviews(TargetUserId);");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS IX_SiteAnnouncements_Active ON SiteAnnouncements(IsActive, TargetPage, Placement, CreatedAt);");
     }
 
     private static void EnsurePostgresSchema(AppDbContext db)
@@ -148,6 +159,17 @@ public static class DatabaseSchemaInitializer
             ""TargetPage"" = COALESCE(""TargetPage"", 'all'),
             ""Placement"" = COALESCE(""Placement"", 'top')
             WHERE ""Title"" IS NULL OR ""Message"" IS NULL OR ""Type"" IS NULL OR ""TargetPage"" IS NULL OR ""Placement"" IS NULL;");
+
+        // Індекси PostgreSQL для високого навантаження
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS ""IX_Users_Email"" ON ""Users""(""Email"");");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS ""IX_Users_PhoneNumber"" ON ""Users""(""PhoneNumber"");");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS ""IX_Users_TelegramChatId"" ON ""Users""(""TelegramChatId"");");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS ""IX_Listings_SellerId_Status"" ON ""Listings""(""SellerId"", ""Status"");");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS ""IX_Listings_Status_CreatedAt"" ON ""Listings""(""Status"", ""CreatedAt"");");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS ""IX_StoredFiles_FileName"" ON ""StoredFiles""(""FileName"");");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS ""IX_Notifications_UserId_IsRead_CreatedAt"" ON ""Notifications""(""UserId"", ""IsRead"", ""CreatedAt"");");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS ""IX_Reviews_TargetUserId"" ON ""Reviews""(""TargetUserId"");");
+        TryExecute(db, @"CREATE INDEX IF NOT EXISTS ""IX_SiteAnnouncements_Active"" ON ""SiteAnnouncements""(""IsActive"", ""TargetPage"", ""Placement"", ""CreatedAt"");");
     }
 
     private static void TryExecute(AppDbContext db, string sql)

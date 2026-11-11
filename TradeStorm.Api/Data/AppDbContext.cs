@@ -105,5 +105,27 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Complaint>()
             .HasIndex(c => c.Status);
+
+        // Додаткові індекси для високого навантаження (автентифікація, Telegram-бот, сповіщення, файли)
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email);
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.PhoneNumber);
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.TelegramChatId);
+
+        modelBuilder.Entity<Listing>()
+            .HasIndex(l => new { l.SellerId, l.Status });
+
+        modelBuilder.Entity<StoredFile>()
+            .HasIndex(f => f.FileName);
+
+        modelBuilder.Entity<Notification>()
+            .HasIndex(n => new { n.UserId, n.IsRead, n.CreatedAt });
+
+        modelBuilder.Entity<Review>()
+            .HasIndex(r => r.TargetUserId);
     }
 }

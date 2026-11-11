@@ -5704,8 +5704,8 @@
         }
     </script>
     <!-- Realtime In-App Push Notifications -->
-    <script src="/js/push-notifications.js?v=1.1"></script>
-    <script src="/js/responsive-nav.js?v=3.6" defer></script>
+    <script src="/js/push-notifications.js?v=1.2"></script>
+    <script src="/js/responsive-nav.js?v=3.7" defer></script>
     <script src="/js/loop-dialogs.js?v=1.1"></script>
     <script src="/js/cookie-consent.js?v=1.1"></script>
     <script>
@@ -5828,7 +5828,7 @@
             }
         }
         updateUnreadChatBadge();
-        setInterval(updateUnreadChatBadge, 15000);
+        setInterval(() => { if (!document.hidden) updateUnreadChatBadge(); }, 30000);
 
     
         // ==================== РЕНДЕР ДЕТАЛЕЙ ТА СХОЖИХ ПРОПОЗИЦІЙ ====================

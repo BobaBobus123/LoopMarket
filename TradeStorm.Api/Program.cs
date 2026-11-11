@@ -66,7 +66,10 @@ var isPostgres = dbProvider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreC
                  dbProvider.Equals("Postgres", StringComparison.OrdinalIgnoreCase) ||
                  !string.IsNullOrEmpty(pgEnvUrl);
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+var isTestEnvDb = builder.Environment.IsEnvironment("Testing") ||
+                  AppDomain.CurrentDomain.FriendlyName.Contains("testhost", StringComparison.OrdinalIgnoreCase);
+
+Action<DbContextOptionsBuilder> configureDbContext = options =>
 {
     if (isPostgres)
     {
@@ -80,7 +83,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             pgConn = builder.Configuration.GetConnectionString("DefaultConnection");
         }
         pgConn = NormalizePostgresConnectionString(pgConn);
-        options.UseNpgsql(pgConn);
+        options.UseNpgsql(pgConn, npgsql => npgsql.CommandTimeout(30));
     }
     else
     {
@@ -98,7 +101,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         }
         options.UseSqlite(connStr);
     }
-});
+};
+
+if (isTestEnvDb)
+{
+    builder.Services.AddDbContext<AppDbContext>(configureDbContext);
+}
+else
+{
+    builder.Services.AddDbContextPool<AppDbContext>(configureDbContext, poolSize: 128);
+}
 
 // RFC 7807 стандартизована обробка помилок (Етап 2)
 builder.Services.AddProblemDetails();
@@ -133,7 +145,7 @@ builder.Services.AddHttpClient("NovaPoshtaClient", client =>
 builder.Services.AddScoped<INovaPoshtaService, NovaPoshtaService>();
 
 // Фонова черга задач без зовнішнього брокера (Етап 4)
-builder.Services.AddSingleton<IBackgroundTaskQueue>(new BackgroundTaskQueue(100));
+builder.Services.AddSingleton<IBackgroundTaskQueue>(new BackgroundTaskQueue(1000));
 builder.Services.AddHostedService<QueuedHostedService>();
 
 // Зовнішня автентифікація OAuth 2.0 (Етап 7)
@@ -215,49 +227,61 @@ builder.Services.AddRateLimiter(options =>
         return ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
     }
 
-    // Обмеження для автентифікації та реєстрації (15 запитів на хвилину на IP у продакшені, безліміт у тестах)
+    // Обмеження для автентифікації та реєстрації (20 запитів на хвилину на IP у продакшені, безліміт у тестах)
     options.AddPolicy("AuthRateLimit", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
             ResolveClientIp(httpContext),
             _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = isTestEnvironment ? 5000 : 15,
+                PermitLimit = isTestEnvironment ? 5000 : 20,
                 Window = TimeSpan.FromMinutes(1),
-                QueueLimit = 0
+                QueueLimit = 2
             }));
 
-    // Обмеження для створення оголошень та завантаження фото (15 запитів на хвилину)
+    // Політика для легких status-polling ендпоінтів (Telegram вхід/верифікація, сповіщення)
+    options.AddPolicy("PollingLimit", httpContext =>
+        RateLimitPartition.GetSlidingWindowLimiter(
+            httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? ResolveClientIp(httpContext),
+            _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = isTestEnvironment ? 5000 : 120,
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 6,
+                QueueLimit = 4
+            }));
+
+    // Обмеження для створення оголошень та завантаження фото (20 запитів на хвилину)
     options.AddPolicy("CreateListingLimit", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
             httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? ResolveClientIp(httpContext),
             _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 15,
+                PermitLimit = isTestEnvironment ? 5000 : 20,
                 Window = TimeSpan.FromMinutes(1),
-                QueueLimit = 0
+                QueueLimit = 2
             }));
 
-    // Обмеження для відправки повідомлень у чаті (60 повідомлень на хвилину)
+    // Обмеження для відправки повідомлень у чаті (90 повідомлень на хвилину)
     options.AddPolicy("MessagesLimit", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
             httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? ResolveClientIp(httpContext),
             _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 60,
+                PermitLimit = isTestEnvironment ? 5000 : 90,
                 Window = TimeSpan.FromMinutes(1),
-                QueueLimit = 2
+                QueueLimit = 4
             }));
 
-    // Глобальне обмеження для захисту від DDoS та скрапінгу (150 запитів на хвилину на IP)
+    // Глобальне обмеження для захисту від DDoS та скрапінгу (300 запитів на хвилину на IP)
     options.AddPolicy("GlobalApiLimit", httpContext =>
         RateLimitPartition.GetSlidingWindowLimiter(
             ResolveClientIp(httpContext),
             _ => new SlidingWindowRateLimiterOptions
             {
-                PermitLimit = 150,
+                PermitLimit = isTestEnvironment ? 10000 : 300,
                 Window = TimeSpan.FromMinutes(1),
                 SegmentsPerWindow = 6,
-                QueueLimit = 10
+                QueueLimit = 20
             }));
 });
 
@@ -426,11 +450,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// RFC 7807 Exception Handler
-app.UseExceptionHandler();
-app.UseStatusCodePagesWithReExecute("/404.html");
-
-// Cloudflare & Reverse Proxy Forwarded Headers (отримання справжнього IP клієнта та HTTPS протоколу)
+// Cloudflare & Reverse Proxy Forwarded Headers (отримання справжнього IP клієнта та HTTPS протоколу перед обробкою помилок і rate-limiter)
 var forwardedOptions = new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
@@ -438,6 +458,10 @@ var forwardedOptions = new ForwardedHeadersOptions
 forwardedOptions.KnownIPNetworks.Clear();
 forwardedOptions.KnownProxies.Clear();
 app.UseForwardedHeaders(forwardedOptions);
+
+// RFC 7807 Exception Handler
+app.UseExceptionHandler();
+app.UseStatusCodePagesWithReExecute("/404.html");
 
 // Заголовки безпеки (OWASP & Cloudflare Anti-DDoS / Anti-Tamper Security Headers)
 app.Use(async (context, next) =>
@@ -456,8 +480,6 @@ app.Use(async (context, next) =>
 
 // Застосування політики CORS (Етап 6)
 app.UseCors("AllowClientApps");
-
-app.UseRateLimiter();
 
 if (app.Environment.IsDevelopment())
 {
@@ -494,6 +516,7 @@ app.UseStaticFiles(new StaticFileOptions
     }
 });
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 
 // Стандартний Health Check Endpoint (Етап 1)
@@ -502,12 +525,14 @@ app.MapHealthChecks("/health");
 app.MapControllers();
 
 // Ендпоінт автоматичного відновлення збережених медіафайлів із бази даних (захист від втрати даних на Render)
-app.MapGet("/uploads/{fileName}", async (string fileName, TradeStorm.Api.Data.AppDbContext db, IWebHostEnvironment env) =>
+app.MapGet("/uploads/{fileName}", async (string fileName, TradeStorm.Api.Data.AppDbContext db, IWebHostEnvironment env, HttpContext httpContext) =>
 {
     var cleanFileName = Path.GetFileName(fileName);
     var webRoot = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
     var uploadsFolder = Path.Combine(webRoot, "uploads");
     var filePath = Path.Combine(uploadsFolder, cleanFileName);
+
+    httpContext.Response.Headers["Cache-Control"] = "public, max-age=604800, stale-while-revalidate=86400";
 
     if (File.Exists(filePath))
     {
@@ -526,7 +551,7 @@ app.MapGet("/uploads/{fileName}", async (string fileName, TradeStorm.Api.Data.Ap
         return Results.File(filePath, ct);
     }
 
-    var stored = await db.StoredFiles.FirstOrDefaultAsync(f => f.FileName == cleanFileName);
+    var stored = await db.StoredFiles.AsNoTracking().FirstOrDefaultAsync(f => f.FileName == cleanFileName);
     if (stored != null && stored.Data != null && stored.Data.Length > 0)
     {
         try

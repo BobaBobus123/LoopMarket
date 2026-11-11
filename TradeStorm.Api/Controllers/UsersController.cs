@@ -36,7 +36,7 @@ namespace TradeStorm.Api.Controllers;
 
 [Route("api/[controller]")]
 
-[EnableRateLimiting("AuthRateLimit")]
+[EnableRateLimiting("GlobalApiLimit")]
 
 public class UsersController : ControllerBase
 
@@ -141,6 +141,8 @@ public class UsersController : ControllerBase
     [HttpPost]
 
     [HttpPost("register")]
+
+    [EnableRateLimiting("AuthRateLimit")]
 
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto)
 
@@ -270,6 +272,15 @@ public class UsersController : ControllerBase
 
 
 
+        if (_verificationTickets.Count > 256)
+        {
+            var nowPrune = DateTime.UtcNow;
+            foreach (var kv in _verificationTickets)
+            {
+                if (kv.Value.Expiry < nowPrune) _verificationTickets.TryRemove(kv.Key, out _);
+            }
+        }
+
         var ticket = Guid.NewGuid().ToString("N");
 
         _verificationTickets[user.Id] = (ticket, DateTime.UtcNow.AddMinutes(15));
@@ -317,6 +328,8 @@ public class UsersController : ControllerBase
     [HttpGet("verify-status")]
 
     [AllowAnonymous]
+
+    [EnableRateLimiting("PollingLimit")]
 
     public async Task<IActionResult> CheckVerifyStatus([FromQuery] int userId, [FromQuery] string? ticket)
 
@@ -411,6 +424,8 @@ public class UsersController : ControllerBase
     [HttpPost("verify-registration-code")]
 
     [AllowAnonymous]
+
+    [EnableRateLimiting("AuthRateLimit")]
 
     public async Task<IActionResult> VerifyRegistrationCode([FromBody] VerifyRegistrationCodeDto dto)
 
@@ -546,6 +561,8 @@ public class UsersController : ControllerBase
 
     [AllowAnonymous]
 
+    [EnableRateLimiting("AuthRateLimit")]
+
     public async Task<IActionResult> ResendRegistrationCode([FromBody] ResendRegistrationCodeDto dto)
 
     {
@@ -621,6 +638,8 @@ public class UsersController : ControllerBase
 
 
     [HttpPost("login")]
+
+    [EnableRateLimiting("AuthRateLimit")]
 
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
 
@@ -716,6 +735,10 @@ public class UsersController : ControllerBase
 
         {
 
+            var loginTicket = Guid.NewGuid().ToString("N");
+
+            _verificationTickets[user.Id] = (loginTicket, DateTime.UtcNow.AddMinutes(15));
+
             return Ok(new
 
             {
@@ -729,6 +752,8 @@ public class UsersController : ControllerBase
                 role = user.Role,
 
                 isEmailVerified = false,
+
+                verificationTicket = loginTicket,
 
                 error = "Номер телефону або пошту не підтверджено"
 
@@ -2150,6 +2175,8 @@ public class UsersController : ControllerBase
 
     [Authorize]
 
+    [EnableRateLimiting("AuthRateLimit")]
+
     public async Task<IActionResult> SendEmailVerificationCode()
 
     {
@@ -2246,6 +2273,8 @@ public class UsersController : ControllerBase
     [HttpPost("verify-email-code")]
 
     [Authorize]
+
+    [EnableRateLimiting("AuthRateLimit")]
 
     public async Task<IActionResult> VerifyEmailCode([FromBody] VerifyEmailCodeDto dto)
 
@@ -2587,13 +2616,15 @@ public class UsersController : ControllerBase
 
 
 
-        // 1. Оголошення продавця
+        // 1. Оголошення продавця (легка проекція без зайвих полів)
 
         var listings = await _context.Listings
 
             .AsNoTracking()
 
             .Where(l => l.SellerId == id)
+
+            .Select(l => new { l.Id, l.Title, l.Price, l.ViewsCount, l.Status, l.ImageUrl, l.CategoryId })
 
             .ToListAsync();
 
@@ -2607,37 +2638,41 @@ public class UsersController : ControllerBase
 
         // 2. Вподобання
 
-        var listingIds = listings.Select(l => l.Id).ToList();
-
-        int totalFavs = await _context.Favorites.CountAsync(f => listingIds.Contains(f.ListingId));
+        int totalFavs = await _context.Favorites.CountAsync(f => _context.Listings.Any(l => l.Id == f.ListingId && l.SellerId == id));
 
 
 
-        // 3. Завершені угоди (АНТИФРОД: тільки успішно закриті замовлення без самовикупу BuyerId != SellerId)
+        // 3. Завершені угоди (SQL агрегація замість завантаження всіх рядків)
 
-        var completedOrders = await _context.Orders
+        var orderStats = await _context.Orders
 
             .AsNoTracking()
 
             .Where(o => o.SellerId == id && o.Status == "Completed" && o.BuyerId != id)
 
-            .ToListAsync();
+            .GroupBy(_ => 1)
+
+            .Select(g => new { Count = g.Count(), Sum = g.Sum(o => o.TotalPrice) })
+
+            .FirstOrDefaultAsync();
 
 
 
-        int completedCount = completedOrders.Count;
+        int completedCount = orderStats?.Count ?? 0;
 
-        decimal totalRevenue = completedOrders.Sum(o => o.TotalPrice);
+        decimal totalRevenue = orderStats?.Sum ?? 0m;
 
 
 
-        // 4. Рейтинг та відгуки
+        // 4. Рейтинг та відгуки (легка проекція)
 
         var reviews = await _context.Reviews
 
             .AsNoTracking()
 
             .Where(r => r.TargetUserId == id)
+
+            .Select(r => new { r.Rating, r.IsVerifiedPurchase })
 
             .ToListAsync();
 
@@ -2841,7 +2876,11 @@ public class UsersController : ControllerBase
 
         var listings = await _context.Listings
 
+            .AsNoTracking()
+
             .Where(l => l.SellerId == userId)
+
+            .Select(l => new { l.Id, l.Title, l.Price, l.ViewsCount, l.Status, l.ImageUrl, l.CategoryId })
 
             .ToListAsync();
 
@@ -2853,17 +2892,19 @@ public class UsersController : ControllerBase
 
 
 
-        var listingIds = listings.Select(l => l.Id).ToList();
-
         var totalFavorites = await _context.Favorites
 
-            .CountAsync(f => listingIds.Contains(f.ListingId));
+            .CountAsync(f => _context.Listings.Any(l => l.Id == f.ListingId && l.SellerId == userId));
 
 
 
         var sellerOrders = await _context.Orders
 
+            .AsNoTracking()
+
             .Where(o => o.SellerId == userId)
+
+            .Select(o => new { o.Status, o.TotalPrice })
 
             .ToListAsync();
 
@@ -2881,7 +2922,11 @@ public class UsersController : ControllerBase
 
         var reviews = await _context.Reviews
 
+            .AsNoTracking()
+
             .Where(r => r.TargetUserId == userId)
+
+            .Select(r => new { r.Rating, r.IsVerifiedPurchase })
 
             .ToListAsync();
 

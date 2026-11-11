@@ -3097,7 +3097,7 @@
 
         if (token) {
             loadNotifications();
-            setInterval(loadNotifications, 15000);
+            setInterval(() => { if (!document.hidden) loadNotifications(); }, 45000);
             fetch('/api/favorites/ids', {
                 headers: { 'Authorization': 'Bearer ' + token }
             })
@@ -4216,8 +4216,8 @@
 
     </script>
     <!-- Realtime In-App Push Notifications -->
-    <script src="/js/push-notifications.js?v=1.1"></script>
-    <script src="/js/responsive-nav.js?v=3.6" defer></script>
+    <script src="/js/push-notifications.js?v=1.2"></script>
+    <script src="/js/responsive-nav.js?v=3.7" defer></script>
     <script src="/js/loop-dialogs.js?v=1.1"></script>
     <script>
         // ========================================================
@@ -4483,7 +4483,7 @@
 
         // Періодичне оновлення лічильника кожні 15 секунд
         updateUnreadChatBadge();
-        setInterval(updateUnreadChatBadge, 15000);
+        setInterval(() => { if (!document.hidden) updateUnreadChatBadge(); }, 30000);
 
     </script>
 

@@ -273,6 +273,7 @@ public class AuthController : ControllerBase
     /// Перевірка статусу підтвердження входу через Telegram
     /// </summary>
     [HttpGet("telegram/check-login")]
+    [EnableRateLimiting("PollingLimit")]
     public IActionResult CheckTelegramLogin([FromQuery] string code)
     {
         if (string.IsNullOrEmpty(code) || !TelegramBotService.LoginSessions.TryGetValue(code, out var session))

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.Security.Claims;
 using System.Text;
 using TradeStorm.Api.Data;
@@ -17,18 +18,30 @@ namespace TradeStorm.Api.Controllers;
 [Authorize(Roles = UserRoles.Admin)]
 public class AdminOperationsController : ControllerBase
 {
+    private static long _announcementCacheVersion;
     private readonly AppDbContext _context;
     private readonly TelegramBotService _telegramService;
     private readonly IHubContext<ChatHub> _hubContext;
+    private readonly IMemoryCache? _cache;
+    private readonly IBackgroundTaskQueue? _taskQueue;
 
     public AdminOperationsController(
         AppDbContext context,
         TelegramBotService telegramService,
-        IHubContext<ChatHub> hubContext)
+        IHubContext<ChatHub> hubContext,
+        IMemoryCache? cache = null,
+        IBackgroundTaskQueue? taskQueue = null)
     {
         _context = context;
         _telegramService = telegramService;
         _hubContext = hubContext;
+        _cache = cache;
+        _taskQueue = taskQueue;
+    }
+
+    private static void InvalidateAnnouncementCache()
+    {
+        Interlocked.Increment(ref _announcementCacheVersion);
     }
 
     private int GetAdminId()
@@ -107,8 +120,19 @@ public class AdminOperationsController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetActiveAnnouncement([FromQuery] string? page = null, [FromQuery] string? placement = null)
     {
+        var ver = Interlocked.Read(ref _announcementCacheVersion);
+        var normPage = string.IsNullOrWhiteSpace(page) ? "all" : page.Trim().ToLowerInvariant();
+        var normPlacement = string.IsNullOrWhiteSpace(placement) ? "all" : placement.Trim().ToLowerInvariant();
+        var cacheKey = $"loopmarket_announcement_active_v{ver}_{normPage}_{normPlacement}";
+
+        if (_cache != null && _cache.TryGetValue(cacheKey, out object? cachedPayload) && cachedPayload != null)
+        {
+            return Ok(cachedPayload);
+        }
+
         var now = DateTime.UtcNow;
         var query = _context.SiteAnnouncements
+            .AsNoTracking()
             .Where(a => a.IsActive && (!a.ExpiresAt.HasValue || a.ExpiresAt.Value > now));
 
         if (!string.IsNullOrWhiteSpace(page) && page != "all")
@@ -123,66 +147,75 @@ public class AdminOperationsController : ControllerBase
         var activeList = await query.OrderByDescending(a => a.CreatedAt).ToListAsync();
         var primary = activeList.FirstOrDefault();
 
-        if (primary == null) return Ok(new { hasActive = false, announcements = new object[0] });
-
-        var infoBanner = activeList.FirstOrDefault(a => (a.Placement ?? "top") == "top" || a.Placement == "header" || a.Placement == "modal");
-        var adBanner = activeList.FirstOrDefault(a => (a.Placement ?? string.Empty).StartsWith("sidebar", StringComparison.OrdinalIgnoreCase) || a.Placement == "catalog" || (a.Type ?? string.Empty) == "promo");
-
-        return Ok(new
+        object payload;
+        if (primary == null)
         {
-            hasActive = true,
-            id = primary.Id,
-            title = primary.Title,
-            message = primary.Message,
-            type = primary.Type,
-            targetPage = primary.TargetPage,
-            placement = primary.Placement,
-            actionText = primary.ActionText,
-            actionUrl = primary.ActionUrl,
-            imageUrl = primary.ImageUrl,
-            expiresAt = primary.ExpiresAt,
-            createdAt = primary.CreatedAt,
-            infoBanner = infoBanner != null ? new
+            payload = new { hasActive = false, announcements = new object[0] };
+        }
+        else
+        {
+            var infoBanner = activeList.FirstOrDefault(a => (a.Placement ?? "top") == "top" || a.Placement == "header" || a.Placement == "modal");
+            var adBanner = activeList.FirstOrDefault(a => (a.Placement ?? string.Empty).StartsWith("sidebar", StringComparison.OrdinalIgnoreCase) || a.Placement == "catalog" || (a.Type ?? string.Empty) == "promo");
+
+            payload = new
             {
-                id = infoBanner.Id,
-                title = infoBanner.Title,
-                message = infoBanner.Message,
-                type = infoBanner.Type,
-                targetPage = infoBanner.TargetPage,
-                placement = infoBanner.Placement,
-                actionText = infoBanner.ActionText,
-                actionUrl = infoBanner.ActionUrl,
-                imageUrl = infoBanner.ImageUrl,
-                expiresAt = infoBanner.ExpiresAt
-            } : null,
-            adBanner = adBanner != null ? new
-            {
-                id = adBanner.Id,
-                title = adBanner.Title,
-                message = adBanner.Message,
-                type = adBanner.Type,
-                targetPage = adBanner.TargetPage,
-                placement = adBanner.Placement,
-                actionText = adBanner.ActionText,
-                actionUrl = adBanner.ActionUrl,
-                imageUrl = adBanner.ImageUrl,
-                expiresAt = adBanner.ExpiresAt
-            } : null,
-            announcements = activeList.Select(a => new
-            {
-                id = a.Id,
-                title = a.Title,
-                message = a.Message,
-                type = a.Type,
-                targetPage = a.TargetPage,
-                placement = a.Placement,
-                actionText = a.ActionText,
-                actionUrl = a.ActionUrl,
-                imageUrl = a.ImageUrl,
-                expiresAt = a.ExpiresAt,
-                createdAt = a.CreatedAt
-            })
-        });
+                hasActive = true,
+                id = primary.Id,
+                title = primary.Title,
+                message = primary.Message,
+                type = primary.Type,
+                targetPage = primary.TargetPage,
+                placement = primary.Placement,
+                actionText = primary.ActionText,
+                actionUrl = primary.ActionUrl,
+                imageUrl = primary.ImageUrl,
+                expiresAt = primary.ExpiresAt,
+                createdAt = primary.CreatedAt,
+                infoBanner = infoBanner != null ? new
+                {
+                    id = infoBanner.Id,
+                    title = infoBanner.Title,
+                    message = infoBanner.Message,
+                    type = infoBanner.Type,
+                    targetPage = infoBanner.TargetPage,
+                    placement = infoBanner.Placement,
+                    actionText = infoBanner.ActionText,
+                    actionUrl = infoBanner.ActionUrl,
+                    imageUrl = infoBanner.ImageUrl,
+                    expiresAt = infoBanner.ExpiresAt
+                } : null,
+                adBanner = adBanner != null ? new
+                {
+                    id = adBanner.Id,
+                    title = adBanner.Title,
+                    message = adBanner.Message,
+                    type = adBanner.Type,
+                    targetPage = adBanner.TargetPage,
+                    placement = adBanner.Placement,
+                    actionText = adBanner.ActionText,
+                    actionUrl = adBanner.ActionUrl,
+                    imageUrl = adBanner.ImageUrl,
+                    expiresAt = adBanner.ExpiresAt
+                } : null,
+                announcements = activeList.Select(a => new
+                {
+                    id = a.Id,
+                    title = a.Title,
+                    message = a.Message,
+                    type = a.Type,
+                    targetPage = a.TargetPage,
+                    placement = a.Placement,
+                    actionText = a.ActionText,
+                    actionUrl = a.ActionUrl,
+                    imageUrl = a.ImageUrl,
+                    expiresAt = a.ExpiresAt,
+                    createdAt = a.CreatedAt
+                })
+            };
+        }
+
+        _cache?.Set(cacheKey, payload, TimeSpan.FromSeconds(30));
+        return Ok(payload);
     }
 
     // 1.1 СПИСОК УСІХ ОГОЛОШЕНЬ ДЛЯ АДМІН-ПАНЕЛІ
@@ -296,6 +329,7 @@ public class AdminOperationsController : ControllerBase
             return StatusCode(500, new { error = $"Не вдалося зберегти банер: {ex.GetBaseException().Message}" });
         }
 
+        InvalidateAnnouncementCache();
         await LogAuditAsync("SetAnnouncement", "Announcement", banner.Id, $"[{placement} / {targetPage}] {banner.Message}");
 
         return Ok(new
@@ -331,6 +365,7 @@ public class AdminOperationsController : ControllerBase
         {
             banner.IsActive = false;
             await _context.SaveChangesAsync();
+            InvalidateAnnouncementCache();
             await LogAuditAsync("RemoveAnnouncement", "Announcement", banner.Id, "Оголошення знято з сайту");
             return Ok(new { message = $"Оголошення #{banner.Id} деактивовано", id = banner.Id });
         }
@@ -348,6 +383,7 @@ public class AdminOperationsController : ControllerBase
         {
             _context.SiteAnnouncements.Remove(banner);
             await _context.SaveChangesAsync();
+            InvalidateAnnouncementCache();
             await LogAuditAsync("DeleteAnnouncement", "Announcement", id, "Оголошення видалено назавжди");
         }
         return Ok(new { message = "Оголошення видалено" });
@@ -373,44 +409,73 @@ public class AdminOperationsController : ControllerBase
             query = query.Where(u => u.Role == UserRoles.Buyer);
         }
 
-        var users = await query.ToListAsync();
+        var users = await query
+            .AsNoTracking()
+            .Select(u => new { u.Id, u.TelegramChatId, u.ReceiveTelegramNotifications })
+            .ToListAsync();
+
         int inAppCount = 0;
         int telegramCount = 0;
         var now = DateTime.UtcNow;
+        var titleResolved = string.IsNullOrWhiteSpace(dto.Title) ? "Оголошення LoopMarket" : dto.Title;
 
         if (dto.SendInApp)
         {
-            var notifs = users.Select(user => new Notification
+            foreach (var chunk in users.Chunk(500))
             {
-                UserId = user.Id,
-                Title = string.IsNullOrWhiteSpace(dto.Title) ? "Оголошення LoopMarket" : dto.Title,
-                Message = dto.Message,
-                Link = "/index.html",
-                IsRead = false,
-                CreatedAt = now
-            }).ToList();
+                var notifs = chunk.Select(user => new Notification
+                {
+                    UserId = user.Id,
+                    Title = titleResolved,
+                    Message = dto.Message,
+                    Link = "/index.html",
+                    IsRead = false,
+                    CreatedAt = now
+                }).ToList();
 
-            _context.Notifications.AddRange(notifs);
-            inAppCount = notifs.Count;
-            await _context.SaveChangesAsync();
+                _context.Notifications.AddRange(notifs);
+                await _context.SaveChangesAsync();
+                _context.ChangeTracker.Clear();
+                inAppCount += notifs.Count;
+            }
         }
 
         if (dto.SendTelegram)
         {
-            foreach (var user in users)
+            var tgTargets = users
+                .Where(u => u.TelegramChatId != 0 && u.ReceiveTelegramNotifications)
+                .Select(u => u.TelegramChatId)
+                .ToList();
+
+            string tgText = $"📢 <b>{dto.Title}</b>\n\n{dto.Message}\n\n<i>З повагою, команда безпеки Loop Market</i>";
+
+            if (_taskQueue != null && tgTargets.Count > 0)
             {
-                if (user.TelegramChatId != 0 && user.ReceiveTelegramNotifications)
+                await _taskQueue.QueueBackgroundWorkItemAsync(async ct =>
+                {
+                    foreach (var chatId in tgTargets)
+                    {
+                        if (ct.IsCancellationRequested) break;
+                        try
+                        {
+                            await _telegramService.SendNotificationAsync(chatId, tgText);
+                        }
+                        catch { }
+                        await Task.Delay(40, ct);
+                    }
+                });
+                telegramCount = tgTargets.Count;
+            }
+            else
+            {
+                foreach (var chatId in tgTargets)
                 {
                     try
                     {
-                        string tgText = $"📢 <b>{dto.Title}</b>\n\n{dto.Message}\n\n<i>З повагою, команда безпеки Loop Market</i>";
-                        await _telegramService.SendNotificationAsync(user.TelegramChatId, tgText);
+                        await _telegramService.SendNotificationAsync(chatId, tgText);
                         telegramCount++;
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[Broadcast TG Error] User {user.Id}: {ex.Message}");
-                    }
+                    catch { }
                 }
             }
         }

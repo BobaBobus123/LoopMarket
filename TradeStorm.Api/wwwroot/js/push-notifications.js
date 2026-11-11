@@ -383,8 +383,17 @@
     // 5. Automatic In-App Polling & Real-time Delivery
     const seenNotifications = new Set();
     let isInitialLoad = true;
+    let lastPollAt = 0;
 
-    async function checkNotifications() {
+    async function checkNotifications(force = false) {
+        if (!force && document.hidden) return;
+        const now = Date.now();
+        if (!force && !isInitialLoad) {
+            if (window.__loopSignalRConnected && (now - lastPollAt) < 60000) return;
+            if ((now - lastPollAt) < 10000) return;
+        }
+        lastPollAt = now;
+
         const token = localStorage.getItem('loopToken');
         if (!token) return;
 
@@ -452,15 +461,25 @@
         }
     }
 
-    // Start background check every 4.5 seconds
-    setInterval(checkNotifications, 4500);
-    setTimeout(checkNotifications, 600);
+    // Background fallback polling every 25s (skipped when tab hidden or SignalR is live <60s)
+    setInterval(() => checkNotifications(false), 25000);
+    setTimeout(() => checkNotifications(true), 600);
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && (Date.now() - lastPollAt) >= 25000) {
+            checkNotifications(false);
+        }
+    });
 
     // Export API
     window.LoopPushNotifications = {
         show: showToast,
         playChime: playChime,
-        checkNow: checkNotifications,
+        markSeen: function (id) {
+            if (id !== undefined && id !== null) seenNotifications.add(id);
+        },
+        checkNow: function () {
+            return checkNotifications(true);
+        },
         test: function () {
             showToast({
                 title: 'Нове сповіщення LoopMarket',

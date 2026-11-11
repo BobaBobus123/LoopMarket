@@ -1562,84 +1562,61 @@
         // АВТОМАТИЧНЕ ОПИТУВАННЯ СТАТУСУ ВЕРИФІКАЦІЇ В ТЕЛЕГРАМ (БЕЗ НАТИСКАННЯ КНОПОК)
 
         function startVerificationPolling(userId, ticket = "") {
-
             if (pollVerificationInterval) clearInterval(pollVerificationInterval);
-
+            let attempts = 0;
             pollVerificationInterval = setInterval(async () => {
-
-                try {
-
-                    const ticketParam = ticket ? `&ticket=${encodeURIComponent(ticket)}` : '';
-
-                    const res = await fetch(`/api/users/verify-status?userId=${userId}${ticketParam}`);
-
-                    if (!res.ok) return;
-
-                    const data = await res.json();
-
-                    if (data && data.isVerified) {
-
-                        clearInterval(pollVerificationInterval);
-
-                        pollVerificationInterval = null;
-
-                        const statusText = document.getElementById('verifyStatusText');
-
-                        if (statusText) statusText.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" fill="#10b981" fill-opacity="0.16"/><path d="m9 12 2 2 4-4"/></svg>Номер успішно підтверджено! Входимо...</span>';
-
-                        localStorage.setItem('loopToken', data.token);
-
-                        localStorage.setItem('token', data.token);
-
-                        if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
-
-                                            if (data.role) localStorage.setItem('loopUserRole', data.role);
-                    if (data.avatarUrl) {
-                        localStorage.setItem('loopUserAvatar', data.avatarUrl);
-                        if (data.userId) localStorage.setItem('userAvatar_' + data.userId, data.avatarUrl);
-                    } else if (data.user && data.user.avatarUrl) {
-                        localStorage.setItem('loopUserAvatar', data.user.avatarUrl);
-                        if (data.user.id) localStorage.setItem('userAvatar_' + data.user.id, data.user.avatarUrl);
-                    }
-
-                        if (data.role === 'Admin') {
-
-                            document.cookie = "loop_admin_session=" + encodeURIComponent(data.token) + "; path=/; max-age=86400; SameSite=Lax";
-
-                        }
-
-                        if (data.role === 'Admin') {
-
-                            document.cookie = "loop_admin_session=" + encodeURIComponent(data.token) + "; path=/; max-age=86400; SameSite=Lax";
-
-                        }
-
-                        setTimeout(() => {
-
-                            const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
-
-                            if (data.role === 'Admin') {
-
-                                window.location.href = returnUrl || '/admin.html';
-
-                            } else {
-
-                                window.location.href = returnUrl || '/index.html';
-
-                            }
-
-                        }, 500);
-
-                    }
-
-                } catch (e) {
-
-                    // тиха обробка опитування
-
+                if (document.hidden) return;
+                if (++attempts > 240) {
+                    clearInterval(pollVerificationInterval);
+                    pollVerificationInterval = null;
+                    const statusText = document.getElementById('verifyStatusText');
+                    if (statusText) statusText.textContent = 'Час очікування минув. Оновіть сторінку або увійдіть повторно.';
+                    return;
                 }
-
-            }, 1200);
-
+                try {
+                    const ticketParam = ticket ? `&ticket=${encodeURIComponent(ticket)}` : '';
+                    const res = await fetch(`/api/users/verify-status?userId=${encodeURIComponent(userId)}${ticketParam}`);
+                    if (res.status === 401 || res.status === 404) {
+                        clearInterval(pollVerificationInterval);
+                        pollVerificationInterval = null;
+                        const statusText = document.getElementById('verifyStatusText');
+                        if (statusText) statusText.textContent = 'Сесія перевірки застаріла. Будь ласка, увійдіть ще раз.';
+                        return;
+                    }
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    if (data && data.isVerified) {
+                        clearInterval(pollVerificationInterval);
+                        pollVerificationInterval = null;
+                        const statusText = document.getElementById('verifyStatusText');
+                        if (statusText) statusText.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" fill="#10b981" fill-opacity="0.16"/><path d="m9 12 2 2 4-4"/></svg>Номер успішно підтверджено! Входимо...</span>';
+                        localStorage.setItem('loopToken', data.token);
+                        localStorage.setItem('token', data.token);
+                        if (data.refreshToken) localStorage.setItem('loopRefreshToken', data.refreshToken);
+                        if (data.role) localStorage.setItem('loopUserRole', data.role);
+                        if (data.avatarUrl) {
+                            localStorage.setItem('loopUserAvatar', data.avatarUrl);
+                            if (data.userId) localStorage.setItem('userAvatar_' + data.userId, data.avatarUrl);
+                        } else if (data.user && data.user.avatarUrl) {
+                            localStorage.setItem('loopUserAvatar', data.user.avatarUrl);
+                            if (data.user.id) localStorage.setItem('userAvatar_' + data.user.id, data.user.avatarUrl);
+                        }
+                        if (data.role === 'Admin') {
+                            document.cookie = "loop_admin_session=" + encodeURIComponent(data.token) + "; path=/; max-age=86400; SameSite=Lax";
+                        }
+                        setTimeout(() => {
+                            const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+                            if (data.role === 'Admin') {
+                                window.location.href = returnUrl || '/admin.html';
+                            } else {
+                                window.location.href = returnUrl || '/index.html';
+                            }
+                        }, 500);
+                    }
+                } catch (e) {
+                    // тиха обробка опитування
+                }
+            }, 2500);
         }
 
         // 1. ОБРОБКА ВХОДУ (ЛОГІН)
@@ -2049,75 +2026,64 @@
         let tgPollingInterval = null;
 
         async function startTelegramLoginFlow() {
-
             try {
-
                 const res = await fetch('/api/auth/telegram/start');
-
                 const data = await res.json();
-
                 if (data && data.deepLink) {
-
                     const linkElem = document.getElementById('btnOpenTgDeepLink');
-
                     if (linkElem) linkElem.href = data.deepLink;
-
                     const modal = document.getElementById('telegramOAuthModal');
-
                     if (modal) modal.style.display = 'flex';
-
                     if (tgPollingInterval) clearInterval(tgPollingInterval);
-
+                    let checks = 0;
                     tgPollingInterval = setInterval(async () => {
-
+                        if (document.hidden) return;
+                        if (++checks > 120) {
+                            clearInterval(tgPollingInterval);
+                            tgPollingInterval = null;
+                            if (modal) modal.style.display = 'none';
+                            alert('Час очікування входу через Telegram минув. Спробуйте ще раз.');
+                            return;
+                        }
                         try {
-
-                            const checkRes = await fetch('/api/auth/telegram/check-login?code=' + data.code);
-
-                            const checkData = await checkRes.json();
-
-                            if (checkData.approved && data.token) {
-
+                            const checkRes = await fetch('/api/auth/telegram/check-login?code=' + encodeURIComponent(data.code));
+                            if (checkRes.status === 404 || checkRes.status === 410) {
                                 clearInterval(tgPollingInterval);
-
+                                tgPollingInterval = null;
                                 if (modal) modal.style.display = 'none';
-
-                                localStorage.setItem('loopToken', data.token);
-
-                                localStorage.setItem('token', data.token);
-
-                                if (checkData.refreshToken) localStorage.setItem('loopRefreshToken', checkData.refreshToken);
-
-                                const userRole = checkData.user?.role || 'Buyer';
-
-                                localStorage.setItem('loopUserRole', userRole);
-
-                                const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
-
-                                if (userRole === 'Admin') {
-
-                                    window.location.href = returnUrl || '/admin.html';
-
-                                } else {
-
-                                    window.location.href = returnUrl || '/index.html';
-
-                                }
-
+                                return;
                             }
-
+                            if (!checkRes.ok) return;
+                            const checkData = await checkRes.json();
+                            if (checkData.approved && checkData.token) {
+                                clearInterval(tgPollingInterval);
+                                tgPollingInterval = null;
+                                if (modal) modal.style.display = 'none';
+                                localStorage.setItem('loopToken', checkData.token);
+                                localStorage.setItem('token', checkData.token);
+                                if (checkData.refreshToken) localStorage.setItem('loopRefreshToken', checkData.refreshToken);
+                                const userRole = checkData.user?.role || 'Buyer';
+                                localStorage.setItem('loopUserRole', userRole);
+                                if (checkData.user?.avatarUrl) {
+                                    localStorage.setItem('loopUserAvatar', checkData.user.avatarUrl);
+                                    if (checkData.user.id) localStorage.setItem('userAvatar_' + checkData.user.id, checkData.user.avatarUrl);
+                                }
+                                if (userRole === 'Admin') {
+                                    document.cookie = "loop_admin_session=" + encodeURIComponent(checkData.token) + "; path=/; max-age=86400; SameSite=Lax";
+                                }
+                                const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+                                if (userRole === 'Admin') {
+                                    window.location.href = returnUrl || '/admin.html';
+                                } else {
+                                    window.location.href = returnUrl || '/index.html';
+                                }
+                            }
                         } catch (err) {}
-
-                    }, 1000);
-
+                    }, 2500);
                 }
-
             } catch (e) {
-
                 alert("Помилка зв'язку з Telegram-ботом");
-
             }
-
         }
 
         function closeTelegramOAuthModal() {
@@ -2330,7 +2296,7 @@
 
     </script>
 
-    <script src="/js/responsive-nav.js?v=3.6" defer></script>
+    <script src="/js/responsive-nav.js?v=3.7" defer></script>
 
 </body>
 

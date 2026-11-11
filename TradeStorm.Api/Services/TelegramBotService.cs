@@ -32,22 +32,103 @@ public class TelegramBotService : BackgroundService
 
     private readonly TelegramBotClient? _botClient;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IBackgroundTaskQueue? _taskQueue;
+    private readonly string? _webhookUrl;
+    private readonly string _webhookSecretToken = string.Empty;
+    private readonly string _siteBaseUrl = "https://loopmarket-x0uo.onrender.com";
 
-    public TelegramBotService(IConfiguration config, IServiceScopeFactory scopeFactory)
+    public bool HasBotToken => _botClient != null;
+    public bool IsWebhookMode => _botClient != null && !string.IsNullOrWhiteSpace(_webhookUrl);
+    public string WebhookSecretToken => _webhookSecretToken;
+
+    public TelegramBotService(IConfiguration config, IServiceScopeFactory scopeFactory, IBackgroundTaskQueue? taskQueue = null)
     {
         _scopeFactory = scopeFactory;
-        var token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN") 
-            ?? config["Telegram:BotToken"] 
+        _taskQueue = taskQueue;
+        var token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN")
+            ?? config["Telegram:BotToken"]
             ?? config["TelegramBot:Token"];
+
+        var renderUrl = Environment.GetEnvironmentVariable("RENDER_EXTERNAL_URL");
+        if (!string.IsNullOrWhiteSpace(renderUrl) && renderUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            _siteBaseUrl = renderUrl.TrimEnd('/');
+        }
+        else if (!string.IsNullOrWhiteSpace(config["PublicBaseUrl"]))
+        {
+            _siteBaseUrl = config["PublicBaseUrl"]!.TrimEnd('/');
+        }
+
+        var explicitWebhook = config["Telegram:WebhookUrl"] ?? Environment.GetEnvironmentVariable("TELEGRAM_WEBHOOK_URL");
+        if (!string.IsNullOrWhiteSpace(explicitWebhook))
+        {
+            _webhookUrl = explicitWebhook.Trim();
+        }
+        else if (!string.IsNullOrWhiteSpace(renderUrl) && renderUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            _webhookUrl = renderUrl.TrimEnd('/') + "/api/telegram/webhook";
+        }
 
         try
         {
-            if (!string.IsNullOrWhiteSpace(token)) _botClient = new TelegramBotClient(token);
-            Console.WriteLine("[Telegram Info] TelegramBotClient успішно ініціалізовано з токеном.");
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                _botClient = new TelegramBotClient(token);
+                var customSecret = config["Telegram:WebhookSecret"] ?? Environment.GetEnvironmentVariable("TELEGRAM_WEBHOOK_SECRET");
+                if (!string.IsNullOrWhiteSpace(customSecret))
+                {
+                    _webhookSecretToken = customSecret.Trim();
+                }
+                else
+                {
+                    var hashBytes = System.Security.Cryptography.SHA256.HashData(
+                        System.Text.Encoding.UTF8.GetBytes($"loopmarket-tg-webhook:{token}"));
+                    _webhookSecretToken = Convert.ToHexString(hashBytes).ToLowerInvariant()[..48];
+                }
+                Console.WriteLine($"[Telegram Info] TelegramBotClient успішно ініціалізовано (Режим: {(string.IsNullOrWhiteSpace(_webhookUrl) ? "Polling" : "Webhook")}).");
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[Telegram Warning] Не вдалося ініціалізувати бота: {ex.Message}");
+        }
+    }
+
+    public Task ProcessUpdateAsync(Update update, CancellationToken cancellationToken = default)
+    {
+        if (_botClient == null) return Task.CompletedTask;
+        return HandleUpdateAsync(_botClient, update, cancellationToken);
+    }
+
+    public Task ProcessUpdateWithClientAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken = default)
+    {
+        return HandleUpdateAsync(botClient, update, cancellationToken);
+    }
+
+    private static void PurgeExpiredState()
+    {
+        var now = DateTime.UtcNow;
+        foreach (var kv in LoginSessions)
+        {
+            if (now - kv.Value.CreatedAt > TimeSpan.FromMinutes(15))
+            {
+                LoginSessions.TryRemove(kv.Key, out _);
+            }
+        }
+
+        foreach (var kv in RateLimitTracker)
+        {
+            var list = kv.Value;
+            bool isEmpty = false;
+            lock (list)
+            {
+                list.RemoveAll(t => now - t > TimeSpan.FromMinutes(5));
+                isEmpty = list.Count == 0;
+            }
+            if (isEmpty)
+            {
+                RateLimitTracker.TryRemove(kv.Key, out _);
+            }
         }
     }
 
@@ -59,14 +140,63 @@ public class TelegramBotService : BackgroundService
             return;
         }
 
+        if (IsWebhookMode)
+        {
+            bool webhookSet = false;
+            for (int attempt = 1; attempt <= 5 && !stoppingToken.IsCancellationRequested; attempt++)
+            {
+                try
+                {
+                    await _botClient.SetWebhook(
+                        url: _webhookUrl!,
+                        allowedUpdates: new[] { UpdateType.Message, UpdateType.CallbackQuery },
+                        maxConnections: 40,
+                        dropPendingUpdates: false,
+                        secretToken: _webhookSecretToken,
+                        cancellationToken: stoppingToken);
+                    webhookSet = true;
+                    Console.WriteLine($"[Telegram Webhook] Вебхук успішно активовано: {_webhookUrl}");
+                    break;
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Telegram Webhook] Спроба #{attempt} встановлення вебхуку не вдалася: {ex.Message}");
+                    try { await Task.Delay(TimeSpan.FromSeconds(attempt * 3), stoppingToken); } catch { return; }
+                }
+            }
+
+            if (webhookSet)
+            {
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+                        PurgeExpiredState();
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                }
+                return;
+            }
+        }
+
+        int retryDelaySec = 5;
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
+                PurgeExpiredState();
+
                 try
                 {
-                    // Скидаємо старий вебхук для коректної роботи Polling
-                    await _botClient.DeleteWebhook(cancellationToken: stoppingToken);
+                    await _botClient.DeleteWebhook(dropPendingUpdates: false, cancellationToken: stoppingToken);
                 }
                 catch (Exception ex)
                 {
@@ -75,26 +205,37 @@ public class TelegramBotService : BackgroundService
 
                 var receiverOptions = new ReceiverOptions
                 {
-                    AllowedUpdates = Array.Empty<UpdateType>() // Слухаємо всі типи оновлень (Message + CallbackQuery)
+                    AllowedUpdates = new[] { UpdateType.Message, UpdateType.CallbackQuery }
                 };
 
-                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
-                _botClient.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOptions, linkedCts.Token);
+                Console.WriteLine("[Telegram Polling] Бот запущений і слухає оновлення (ReceiveAsync)...");
+                retryDelaySec = 5;
 
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("\n[Telegram] Бот успішно запущений і слухає повідомлення!\n");
-                Console.ResetColor();
-
-                await Task.Delay(Timeout.Infinite, stoppingToken);
+                await _botClient.ReceiveAsync(
+                    HandleUpdateAsync,
+                    HandleErrorAsync,
+                    receiverOptions,
+                    stoppingToken);
             }
             catch (OperationCanceledException)
             {
                 break;
             }
+            catch (Telegram.Bot.Exceptions.ApiRequestException apiEx) when (apiEx.ErrorCode == 401)
+            {
+                Console.WriteLine($"❌ [Telegram Fatal] Невалідний токен бота (401 Unauthorized): {apiEx.Message}. Зупинка polling.");
+                break;
+            }
+            catch (Telegram.Bot.Exceptions.ApiRequestException apiEx) when (apiEx.ErrorCode == 409)
+            {
+                Console.WriteLine("⚠️ [Telegram Conflict 409] Виявлено інший активний інстанс бота. Пауза 15 секунд перед повтором...");
+                try { await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken); } catch { break; }
+            }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Помилка в циклі Telegram бота: {ex.Message}. Перезапуск polling через 5 секунд...");
-                try { await Task.Delay(5000, stoppingToken); } catch { break; }
+                Console.WriteLine($"❌ Помилка в циклі Telegram бота: {ex.Message}. Перезапуск polling через {retryDelaySec} сек...");
+                try { await Task.Delay(TimeSpan.FromSeconds(retryDelaySec), stoppingToken); } catch { break; }
+                retryDelaySec = Math.Min(30, retryDelaySec * 2);
             }
         }
     }
@@ -303,6 +444,10 @@ public class TelegramBotService : BackgroundService
                     cancellationToken: cancellationToken);
                 break;
 
+            case "faq_setup":
+                await SendStandaloneSetupGuideAsync(botClient, chatId, cancellationToken);
+                break;
+
             case "faq_safety":
                 await botClient.SendMessage(
                     chatId: chatId,
@@ -383,28 +528,23 @@ public class TelegramBotService : BackgroundService
             MasterSupportChatId = chatId;
         }
 
-        // Перевіряємо, чи є користувач адміністратором
-        using (var authScope = _scopeFactory.CreateScope())
-        {
-            var authDb = authScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var authUser = await authDb.Users.FirstOrDefaultAsync(u => u.TelegramChatId == chatId, cancellationToken);
-            bool isAdminChat = (message.Chat.Username?.Equals("LoopMarketSupport", StringComparison.OrdinalIgnoreCase) == true)
-                               || (MasterSupportChatId != 0 && MasterSupportChatId == chatId)
-                               || (authUser != null && authUser.Role == UserRoles.Admin);
-
-            // Якщо пише адміністратор — обслуговуємо виключно його адмін-функціями (без клієнтських меню)
-            if (isAdminChat)
-            {
-                await HandleAdminMessageAsync(botClient, message, rawText, lowerText, chatId, authDb, authUser, cancellationToken);
-                return;
-            }
-        }
-
-        // 0. Авторизація через Telegram-бота: /start login_XYZ
+        // 0. Авторизація через Telegram-бота: /start login_XYZ (працює для всіх ролей, включно з адміном)
         if (System.Text.RegularExpressions.Regex.IsMatch(rawText, @"^/start\s+(login_[a-zA-Z0-9_]+)$"))
         {
             var match = System.Text.RegularExpressions.Regex.Match(rawText, @"^/start\s+(login_[a-zA-Z0-9_]+)$");
             var code = match.Groups[1].Value.Trim();
+
+            if (!LoginSessions.TryGetValue(code, out var session))
+            {
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: "⏳ <b>Сесія входу застаріла або посилання недійсне.</b>\n\n" +
+                          $"Перейдіть на сайт {_siteBaseUrl}/login.html та натисніть <b>«Увійти через Telegram»</b> ще раз.",
+                    parseMode: ParseMode.Html,
+                    replyMarkup: GetUserKeyboard(false),
+                    cancellationToken: cancellationToken);
+                return;
+            }
 
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -415,15 +555,20 @@ public class TelegramBotService : BackgroundService
             {
                 var firstName = message.Chat.FirstName ?? "Користувач";
                 var lastName = message.Chat.LastName ?? "Telegram";
-                var email = !string.IsNullOrWhiteSpace(message.Chat.Username)
+                var candidateEmail = !string.IsNullOrWhiteSpace(message.Chat.Username)
                     ? $"{message.Chat.Username}@t.me"
                     : $"tg_{chatId}@loopmarket.ua";
+
+                if (await db.Users.AnyAsync(u => u.Email == candidateEmail, cancellationToken))
+                {
+                    candidateEmail = $"tg_{chatId}_{Guid.NewGuid().ToString("N")[..6]}@loopmarket.ua";
+                }
 
                 targetUser = new TradeStorm.Api.Models.User
                 {
                     FirstName = firstName,
                     LastName = lastName,
-                    Email = email,
+                    Email = candidateEmail,
                     TelegramChatId = chatId,
                     IsPhoneVerified = true,
                     Role = UserRoles.Buyer,
@@ -440,23 +585,41 @@ public class TelegramBotService : BackgroundService
             targetUser.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             await db.SaveChangesAsync(cancellationToken);
 
-            if (LoginSessions.TryGetValue(code, out var session))
-            {
-                session.IsApproved = true;
-                session.Token = accessToken;
-                session.RefreshToken = refreshToken;
-                session.UserEmail = targetUser.Email;
-                session.UserName = $"{targetUser.FirstName} {targetUser.LastName}";
-                session.UserRole = targetUser.Role;
-            }
+            session.IsApproved = true;
+            session.Token = accessToken;
+            session.RefreshToken = refreshToken;
+            session.UserEmail = targetUser.Email;
+            session.UserName = $"{targetUser.FirstName} {targetUser.LastName}";
+            session.UserRole = targetUser.Role;
+
+            var replyMarkup = targetUser.Role == UserRoles.Admin
+                ? GetAdminKeyboard()
+                : GetUserKeyboard(true, targetUser.ReceiveTelegramNotifications);
 
             await botClient.SendMessage(
                 chatId: chatId,
-                text: $"✅ <b>Вхід підтверджено!</b>\n\nВи успішно увійшли на платформу <b>Loop Market</b> як <b>{targetUser.FirstName} {targetUser.LastName}</b>.\nБраузер автоматично відкриє ваш профіль.",
+                text: $"✅ <b>Вхід підтверджено!</b>\n\nВи успішно увійшли на платформу <b>Loop Market</b> як <b>{System.Net.WebUtility.HtmlEncode(targetUser.FirstName)} {System.Net.WebUtility.HtmlEncode(targetUser.LastName)}</b>.\nБраузер автоматично відкриє ваш профіль.",
                 parseMode: ParseMode.Html,
-                replyMarkup: GetUserKeyboard(true, targetUser.ReceiveTelegramNotifications),
+                replyMarkup: replyMarkup,
                 cancellationToken: cancellationToken);
             return;
+        }
+
+        // Перевіряємо, чи є користувач адміністратором
+        using (var authScope = _scopeFactory.CreateScope())
+        {
+            var authDb = authScope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var authUser = await authDb.Users.FirstOrDefaultAsync(u => u.TelegramChatId == chatId, cancellationToken);
+            bool isAdminChat = (message.Chat.Username?.Equals("LoopMarketSupport", StringComparison.OrdinalIgnoreCase) == true)
+                               || (MasterSupportChatId != 0 && MasterSupportChatId == chatId)
+                               || (authUser != null && authUser.Role == UserRoles.Admin);
+
+            // Якщо пише адміністратор — обслуговуємо виключно його адмін-функціями (без клієнтських меню)
+            if (isAdminChat)
+            {
+                await HandleAdminMessageAsync(botClient, message, rawText, lowerText, chatId, authDb, authUser, cancellationToken);
+                return;
+            }
         }
 
         // 1. Прив'язка акаунта через /start verify_123
@@ -483,7 +646,7 @@ public class TelegramBotService : BackgroundService
 
                     await botClient.SendMessage(
                         chatId: chatId,
-                        text: $"🎉 <b>Вітаємо, {targetUser.FirstName}!</b>\n\n" +
+                        text: $"🎉 <b>Вітаємо, {System.Net.WebUtility.HtmlEncode(targetUser.FirstName)}!</b>\n\n" +
                               $"✅ <b>Номер підтверджено та акаунт успішно підключено до Telegram!</b>\n" +
                               $"🔔 <b>Сповіщення активовано:</b> тепер ви будете отримувати повідомлення про нові замовлення, доставку посилок та повідомлення в чаті.",
                         parseMode: ParseMode.Html,
@@ -492,6 +655,29 @@ public class TelegramBotService : BackgroundService
                     return;
                 }
             }
+
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: "⚠️ <b>Користувача не знайдено або посилання застаріло.</b>\n\n" +
+                      "Натисніть кнопку <b>«📱 Надіслати мій номер (Прив'язати акаунт)»</b> нижче або зареєструйтесь заново на сайті.",
+                parseMode: ParseMode.Html,
+                replyMarkup: GetUserKeyboard(false),
+                cancellationToken: cancellationToken);
+            return;
+        }
+
+        // 1.5 Прямий вхід у бот (/start, /start start, /setup, інструкція, налаштування)
+        if (lowerText == "/start" ||
+            lowerText == "/start start" ||
+            lowerText == "/setup" ||
+            lowerText == "/menu" ||
+            lowerText == "меню" ||
+            lowerText.Contains("інструкц") ||
+            lowerText.Contains("налаштув") ||
+            lowerText.Contains("підключит"))
+        {
+            await SendStandaloneSetupGuideAsync(botClient, chatId, cancellationToken);
+            return;
         }
 
         // 2. Обробка передачі номера телефону (Contact)
@@ -514,9 +700,18 @@ public class TelegramBotService : BackgroundService
                 .OrderByDescending(u => u.Id)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (user == null)
+            if (user == null && !string.IsNullOrEmpty(cleanTelegramPhone))
             {
-                var candidates = await db.Users.Where(u => u.PhoneNumber != null).ToListAsync(cancellationToken);
+                var withPlus = "+" + cleanTelegramPhone;
+                var last9 = cleanTelegramPhone.Length >= 9 ? cleanTelegramPhone[^9..] : cleanTelegramPhone;
+                var candidates = await db.Users
+                    .Where(u => u.PhoneNumber != null &&
+                                (u.PhoneNumber == cleanTelegramPhone ||
+                                 u.PhoneNumber == withPlus ||
+                                 (last9.Length >= 7 && u.PhoneNumber.EndsWith(last9))))
+                    .OrderByDescending(u => u.Id)
+                    .Take(20)
+                    .ToListAsync(cancellationToken);
                 user = candidates.FirstOrDefault(u => new string(u.PhoneNumber!.Where(char.IsDigit).ToArray()) == cleanTelegramPhone);
             }
 
@@ -850,7 +1045,7 @@ public class TelegramBotService : BackgroundService
                        $"  Назва: <b>{System.Net.WebUtility.HtmlEncode(o.Listing?.Title ?? "Оголошення")}</b>\n" +
                        $"  Сума: <b>{o.TotalPrice:N0} ₴</b> | Статус: <b>{statusText}</b>\n" +
                        (!string.IsNullOrWhiteSpace(o.TrackingNumber) ? $"  ТТН: <code>{o.TrackingNumber}</code>\n" : "") +
-                       $"\\n";
+                       "\n";
             }
             msg += $"━━━━━━━━━━━━━━━━━━\n<i>Для перегляду всіх деталей перейдіть до особистого кабінету.</i>";
 
@@ -981,16 +1176,22 @@ public class TelegramBotService : BackgroundService
             var user = await db.Users.FirstOrDefaultAsync(u => u.TelegramChatId == chatId, cancellationToken);
             var isVerified = user != null && user.IsPhoneVerified;
 
+            var hint = isVerified
+                ? "Чим я можу вам допомогти?"
+                : "Щоб підключити ваш профіль — надішліть команду /start або натисніть «📱 Надіслати мій номер» нижче.";
+
             await botClient.SendMessage(
                 chatId: chatId,
                 text: "🤖 <b>Вітаємо! Я офіційний чат-бот платформи Loop Market.</b>\n\n" +
-                      "Чим я можу вам допомогти?\n\n" +
+                      hint + "\n\n" +
+                      "• 📱 <b>Налаштування бота:</b> натисніть «📖 Інструкція підключення» або надішліть /start.\n" +
                       "• 📦 <b>Статус замовлення:</b> надішліть його 6-значний номер (наприклад, <code>749281</code> або <code>LP-749281</code>).\n" +
-                      "• 🆘 <b>Підтримка:</b> натисніть кнопку нижче, щоб відкрити офіційне звернення до чергового адміністратора <b>@LoopMarketSupport</b>.\n" +
+                      "• 🆘 <b>Підтримка:</b> натисніть кнопку нижче для зв'язку з <b>@LoopMarketSupport</b>.\n" +
                       "• 🛡️ <b>Безпека:</b> дізнайтеся перевірені правила захисту від шахраїв.",
                 parseMode: ParseMode.Html,
                 replyMarkup: new InlineKeyboardMarkup(new[]
                 {
+                    new[] { InlineKeyboardButton.WithCallbackData("📖 Інструкція підключення бота", "faq_setup") },
                     new[] { InlineKeyboardButton.WithCallbackData("✍️ Написати в підтримку", "btn_start_support") },
                     new[] { InlineKeyboardButton.WithUrl("💬 Написати @LoopMarketSupport", "https://t.me/LoopMarketSupport") },
                     new[] { InlineKeyboardButton.WithCallbackData("🔍 Перевірити замовлення", "btn_check_order") },
@@ -998,6 +1199,53 @@ public class TelegramBotService : BackgroundService
                 }),
                 cancellationToken: cancellationToken);
         }
+    }
+
+    private async Task SendStandaloneSetupGuideAsync(ITelegramBotClient botClient, long chatId, CancellationToken cancellationToken)
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.TelegramChatId == chatId, cancellationToken);
+
+        if (user != null && user.IsPhoneVerified)
+        {
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: $"👋 <b>Вітаємо на Loop Market, {System.Net.WebUtility.HtmlEncode(user.FirstName)}!</b>\n\n" +
+                      "✅ <b>Ваш Telegram-бот вже успішно налаштовано та прив'язано до акаунта.</b>\n" +
+                      $"📱 Номер: <code>{System.Net.WebUtility.HtmlEncode(user.PhoneNumber ?? "підтверджено")}</code>\n" +
+                      $"🔔 Сповіщення: <b>{(user.ReceiveTelegramNotifications ? "Увімкнено ✅" : "Вимкнено ❌")}</b>\n\n" +
+                      "<b>Що вміє бот:</b>\n" +
+                      "• 📦 Надсилати миттєві сповіщення про замовлення, ТТН і повідомлення в чаті\n" +
+                      "• 🔍 Перевіряти статус посилки за номером (напр. <code>LP-749281</code>)\n" +
+                      "• 🔐 Входити на сайт в 1 клік кнопкою «Увійти через Telegram»\n" +
+                      "• 🆘 Швидко зв'язуватися з підтримкою <b>@LoopMarketSupport</b>\n\n" +
+                      "<i>Оберіть потрібну дію на клавіатурі нижче:</i>",
+                parseMode: ParseMode.Html,
+                replyMarkup: GetUserKeyboard(true, user.ReceiveTelegramNotifications),
+                cancellationToken: cancellationToken);
+            return;
+        }
+
+        var guideText =
+            "👋 <b>Вітаємо в офіційному боті Loop Market!</b>\n\n" +
+            "Якщо ви зайшли в бот напряму (не через кнопку на сайті), налаштуйте його за <b>3 прості кроки</b>:\n\n" +
+            "1️⃣ <b>Зареєструйтеся на сайті</b> (якщо ще не маєте акаунта):\n" +
+            $"   👉 <a href=\"{_siteBaseUrl}/login.html\">{_siteBaseUrl}/login.html</a>\n" +
+            "   Підтвердьте пошту кодом або скористайтеся кнопкою «Підтвердити через Telegram» під час реєстрації.\n\n" +
+            "2️⃣ <b>Прив'яжіть існуючий акаунт у 1 клік:</b>\n" +
+            "   Натисніть синю кнопку <b>«📱 Надіслати мій номер (Прив'язати акаунт)»</b> внизу екрана.\n" +
+            "   ⚠️ <i>Номер телефону в Telegram має збігатися з тим, який ви вказали при реєстрації.</i>\n\n" +
+            "3️⃣ <b>Або увійдіть без реєстрації вручну:</b>\n" +
+            $"   На сторінці <a href=\"{_siteBaseUrl}/login.html\">входу</a> натисніть <b>«Увійти через Telegram»</b> — бот автоматично створить і прив'яже профіль.\n\n" +
+            "🔔 Після прив'язки ви будете отримувати сповіщення про замовлення, ТТН Нової Пошти та нові повідомлення у чаті!";
+
+        await botClient.SendMessage(
+            chatId: chatId,
+            text: guideText,
+            parseMode: ParseMode.Html,
+            replyMarkup: GetUserKeyboard(false),
+            cancellationToken: cancellationToken);
     }
 
     private static string? ExtractOrderCodeCandidate(string text)
@@ -1197,6 +1445,7 @@ public class TelegramBotService : BackgroundService
     {
         return new InlineKeyboardMarkup(new[]
         {
+            new[] { InlineKeyboardButton.WithCallbackData("📖 Як налаштувати та підключити бот?", "faq_setup") },
             new[] { InlineKeyboardButton.WithCallbackData("📦 Як оформити замовлення товару?", "faq_orders") },
             new[] { InlineKeyboardButton.WithCallbackData("🛠 Як замовити послугу майстра?", "faq_services") },
             new[] { InlineKeyboardButton.WithCallbackData("🛡️ Правила безпеки та захист від шахраїв", "faq_safety") },
@@ -1374,50 +1623,98 @@ public class TelegramBotService : BackgroundService
                 parseMode: ParseMode.Html,
                 cancellationToken: cancellationToken);
 
-            var allUsers = await db.Users.ToListAsync(cancellationToken);
-            int inAppCount = 0;
-            int tgCount = 0;
+            var broadcastTargets = await db.Users
+                .AsNoTracking()
+                .Select(u => new { u.Id, u.TelegramChatId, u.ReceiveTelegramNotifications })
+                .ToListAsync(cancellationToken);
 
-            foreach (var u in allUsers)
+            var nowUtc = DateTime.UtcNow;
+            var notificationsBatch = new List<Notification>(500);
+            int inAppCount = 0;
+            var tgTargets = new List<long>();
+
+            foreach (var u in broadcastTargets)
             {
-                var notif = new Notification
+                notificationsBatch.Add(new Notification
                 {
                     UserId = u.Id,
                     Title = "📢 Оголошення LoopMarket",
                     Message = rawText,
                     Link = "/index.html",
                     IsRead = false,
-                    CreatedAt = DateTime.UtcNow
-                };
-                db.Notifications.Add(notif);
+                    CreatedAt = nowUtc
+                });
                 inAppCount++;
+
+                if (notificationsBatch.Count >= 500)
+                {
+                    db.Notifications.AddRange(notificationsBatch);
+                    await db.SaveChangesAsync(cancellationToken);
+                    db.ChangeTracker.Clear();
+                    notificationsBatch.Clear();
+                }
 
                 if (u.TelegramChatId != 0 && u.ReceiveTelegramNotifications && u.TelegramChatId != chatId)
                 {
-                    try
-                    {
-                        var pushText = $"📢 <b>ОГОЛОШЕННЯ ВІД LOOP MARKET</b>\n━━━━━━━━━━━━━━━━━━\n{System.Net.WebUtility.HtmlEncode(rawText)}\n\n<i>З повагою, команда платформи Loop Market</i>";
-                        await botClient.SendMessage(
-                            chatId: u.TelegramChatId,
-                            text: pushText,
-                            parseMode: ParseMode.Html,
-                            cancellationToken: cancellationToken);
-                        tgCount++;
-                    }
-                    catch { }
+                    tgTargets.Add(u.TelegramChatId);
                 }
             }
 
-            await db.SaveChangesAsync(cancellationToken);
+            if (notificationsBatch.Count > 0)
+            {
+                db.Notifications.AddRange(notificationsBatch);
+                await db.SaveChangesAsync(cancellationToken);
+            }
 
-            await botClient.SendMessage(
-                chatId: chatId,
-                text: $"✅ <b>Масову розсилку успішно завершено!</b>\n\n" +
-                      $"📨 Внутрішніх сповіщень створено: <b>{inAppCount}</b>\n" +
-                      $"📱 Telegram-повідомлень доставлено: <b>{tgCount}</b>",
-                parseMode: ParseMode.Html,
-                replyMarkup: GetAdminKeyboard(),
-                cancellationToken: cancellationToken);
+            var pushText = $"📢 <b>ОГОЛОШЕННЯ ВІД LOOP MARKET</b>\n━━━━━━━━━━━━━━━━━━\n{System.Net.WebUtility.HtmlEncode(rawText)}\n\n<i>З повагою, команда платформи Loop Market</i>";
+
+            async ValueTask SendTelegramBroadcastAsync(CancellationToken ct)
+            {
+                int tgCount = 0;
+                foreach (var targetChatId in tgTargets)
+                {
+                    if (ct.IsCancellationRequested) break;
+                    try
+                    {
+                        await botClient.SendMessage(
+                            chatId: targetChatId,
+                            text: pushText,
+                            parseMode: ParseMode.Html,
+                            cancellationToken: ct);
+                        tgCount++;
+                    }
+                    catch { }
+                    await Task.Delay(40, ct);
+                }
+
+                try
+                {
+                    await botClient.SendMessage(
+                        chatId: chatId,
+                        text: $"✅ <b>Масову розсилку успішно завершено!</b>\n\n" +
+                              $"📨 Внутрішніх сповіщень створено: <b>{inAppCount}</b>\n" +
+                              $"📱 Telegram-повідомлень доставлено: <b>{tgCount}</b>",
+                        parseMode: ParseMode.Html,
+                        replyMarkup: GetAdminKeyboard(),
+                        cancellationToken: ct);
+                }
+                catch { }
+            }
+
+            if (_taskQueue != null)
+            {
+                await _taskQueue.QueueBackgroundWorkItemAsync(SendTelegramBroadcastAsync);
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: $"✅ <b>Внутрішні сповіщення створено ({inAppCount})!</b>\n📱 Telegram-розсилку ({tgTargets.Count} отримувачів) поставлено у фонову чергу.",
+                    parseMode: ParseMode.Html,
+                    replyMarkup: GetAdminKeyboard(),
+                    cancellationToken: cancellationToken);
+            }
+            else
+            {
+                await SendTelegramBroadcastAsync(cancellationToken);
+            }
             return;
         }
 
