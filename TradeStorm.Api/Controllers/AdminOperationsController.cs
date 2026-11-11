@@ -125,8 +125,8 @@ public class AdminOperationsController : ControllerBase
 
         if (primary == null) return Ok(new { hasActive = false, announcements = new object[0] });
 
-        var infoBanner = activeList.FirstOrDefault(a => a.Placement == "top" || a.Placement == "header" || a.Placement == "modal");
-        var adBanner = activeList.FirstOrDefault(a => a.Placement.StartsWith("sidebar") || a.Placement == "catalog" || a.Type == "promo");
+        var infoBanner = activeList.FirstOrDefault(a => (a.Placement ?? "top") == "top" || a.Placement == "header" || a.Placement == "modal");
+        var adBanner = activeList.FirstOrDefault(a => (a.Placement ?? string.Empty).StartsWith("sidebar", StringComparison.OrdinalIgnoreCase) || a.Placement == "catalog" || (a.Type ?? string.Empty) == "promo");
 
         return Ok(new
         {
@@ -199,11 +199,11 @@ public class AdminOperationsController : ControllerBase
         return Ok(list.Select(a => new
         {
             id = a.Id,
-            title = a.Title,
-            message = a.Message,
-            type = a.Type,
-            targetPage = a.TargetPage,
-            placement = a.Placement,
+            title = a.Title ?? string.Empty,
+            message = a.Message ?? string.Empty,
+            type = a.Type ?? "warning",
+            targetPage = a.TargetPage ?? "all",
+            placement = a.Placement ?? "top",
             actionText = a.ActionText,
             actionUrl = a.ActionUrl,
             imageUrl = a.ImageUrl,
@@ -217,14 +217,24 @@ public class AdminOperationsController : ControllerBase
     // 2. ВСТАНОВИТИ / СТВОРИТИ НОВЕ ОГОЛОШЕННЯ АБО БАНЕР
     [HttpPost("announcement")]
     [Authorize(Roles = UserRoles.Admin)]
-    public async Task<IActionResult> SetAnnouncement([FromBody] SiteAnnouncementDto dto)
+    public async Task<IActionResult> SetAnnouncement([FromBody] SiteAnnouncementDto? dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Message))
+        if (dto == null)
         {
-            dto.Message = !string.IsNullOrWhiteSpace(dto.Title) 
-                ? dto.Title 
-                : (!string.IsNullOrWhiteSpace(dto.ImageUrl) ? "Рекламний банер LoopMarket" : "Повідомлення платформи");
+            return BadRequest(new { error = "Дані банера не передано" });
         }
+
+        bool hasTitle = !string.IsNullOrWhiteSpace(dto.Title);
+        bool hasMessage = !string.IsNullOrWhiteSpace(dto.Message);
+        bool hasImage = !string.IsNullOrWhiteSpace(dto.ImageUrl);
+        if (!hasTitle && !hasMessage && !hasImage)
+        {
+            return BadRequest(new { error = "Вкажіть заголовок, текст або зображення банера" });
+        }
+
+        var resolvedMessage = hasMessage
+            ? dto.Message!.Trim()
+            : (hasTitle ? dto.Title!.Trim() : "Рекламний банер LoopMarket");
 
         DateTime? expiresAt = null;
         var now = DateTime.UtcNow;
@@ -245,7 +255,7 @@ public class AdminOperationsController : ControllerBase
         var banner = new SiteAnnouncement
         {
             Title = (dto.Title ?? string.Empty).Trim(),
-            Message = dto.Message.Trim(),
+            Message = resolvedMessage,
             Type = type,
             TargetPage = targetPage,
             Placement = placement,
@@ -253,31 +263,40 @@ public class AdminOperationsController : ControllerBase
             ActionText = string.IsNullOrWhiteSpace(dto.ActionText) ? null : dto.ActionText.Trim(),
             ActionUrl = string.IsNullOrWhiteSpace(dto.ActionUrl) ? null : dto.ActionUrl.Trim(),
             ImageUrl = string.IsNullOrWhiteSpace(dto.ImageUrl) ? null : dto.ImageUrl.Trim(),
-            IsActive = dto.IsActive,
+            IsActive = placement != "hidden" && dto.IsActive,
             CreatedAt = now
         };
 
-        // Якщо створюється новий рекламний банер — деактивуємо лише старі рекламні банери
-        if (type == "promo" || placement.StartsWith("sidebar") || placement == "catalog")
+        try
         {
-            var oldAds = await _context.SiteAnnouncements
-                .Where(a => a.IsActive && (a.Type == "promo" || a.Placement.StartsWith("sidebar") || a.Placement == "catalog"))
-                .ToListAsync();
-            foreach (var old in oldAds) old.IsActive = false;
+            bool isAdBanner = type == "promo" || placement.StartsWith("sidebar", StringComparison.OrdinalIgnoreCase) || placement == "catalog";
+            // Якщо створюється новий рекламний банер — деактивуємо лише старі рекламні банери
+            if (isAdBanner)
+            {
+                var oldAds = await _context.SiteAnnouncements
+                    .Where(a => a.IsActive && (a.Type == "promo" || (a.Placement != null && a.Placement.StartsWith("sidebar")) || a.Placement == "catalog"))
+                    .ToListAsync();
+                foreach (var old in oldAds) old.IsActive = false;
+            }
+            else
+            {
+                // Якщо створюється інфо-банер або системне повідомлення — деактивуємо лише старі інфо-банери
+                var oldInfo = await _context.SiteAnnouncements
+                    .Where(a => a.IsActive && a.Type != "promo" && (a.Placement == null || (!a.Placement.StartsWith("sidebar") && a.Placement != "catalog")))
+                    .ToListAsync();
+                foreach (var old in oldInfo) old.IsActive = false;
+            }
+
+            _context.SiteAnnouncements.Add(banner);
+            await _context.SaveChangesAsync();
         }
-        else
+        catch (Exception ex)
         {
-            // Якщо створюється інфо-банер або системне повідомлення — деактивуємо лише старі інфо-банери
-            var oldInfo = await _context.SiteAnnouncements
-                .Where(a => a.IsActive && a.Type != "promo" && !a.Placement.StartsWith("sidebar") && a.Placement != "catalog")
-                .ToListAsync();
-            foreach (var old in oldInfo) old.IsActive = false;
+            Console.WriteLine($"[SetAnnouncement Error] {ex}");
+            return StatusCode(500, new { error = $"Не вдалося зберегти банер: {ex.GetBaseException().Message}" });
         }
 
-        _context.SiteAnnouncements.Add(banner);
-        await _context.SaveChangesAsync();
-
-        await LogAuditAsync("SetAnnouncement", "Announcement", banner.Id, $"[{placement} / {targetPage}] {dto.Message}");
+        await LogAuditAsync("SetAnnouncement", "Announcement", banner.Id, $"[{placement} / {targetPage}] {banner.Message}");
 
         return Ok(new
         {

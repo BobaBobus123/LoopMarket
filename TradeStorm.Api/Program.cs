@@ -396,13 +396,7 @@ using (var scope = app.Services.CreateScope())
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN IsEmailVerified INTEGER DEFAULT 0;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN EmailVerificationCode TEXT;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE Users ADD COLUMN EmailVerificationCodeExpiresAt TEXT;"); } catch {}
-            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN Title TEXT;"); } catch {}
-            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN TargetPage TEXT;"); } catch {}
-            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN Placement TEXT;"); } catch {}
-            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN ExpiresAt TEXT;"); } catch {}
-            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN ActionText TEXT;"); } catch {}
-            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN ActionUrl TEXT;"); } catch {}
-            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE SiteAnnouncements ADD COLUMN ImageUrl TEXT;"); } catch {}
+            DatabaseSchemaInitializer.EnsureMissingTablesAndColumns(db, isPostgres: false);
             try { db.Database.ExecuteSqlRaw(@"CREATE INDEX IF NOT EXISTS IX_Messages_Sender_Receiver_Id ON Messages(SenderId, ReceiverId, Id);"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"CREATE INDEX IF NOT EXISTS IX_Messages_Receiver_IsRead ON Messages(ReceiverId, IsRead);"); } catch {}
         }
@@ -424,13 +418,7 @@ using (var scope = app.Services.CreateScope())
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""IsEmailVerified"" boolean DEFAULT FALSE;"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""EmailVerificationCode"" VARCHAR(10);"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""EmailVerificationCodeExpiresAt"" timestamp with time zone;"); } catch {}
-            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""Title"" TEXT;"); } catch {}
-            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""TargetPage"" VARCHAR(50);"); } catch {}
-            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""Placement"" VARCHAR(50);"); } catch {}
-            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""ExpiresAt"" timestamp with time zone;"); } catch {}
-            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""ActionText"" VARCHAR(100);"); } catch {}
-            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""ActionUrl"" VARCHAR(500);"); } catch {}
-            try { db.Database.ExecuteSqlRaw(@"ALTER TABLE ""SiteAnnouncements"" ADD COLUMN IF NOT EXISTS ""ImageUrl"" TEXT;"); } catch {}
+            DatabaseSchemaInitializer.EnsureMissingTablesAndColumns(db, isPostgres: true);
             try { db.Database.ExecuteSqlRaw(@"CREATE INDEX IF NOT EXISTS ""IX_Messages_Sender_Receiver_Id"" ON ""Messages""(""SenderId"", ""ReceiverId"", ""Id"");"); } catch {}
             try { db.Database.ExecuteSqlRaw(@"CREATE INDEX IF NOT EXISTS ""IX_Messages_Receiver_IsRead"" ON ""Messages""(""ReceiverId"", ""IsRead"");"); } catch {}
         }

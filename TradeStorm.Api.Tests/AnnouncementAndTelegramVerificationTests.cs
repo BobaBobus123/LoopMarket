@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TradeStorm.Api.Data;
 using TradeStorm.Api.DTOs;
@@ -234,5 +235,134 @@ public class AnnouncementAndTelegramVerificationTests : IClassFixture<CustomWebA
         var checkRes = await pubClient.GetAsync("/api/admin/announcement/active?page=home&placement=catalog");
         using var checkDoc = JsonDocument.Parse(await checkRes.Content.ReadAsStringAsync());
         Assert.False(checkDoc.RootElement.GetProperty("hasActive").GetBoolean());
+    }
+
+    [Fact]
+    public async Task Admin_CanCreateSidebarAdBannerWithImageOnly_AndInfoBannerWithoutTitle()
+    {
+        var (adminClient, _, _) = await CreateUserWithRoleAsync(UserRoles.Admin);
+        var pubClient = _factory.CreateClient();
+
+        // 1. Image-only sidebar ad banner (empty Title and empty Message)
+        var adDto = new SiteAnnouncementDto
+        {
+            Title = "",
+            Message = "",
+            ImageUrl = "/uploads/test-sidebar-ad.png",
+            Type = "promo",
+            TargetPage = "all",
+            Placement = "sidebar_both",
+            Duration = "7d",
+            ActionText = "Детальніше",
+            ActionUrl = "https://t.me/LoopMarketSupport",
+            IsActive = true
+        };
+
+        var adRes = await adminClient.PostAsJsonAsync("/api/admin/announcement", adDto);
+        Assert.Equal(HttpStatusCode.OK, adRes.StatusCode);
+        using var adDoc = JsonDocument.Parse(await adRes.Content.ReadAsStringAsync());
+        int adId = adDoc.RootElement.GetProperty("id").GetInt32();
+
+        // 2. Info banner with optional Title left empty (as in admin.html form)
+        var infoDto = new SiteAnnouncementDto
+        {
+            Title = "",
+            Message = "Планове оновлення платформи сьогодні вночі.",
+            Type = "warning",
+            TargetPage = "all",
+            Placement = "top",
+            Duration = "24h",
+            ActionText = null,
+            ActionUrl = null,
+            IsActive = true
+        };
+
+        var infoRes = await adminClient.PostAsJsonAsync("/api/admin/announcement", infoDto);
+        Assert.Equal(HttpStatusCode.OK, infoRes.StatusCode);
+        using var infoDoc = JsonDocument.Parse(await infoRes.Content.ReadAsStringAsync());
+        int infoId = infoDoc.RootElement.GetProperty("id").GetInt32();
+
+        // 3. List all announcements as Admin
+        var listRes = await adminClient.GetAsync("/api/admin/announcements");
+        Assert.Equal(HttpStatusCode.OK, listRes.StatusCode);
+        using var listDoc = JsonDocument.Parse(await listRes.Content.ReadAsStringAsync());
+        Assert.True(listDoc.RootElement.GetArrayLength() >= 2);
+
+        // 4. Both adBanner and infoBanner are returned actively for details page
+        var activeRes = await pubClient.GetAsync("/api/admin/announcement/active?page=details");
+        Assert.Equal(HttpStatusCode.OK, activeRes.StatusCode);
+        using var activeDoc = JsonDocument.Parse(await activeRes.Content.ReadAsStringAsync());
+        Assert.True(activeDoc.RootElement.GetProperty("hasActive").GetBoolean());
+
+        var activeAd = activeDoc.RootElement.GetProperty("adBanner");
+        Assert.Equal(adId, activeAd.GetProperty("id").GetInt32());
+        Assert.Equal("sidebar_both", activeAd.GetProperty("placement").GetString());
+        Assert.Equal("/uploads/test-sidebar-ad.png", activeAd.GetProperty("imageUrl").GetString());
+
+        var activeInfo = activeDoc.RootElement.GetProperty("infoBanner");
+        Assert.Equal(infoId, activeInfo.GetProperty("id").GetInt32());
+        Assert.Equal("top", activeInfo.GetProperty("placement").GetString());
+
+        // Cleanup both
+        await adminClient.DeleteAsync($"/api/admin/announcement/{adId}");
+        await adminClient.DeleteAsync($"/api/admin/announcement/{infoId}");
+    }
+
+    [Fact]
+    public async Task DatabaseSchemaInitializer_CreatesMissingTable_AndRepairsLegacyNullColumns()
+    {
+        // Case A: Existing database missing SiteAnnouncements completely (e.g. EnsureCreated skipped)
+        var optionsMissing = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite("DataSource=:memory:")
+            .Options;
+
+        using (var dbMissing = new AppDbContext(optionsMissing))
+        {
+            await dbMissing.Database.OpenConnectionAsync();
+            DatabaseSchemaInitializer.EnsureMissingTablesAndColumns(dbMissing, isPostgres: false);
+
+            dbMissing.SiteAnnouncements.Add(new SiteAnnouncement
+            {
+                Title = "Банер після ініціалізації",
+                Message = "Перевірка створення таблиці",
+                Type = "promo",
+                TargetPage = "all",
+                Placement = "sidebar_both",
+                IsActive = true
+            });
+            await dbMissing.SaveChangesAsync();
+
+            var count = await dbMissing.SiteAnnouncements.CountAsync();
+            Assert.Equal(1, count);
+        }
+
+        // Case B: Legacy SiteAnnouncements schema missing new columns and containing NULL values
+        var optionsLegacy = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite("DataSource=:memory:")
+            .Options;
+
+        using (var dbLegacy = new AppDbContext(optionsLegacy))
+        {
+            await dbLegacy.Database.OpenConnectionAsync();
+            await dbLegacy.Database.ExecuteSqlRawAsync(@"
+                CREATE TABLE SiteAnnouncements (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Message TEXT NULL,
+                    Type TEXT NULL,
+                    IsActive INTEGER NOT NULL DEFAULT 1,
+                    CreatedAt TEXT NOT NULL
+                );
+                INSERT INTO SiteAnnouncements (Message, Type, IsActive, CreatedAt)
+                VALUES (NULL, NULL, 1, '2026-01-01T00:00:00Z');");
+
+            DatabaseSchemaInitializer.EnsureMissingTablesAndColumns(dbLegacy, isPostgres: false);
+
+            var rows = await dbLegacy.SiteAnnouncements.ToListAsync();
+            Assert.Single(rows);
+            Assert.Equal(string.Empty, rows[0].Title);
+            Assert.Equal("all", rows[0].TargetPage);
+            Assert.Equal("top", rows[0].Placement);
+            Assert.Equal("warning", rows[0].Type);
+        }
     }
 }

@@ -68,11 +68,11 @@ public class BroadcastDto
 
 public class SiteAnnouncementDto
 {
-    public string Title { get; set; } = string.Empty;
-    public string Message { get; set; } = string.Empty;
-    public string Type { get; set; } = "warning";
-    public string TargetPage { get; set; } = "all";
-    public string Placement { get; set; } = "top";
+    public string? Title { get; set; }
+    public string? Message { get; set; }
+    public string? Type { get; set; } = "warning";
+    public string? TargetPage { get; set; } = "all";
+    public string? Placement { get; set; } = "top";
     public string? Duration { get; set; }
     public string? ActionText { get; set; }
     public string? ActionUrl { get; set; }
