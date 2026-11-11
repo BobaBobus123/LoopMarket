@@ -1960,3 +1960,64 @@ h1, h2, h3, .heading-brand, .hero-title, .section-title, .modal-title {
     border: 1.5px solid var(--surface);
     line-height: 1;
 }
+
+/* ==========================================================================
+   RESERVED SYMMETRICAL SIDE AD-BANNER GUTTERS (ALL PAGES EXCEPT INDEX.HTML)
+   ========================================================================== */
+@media (min-width: 1200px) {
+    :root {
+        --loop-ad-edge: 12px;
+        --loop-ad-width: 136px;
+        --loop-ad-gap: 16px;
+        --loop-ad-gutter: 164px;
+        --loop-content-max: 1548px;
+        --loop-shell-max: calc(1548px + 2 * var(--loop-ad-gutter));
+    }
+}
+
+@media (min-width: 1400px) {
+    :root {
+        --loop-ad-edge: 16px;
+        --loop-ad-width: 150px;
+        --loop-ad-gap: 20px;
+        --loop-ad-gutter: 186px;
+    }
+}
+
+@media (min-width: 1200px) {
+    body:not(.loop-home-page) > main,
+    body:not(.loop-home-page) > .container,
+    body:not(.loop-home-page) > main.container,
+    body:not(.loop-home-page) > main.admin-main,
+    body:not(.loop-home-page) > main.main-container {
+        max-width: var(--loop-shell-max) !important;
+        width: 100% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        padding-left: var(--loop-ad-gutter) !important;
+        padding-right: var(--loop-ad-gutter) !important;
+        box-sizing: border-box !important;
+    }
+
+    body:not(.loop-home-page) > header .header-content {
+        max-width: var(--loop-content-max) !important;
+        width: 100% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    body:not(.loop-home-page) > footer {
+        padding-left: var(--loop-ad-gutter) !important;
+        padding-right: var(--loop-ad-gutter) !important;
+        box-sizing: border-box !important;
+    }
+
+    body:not(.loop-home-page) > footer .footer-content,
+    body:not(.loop-home-page) > footer .footer-grid {
+        max-width: var(--loop-content-max) !important;
+        width: 100% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        box-sizing: border-box !important;
+    }
+}

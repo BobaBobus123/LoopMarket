@@ -62,7 +62,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Панель оператора безпеки — LoopMarket</title>
-    <link rel="stylesheet" href="/css/global.css?v=5.5">
+    <link rel="stylesheet" href="/css/global.css?v=5.6">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -977,8 +977,9 @@
                             <div class="admin-form-group">
                                 <label>🧭 Позиція розміщення на екрані *</label>
                                 <select id="adBannerPlacementSelect" class="admin-form-select" onchange="updateAdBannerLivePreview()">
-                                    <option value="sidebar_right" selected>➡️ Праворуч на екрані (Вертикальний Skyscraper як на OLX)</option>
-                                    <option value="sidebar_left">⬅️ Ліворуч на екрані (Вертикальний Skyscraper)</option>
+                                    <option value="sidebar_both" selected>↔️ Оба боки симетрично (Ліворуч + Праворуч на висоту екрана)</option>
+                                    <option value="sidebar_right">➡️ Лише праворуч (Вертикальний Skyscraper)</option>
+                                    <option value="sidebar_left">⬅️ Лише ліворуч (Вертикальний Skyscraper)</option>
                                     <option value="catalog">📰 У каталозі товарів (Горизонтальний блок над сіткою)</option>
                                     <option value="hidden">🚫 Приховано / Вимкнено</option>
                                 </select>
@@ -1020,9 +1021,9 @@
                     <div style="background: var(--bg-color); border: 1.5px dashed var(--border-color); border-radius: 16px; padding: 18px;">
                         <div style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
                             <span>👁️ Живе прев'ю на сайті:</span>
-                            <span id="adPreviewPosBadge" style="color: #2563eb; background: rgba(37,99,235,0.1); padding: 2px 8px; border-radius: 6px;">Праворуч</span>
+                            <span id="adPreviewPosBadge" style="color: #2563eb; background: rgba(37,99,235,0.1); padding: 2px 8px; border-radius: 6px;">Оба боки (симетрично)</span>
                         </div>
-                        <div id="adLivePreviewBox" style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                        <div id="adLivePreviewBox" style="max-width: 175px; min-height: 300px; margin: 0 auto; display: flex; flex-direction: column; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 14px; padding: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
                             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; margin-bottom: 10px;">
                                 <span style="font-size: 0.68rem; font-weight: 800; color: var(--text-muted);">Реклама <span style="background: rgba(16,185,129,0.15); color: #10b981; padding: 1px 5px; border-radius: 4px;">AD</span></span>
                                 <span style="color: var(--text-muted); font-size: 1.1rem; line-height: 1;">&times;</span>
@@ -3036,7 +3037,7 @@
                 document.getElementById('adBannerImageInput').value = '/images/loop-ad-banner.svg';
                 document.getElementById('adBannerActionTextInput').value = 'Розмістити рекламу 📢';
                 document.getElementById('adBannerActionUrlInput').value = 'https://t.me/LoopMarketSupport';
-                document.getElementById('adBannerPlacementSelect').value = 'sidebar_right';
+                document.getElementById('adBannerPlacementSelect').value = 'sidebar_both';
             } else if (type === 'pro') {
                 document.getElementById('adBannerTitleInput').value = 'Підвищуйте продажі з PRO-акаунтом!';
                 document.getElementById('adBannerMessageInput').value = 'Отримуйте в 5 разів більше переглядів, пріоритет у пошуку каталогу та довіру покупців з бейджем «Надійний продавець».';
@@ -3050,7 +3051,7 @@
                 document.getElementById('adBannerImageInput').value = '/images/loop-ad-banner.svg';
                 document.getElementById('adBannerActionTextInput').value = 'Правила безпеки 🛡️';
                 document.getElementById('adBannerActionUrlInput').value = '/safety.html';
-                document.getElementById('adBannerPlacementSelect').value = 'sidebar_right';
+                document.getElementById('adBannerPlacementSelect').value = 'sidebar_both';
             }
             updateAdBannerLivePreview();
             LoopToast.info("Шаблон реклами застосовано!");
@@ -3306,7 +3307,7 @@ async function loadAnnouncementsList() {
             document.getElementById('adBannerMessageInput').value = 'Залучайте тисячі покупців щодня на LoopMarket. Розміщуйте товари вашого бренду, банери чи акційні пропозиції.';
             document.getElementById('adBannerActionTextInput').value = 'Розмістити рекламу 📢';
             document.getElementById('adBannerActionUrlInput').value = 'https://t.me/LoopMarketSupport';
-            document.getElementById('adBannerPlacementSelect').value = 'sidebar_right';
+            document.getElementById('adBannerPlacementSelect').value = 'sidebar_both';
             updateAdBannerLivePreview();
             LoopToast.info("Застосовано фірмовий банер LoopMarket з офіційним логотипом!");
         };
@@ -3344,7 +3345,7 @@ async function loadAnnouncementsList() {
             const desc = document.getElementById('adBannerMessageInput')?.value?.trim() || 'Залучайте тисячі покупців щодня на LoopMarket...';
             const imgUrl = document.getElementById('adBannerImageInput')?.value?.trim() || '';
             const actionText = document.getElementById('adBannerActionTextInput')?.value?.trim() || 'Розмістити рекламу 📢';
-            const placement = document.getElementById('adBannerPlacementSelect')?.value || 'sidebar_right';
+            const placement = document.getElementById('adBannerPlacementSelect')?.value || 'sidebar_both';
 
             document.getElementById('adPreviewTitle').innerText = title;
             document.getElementById('adPreviewText').innerText = desc;
@@ -3352,7 +3353,9 @@ async function loadAnnouncementsList() {
 
             const badge = document.getElementById('adPreviewPosBadge');
             if (badge) {
-                badge.innerText = placement === 'sidebar_right' ? 'Праворуч' : (placement === 'sidebar_left' ? 'Ліворуч' : (placement === 'catalog' ? 'У каталозі' : 'Приховано'));
+                badge.innerText = placement === 'sidebar_both'
+                    ? 'Оба боки (симетрично)'
+                    : (placement === 'sidebar_right' ? 'Праворуч' : (placement === 'sidebar_left' ? 'Ліворуч' : (placement === 'catalog' ? 'У каталозі' : 'Приховано')));
             }
 
             const imgWrap = document.getElementById('adPreviewImageWrap');
@@ -3532,7 +3535,7 @@ async function loadAnnouncementsList() {
                         : '<span class="status-badge" style="background: rgba(100,116,139,0.15); color: #64748b;">⚪ Знято адміном</span>');
 
                 const pageLabel = a.targetPage === 'home' ? '🏠 Каталог / Головна' : (a.targetPage === 'details' ? '📦 Товар' : (a.targetPage === 'services' ? '🛠️ Послуги' : '🌐 Всі сторінки'));
-                const placeLabel = a.placement === 'sidebar_right' ? '➡️ Справа (Skyscraper)' : (a.placement === 'sidebar_left' ? '⬅️ Зліва (Skyscraper)' : (a.placement === 'catalog' ? '📰 У каталозі' : (a.placement === 'modal' ? '🪟 Модальне вікно' : '🔝 Верхній банер')));
+                const placeLabel = a.placement === 'sidebar_both' ? '↔️ Оба боки (Симетричний Skyscraper)' : (a.placement === 'sidebar_right' ? '➡️ Справа (Skyscraper)' : (a.placement === 'sidebar_left' ? '⬅️ Зліва (Skyscraper)' : (a.placement === 'catalog' ? '📰 У каталозі' : (a.placement === 'modal' ? '🪟 Модальне вікно' : '🔝 Верхній банер'))));
 
                 const expiresLabel = a.expiresAt 
                     ? new Date(a.expiresAt).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
@@ -4354,5 +4357,6 @@ async function loadAnnouncementsList() {
         </div>
     </div>
 
+    <script src="/js/responsive-nav.js?v=3.4" defer></script>
 </body>
 </html>

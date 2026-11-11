@@ -271,11 +271,63 @@
         updateDrawerActiveState(drawer);
     }
 
-    function initResponsiveNav() {
-        const header = document.querySelector('header');
-        if (!header) return;
+    function isHomeRoutePath() {
+        const p = window.location.pathname.toLowerCase();
+        return Boolean(
+            document.body?.classList.contains('loop-home-page') ||
+            p === '/' ||
+            p === '' ||
+            p.endsWith('/index.html')
+        );
+    }
 
+    function isNonStorefrontRoute() {
+        const p = window.location.pathname.toLowerCase();
+        return p.includes('admin') || p.includes('login') || p.includes('404') || p.includes('privacy');
+    }
+
+    function syncSkyscraperTopOffset() {
+        const header = document.querySelector('header, .admin-header');
+        let topPx = 16;
+        if (header) {
+            const rect = header.getBoundingClientRect();
+            topPx = Math.max(14, Math.round(Math.max(0, rect.bottom) + 12));
+        }
+        document.documentElement.style.setProperty('--loop-ad-top', topPx + 'px');
+    }
+
+    let _loopSkyscraperSyncBound = false;
+    function bindSkyscraperTopSync() {
+        syncSkyscraperTopOffset();
+        if (_loopSkyscraperSyncBound) return;
+        _loopSkyscraperSyncBound = true;
+        let rafPending = false;
+        const scheduleSync = () => {
+            if (rafPending) return;
+            rafPending = true;
+            requestAnimationFrame(() => {
+                rafPending = false;
+                syncSkyscraperTopOffset();
+            });
+        };
+        window.addEventListener('resize', scheduleSync, { passive: true });
+        window.addEventListener('scroll', scheduleSync, { passive: true });
+    }
+
+    function initResponsiveNav() {
+        if (isHomeRoutePath() && document.body) {
+            document.body.classList.add('loop-home-page');
+        }
+        const header = document.querySelector('header');
         const currentPath = window.location.pathname.toLowerCase();
+        if (
+            !header ||
+            header.classList.contains('admin-header') ||
+            header.classList.contains('header-simple') ||
+            isNonStorefrontRoute()
+        ) {
+            return;
+        }
         const account = resolveLoopAccount();
         const token = account.token;
         const user = account.storedUser;
@@ -573,48 +625,54 @@
         style.textContent = `
             .loop-olx-skyscraper {
                 position: fixed;
-                top: 86px;
-                width: 240px;
-                z-index: 995;
+                top: var(--loop-ad-top, 80px);
+                bottom: 14px;
+                width: var(--loop-ad-width, 150px);
+                height: auto;
+                max-height: calc(100vh - var(--loop-ad-top, 80px) - 14px);
+                z-index: 990;
                 background: var(--surface, #1e293b);
                 border: 1.5px solid var(--border-color, #334155);
-                border-radius: 16px;
-                box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+                border-radius: 14px;
+                box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
                 overflow: hidden;
-                transition: transform 0.25s ease, opacity 0.25s ease;
+                transition: transform 0.25s ease, opacity 0.25s ease, top 0.15s ease;
                 animation: loopSkyscraperSlide 0.35s ease;
                 display: flex;
                 flex-direction: column;
             }
             @keyframes loopSkyscraperSlide {
-                from { opacity: 0; transform: translateY(18px); }
+                from { opacity: 0; transform: translateY(14px); }
                 to { opacity: 1; transform: translateY(0); }
             }
             .loop-olx-skyscraper.pos-right {
-                right: 20px;
+                right: var(--loop-ad-edge, 16px);
             }
             .loop-olx-skyscraper.pos-left {
-                left: 20px;
+                left: var(--loop-ad-edge, 16px);
             }
             .loop-olx-skyscraper.closing {
                 opacity: 0;
-                transform: scale(0.92);
+                transform: scale(0.94);
             }
             .skyscraper-inner {
+                height: 100%;
                 display: flex;
                 flex-direction: column;
-                padding: 12px 14px 14px;
+                padding: 10px;
+                gap: 8px;
+                box-sizing: border-box;
             }
             .skyscraper-top-bar {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                margin-bottom: 10px;
                 padding-bottom: 6px;
                 border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.08));
+                flex-shrink: 0;
             }
             .skyscraper-ad-tag {
-                font-size: 0.68rem;
+                font-size: 0.62rem;
                 font-weight: 800;
                 text-transform: uppercase;
                 color: var(--text-muted, #94a3b8);
@@ -625,18 +683,18 @@
             .skyscraper-ad-tag .ad-badge {
                 background: rgba(16, 185, 129, 0.15);
                 color: #10b981;
-                padding: 1px 5px;
+                padding: 1px 4px;
                 border-radius: 4px;
-                font-size: 0.62rem;
+                font-size: 0.56rem;
             }
             .skyscraper-close-btn {
                 background: none;
                 border: none;
                 color: var(--text-muted, #94a3b8);
-                font-size: 1.3rem;
+                font-size: 1.15rem;
                 line-height: 1;
                 cursor: pointer;
-                padding: 2px 6px;
+                padding: 1px 5px;
                 border-radius: 6px;
                 transition: all 0.15s;
             }
@@ -644,29 +702,21 @@
                 color: #ef4444;
                 background: rgba(239, 68, 68, 0.12);
             }
-            .loop-olx-skyscraper {
-                position: fixed;
-                top: 86px;
-                width: clamp(240px, 18vw, 320px);
-                max-height: calc(100vh - 110px);
-                z-index: 995;
-                background: var(--surface, #1e293b);
-                border: 1.5px solid var(--border-color, #334155);
-                border-radius: 18px;
-                box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
-                overflow-y: auto;
-                overflow-x: hidden;
-                transition: transform 0.25s ease, opacity 0.25s ease;
-                animation: loopSkyscraperSlide 0.35s ease;
+            .skyscraper-body {
+                flex: 1 1 auto;
+                min-height: 0;
                 display: flex;
                 flex-direction: column;
+                gap: 8px;
+                overflow: hidden;
             }
             .skyscraper-media {
+                flex: 1 1 auto;
+                min-height: 160px;
                 width: 100%;
-                margin-bottom: 10px;
-                border-radius: 12px;
+                border-radius: 10px;
                 overflow: hidden;
-                background: #020617;
+                background: linear-gradient(180deg, rgba(16, 185, 129, 0.06) 0%, #020617 50%, rgba(37, 99, 235, 0.06) 100%);
                 border: 1px solid var(--border-color, #334155);
                 display: flex;
                 align-items: center;
@@ -674,66 +724,88 @@
             }
             .skyscraper-media img {
                 width: 100%;
-                height: auto;
-                max-height: 480px;
+                height: 100%;
                 object-fit: contain;
-                border-radius: 12px;
                 display: block;
             }
             .skyscraper-brand-box {
+                flex: 1 1 auto;
+                min-height: 140px;
                 background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(37, 99, 235, 0.12) 100%);
                 border: 1px dashed rgba(16, 185, 129, 0.35);
-                border-radius: 12px;
-                padding: 18px 10px;
+                border-radius: 10px;
+                padding: 14px 8px;
                 text-align: center;
-                margin-bottom: 12px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
             }
             .skyscraper-brand-logo {
-                width: 44px;
-                height: 44px;
+                width: 36px;
+                height: 36px;
                 margin: 0 auto 6px;
                 background: linear-gradient(135deg, #10b981 0%, #2563eb 100%);
-                border-radius: 12px;
+                border-radius: 10px;
                 color: white;
                 font-weight: 900;
-                font-size: 1.35rem;
+                font-size: 1.15rem;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
             }
             .skyscraper-title {
-                font-size: 0.95rem;
+                font-size: 0.78rem;
                 font-weight: 800;
                 color: var(--text-main, #f8fafc);
-                line-height: 1.35;
-                margin-bottom: 6px;
+                line-height: 1.28;
+                overflow-wrap: anywhere;
+                flex-shrink: 0;
             }
             .skyscraper-desc {
-                font-size: 0.8rem;
+                font-size: 0.69rem;
                 color: var(--text-muted, #94a3b8);
-                line-height: 1.45;
-                margin-bottom: 14px;
+                line-height: 1.35;
+                overflow: hidden;
+                display: -webkit-box;
+                -webkit-line-clamp: 5;
+                -webkit-box-orient: vertical;
+                overflow-wrap: anywhere;
+                flex-shrink: 0;
+            }
+            .skyscraper-footer {
+                flex-shrink: 0;
+                margin-top: auto;
             }
             .skyscraper-action-btn {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 6px;
+                gap: 5px;
                 width: 100%;
-                padding: 10px 14px;
+                padding: 8px 9px;
                 background: linear-gradient(135deg, #10b981 0%, #059669 100%);
                 color: white !important;
                 text-decoration: none;
                 font-weight: 800;
-                font-size: 0.82rem;
-                border-radius: 10px;
+                font-size: 0.72rem;
+                line-height: 1.2;
+                text-align: center;
+                border-radius: 9px;
                 box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
                 transition: transform 0.2s, box-shadow 0.2s;
             }
             .skyscraper-action-btn:hover {
                 transform: translateY(-1px);
-                box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+                box-shadow: 0 6px 16px rgba(16, 185, 129, 0.45);
+            }
+            @media (min-width: 1200px) and (max-width: 1399px) {
+                .loop-olx-skyscraper {
+                    width: 136px;
+                }
+                .loop-olx-skyscraper.pos-left { left: 12px; }
+                .loop-olx-skyscraper.pos-right { right: 12px; }
             }
             @media (max-width: 1199px) {
                 .loop-olx-skyscraper {
@@ -744,27 +816,10 @@
         document.head.appendChild(style);
     }
 
-    function renderOlxSkyscraperAd(item) {
-        if (!item || item.placement === 'hidden') return;
-        const dismissedKey = 'loop_ad_skyscraper_dismissed_' + (item.id || 'curr');
-        if (sessionStorage.getItem(dismissedKey) === 'true' || localStorage.getItem(dismissedKey) === 'true') {
-            return;
-        }
-
-        // On laptops and mobile screens (< 1200px), display in catalog promo slot instead of fixed overlay
-        if (window.innerWidth < 1200) {
-            renderCatalogPromoBanner(item);
-            return;
-        }
-
-        injectSkyscraperStyles();
-        const existing = document.getElementById('loopOlxSkyscraperAd');
-        if (existing) existing.remove();
-
-        const isLeft = (item.placement === 'sidebar_left');
+    function buildSkyscraperRail(item, side, dismissedKey) {
         const adWrap = document.createElement('aside');
-        adWrap.id = 'loopOlxSkyscraperAd';
-        adWrap.className = 'loop-olx-skyscraper ' + (isLeft ? 'pos-left' : 'pos-right');
+        adWrap.id = side === 'left' ? 'loopOlxSkyscraperAdLeft' : 'loopOlxSkyscraperAdRight';
+        adWrap.className = 'loop-olx-skyscraper ' + (side === 'left' ? 'pos-left' : 'pos-right');
 
         const title = (item.title || 'Тут могла бути ваша реклама!').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const desc = (item.message || 'Залучайте тисячі покупців щодня на LoopMarket.').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -786,7 +841,7 @@
                     ` : `
                         <div class="skyscraper-brand-box">
                             <div class="skyscraper-brand-logo">L</div>
-                            <div style="font-size: 0.68rem; font-weight: 800; letter-spacing: 0.8px; color: #10b981;">LOOP ADS</div>
+                            <div style="font-size: 0.65rem; font-weight: 800; letter-spacing: 0.8px; color: #10b981;">LOOP ADS</div>
                         </div>
                     `}
                     <div class="skyscraper-title">${title}</div>
@@ -795,7 +850,6 @@
                 <div class="skyscraper-footer">
                     <a href="${actionUrl}" target="_blank" rel="noopener noreferrer" class="skyscraper-action-btn">
                         <span>${actionText}</span>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                     </a>
                 </div>
             </div>
@@ -806,12 +860,46 @@
             closeBtn.onclick = function() {
                 sessionStorage.setItem(dismissedKey, 'true');
                 localStorage.setItem(dismissedKey, 'true');
-                adWrap.classList.add('closing');
-                setTimeout(() => adWrap.remove(), 250);
+                document.querySelectorAll('.loop-olx-skyscraper').forEach(el => {
+                    el.classList.add('closing');
+                    setTimeout(() => el.remove(), 250);
+                });
             };
         }
 
-        document.body.appendChild(adWrap);
+        return adWrap;
+    }
+
+    function renderOlxSkyscraperAd(item) {
+        if (!item || item.placement === 'hidden') return;
+        const dismissedKey = 'loop_ad_skyscraper_dismissed_' + (item.id || 'curr');
+        if (sessionStorage.getItem(dismissedKey) === 'true' || localStorage.getItem(dismissedKey) === 'true') {
+            return;
+        }
+
+        // Exclude index.html from side skyscraper rails per platform layout design
+        if (isHomeRoutePath()) {
+            return;
+        }
+
+        if (window.innerWidth < 1200) {
+            renderCatalogPromoBanner(item);
+        }
+
+        injectSkyscraperStyles();
+        document.querySelectorAll('.loop-olx-skyscraper').forEach(el => el.remove());
+
+        const placement = (item.placement || 'sidebar_both').toLowerCase();
+        const sides = (placement === 'sidebar_left')
+            ? ['left']
+            : (placement === 'sidebar_right')
+                ? ['right']
+                : ['left', 'right'];
+
+        sides.forEach(side => {
+            document.body.appendChild(buildSkyscraperRail(item, side, dismissedKey));
+        });
+        bindSkyscraperTopSync();
     }
     window.renderOlxSkyscraperAd = renderOlxSkyscraperAd;
 
@@ -891,7 +979,7 @@
             if (data.adBanner) {
                 if (data.adBanner.placement === 'catalog') {
                     renderCatalogPromoBanner(data.adBanner);
-                } else if (data.adBanner.placement === 'sidebar_right' || data.adBanner.placement === 'sidebar_left') {
+                } else if (data.adBanner.placement && data.adBanner.placement.startsWith('sidebar')) {
                     renderOlxSkyscraperAd(data.adBanner);
                 }
             }
@@ -923,9 +1011,11 @@
                                 cBtn.onclick = function() {
                                     localStorage.setItem(dismissedKey, 'true');
                                     banner.remove();
+                                    syncSkyscraperTopOffset();
                                 };
                             }
                             document.body.prepend(banner);
+                            syncSkyscraperTopOffset();
                         }
                     }
                 }
@@ -976,9 +1066,11 @@
                         closeBtn.onclick = function() {
                             localStorage.setItem(dismissedKey, 'true');
                             banner.remove();
+                            syncSkyscraperTopOffset();
                         };
                     }
                     document.body.prepend(banner);
+                    syncSkyscraperTopOffset();
                 }
 
                 // 3. OLX-STYLE SKYSCRAPER SIDEBAR BANNER (RIGHT OR LEFT)
@@ -1038,6 +1130,7 @@
     let globalNotifsList = [];
 
     function setupNotificationCenter() {
+        if (isNonStorefrontRoute()) return;
         const token = localStorage.getItem('token') || localStorage.getItem('loopToken');
         if (!token) return;
 
