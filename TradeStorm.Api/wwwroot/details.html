@@ -426,124 +426,33 @@
 
         .product-top-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.35fr) minmax(360px, 440px);
-            gap: 32px;
+            grid-template-columns: minmax(0, 1.35fr) minmax(370px, 460px);
+            gap: 28px;
             align-items: start;
             width: 100%;
         }
 
-        @media (max-width: 992px) {
-            .product-top-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-        }
-
-        /* FULL-WIDTH LOOP ЗАХИСТ & БЕЗПЕКА */
-        .loop-security-full-banner {
-            width: 100%;
-            background: var(--surface);
-            border: 1.5px solid var(--border-color);
-            border-radius: 20px;
-            padding: 30px 34px;
-            box-sizing: border-box;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-            margin-top: 10px;
-        }
-
-        .security-banner-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 14px;
-            padding-bottom: 18px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .sec-badge-shield {
-            width: 46px;
-            height: 46px;
-            border-radius: 12px;
-            background: rgba(16, 185, 129, 0.12);
-            color: var(--primary-light);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            flex-shrink: 0;
-        }
-
-        .sec-badge-official {
-            font-size: 0.84rem;
-            font-weight: 800;
-            color: var(--primary-light);
-            background: rgba(16, 185, 129, 0.12);
-            border: 1.5px solid rgba(16, 185, 129, 0.3);
-            border-radius: 12px;
-            padding: 6px 14px;
-        }
-
-        .security-cards-grid {
+        .details-lower-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-
-        @media (max-width: 1024px) {
-            .security-cards-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 16px;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .security-cards-grid {
-                grid-template-columns: 1fr;
-                gap: 14px;
-            }
-        }
-
-        .sec-card-item {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            transition: transform 0.2s ease, border-color 0.2s ease;
-        }
-
-        .sec-card-item:hover {
-            transform: translateY(-2px);
-            border-color: var(--primary-light);
-        }
-
-        .sec-card-icon {
-            font-size: 1.6rem;
-            margin-bottom: 2px;
-        }
-
-        .sec-card-title {
-            font-size: 1rem;
-            font-weight: 800;
-            color: var(--text-main);
-        }
-
-        .sec-card-desc {
-            font-size: 0.86rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-
-        .details-main-column {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            min-width: 0;
+            grid-template-columns: minmax(0, 1.35fr) minmax(370px, 460px);
+            gap: 28px;
+            align-items: stretch;
             width: 100%;
+        }
+
+        .details-lower-side {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-width: 0;
+        }
+
+        @media (max-width: 992px) {
+            .product-top-grid,
+            .details-lower-grid {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
         }
 
         .gallery-column {
@@ -911,10 +820,6 @@
                 gap: 18px !important;
             }
 
-            .details-main-column {
-                display: contents !important;
-            }
-
             .gallery-column {
                 order: 1 !important;
                 width: 100% !important;
@@ -926,14 +831,18 @@
                 position: static !important;
             }
 
-            .description-block {
+            .details-lower-grid {
                 order: 3 !important;
+            }
+
+            .description-block {
+                order: 1 !important;
                 width: 100% !important;
                 margin-top: 0 !important;
             }
 
-            #videoDetailSection {
-                order: 4 !important;
+            .details-lower-side {
+                order: 2 !important;
             }
 
             .header-center {
@@ -2037,7 +1946,7 @@
             word-break: break-word;
         }
 
-        /* 2. LOOP ЗАХИСТ - БЛОК БЕЗПЕЧНИХ УГОД ТА ДОВІРИ */
+        /* БЛОК ВІДГУКІВ ТА ДОВІРИ */
         .trust-guarantee-block {
             padding: 24px 28px !important;
             margin-top: 0;
@@ -2430,18 +2339,12 @@
                     </div>
                 </div>
     
-                    <div class="specs-box">
-                    <div class="spec-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><strong id="itemLocation"></strong></div>
-                    <div class="spec-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg><span id="itemCondition"></span></div>
-                    <div class="spec-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg><span id="itemShipping"></span></div>
-                    <div class="spec-item" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="itemDate"></span>
-                        </div>
-                        <div style="font-size: 0.85rem; color: var(--primary-light); font-weight: 700;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><span id="itemViews">1 перегляд</span>
-                        </div>
-                    </div>
+                <div id="listingQuickMeta" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 0.84rem; color: var(--text-muted); margin-bottom: 16px;">
+                    <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><strong id="itemLocation" style="color: var(--text-main);"></strong></span>
+                    <span id="itemCondition" style="display: none;"></span>
+                    <span id="itemShipping" style="display: none;"></span>
+                    <span id="itemDate"></span>
+                    <span style="color: var(--primary-light); font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:3px;"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><span id="itemViews">1 перегляд</span></span>
                 </div>
 
                 <div class="seller-card" id="sellerCardWrapper" title="Перейти в профіль продавця">
@@ -2459,36 +2362,40 @@
                     <span style="color: var(--primary-light); font-size: 1.15rem; margin-left: 2px;">→</span>
                 </a>
 
-                <!-- БЛОК ОТЗЫВОВ И РЕЙТИНГА ПРОДАВЦА -->
-                <div class="reviews-box-modern">
-                    <div class="reviews-top-row">
-                        <div class="reviews-score-info">
-                            <span id="sellerAvgStars" style="display:inline-flex;align-items:center;gap:2px;"></span>
-                            <span id="sellerAvgRating" style="font-weight: 800; font-size: 1.1rem; color: var(--text-main);">0.0</span>
-                            <span id="sellerTotalReviews" style="color: var(--text-muted); font-size: 0.85rem;">(0 відгуків)</span>
-                        </div>
-                        <button id="rateSellerBtn" onclick="openReviewModal()" class="btn-rate-modern" style="display: none;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5" style="vertical-align:-2px;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Оцінити
-                        </button>
-                    </div>
-                    <div id="sellerReviewsList" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; padding-right: 4px;">
-                        <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 10px;">Завантаження відгуків...</p>
-                    </div>
-                </div>
-
-                <div id="actionButtons"></div>
-
-                <div class="safety-box">
-                    <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Правила безпеки</h4>
-                    Ніколи не переказуйте гроші наперед. Користуйтеся післяплатою або зустрічайтеся особисто.
-                </div>
+                <div id="actionButtons" style="margin-top: 16px;"></div>
+            </div>
             </div>
 
-            <!-- ОПИС ТОВАРУ НА ВСЮ ШИРИНУ ЕКРАНА -->
-            <div class="description-block" id="productDescriptionBlock">
+            <!-- ОПИС ТОВАРУ ТА ВІДГУКИ НА ВСЮ ШИРИНУ ЕКРАНА -->
+            <div class="details-lower-grid">
+                <div class="description-block" id="productDescriptionBlock" style="height: 100%; box-sizing: border-box;">
                     <h3 style="margin-bottom: 15px; font-size: 1.5rem;" id="descTitle">Опис товару</h3>
                     <p id="itemDesc" style="white-space: pre-wrap;"></p>
                 </div>
+
+                <div class="details-lower-side">
+                    <div class="reviews-box-modern" style="margin-bottom: 0;">
+                        <div class="reviews-top-row">
+                            <div class="reviews-score-info">
+                                <span id="sellerAvgStars" style="display:inline-flex;align-items:center;gap:2px;"></span>
+                                <span id="sellerAvgRating" style="font-weight: 800; font-size: 1.1rem; color: var(--text-main);">0.0</span>
+                                <span id="sellerTotalReviews" style="color: var(--text-muted); font-size: 0.85rem;">(0 відгуків)</span>
+                            </div>
+                            <button id="rateSellerBtn" onclick="openReviewModal()" class="btn-rate-modern" style="display: none;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5" style="vertical-align:-2px;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Оцінити
+                            </button>
+                        </div>
+                        <div id="sellerReviewsList" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; padding-right: 4px;">
+                            <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 10px;">Завантаження відгуків...</p>
+                        </div>
+                    </div>
+
+                    <div class="safety-box" style="margin-top: 0;">
+                        <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Правила безпеки</h4>
+                        Ніколи не переказуйте гроші наперед. Користуйтеся післяплатою або зустрічайтеся особисто.
+                    </div>
+                </div>
+            </div>
 
                 <!-- ВІДЕООГЛЯД / ВІДЕОПРЕЗЕНТАЦІЯ ТОВАРУ ТА БРЕНДУ -->
                 
@@ -2513,46 +2420,8 @@
                     </div>
                 </div>
 
-            <!-- НИЖНІЙ БЛОК: LOOP ЗАХИСТ • БЕЗПЕЧНІ ПОКУПКИ НА ВЕСЬ ЕКРАН -->
-            <div class="loop-security-full-banner" id="loopSecurityFullBlock">
-                <div class="security-banner-header">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div class="sec-badge-shield">🛡️</div>
-                        <div>
-                            <h3 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: var(--text-main);">Loop Захист • Безпечні покупки</h3>
-                            <p style="margin: 3px 0 0 0; font-size: 0.88rem; color: var(--text-muted);">Ваші кошти та покупки на 100% захищені сервісом ескроу та гарантією повернення</p>
-                        </div>
-                    </div>
-                    <span class="sec-badge-official">Офіційна гарантія платформи</span>
-                </div>
-
-                <div class="security-cards-grid">
-                    <div class="sec-card-item">
-                        <div class="sec-card-icon">🔒</div>
-                        <div class="sec-card-title">Безпечна оплата онлайн</div>
-                        <div class="sec-card-desc">Гроші зберігаються на транзитному рахунку до успішної перевірки товару у відділенні перевізника.</div>
-                    </div>
-
-                    <div class="sec-card-item">
-                        <div class="sec-card-icon">📦</div>
-                        <div class="sec-card-title">Огляд перед оплатою</div>
-                        <div class="sec-card-desc">Ви маєте повне право оглянути та перевірити покупку безпосередньо у відділенні перевізника.</div>
-                    </div>
-
-                    <div class="sec-card-item">
-                        <div class="sec-card-icon">💳</div>
-                        <div class="sec-card-title">Гарантоване повернення коштів</div>
-                        <div class="sec-card-desc">Якщо товар не підійшов або пошкоджений — кошти миттєво повертаються на вашу банківську картку.</div>
-                    </div>
-
-                    <div class="sec-card-item">
-                        <div class="sec-card-icon">💬</div>
-                        <div class="sec-card-title">Цілодобова підтримка 24/7</div>
-                        <div class="sec-card-desc">Швидкий арбітраж та захист від шахрайства нашою власною службою безпеки LoopMarket.</div>
-                    </div>
-                </div>
-            </div>
         </div>
+    </main>
 
         <!-- ФІКСОВАНА ПАНЕЛЬ ДІЙ ВНИЗУ ЕКРАНА ДЛЯ СМАРТФОНІВ (< 768px) -->
     <div class="mobile-sticky-action-bar" id="mobileStickyBar" style="display: none;">
@@ -2751,7 +2620,7 @@
                                         <span class="pay-radio-check">✓</span>
                                     </div>
                                     <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;">
-                                        Банківський ескроу-шлюз на стадії підключення (виберіть накладений платіж)
+                                        Онлайн-оплата карткою на стадії підключення (виберіть накладений платіж або зустріч)
                                     </div>
                                 </div>
                                 <div class="payment-card" id="payCard_cash" onclick="selectPayment('Готівкою при зустрічі')">
@@ -2768,11 +2637,11 @@
                             </div>
                             <input type="hidden" id="orderPaymentMethod" value="Накладений платіж (при отриманні)">
 
-                            <!-- 💳 ІНТЕРАКТИВНИЙ ШЛЮЗ ОПЛАТИ "LOOP ЗАХИСТ" -->
+                            <!-- 💳 ІНТЕРАКТИВНИЙ ШЛЮЗ ОПЛАТИ (В РОЗРОБЦІ) -->
                             <div id="onlineCardGatewaySection" style="display: none; margin-top: 14px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 18px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                                     <div style="font-size: 0.85rem; font-weight: 800; color: var(--primary-light); display: flex; align-items: center; gap: 6px;">
-                                        🛡️ Loop Захист (Безпечний ескроу-холдинг)
+                                        💳 Онлайн-оплата (в розробці)
                                     </div>
                                     <span style="font-size: 0.72rem; color: var(--text-muted); background: var(--surface); padding: 2px 8px; border-radius: 6px; border: 1px solid var(--border-color);">3D Secure 2.0</span>
                                 </div>
@@ -2788,7 +2657,7 @@
                                                     <div style="width: 34px; height: 26px; background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); border-radius: 5px; border: 1px solid #fef08a;"></div>
                                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 6a6 6 0 0 1 6 6"/><path d="M12 10a2 2 0 0 1 2 2"/></svg>
                                                 </div>
-                                                <div id="cardBrandLogo" style="font-weight: 800; font-size: 1.05rem; letter-spacing: 1px; color: #10b981;">Loop Захист</div>
+                                                <div id="cardBrandLogo" style="font-weight: 800; font-size: 1.05rem; letter-spacing: 1px; color: #10b981;">LoopMarket</div>
                                             </div>
 
                                             <div id="cardDisplayNumber" style="font-family: 'Courier New', monospace; font-size: 1.15rem; font-weight: 700; letter-spacing: 2px; color: #f8fafc; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">•••• •••• •••• ••••</div>
@@ -2881,8 +2750,8 @@
                         <div style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 18px; padding: 12px 14px; background: rgba(16, 185, 129, 0.08); border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2.2" style="flex-shrink: 0; margin-top: 1px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
                             <div>
-                                <b style="color: var(--text-main);">Захист покупця Loop Market:</b><br>
-                                Кошти застраховані. Ви оглядаєте посилку перед сплатою.
+                                <b style="color: var(--text-main);">Огляд перед оплатою:</b><br>
+                                Користуйтеся післяплатою. Ви оглядаєте посилку перед сплатою.
                             </div>
                         </div>
 
@@ -3119,7 +2988,7 @@
                                 <div class="payment-card" id="servicePay_online" onclick="selectServicePayment('Онлайн-оплата з заморожуванням коштів')">
                                     <div style="display: flex; align-items: center; justify-content: space-between;">
                                         <div style="font-weight: 800; font-size: 0.92rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-                                            💳 Онлайн-оплата (Loop Захист)
+                                            💳 Онлайн-оплата (скоро)
                                         </div>
                                         <span class="pay-radio-check">✓</span>
                                     </div>
@@ -4266,7 +4135,7 @@
                                 </div>
                                 ${r.isVerifiedPurchase ? `
                                     <div style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.74rem; color: #10b981; font-weight: 700; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); padding: 2px 8px; border-radius: 6px; margin-bottom: 6px;">
-                                        🛡️ Перевірена угода (Loop Захист)
+                                        🛡️ Перевірена угода
                                     </div>
                                 ` : ''}
                                 <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 6px; line-height: 1.4;">${r.comment || 'Без коментаря'}</p>
@@ -4549,8 +4418,8 @@
                     Swal.fire({
                         title: '🔒 Онлайн-оплата в розробці',
                         html: '<div style="text-align: left; font-size: 0.92rem; line-height: 1.5; color: var(--text-secondary);">' +
-                              '<p><b>Ескроу-шлюз безпечної оплати</b> наразі проходить тестування банківського еквайрингу.</p>' +
-                              '<p style="margin-top: 8px;">Для безпечних замовлень зараз доступні перевірені способи:</p>' +
+                              '<p><b>Онлайн-оплата карткою</b> наразі проходить тестування банківського еквайрингу.</p>' +
+                              '<p style="margin-top: 8px;">Для замовлень зараз доступні перевірені способи:</p>' +
                               '<ul style="margin: 8px 0 0 18px; padding: 0;">' +
                               '<li><b>Накладений платіж</b> (оплата у відділенні після огляду товару);</li>' +
                               '<li><b>Особиста зустріч</b> та розрахунок на місці.</li>' +
@@ -4561,7 +4430,7 @@
                         confirmButtonColor: '#2563eb'
                     });
                 } else {
-                    alert('🔒 Послуга безпечної онлайн-оплати (ескроу) наразі в розробці! Оберіть накладений платіж (з перевіркою товару при отриманні на пошті).');
+                    alert('🔒 Послуга онлайн-оплати наразі в розробці! Оберіть накладений платіж (з перевіркою товару при отриманні на пошті).');
                 }
                 // Автоматично повертаємо на перевірений накладений платіж
                 selectPayment('Накладений платіж (при отриманні)');
@@ -4602,7 +4471,7 @@
         };
 
         // ==========================================
-        // 💳 INTERACTIVE PAYMENT GATEWAY (LOOP ЗАХИСТ)
+        // 💳 INTERACTIVE PAYMENT GATEWAY
         // ==========================================
         window.flipCard = function(isFlipped) {
             const card = document.getElementById('virtualCardInner');
@@ -4625,7 +4494,7 @@
             if (brand) {
                 if (val.startsWith('4')) brand.innerHTML = '<span style="color:#38bdf8;font-weight:900;">VISA</span>';
                 else if (val.startsWith('5')) brand.innerHTML = '<span style="color:#f97316;font-weight:900;">Mastercard</span>';
-                else brand.innerText = 'Loop Захист';
+                else brand.innerText = 'LoopMarket';
             }
         };
 
@@ -5720,7 +5589,7 @@
         setInterval(updateUnreadChatBadge, 15000);
 
     
-        // ==================== РЕНДЕР ХАРАКТЕРИСТИК, LOOP ЗАХИСТУ ТА СХОЖИХ ПРОПОЗИЦІЙ ====================
+        // ==================== РЕНДЕР ДЕТАЛЕЙ ТА СХОЖИХ ПРОПОЗИЦІЙ ====================
         function renderProductSpecs(item, isServiceListing) {
             const grid = document.getElementById('specsChipsGrid');
             if (!grid || !item) return;
@@ -5812,13 +5681,13 @@
                                         return `<img src="https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg" class="similar-item-img" alt="${escapeHtml(it.title)}">`;
                                     }
                                     if (vUrl.startsWith('/uploads/') || vUrl.match(/\.(mp4|webm|mov|m4v)(\?.*)?$/i)) {
-                                        return `<video src="${escapeHtml(vUrl)}#t=0.5" preload="metadata" muted playsinline style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;"></video>`;
+                                        return `<div class="card-media-box"><video src="${escapeHtml(vUrl)}#t=0.5" preload="metadata" muted playsinline style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none;"></video></div>`;
                                     }
                                     const igMatch = vUrl.match(/(?:instagram\.com|instagr\.am)\/(?:p|reel|reels|tv)\/([a-zA-Z0-9_\-]+)/i);
                                     if (igMatch) {
                                         return `
-                                            <div style="width: 100%; height: 100%; position: relative; overflow: hidden; background: #0b0f19;">
-                                                <iframe src="https://www.instagram.com/p/${igMatch[1]}/embed/" style="width: 100%; height: 380px; border: none; margin-top: -50px; pointer-events: none;" scrolling="no" frameborder="0" loading="lazy"></iframe>
+                                            <div class="card-media-box">
+                                                <iframe src="https://www.instagram.com/p/${igMatch[1]}/embed/" style="position: absolute; top: -64px; left: -2px; width: calc(100% + 4px); height: calc(100% + 160px); border: none; pointer-events: none;" scrolling="no" frameborder="0" loading="lazy"></iframe>
                                                 <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 2;">
                                                     <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.05rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">▶</div>
                                                 </div>
@@ -5826,7 +5695,7 @@
                                         `;
                                     }
                                     return `
-                                        <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0f172a; color: white;">
+                                        <div class="card-media-box" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0f172a; color: white;">
                                             <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 1rem;">▶</div>
                                             <span style="font-size: 0.7rem; font-weight: 800; margin-top: 3px;">ВІДЕО</span>
                                         </div>

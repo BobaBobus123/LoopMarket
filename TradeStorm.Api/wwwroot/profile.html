@@ -1879,9 +1879,9 @@
                     </div>
 
                     <div style="background: var(--surface); padding: 18px; border-radius: 14px; border: 1.5px solid var(--border-color); box-shadow: var(--card-shadow);">
-                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">🛡️ Угоди Loop Захист</div>
+                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">🛡️ Завершені угоди</div>
                         <div style="font-size: 1.85rem; font-weight: 800; color: #2563eb; margin: 4px 0;" id="statCompletedOrders">0</div>
-                        <div style="font-size: 0.78rem; color: var(--text-muted);">Успішно завершено через ескроу</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Успішно підтверджені замовлення</div>
                     </div>
 
                     <div style="background: var(--surface); padding: 18px; border-radius: 14px; border: 1.5px solid var(--border-color); box-shadow: var(--card-shadow);">
@@ -3183,10 +3183,12 @@
 
                         if (videoUrl.startsWith('/uploads/') || videoUrl.match(/\.(mp4|webm|mov|m4v)(\?.*)?$/i)) {
                             return `
-                                <video src="${escapeHtml(videoUrl)}#t=0.5" preload="metadata" muted playsinline style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;"></video>
-                                <span class="card-badge-video" title="Відеоогляд"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Відео</span>
-                                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;">
-                                    <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem;">▶</div>
+                                <div class="card-media-box">
+                                    <video src="${escapeHtml(videoUrl)}#t=0.5" preload="metadata" muted playsinline style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none;"></video>
+                                    <span class="card-badge-video" title="Відеоогляд"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Відео</span>
+                                    <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;">
+                                        <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem;">▶</div>
+                                    </div>
                                 </div>
                             `;
                         }
@@ -3194,9 +3196,9 @@
                         const igMatch = videoUrl.match(/(?:instagram\.com|instagr\.am)\/(?:p|reel|reels|tv)\/([a-zA-Z0-9_\-]+)/i);
                         if (igMatch) {
                             return `
-                                <div style="width: 100%; height: 100%; position: relative; overflow: hidden; background: #0b0f19;">
-                                    <iframe src="https://www.instagram.com/p/${igMatch[1]}/embed/" style="width: 100%; height: 420px; border: none; margin-top: -52px; pointer-events: none;" scrolling="no" frameborder="0" loading="lazy"></iframe>
-                                    <span class="card-badge-video" style="top: 8px; left: 8px; z-index: 2; pointer-events: none;" title="Instagram Reel"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Reel</span>
+                                <div class="card-media-box">
+                                    <iframe src="https://www.instagram.com/p/${igMatch[1]}/embed/" style="position: absolute; top: -64px; left: -2px; width: calc(100% + 4px); height: calc(100% + 160px); border: none; pointer-events: none;" scrolling="no" frameborder="0" loading="lazy"></iframe>
+                                    <span class="card-badge-video" title="Instagram Reel"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Reel</span>
                                     <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 2;">
                                         <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">▶</div>
                                     </div>
@@ -3551,7 +3553,7 @@
                                 ` : ''}
                                 ${o.status === 'Completed' ? `
                                     <button type="button" onclick="openOrderReviewModal(${o.sellerId}, ${o.listingId}, '${o.listingTitle.replace(/'/g, "\\'")}')" style="padding: 8px 16px; background: rgba(245, 158, 11, 0.14); color: #d97706; border: 1.5px solid rgba(245, 158, 11, 0.35); border-radius: 8px; font-weight: 800; font-size: 0.86rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;">
-                                        ⭐ Оцінити продавця (Loop Захист)
+                                        ⭐ Оцінити продавця
                                     </button>
                                 ` : ''}
                                 <a href="/messages.html?seller=${o.sellerId}&item=${o.listingId}" style="text-decoration: none; padding: 8px 16px; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; font-weight: 700; font-size: 0.86rem; display: inline-flex; align-items: center; gap: 6px;">

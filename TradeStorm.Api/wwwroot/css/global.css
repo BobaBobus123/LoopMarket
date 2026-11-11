@@ -608,6 +608,15 @@ html:not([data-theme="dark"]) .trust-banner {
     transition: transform var(--transition-smooth);
 }
 
+.card-media-box {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #0b0f19;
+}
+
 .card:hover .card-img {
     transform: scale(1.035);
 }
@@ -1629,8 +1638,13 @@ body.has-sticky-bar .mobile-bottom-bar {
 
 .card-badge-video {
     position: absolute;
+    top: auto;
+    left: auto;
     bottom: 8px;
     right: 8px;
+    width: auto;
+    max-width: max-content;
+    white-space: nowrap;
     background: rgba(15, 23, 42, 0.88) !important;
     color: #ffffff !important;
     backdrop-filter: blur(8px);
@@ -1646,6 +1660,7 @@ body.has-sticky-bar .mobile-bottom-bar {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
     z-index: 3 !important;
     letter-spacing: 0.3px;
+    pointer-events: none;
 }
 
 .thumb-video {
