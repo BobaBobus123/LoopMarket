@@ -111,6 +111,7 @@ public class AnnouncementAndTelegramVerificationTests : IClassFixture<CustomWebA
             Price = 28000,
             CategoryId = 1,
             Location = "Київ",
+            ImageUrls = new System.Collections.Generic.List<string> { "/uploads/test-mac.jpg" },
             Condition = "Нове"
         };
 
@@ -174,6 +175,7 @@ public class AnnouncementAndTelegramVerificationTests : IClassFixture<CustomWebA
             Price = 32000,
             CategoryId = 1,
             Location = "Львів",
+            ImageUrls = new System.Collections.Generic.List<string> { "/uploads/test-s23.jpg" },
             Condition = "Нове"
         };
 

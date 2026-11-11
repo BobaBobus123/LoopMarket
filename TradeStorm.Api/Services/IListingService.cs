@@ -17,7 +17,8 @@ public interface IListingService
         string? status,
         string? sortBy,
         int? page,
-        int? pageSize);
+        int? pageSize,
+        bool includeDrafts = false);
 
     Task<Listing?> GetListingByIdAsync(int id);
     Task<Listing> CreateListingAsync(int sellerId, CreateListingDto dto);

@@ -3478,7 +3478,9 @@
             const currentUserId = activeUser ? activeUser.id : null;
 
             try {
-                const response = await fetch(`/api/listings/${encodeURIComponent(lookupId)}`);
+                const response = await fetch(`/api/listings/${encodeURIComponent(lookupId)}`, {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
                 if (!response.ok) {
                     const container = document.getElementById('productContent');
                     if (container) {

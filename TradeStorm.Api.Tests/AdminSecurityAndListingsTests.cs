@@ -177,6 +177,7 @@ public class AdminSecurityAndListingsTests : IClassFixture<CustomWebApplicationF
             Description = "В ідеальному стані",
             Price = 25000,
             CategoryId = 1,
+            ImageUrls = new System.Collections.Generic.List<string> { "/uploads/test-macbook.jpg" },
             Condition = "Вживане",
             IsShippingAvailable = true
         };
@@ -208,6 +209,7 @@ public class AdminSecurityAndListingsTests : IClassFixture<CustomWebApplicationF
             Description = "Опис товару",
             Price = 1200,
             CategoryId = 1,
+            ImageUrls = new System.Collections.Generic.List<string> { "/uploads/test-item.jpg" },
             Condition = "Нове"
         };
         var createRes = await sellerClient.PostAsJsonAsync("/api/listings", createListingDto);

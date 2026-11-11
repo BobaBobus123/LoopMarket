@@ -27,10 +27,11 @@ public class ListingService : IListingService
         string? status,
         string? sortBy,
         int? page,
-        int? pageSize)
+        int? pageSize,
+        bool includeDrafts = false)
     {
         return await _listingRepository.GetPagedListingsAsync(
-            search, categoryId, minPrice, maxPrice, condition, sellerId, status, sortBy, page, pageSize);
+            search, categoryId, minPrice, maxPrice, condition, sellerId, status, sortBy, page, pageSize, includeDrafts);
     }
 
     public async Task<Listing?> GetListingByIdAsync(int id)
@@ -98,6 +99,25 @@ public class ListingService : IListingService
             return (false, "Ви не маєте права редагувати чуже оголошення", null);
         }
 
+        var video = dto.VideoUrl != null ? (string.IsNullOrWhiteSpace(dto.VideoUrl) ? null : dto.VideoUrl.Trim()) : listing.VideoUrl;
+        string? nextImageUrl = dto.ImageUrls != null
+            ? ResolveListingImageUrl(dto.ImageUrls, video, dto.CategoryId, dto.Title)
+            : listing.ImageUrl;
+
+        bool hasExplicitStatus = !string.IsNullOrWhiteSpace(dto.Status);
+        string targetStatus = hasExplicitStatus ? dto.Status!.Trim() : listing.Status;
+
+        // Чернетка з доданим медіа автоматично публікується, якщо інший статус явно не передано
+        if (!hasExplicitStatus && string.Equals(listing.Status, "Draft", StringComparison.OrdinalIgnoreCase) && ListingMediaHelper.HasValidMediaRaw(nextImageUrl, video))
+        {
+            targetStatus = "Active";
+        }
+
+        if (!string.Equals(targetStatus, "Draft", StringComparison.OrdinalIgnoreCase) && !ListingMediaHelper.HasValidMediaRaw(nextImageUrl, video))
+        {
+            return (false, "MEDIA_REQUIRED:" + ListingMediaHelper.MediaRequiredMessage, null);
+        }
+
         listing.Title = dto.Title.Trim();
         listing.Description = dto.Description.Trim();
         listing.Price = dto.Price;
@@ -105,19 +125,9 @@ public class ListingService : IListingService
         listing.Condition = dto.Condition;
         listing.Location = string.IsNullOrWhiteSpace(dto.Location) ? "Не вказано" : dto.Location.Trim();
         listing.IsShippingAvailable = dto.IsShippingAvailable;
-
-        var video = dto.VideoUrl != null ? (string.IsNullOrWhiteSpace(dto.VideoUrl) ? null : dto.VideoUrl.Trim()) : listing.VideoUrl;
         listing.VideoUrl = video;
-
-        if (dto.ImageUrls != null)
-        {
-            listing.ImageUrl = ResolveListingImageUrl(dto.ImageUrls, video, dto.CategoryId, dto.Title);
-        }
-
-        if (!string.IsNullOrWhiteSpace(dto.Status))
-        {
-            listing.Status = dto.Status.Trim();
-        }
+        listing.ImageUrl = nextImageUrl;
+        listing.Status = targetStatus;
 
         if (dto.IsFeatured.HasValue && isAdmin)
         {
@@ -141,10 +151,15 @@ public class ListingService : IListingService
             return (false, "Ви не маєте права змінювати статус чужого оголошення");
         }
 
-        var validStatuses = new[] { "Active", "Sold", "Reserved" };
+        var validStatuses = new[] { "Active", "Sold", "Reserved", "Draft" };
         if (!validStatuses.Contains(status))
         {
-            return (false, "Неприпустимий статус. Дозволені: Active, Sold, Reserved");
+            return (false, "Неприпустимий статус. Дозволені: Active, Sold, Reserved, Draft");
+        }
+
+        if (!string.Equals(status, "Draft", StringComparison.OrdinalIgnoreCase) && !ListingMediaHelper.HasValidMediaRaw(listing.ImageUrl, listing.VideoUrl))
+        {
+            return (false, "MEDIA_REQUIRED:" + ListingMediaHelper.MediaRequiredMessage);
         }
 
         listing.Status = status;

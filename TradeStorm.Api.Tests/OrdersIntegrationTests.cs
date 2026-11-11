@@ -48,6 +48,7 @@ public class OrdersIntegrationTests : IClassFixture<CustomWebApplicationFactory>
             Description = "Ідеальний стан, 16GB RAM, SSD 512GB",
             Price = 18500.0m,
             CategoryId = 1, // Електроніка
+            ImageUrls = new System.Collections.Generic.List<string> { "/uploads/test-laptop.jpg" },
             Condition = "Вживане",
             Location = "Кременчук, Центр",
             IsShippingAvailable = true

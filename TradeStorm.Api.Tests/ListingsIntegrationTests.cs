@@ -50,6 +50,7 @@ public class ListingsIntegrationTests : IClassFixture<CustomWebApplicationFactor
             Description = "Повний курс ASP.NET Core для 7 семестру КГТА",
             Price = 250.0m,
             CategoryId = 3, // Навчальні матеріали та книги
+            ImageUrls = new System.Collections.Generic.List<string> { "/uploads/test-book.jpg" },
             Condition = "Нове",
             Location = "Кременчук, КГТА",
             IsShippingAvailable = true

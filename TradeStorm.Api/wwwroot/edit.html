@@ -803,6 +803,9 @@
     <main>
         <div class="creation-card">
             <h1 id="pageHeading">Редагувати оголошення</h1>
+            <div id="draftEditBanner" style="display: none; background: rgba(245, 158, 11, 0.12); border: 1.5px solid rgba(245, 158, 11, 0.5); color: #f59e0b; padding: 13px 16px; border-radius: 12px; margin-bottom: 18px; font-size: 0.9rem; font-weight: 700; line-height: 1.45;">
+                📝 <b>Це чернетка оголошення (очікує фото або відео).</b> Завантажте щонайменше 1 фотографію або додайте відео та натисніть «Додати медіа та опублікувати» — товар одразу з'явиться в каталозі!
+            </div>
 
             <!-- Перемикач типу оголошення -->
             <div style="background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 14px; padding: 14px 18px; margin-bottom: 22px;">
@@ -1811,10 +1814,18 @@
         // ==================== 3. ПОВНЕ АВТОМАТИЧНЕ ЗАВАНТАЖЕННЯ ДАНИХ ====================
         async function loadListingData() {
             try {
-                const res = await fetch(`/api/listings/${listingId}`);
+                const res = await fetch(`/api/listings/${listingId}`, {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
                 if (!res.ok) throw new Error("Оголошення не знайдено на сервері");
                 const item = await res.json();
                 window.currentListing = item;
+                if (item.status === 'Draft') {
+                    const db = document.getElementById('draftEditBanner');
+                    if (db) db.style.display = 'block';
+                    const saveBtn = document.querySelector('.btn-publish');
+                    if (saveBtn) saveBtn.innerText = '🚀 Додати медіа та опублікувати';
+                }
                 window.savedPhysicalLocation = item.location && !item.location.toLowerCase().includes('онлайн') ? item.location : 'Кременчук';
 
                 // Безпечна заміна числового ID на хешований код у посиланні браузера
@@ -1943,6 +1954,18 @@
             e.preventDefault();
             const btn = document.querySelector('.btn-publish');
             const statusDiv = document.getElementById('statusMsg');
+
+            const hasAnyMedia = (existingPhotos && existingPhotos.length > 0) || (newSelectedFiles && newSelectedFiles.length > 0) || !!selectedVideoFile || !!(attachedVideoUrl && attachedVideoUrl.trim());
+            if (!hasAnyMedia) {
+                const errMsg = "Додайте щонайменше 1 фотографію або відеопрезентацію. Оголошення без фото або відео не може бути опубліковане.";
+                LoopToast.error(errMsg);
+                if (statusDiv) {
+                    statusDiv.innerText = errMsg;
+                    statusDiv.style.color = "#ef4444";
+                }
+                document.getElementById('previewGrid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
             btn.innerText = "Збереження змін...";
             btn.disabled = true;
             statusDiv.innerText = "";
@@ -1977,7 +2000,7 @@
                 let finalImageUrls = [...existingPhotos, ...newlyUploadedUrls]
                     .filter(u => u && !u.includes('placeholder') && !u.includes('no-photo'));
                 if (finalImageUrls.length === 0 && !attachedVideoUrl && !selectedVideoFile) {
-                    finalImageUrls = [isCurrentService ? '/images/placeholder-service.svg' : '/images/placeholder.svg'];
+                    throw new Error("Додайте щонайменше 1 фотографію або відеопрезентацію.");
                 }
 
                 let finalVideoUrl = attachedVideoUrl;
@@ -2020,7 +2043,8 @@
                     videoUrl: finalVideoUrl,
                     condition: conditionValue,
                     location: document.getElementById('location').value.trim() || 'Кременчук',
-                    isShippingAvailable: shippingAvailable
+                    isShippingAvailable: shippingAvailable,
+                    status: (window.currentListing && window.currentListing.status === 'Draft') ? 'Active' : undefined
                 };
 
                 const response = await fetch(`/api/listings/${listingId}`, {
@@ -2046,7 +2070,7 @@
                 LoopToast.error(err.message || "Помилка збереження");
                 statusDiv.innerText = err.message;
                 statusDiv.style.color = "#ef4444";
-                btn.innerText = "Зберегти зміни";
+                btn.innerText = (window.currentListing && window.currentListing.status === 'Draft') ? "🚀 Додати медіа та опублікувати" : "Зберегти зміни";
                 btn.disabled = false;
             }
         });

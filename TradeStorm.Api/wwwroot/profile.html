@@ -2998,7 +2998,10 @@
 
                 async function loadAllListings() {
                     try {
-                        const response = await fetch(`/api/listings?sellerId=${currentUserId}&pageSize=100`);
+                        const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
+                        const response = await fetch(`/api/listings?sellerId=${currentUserId}&pageSize=100&includeDrafts=true`, {
+                            headers: curToken ? { 'Authorization': `Bearer ${curToken}` } : {}
+                        });
                         const data = await response.json();
                         allListingsData = data.listings || [];
 
@@ -3239,14 +3242,15 @@
 
                     container.innerHTML = pageItems.map(item => `
                         <div class="card">
-                            <div class="card-img-wrapper" onclick="window.location.href='/details.html?id=${item.code || item.id}'">
+                            <div class="card-img-wrapper" onclick="window.location.href='/${item.status === 'Draft' ? 'edit' : 'details'}.html?id=${item.code || item.id}'">
                                 ${getProfileCardMediaHtml(item)}
+                                ${item.status === 'Draft' ? '<span style="position:absolute; top:10px; left:10px; z-index:4; background:rgba(245,158,11,0.94); color:#fff; font-size:0.72rem; font-weight:800; padding:4px 9px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.28);">📝 Чернетка • додайте фото</span>' : ''}
                             </div>
                             <div class="card-content">
                                 <div class="card-title">${item.title}</div>
                                 <div class="card-price">${item.price} ₴</div>
                                 <div class="card-actions">
-                                    <a href="/edit.html?id=${item.code || item.id}" class="btn-edit">${ICONS.edit} Змінити</a>
+                                    <a href="/edit.html?id=${item.code || item.id}" class="btn-edit">${ICONS.edit} ${item.status === 'Draft' ? 'Додати фото' : 'Змінити'}</a>
                                     <button onclick="deleteListing('${item.code || item.id}')" class="btn-delete">${ICONS.trash} Видалити</button>
                                 </div>
                             </div>

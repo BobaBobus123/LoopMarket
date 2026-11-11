@@ -1337,7 +1337,7 @@
                     <div class="section-header-row">
                         <div class="section-title-wrap">
                             <div class="section-badge-num">2</div>
-                            <h2 class="section-title">Фотографії та відеопрезентація</h2>
+                            <h2 class="section-title">Фотографії та відеопрезентація <span style="color:#ef4444; font-size:0.85rem; font-weight:700;">* обов'язково</span></h2>
                         </div>
                         <span id="photoCountBadge" style="font-size: 0.82rem; font-weight: 800; color: var(--text-muted); background: var(--bg-color); padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border-color);">
                             0 / 5 фото
@@ -1349,7 +1349,7 @@
                         <input type="file" id="fileInput" accept="image/*" multiple style="display: none;" onchange="handleFileSelect(this.files)">
                         <div class="dropzone-icon-box">📸</div>
                         <div class="dropzone-text-main">Перетягніть фотографії сюди або натисніть для вибору</div>
-                        <div class="dropzone-text-sub">Підтримуються JPG, PNG, WEBP (до 5 файлів). Перше фото стане обкладинкою оголошення.</div>
+                        <div class="dropzone-text-sub">Підтримуються JPG, PNG, WEBP (до 5 файлів). Обов'язково додайте хоча б 1 фото або відеопрезентацію.</div>
                     </div>
 
                     <!-- PREVIEWS GRID -->
@@ -2415,6 +2415,19 @@
                 if (isNaN(priceVal) || priceVal < 0) {
                     showToast('Помилка', 'Вкажіть коректну вартість (від 0 грн)', '⚠️', true);
                     document.getElementById('priceInput').focus();
+                    return;
+                }
+
+                const hasSelectedPhoto = Array.isArray(selectedFiles) && selectedFiles.length > 0;
+                const hasSelectedVideo = !!selectedVideoFile || !!(attachedVideoUrl && attachedVideoUrl.trim());
+                if (!hasSelectedPhoto && !hasSelectedVideo) {
+                    showToast('Додайте фото або відео', "Оголошення без фотографії чи відео не може бути опубліковане. Додайте хоча б 1 фото або відео.", '📸', true);
+                    const dz = document.getElementById('photoDropzone');
+                    if (dz) {
+                        dz.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        dz.style.borderColor = '#ef4444';
+                        setTimeout(() => { dz.style.borderColor = ''; }, 3000);
+                    }
                     return;
                 }
 

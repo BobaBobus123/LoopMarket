@@ -48,10 +48,23 @@ public class ListingsController : ControllerBase
         [FromQuery] string? status,
         [FromQuery] string? sortBy,
         [FromQuery] int? page,
-        [FromQuery] int? pageSize)
+        [FromQuery] int? pageSize,
+        [FromQuery] bool includeDrafts = false)
     {
+        bool canIncludeDrafts = false;
+        if (includeDrafts || string.Equals(status, "Draft", StringComparison.OrdinalIgnoreCase))
+        {
+            var authIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            bool isOwner = int.TryParse(authIdStr, out int authId) && sellerId.HasValue && sellerId.Value == authId;
+            canIncludeDrafts = User.IsInRole("Admin") || isOwner;
+            if (!canIncludeDrafts && string.Equals(status, "Draft", StringComparison.OrdinalIgnoreCase))
+            {
+                return Ok(new { totalCount = 0, listings = Array.Empty<object>() });
+            }
+        }
+
         var (totalCount, listings) = await _listingService.GetListingsAsync(
-            search, categoryId, minPrice, maxPrice, condition, sellerId, status, sortBy, page, pageSize);
+            search, categoryId, minPrice, maxPrice, condition, sellerId, status, sortBy, page, pageSize, canIncludeDrafts);
 
         return Ok(new { totalCount, listings });
     }
@@ -98,6 +111,16 @@ public class ListingsController : ControllerBase
         if (l == null)
         {
             return NotFound(new { error = "Оголошення не знайдено" });
+        }
+
+        if (string.Equals(l.Status, "Draft", StringComparison.OrdinalIgnoreCase))
+        {
+            var authIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            bool isOwner = int.TryParse(authIdStr, out int authId) && l.SellerId == authId;
+            if (!User.IsInRole("Admin") && !isOwner)
+            {
+                return NotFound(new { error = "Оголошення не знайдено" });
+            }
         }
 
         try
@@ -181,6 +204,15 @@ public class ListingsController : ControllerBase
             }
         }
 
+        if (!ListingMediaHelper.HasValidMedia(dto.ImageUrls, dto.VideoUrl))
+        {
+            return BadRequest(new
+            {
+                error = ListingMediaHelper.MediaRequiredMessage,
+                code = "MEDIA_REQUIRED"
+            });
+        }
+
         if (!string.IsNullOrWhiteSpace(dto.VideoUrl) && !User.IsInRole("Admin"))
         {
             bool isPremium = currentUser != null && (currentUser.IsPremium && (!currentUser.PremiumUntil.HasValue || currentUser.PremiumUntil.Value > DateTime.UtcNow));
@@ -237,6 +269,8 @@ public class ListingsController : ControllerBase
         {
             if (error == "Оголошення не знайдено")
                 return NotFound(new { error });
+            if (error != null && error.StartsWith("MEDIA_REQUIRED:", StringComparison.Ordinal))
+                return BadRequest(new { error = error.Substring("MEDIA_REQUIRED:".Length), code = "MEDIA_REQUIRED" });
 
             return StatusCode(403, new { error });
         }
@@ -267,11 +301,15 @@ public class ListingsController : ControllerBase
             return Unauthorized();
         }
 
-        var (success, error) = await _listingService.UpdateListingStatusAsync(numericId, userId, dto.Status);
+        var (success, error) = await _listingService.UpdateListingStatusAsync(numericId, userId, dto.Status, User.IsInRole("Admin"));
         if (!success)
         {
             if (error == "Оголошення не знайдено")
                 return NotFound(new { error });
+            if (error != null && error.StartsWith("MEDIA_REQUIRED:", StringComparison.Ordinal))
+                return BadRequest(new { error = error.Substring("MEDIA_REQUIRED:".Length), code = "MEDIA_REQUIRED" });
+            if (error != null && error.StartsWith("Неприпустимий статус", StringComparison.Ordinal))
+                return BadRequest(new { error });
 
             return StatusCode(403, new { error });
         }
@@ -321,8 +359,11 @@ public class ListingsController : ControllerBase
             .Select(l => new
             {
                 id = l.Id,
+                code = ListingIdEncoder.Encode(l.Id),
                 title = l.Title,
+                description = l.Description,
                 price = l.Price,
+                categoryId = l.CategoryId,
                 categoryName = l.Category != null ? l.Category.Name : "Інше",
                 sellerId = l.SellerId,
                 sellerName = l.Seller != null ? $"{l.Seller.FirstName} {l.Seller.LastName}".Trim() : "Невідомий",
@@ -356,6 +397,8 @@ public class ListingsController : ControllerBase
         var (success, error, listing) = await _listingService.UpdateListingAsync(numericId, 0, dto, isAdmin: true);
         if (!success || listing == null)
         {
+            if (error != null && error.StartsWith("MEDIA_REQUIRED:", StringComparison.Ordinal))
+                return BadRequest(new { error = error.Substring("MEDIA_REQUIRED:".Length), code = "MEDIA_REQUIRED" });
             return NotFound(new { error = error ?? "Не вдалося оновити оголошення" });
         }
 
@@ -402,6 +445,17 @@ public class ListingsController : ControllerBase
         if (string.IsNullOrWhiteSpace(dto.Title))
             return BadRequest(new { error = "Назва оголошення обов'язкова" });
 
+        string targetStatus = string.IsNullOrWhiteSpace(dto.Status) ? "Active" : dto.Status.Trim();
+        if (!string.Equals(targetStatus, "Draft", StringComparison.OrdinalIgnoreCase) &&
+            !ListingMediaHelper.HasValidMediaRaw(dto.ImageUrl, dto.VideoUrl))
+        {
+            return BadRequest(new
+            {
+                error = ListingMediaHelper.MediaRequiredMessage,
+                code = "MEDIA_REQUIRED"
+            });
+        }
+
         var adminIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
         int currentAdminId = int.TryParse(adminIdStr, out int aId) ? aId : 1;
         int targetSellerId = dto.SellerId.HasValue && dto.SellerId.Value > 0 ? dto.SellerId.Value : currentAdminId;
@@ -421,7 +475,7 @@ public class ListingsController : ControllerBase
                 : dto.ImageUrl.Trim(),
             VideoUrl = string.IsNullOrWhiteSpace(dto.VideoUrl) ? null : dto.VideoUrl.Trim(),
             IsFeatured = false, // Тільки адміністратор може призначати статус VIP
-            Status = "Active",
+            Status = targetStatus,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -432,7 +486,27 @@ public class ListingsController : ControllerBase
         {
             id = listing.Id,
             title = listing.Title,
-            message = "Оголошення успішно додано!"
+            status = listing.Status,
+            message = targetStatus == "Draft" ? "Чернетку оголошення збережено!" : "Оголошення успішно додано!"
+        });
+    }
+
+    /// <summary>
+    /// Адміністрування: створення готових чернеток товарних оголошень (Draft) по всіх товарних категоріях
+    /// </summary>
+    [HttpPost("admin/seed-templates")]
+    [Authorize(Roles = "Admin")]
+    public IActionResult AdminSeedProductTemplates()
+    {
+        var adminIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        int? currentAdminId = int.TryParse(adminIdStr, out int aId) ? aId : null;
+        int created = TradeStorm.Api.Data.ListingSeeder.SeedDraftProductTemplates(_context, currentAdminId, onlyIfNoneSeeded: false);
+        return Ok(new
+        {
+            createdCount = created,
+            message = created > 0
+                ? $"Створено {created} чернеток оголошень по товарних категоріях (очікують на фото або відео)"
+                : "Усі шаблони чернеток вже створені в базі даних"
         });
     }
 

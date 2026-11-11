@@ -137,7 +137,7 @@ public class VideoListingSupportTests
 
         public Task<(int TotalCount, IReadOnlyList<object> Items)> GetPagedListingsAsync(
             string? search, int? categoryId, decimal? minPrice, decimal? maxPrice,
-            string? condition, int? sellerId, string? status, string? sortBy, int? page, int? pageSize)
+            string? condition, int? sellerId, string? status, string? sortBy, int? page, int? pageSize, bool includeDrafts = false)
         {
             return Task.FromResult((Store.Count, (IReadOnlyList<object>)Store.Cast<object>().ToList()));
         }

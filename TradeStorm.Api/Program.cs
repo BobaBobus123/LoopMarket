@@ -735,6 +735,19 @@ using (var scope = app.Services.CreateScope())
             Console.WriteLine($"👑 Користувачу {firstUser.Email} надано роль Admin для захисту лабораторних робіт!");
         }
     }
+
+    try
+    {
+        int seededDrafts = TradeStorm.Api.Data.ListingSeeder.SeedDraftProductTemplates(db, onlyIfNoneSeeded: true);
+        if (seededDrafts > 0)
+        {
+            Console.WriteLine($"📝 Створено {seededDrafts} чернеток оголошень по всіх товарних категоріях (очікують фото/відео).");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Listing seeding notice: {ex.Message}");
+    }
 }
 
 

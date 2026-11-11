@@ -30,7 +30,8 @@ public class ListingRepository : Repository<Listing>, IListingRepository
         string? status,
         string? sortBy,
         int? page,
-        int? pageSize)
+        int? pageSize,
+        bool includeDrafts = false)
     {
         var query = _dbSet
             .AsNoTracking()
@@ -73,6 +74,10 @@ public class ListingRepository : Repository<Listing>, IListingRepository
         if (!string.IsNullOrWhiteSpace(status))
         {
             query = query.Where(l => l.Status == status);
+        }
+        else if (!includeDrafts)
+        {
+            query = query.Where(l => l.Status != "Draft");
         }
 
         int totalCount = await query.CountAsync();

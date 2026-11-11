@@ -839,7 +839,14 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     <input type="text" id="listingsSearchInput" class="search-input" placeholder="Пошук за назвою або продавцем..." oninput="filterListingsTable()">
                 </div>
+                <select id="listingsStatusFilter" class="admin-form-select" style="width: auto; min-width: 190px; padding: 8px 12px;" onchange="filterListingsTable()">
+                    <option value="all">Усі статуси</option>
+                    <option value="Draft">📝 Чернетки (очікують фото)</option>
+                    <option value="Active">🟢 Лише активні</option>
+                    <option value="Sold">🔴 Продані</option>
+                </select>
                 <button class="btn-action primary" onclick="loadListings()">🔄 Оновити оголошення</button>
+                <button class="btn-action warning" onclick="seedDraftTemplatesAdmin()" title="Створити готові описи по всіх товарних категоріях у статусі Draft">✨ Шаблони по категоріях</button>
                 <button class="btn-action success" onclick="openCreateListingModal()" style="font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 2px 8px rgba(16,185,129,0.3);">➕ Додати оголошення</button>
             </div>
 
@@ -1579,8 +1586,21 @@
                         </select>
                     </div>
                     <div class="admin-form-group">
-                        <label>URL фото (або залиште порожнім)</label>
+                        <label>URL фото (обов'язково для активного) *</label>
                         <input type="text" id="listingImage" class="admin-form-input" placeholder="/uploads/... або посилання">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="admin-form-group">
+                        <label>URL відео (якщо немає фото)</label>
+                        <input type="text" id="listingVideo" class="admin-form-input" placeholder="https://youtube.com/... або /uploads/videos/...">
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Статус публікації</label>
+                        <select id="listingStatusCreate" class="admin-form-select">
+                            <option value="Active" selected>🟢 Активне (потрібне фото або відео)</option>
+                            <option value="Draft">📝 Чернетка (приховано, фото додам пізніше)</option>
+                        </select>
                     </div>
                 </div>
                 <div style="display: flex; gap: 20px; align-items: center; margin-top: 10px;">
@@ -1639,6 +1659,7 @@
                         <label>Статус публікації</label>
                         <select id="adminEditListingStatus" class="admin-form-select">
                             <option value="Active">🟢 Активне (В наявності / опубліковано)</option>
+                            <option value="Draft">📝 Чернетка (Приховано, очікує фото/відео)</option>
                             <option value="Sold">🔴 Продано (Архівне)</option>
                             <option value="Reserved">🟡 Зарезервовано (Оформлюється угода)</option>
                         </select>
@@ -1660,8 +1681,15 @@
                 </div>
 
                 <div class="admin-form-group">
-                    <label>Посилання на фотографії (розділені крапкою з комою ';' або новим рядком)</label>
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <label style="margin: 0;">Посилання на фотографії (через ';' або з нового рядка)</label>
+                        <label class="btn-action primary" style="cursor: pointer; font-size: 0.78rem; padding: 5px 10px; margin: 0;">
+                            📸 Завантажити фото з ПК
+                            <input type="file" id="adminEditListingUploadInput" accept="image/*" multiple style="display: none;" onchange="uploadAdminModalPhotos(this)">
+                        </label>
+                    </div>
                     <textarea id="adminEditListingImages" class="admin-form-textarea" rows="2" placeholder="/uploads/..., https://..."></textarea>
+                    <div id="adminEditListingUploadHint" style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px;"></div>
                 </div>
 
                 <div class="admin-form-group">
@@ -2755,12 +2783,30 @@
 
         function filterListingsTable() {
             const q = (document.getElementById('listingsSearchInput').value || '').toLowerCase();
+            const st = document.getElementById('listingsStatusFilter')?.value || 'all';
             const filtered = allListings.filter(l => {
                 const title = (l.title || '').toLowerCase();
                 const seller = (l.sellerName || '').toLowerCase();
-                return !q || title.includes(q) || seller.includes(q);
+                const matchesQuery = !q || title.includes(q) || seller.includes(q);
+                const matchesStatus = st === 'all' || (l.status || 'Active') === st;
+                return matchesQuery && matchesStatus;
             });
             renderListingsTable(filtered);
+        }
+
+        async function seedDraftTemplatesAdmin() {
+            try {
+                const res = await adminFetch('/api/listings/admin/seed-templates', { method: 'POST' });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok) {
+                    LoopToast.success(data.message || 'Чернетки оновлено!');
+                    await loadListings();
+                } else {
+                    LoopToast.error(data.error || 'Не вдалося створити шаблони');
+                }
+            } catch (e) {
+                LoopToast.error('Помилка мережі при створенні шаблонів');
+            }
         }
 
         function renderListingsTable(list) {
@@ -2771,7 +2817,8 @@
             }
 
             tbody.innerHTML = list.map(l => {
-                const img = l.imageUrl ? `<img src="${l.imageUrl}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 8px;">` : `<div style="width: 44px; height: 44px; background: rgba(0,0,0,0.05); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-size: 1.2rem;">📦</div>`;
+                const firstImg = l.imageUrl ? String(l.imageUrl).split(';')[0].trim() : '';
+                const img = firstImg ? `<img src="${escapeHtml(firstImg)}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 8px;">` : `<div style="width: 44px; height: 44px; background: rgba(0,0,0,0.05); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-size: 1.2rem;">📦</div>`;
                 const date = new Date(l.createdAt).toLocaleDateString('uk-UA');
                 const isFeatured = !!l.isFeatured;
 
@@ -2795,7 +2842,7 @@
                         <td><code style="font-size: 0.8rem;">${escapeHtml(formatAdminPhone(l.sellerPhone) || l.sellerEmail || '—')}</code></td>
                         <td style="color: var(--text-muted); font-size: 0.82rem;">${date}</td>
                         <td>
-                            ${isFeatured ? '<span class="status-badge featured">⭐ ТОП</span>' : '<span class="status-badge active">Звичайне</span>'}
+                            ${l.status === 'Draft' ? '<span class="status-badge" style="background:rgba(245,158,11,0.16);color:#f59e0b;border:1px solid rgba(245,158,11,0.4);">📝 Чернетка (без фото)</span>' : (isFeatured ? '<span class="status-badge featured">⭐ ТОП</span>' : '<span class="status-badge active">🟢 Активне</span>')}
                         </td>
                         <td style="text-align: right; white-space: nowrap;">
                             <button class="btn-action ${isFeatured ? 'warning' : 'neutral'}" onclick="toggleFeaturedListing(${l.id})" title="Закріпити в ТОП / зняти">
@@ -2804,6 +2851,7 @@
                             <a href="/details.html?id=${l.code || l.id}" target="_blank" class="btn-action neutral" title="Переглянути">
                                 👁️
                             </a>
+                            <a href="/edit.html?id=${encodeURIComponent(l.code || l.id)}" target="_blank" class="btn-action neutral" title="Додати фото / відео на сторінці редагування">📸</a>
                             <button type="button" class="btn-action primary" onclick="openAdminEditListingModal(${l.id})" title="Редагувати оголошення в адмінці">
                                 ✏️
                             </button>
@@ -3114,8 +3162,13 @@ async function loadAnnouncementsList() {
             document.getElementById('adminEditListingShipping').checked = !!item.isShippingAvailable;
             document.getElementById('adminEditListingVideo').value = item.videoUrl || '';
 
-            const rawImgs = Array.isArray(item.imageUrls) ? item.imageUrls : (item.imageUrl ? item.imageUrl.split(';') : []);
+            const rawImgs = (Array.isArray(item.imageUrls) ? item.imageUrls : (item.imageUrl ? item.imageUrl.split(';') : []))
+                .map(s => (s || '').trim())
+                .filter(s => s && !s.includes('placeholder') && !s.includes('no-photo'));
             document.getElementById('adminEditListingImages').value = rawImgs.join(';\n');
+            const hintEl = document.getElementById('adminEditListingUploadHint');
+            if (hintEl) hintEl.innerText = item.status === 'Draft' ? '📝 Чернетка без фото. Завантажте фото або додайте відео — статус автоматично стане Активним.' : '';
+            window._adminEditInitialStatus = item.status || 'Active';
 
             const catSelect = document.getElementById('adminEditListingCategory');
             if (catSelect) {
@@ -3152,7 +3205,18 @@ async function loadAnnouncementsList() {
             }
 
             const rawImagesText = document.getElementById('adminEditListingImages').value || '';
-            const imagesList = rawImagesText.split(/[\n;]+/).map(s => s.trim()).filter(Boolean);
+            const imagesList = rawImagesText.split(/[\n;]+/).map(s => s.trim()).filter(u => u && !u.includes('placeholder') && !u.includes('no-photo'));
+            const videoVal = document.getElementById('adminEditListingVideo').value.trim() || null;
+            let nextStatus = document.getElementById('adminEditListingStatus').value;
+            const hasValidMedia = imagesList.length > 0 || !!videoVal;
+            if (nextStatus === 'Draft' && hasValidMedia && window._adminEditInitialStatus === 'Draft') {
+                nextStatus = 'Active';
+            }
+            if (nextStatus !== 'Draft' && !hasValidMedia) {
+                LoopToast.error("Додайте щонайменше 1 фотографію або відео (або оберіть статус Чернетка Draft).");
+                if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = origHtml; }
+                return;
+            }
 
             const payload = {
                 title: document.getElementById('adminEditListingTitle').value.trim(),
@@ -3161,10 +3225,10 @@ async function loadAnnouncementsList() {
                 condition: document.getElementById('adminEditListingCondition').value.trim(),
                 location: document.getElementById('adminEditListingLocation').value.trim() || 'Кременчук',
                 description: document.getElementById('adminEditListingDesc').value.trim(),
-                status: document.getElementById('adminEditListingStatus').value,
+                status: nextStatus,
                 isFeatured: document.getElementById('adminEditListingFeatured').checked,
                 isShippingAvailable: document.getElementById('adminEditListingShipping').checked,
-                videoUrl: document.getElementById('adminEditListingVideo').value.trim() || null,
+                videoUrl: videoVal,
                 imageUrls: imagesList
             };
 
@@ -3193,6 +3257,34 @@ async function loadAnnouncementsList() {
                     saveBtn.disabled = false;
                     saveBtn.innerHTML = origHtml;
                 }
+            }
+        };
+
+        window.uploadAdminModalPhotos = async function(input) {
+            const files = Array.from(input.files || []);
+            if (!files.length) return;
+            const hintEl = document.getElementById('adminEditListingUploadHint');
+            if (hintEl) hintEl.innerText = '⏳ Завантаження фотографій...';
+            try {
+                const fd = new FormData();
+                files.forEach(f => fd.append('files', f));
+                const upRes = await adminFetch('/api/listings/upload-multiple', { method: 'POST', body: fd });
+                const upData = await upRes.json().catch(() => ({}));
+                if (!upRes.ok || !upData.imageUrls || !upData.imageUrls.length) {
+                    throw new Error(upData.error || 'Помилка завантаження фотографій');
+                }
+                const ta = document.getElementById('adminEditListingImages');
+                const existing = (ta.value || '').split(/[\n;]+/).map(s => s.trim()).filter(u => u && !u.includes('placeholder') && !u.includes('no-photo'));
+                ta.value = [...existing, ...upData.imageUrls].join(';\n');
+                const stSel = document.getElementById('adminEditListingStatus');
+                if (stSel && stSel.value === 'Draft') stSel.value = 'Active';
+                if (hintEl) hintEl.innerText = '✅ Фото завантажено! Натисніть «Зберегти зміни» для публікації.';
+                LoopToast.success(`Завантажено ${upData.imageUrls.length} фото!`);
+            } catch (err) {
+                if (hintEl) hintEl.innerText = '❌ ' + (err.message || 'Помилка');
+                LoopToast.error(err.message || 'Не вдалося завантажити фото');
+            } finally {
+                input.value = '';
             }
         };
 
@@ -4065,8 +4157,15 @@ async function loadAnnouncementsList() {
             const description = document.getElementById('listingDescription').value.trim();
             const sellerId = parseInt(document.getElementById('listingSellerId').value) || null;
             const imageUrl = document.getElementById('listingImage').value.trim();
+            const videoUrl = document.getElementById('listingVideo')?.value.trim() || null;
+            const status = document.getElementById('listingStatusCreate')?.value || 'Active';
             const isFeatured = document.getElementById('listingFeatured').checked;
             const isShippingAvailable = document.getElementById('listingShipping').checked;
+
+            if (status !== 'Draft' && !imageUrl && !videoUrl) {
+                LoopToast.error("Для активного оголошення обов'язкове фото або відео (або оберіть статус Чернетка Draft).");
+                return;
+            }
 
             try {
                 const res = await adminFetch('/api/listings/admin/create', {
@@ -4074,7 +4173,7 @@ async function loadAnnouncementsList() {
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({
                         title, categoryId, price, condition, location, description,
-                        sellerId, imageUrl, isFeatured, isShippingAvailable
+                        sellerId, imageUrl, videoUrl, status, isFeatured, isShippingAvailable
                     })
                 });
                 const data = await res.json();

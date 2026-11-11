@@ -136,5 +136,6 @@ public class AdminCreateListingDto
     public int? SellerId { get; set; }
     public string? ImageUrl { get; set; }
     public string? VideoUrl { get; set; }
+    public string Status { get; set; } = "Active";
     public bool IsFeatured { get; set; } = false;
 }

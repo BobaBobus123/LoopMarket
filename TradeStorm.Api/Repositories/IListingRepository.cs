@@ -17,5 +17,6 @@ public interface IListingRepository : IRepository<Listing>
         string? status,
         string? sortBy,
         int? page,
-        int? pageSize);
+        int? pageSize,
+        bool includeDrafts = false);
 }
