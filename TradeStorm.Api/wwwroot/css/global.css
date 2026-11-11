@@ -981,31 +981,14 @@ header {
 }
 
 @media (max-width: 768px) {
-    body:not(.messages-page):not(.in-chat-conversation) .mobile-bottom-bar {
+    .mobile-bottom-bar {
         display: block !important;
     }
     
     /* Ensure content is not hidden behind the fixed bottom bar on phones */
-    body:not(.messages-page):not(.in-chat-conversation) {
+    body:not(.messages-page) {
         padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
     }
-}
-
-body.messages-page .mobile-bottom-bar,
-body.messages-page #mobileBottomBar,
-body.messages-page .mobile-bottom-app-bar,
-body.in-chat-conversation .mobile-bottom-bar,
-body.in-chat-conversation #mobileBottomBar,
-body.in-chat-conversation .mobile-bottom-app-bar {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-    height: 0 !important;
-    max-height: 0 !important;
-    position: fixed !important;
-    bottom: -9999px !important;
-    left: -9999px !important;
-    opacity: 0 !important;
 }
 
 /* ==========================================================================
@@ -1400,27 +1383,9 @@ body.in-chat-conversation .mobile-bottom-app-bar {
 }
 
 /* ==========================================================================
-   CHAT VIEWPORT & BOTTOM BAR PROTECTION
-   Never let bottom navigation bar cover the message input bar!
+   CHAT VIEWPORT & BOTTOM BAR SPACING
+   messages.html sizes <main> to stop above #mobileBottomBar cleanly.
    ========================================================================== */
-body.messages-page #mobileBottomBar,
-body.messages-page .mobile-bottom-bar,
-body.messages-page .mobile-bottom-app-bar,
-body.in-chat-conversation #mobileBottomBar,
-body.in-chat-conversation .mobile-bottom-bar,
-body.in-chat-conversation .mobile-bottom-app-bar,
-body:has(.messenger-card.chat-active) #mobileBottomBar,
-body:has(.messenger-card.chat-active) .mobile-bottom-bar,
-body:has(.messenger-card.chat-active) .mobile-bottom-app-bar,
-.messenger-card.chat-active ~ #mobileBottomBar,
-.messenger-card.chat-active ~ .mobile-bottom-bar {
-    display: none !important;
-    pointer-events: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
 
 /* ==========================================================================
    PRODUCT DETAILS STICKY BAR PROTECTION

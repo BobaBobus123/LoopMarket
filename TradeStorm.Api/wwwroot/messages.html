@@ -1,33 +1,11 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <script>
-        // Негайне та безперервне видалення нижньої панелі в чаті
-        function purgeChatBottomNav() {
-            document.querySelectorAll('#mobileBottomBar, .mobile-bottom-bar, .mobile-bottom-app-bar').forEach(el => el.remove());
-        }
-        purgeChatBottomNav();
-        document.addEventListener('DOMContentLoaded', purgeChatBottomNav);
-        setInterval(purgeChatBottomNav, 400);(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
+    <script>(function(){const t=localStorage.getItem("loopTheme")||"light";document.documentElement.setAttribute("data-theme",t);})();</script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <style>
-        /* ПОВНА ЗАБОРОНА НИЖНЬОЇ ПАНЕЛІ НАВІГАЦІЇ НА СТОРІНЦІ ЧАТУ */
-        #mobileBottomBar, .mobile-bottom-bar, .mobile-bottom-app-bar {
-            display: none !important;
-            visibility: hidden !important;
-            pointer-events: none !important;
-            height: 0 !important;
-            width: 0 !important;
-            max-height: 0 !important;
-            opacity: 0 !important;
-            position: fixed !important;
-            bottom: -9999px !important;
-            left: -9999px !important;
-            z-index: -99999 !important;
-        }
-
         .chat-input-bar {
             background: var(--surface) !important;
             border-top: 1.5px solid var(--border-color) !important;
@@ -38,7 +16,7 @@
             gap: 8px !important;
             position: sticky !important;
             bottom: 0 !important;
-            z-index: 9999 !important;
+            z-index: 50 !important;
             flex-shrink: 0 !important;
             box-sizing: border-box !important;
             width: 100% !important;
@@ -420,7 +398,9 @@
         html, body {
             height: 100%;
             height: 100vh;
+            height: 100dvh;
             max-height: 100vh;
+            max-height: 100dvh;
             margin: 0;
             padding: 0;
             overflow: hidden; /* Prevent outer window scrolling in messenger */
@@ -522,18 +502,25 @@
             .messenger-card {
                 grid-template-columns: 300px minmax(0, 1fr) !important;
             }
-            .messenger-details-pane {
-                position: fixed;
-                top: 0;
-                right: -360px;
-                width: min(360px, 92vw);
-                height: 100%;
-                z-index: 9999;
+            #detailsPaneOverlay.mobile-nav-overlay {
+                z-index: 200001 !important;
+            }
+            #detailsPane.messenger-details-pane {
+                position: fixed !important;
+                top: 0 !important;
+                right: -420px !important;
+                width: min(360px, 92vw) !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                max-height: 100dvh !important;
+                z-index: 200002 !important;
+                overflow-y: auto !important;
+                padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
                 box-shadow: -10px 0 35px rgba(0, 0, 0, 0.35);
                 border-left: 1.5px solid var(--border-color);
                 transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             }
-            .messenger-details-pane.drawer-open {
+            #detailsPane.messenger-details-pane.drawer-open {
                 right: 0 !important;
                 display: flex !important;
             }
@@ -1027,9 +1014,10 @@
             transition: all 0.18s;
         }
 
-        .btn-header-action:hover {
-            border-color: var(--border-focus);
-            background: var(--surface);
+        .btn-header-action:hover,
+        .btn-header-action.active {
+            border-color: #2563eb;
+            background: rgba(37, 99, 235, 0.12);
             color: #2563eb;
         }
 
@@ -1537,7 +1525,7 @@
         }
 
         .msg-photo-thumb {
-            max-width: 240px;
+            max-width: min(240px, 100%);
             border-radius: 10px;
             margin-top: 4px;
             cursor: pointer;
@@ -1719,8 +1707,10 @@
             main {
                 padding: 0 !important;
                 margin: 0 !important;
-                height: calc(100dvh - 58px) !important;
-                max-height: calc(100dvh - 58px) !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: calc(100dvh - 60px) !important;
+                max-height: calc(100dvh - 60px) !important;
             }
             .messenger-card {
                 display: flex !important;
@@ -1764,28 +1754,82 @@
                 display: inline-flex !important;
                 align-items: center;
                 justify-content: center;
-                width: 40px;
-                height: 40px;
+                width: 38px;
+                height: 38px;
                 border-radius: 10px;
                 background: var(--bg-subtle, rgba(255,255,255,0.06));
                 border: 1px solid var(--border-color);
                 color: var(--text-main);
                 cursor: pointer;
-                margin-right: 8px;
+                margin-right: 4px;
                 flex-shrink: 0;
             }
             .chat-pane-header {
                 padding: 10px 12px !important;
+                flex-wrap: wrap !important;
+                align-items: center !important;
+                gap: 8px !important;
+                min-height: 0 !important;
+            }
+            .chat-pane-user-info {
+                flex: 1 1 100% !important;
+                min-width: 0 !important;
+                gap: 8px !important;
+            }
+            .pane-avatar {
+                width: 36px !important;
+                height: 36px !important;
+            }
+            .chat-pane-actions {
+                width: 100% !important;
+                flex: 1 1 100% !important;
+                flex-wrap: wrap !important;
+                justify-content: flex-start !important;
+                gap: 6px !important;
+                padding-top: 2px;
+            }
+            .chat-pane-actions .btn-header-action {
+                padding: 6px 10px !important;
+                font-size: 0.76rem !important;
+                border-radius: 9px !important;
+                gap: 5px !important;
+                white-space: nowrap !important;
+            }
+            .chat-context-listing-banner {
+                flex-wrap: wrap !important;
+                padding: 8px 12px !important;
+                gap: 6px 10px !important;
+            }
+            .context-listing-left {
+                min-width: 170px !important;
+            }
+            .notif-dropdown {
+                position: fixed !important;
+                top: 64px !important;
+                left: 10px !important;
+                right: 10px !important;
+                width: auto !important;
+                z-index: 200005 !important;
+            }
+            .emoji-quick-bar {
+                left: 10px !important;
+                right: 10px !important;
+                bottom: 64px !important;
+                flex-wrap: wrap !important;
+                max-width: calc(100vw - 20px) !important;
             }
             .chat-stream-area {
                 padding: 12px 10px !important;
             }
+            .quick-chips-wrapper {
+                padding: 7px 10px !important;
+            }
             .chat-input-bar {
-                padding: 10px 12px !important;
-                padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+                padding: 8px 10px !important;
+                padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
                 position: sticky !important;
                 bottom: 0 !important;
-                z-index: 100 !important;
+                z-index: 50 !important;
                 width: 100% !important;
                 box-sizing: border-box !important;
             }
@@ -1795,9 +1839,38 @@
             .mobile-menu-btn {
                 display: inline-flex !important;
             }
-            /* Hide bottom app bar while in active chat so keyboard & messages have full screen */
-            .messenger-card.chat-active ~ .mobile-bottom-app-bar {
-                display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            body.messages-page main {
+                height: calc(100dvh - 60px - 60px - env(safe-area-inset-bottom, 0px)) !important;
+                max-height: calc(100dvh - 60px - 60px - env(safe-area-inset-bottom, 0px)) !important;
+            }
+            body.messages-page .chat-input-bar {
+                padding: 8px 10px !important;
+                padding-bottom: 8px !important;
+            }
+            body.messages-page .dialogs-scroll-area {
+                padding-bottom: 14px !important;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .empty-features-grid {
+                grid-template-columns: 1fr !important;
+                gap: 8px !important;
+            }
+            .chat-empty-state {
+                padding: 18px 14px !important;
+                overflow-y: auto !important;
+            }
+            .sidebar-headline h2 {
+                font-size: 1.12rem !important;
+                gap: 6px !important;
+            }
+            .btn-mark-all-read {
+                font-size: 0.72rem !important;
+                padding: 4px 8px !important;
             }
         }
 
@@ -1838,10 +1911,10 @@
             line-height: 1;
         }
     </style>
-    <link rel="stylesheet" href="/css/global.css?v=5.4">
+    <link rel="stylesheet" href="/css/global.css?v=5.5">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
 </head>
-<body class="messages-page in-chat-conversation">
+<body class="messages-page">
 
     <!-- ==================== HEADER ==================== -->
     <header>
@@ -1968,9 +2041,9 @@
 
                     <!-- Кнопки дій у шапці -->
                     <div class="chat-pane-actions" id="headerActions" style="display: none;">
-                        <button type="button" id="btnToggleDetailsPane" class="btn-header-action active" onclick="toggleDetailsPane()" title="Інформація про співрозмовника та товар">
+                        <button type="button" id="btnToggleDetailsPane" class="btn-header-action" onclick="toggleDetailsPane()" title="Інформація про співрозмовника та товар">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>
-                            <span>Інфо</span>
+                            <span>Деталі</span>
                         </button>
                         <a href="#" id="btnSellerProfile" class="btn-header-action" title="Переглянути профіль автора">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -2022,7 +2095,7 @@
                             Спілкуйтеся напряму з продавцями та майстрами послуг. Обговорюйте час зустрічі, деталі замовлення або уточнюйте ціну.
                         </p>
                         
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; text-align: left;">
+                        <div class="empty-features-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; text-align: left;">
                             <div style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; box-shadow: var(--shadow-sm);">
                                 <div style="font-size: 1.2rem; margin-bottom: 4px;">⚡</div>
                                 <div style="font-weight: 800; font-size: 0.82rem; color: var(--text-main);">Миттєвий чат</div>
@@ -2373,21 +2446,23 @@
             const card = document.querySelector('.messenger-card');
             if (card) card.classList.add('chat-active');
             document.body.classList.add('in-chat-conversation');
-            const bottomBars = document.querySelectorAll('#mobileBottomBar, .mobile-bottom-bar, .mobile-bottom-app-bar');
-            bottomBars.forEach(b => {
-                b.style.setProperty('display', 'none', 'important');
-            });
         }
 
         function showDialogsListMobile() {
             activeReceiverId = null;
             setChatInputVisible(false);
             const dPane = document.getElementById('detailsPane');
-            if (dPane) dPane.style.display = 'none';
+            const dOverlay = document.getElementById('detailsPaneOverlay');
+            const dBtn = document.getElementById('btnToggleDetailsPane');
+            if (dPane) {
+                dPane.classList.remove('drawer-open');
+                dPane.style.display = 'none';
+            }
+            if (dOverlay) dOverlay.classList.remove('active');
+            if (dBtn) dBtn.classList.remove('active');
             const card = document.querySelector('.messenger-card');
-            if (card) card.classList.remove('chat-active');
+            if (card) card.classList.remove('chat-active', 'chat-open');
             document.body.classList.remove('in-chat-conversation');
-            purgeChatBottomNav();
             document.querySelectorAll('.chat-item.active').forEach(el => el.classList.remove('active'));
             if (window.history && window.history.replaceState) {
                 window.history.replaceState({}, '', '/messages.html');
@@ -2628,7 +2703,16 @@
                 mCard.classList.add('chat-open');
             }
             const dPane = document.getElementById('detailsPane');
+            const dOverlay = document.getElementById('detailsPaneOverlay');
+            const dBtn = document.getElementById('btnToggleDetailsPane');
             if (dPane) dPane.style.display = 'flex';
+            if (window.innerWidth <= 1180) {
+                if (dPane) dPane.classList.remove('drawer-open');
+                if (dOverlay) dOverlay.classList.remove('active');
+                if (dBtn) dBtn.classList.remove('active');
+            } else {
+                if (dBtn) dBtn.classList.add('active');
+            }
             window.currentSelectedItemId = itemId ? parseInt(itemId) : null;
             adaptMobilePaneOnSelect();
 
@@ -3563,7 +3647,7 @@
     </script>
     <!-- Realtime In-App Push Notifications -->
     <script src="/js/push-notifications.js"></script>
-    <script src="/js/responsive-nav.js?v=3.2" defer></script>
+    <script src="/js/responsive-nav.js?v=3.3" defer></script>
     <script src="/js/loop-dialogs.js"></script>
     <script>
         // ==================== ПОЗНАЧЕННЯ ВСІХ ПОВІДОМЛЕНЬ ПРОЧИТАНИМИ ====================

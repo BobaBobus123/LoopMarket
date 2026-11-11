@@ -332,22 +332,8 @@
         }
         syncUnifiedDrawer(drawer, account);
 
-        // 3. Inject App-like Mobile Bottom Navigation Bar (< 768px)
-        // НА СТОРІНЦІ ЧАТУ (MESSAGES) НІКОЛИ НЕ СТВОРЮЄМО НИЖНЮ ПАНЕЛЬ, ЩОБ ВОНА НЕ ПЕРЕКРИВАЛА ВВЕДЕННЯ ТЕКСТУ
-        const isChatPage = currentPath.includes('messages') || 
-                           window.location.pathname.toLowerCase().includes('messages') ||
-                           document.body.classList.contains('messages-page') ||
-                           document.body.classList.contains('in-chat-conversation');
-
-        if (isChatPage) {
-            const purge = () => {
-                document.querySelectorAll('#mobileBottomBar, .mobile-bottom-bar, .mobile-bottom-app-bar').forEach(el => el.remove());
-            };
-            purge();
-            setTimeout(purge, 100);
-            setTimeout(purge, 500);
-            return; // На сторінці повідомлень ніколи не створюємо нижню панель
-        } else if (!document.getElementById('mobileBottomBar') && !document.getElementById('mobileBottomAppBar')) {
+        // 3. Inject App-like Mobile Bottom Navigation Bar (< 768px) across all storefront pages incl. messages.html
+        if (!document.getElementById('mobileBottomBar') && !document.getElementById('mobileBottomAppBar')) {
             const bottomBar = document.createElement('nav');
             bottomBar.id = 'mobileBottomBar';
             bottomBar.className = 'mobile-bottom-bar';
