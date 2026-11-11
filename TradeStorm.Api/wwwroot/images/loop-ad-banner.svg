@@ -54,8 +54,12 @@
   <!-- Top Badge: SPONSORED ADS -->
   <g transform="translate(300, 85)">
     <rect x="-140" y="-18" width="280" height="36" rx="18" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" stroke-width="1.5"/>
-    <text x="0" y="5" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="13" font-weight="800" fill="#10b981" text-anchor="middle" letter-spacing="2">
-      📢 ОФІЦІЙНА РЕКЛАМА
+    <g transform="translate(-108, -9) scale(0.75)" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m3 11 18-5v12L3 13v-2z" fill="rgba(16,185,129,0.2)"/>
+      <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
+    </g>
+    <text x="12" y="5" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="13" font-weight="800" fill="#10b981" text-anchor="middle" letter-spacing="2">
+      ОФІЦІЙНА РЕКЛАМА
     </text>
   </g>
 
@@ -97,22 +101,31 @@
   <!-- Features Pills -->
   <g transform="translate(110, 600)">
     <rect x="0" y="0" width="180" height="34" rx="17" fill="rgba(255, 255, 255, 0.06)" stroke="rgba(255, 255, 255, 0.15)"/>
-    <text x="90" y="22" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="700" fill="#f8fafc" text-anchor="middle">
-      ⭐ ТОП позиції
+    <g transform="translate(26, 9) scale(0.68)" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.8" stroke-linejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </g>
+    <text x="98" y="22" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="700" fill="#f8fafc" text-anchor="middle">
+      ТОП позиції
     </text>
   </g>
   <g transform="translate(310, 600)">
     <rect x="0" y="0" width="180" height="34" rx="17" fill="rgba(255, 255, 255, 0.06)" stroke="rgba(255, 255, 255, 0.15)"/>
-    <text x="90" y="22" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="700" fill="#f8fafc" text-anchor="middle">
-      🚀 Прямий трафік
+    <g transform="translate(20, 9) scale(0.68)" fill="rgba(56,189,248,0.28)" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </g>
+    <text x="100" y="22" font-family="'Inter', system-ui, sans-serif" font-size="12" font-weight="700" fill="#f8fafc" text-anchor="middle">
+      Прямий трафік
     </text>
   </g>
 
   <!-- Call to action button box inside image -->
   <g transform="translate(300, 690)">
     <rect x="-180" y="-24" width="360" height="48" rx="24" fill="url(#logoGrad)"/>
-    <text x="0" y="7" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="16" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">
-      РОЗМІСТИТИ РЕКЛАМУ 📢
+    <text x="-12" y="6" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="16" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">
+      РОЗМІСТИТИ РЕКЛАМУ
     </text>
+    <g transform="translate(106, -9) scale(0.75)" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+    </g>
   </g>
 </svg>

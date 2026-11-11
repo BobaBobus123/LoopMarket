@@ -184,7 +184,7 @@
                     <div class="logo-circle" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; font-size: 1rem;">L</div>
                     <span style="color: var(--text-main);">Loop<span style="color: #10b981;">Market</span></span>
                 </a>
-                <button type="button" class="btn-drawer-close" id="mobileDrawerCloseBtn" aria-label="Закрити">✕</button>
+                <button type="button" class="btn-drawer-close" id="mobileDrawerCloseBtn" aria-label="Закрити"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
             </div>
 
             <div class="drawer-user-card" id="drawerUserCard"></div>
@@ -222,7 +222,7 @@
                 ${account.isAdmin ? `
                 <a href="/admin.html" class="drawer-link drawer-admin-link" data-drawer-nav="admin">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    <span>🛡️ Панель оператора</span>
+                    <span>Панель оператора</span>
                 </a>
                 ` : ''}
             </nav>
@@ -347,7 +347,7 @@
             adminLink.id = 'adminPanelNavBtn'; adminLink.className = 'admin-panel-nav-btn';
             adminLink.href = '/admin.html';
             adminLink.style.cssText = 'background: rgba(37,99,235,0.12); color: #2563eb; border: 1.5px solid rgba(37,99,235,0.35); padding: 6px 12px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;';
-            adminLink.innerHTML = '🛡️ Панель оператора';
+            adminLink.innerHTML = '<svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Панель оператора</span>';
             navActions.prepend(adminLink);
         }
 
@@ -817,7 +817,7 @@
         const title = (item.title || 'Тут могла бути ваша реклама!').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const desc = (item.message || 'Залучайте тисячі покупців щодня на LoopMarket.').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const actionUrl = (item.actionUrl || 'https://t.me/LoopMarketSupport').replace(/"/g, '&quot;');
-        const actionText = (item.actionText || 'Розмістити рекламу 📢').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const actionText = (item.actionText || 'Розмістити рекламу').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const imgUrl = (item.imageUrl && item.imageUrl.trim()) ? item.imageUrl.trim() : '/images/loop-ad-banner.svg';
 
         adWrap.innerHTML = `
@@ -906,10 +906,10 @@
         }
 
         slot.style.display = 'block';
-        const title = (item.title || '📢 Тут могла бути ваша реклама!').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const title = (item.title || 'Тут могла бути ваша реклама!').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const desc = (item.message || 'Залучайте тисячі покупців щодня на LoopMarket. Розміщуйте товари вашого бренду, банери чи акційні пропозиції.').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const actionUrl = (item.actionUrl || 'https://t.me/LoopMarketSupport').replace(/"/g, '&quot;');
-        const actionText = (item.actionText || 'Розмістити рекламу 📢').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const actionText = (item.actionText || 'Розмістити рекламу').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const imgUrl = item.imageUrl ? item.imageUrl.trim() : '';
 
         slot.innerHTML = `
@@ -988,10 +988,10 @@
                             const banner = document.createElement('div');
                             banner.id = bannerId;
                             let bg = 'linear-gradient(90deg, #d97706 0%, #f59e0b 100%)';
-                            let icon = '⚠️';
-                            if (info.type === 'danger') { bg = 'linear-gradient(90deg, #dc2626 0%, #ef4444 100%)'; icon = '🚫'; }
-                            else if (info.type === 'promo' || info.type === 'success') { bg = 'linear-gradient(90deg, #059669 0%, #10b981 100%)'; icon = '🏷️'; }
-                            else if (info.type === 'info') { bg = 'linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%)'; icon = 'ℹ️'; }
+                            let icon = '<svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg>';
+                            if (info.type === 'danger') { bg = 'linear-gradient(90deg, #dc2626 0%, #ef4444 100%)'; icon = '<svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>'; }
+                            else if (info.type === 'promo' || info.type === 'success') { bg = 'linear-gradient(90deg, #059669 0%, #10b981 100%)'; icon = '<svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>'; }
+                            else if (info.type === 'info') { bg = 'linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%)'; icon = '<svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'; }
 
                             banner.style.cssText = 'background: ' + bg + '; color: #ffffff; padding: 11px 18px; font-size: 0.88rem; font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px; z-index: 1000; position: relative; box-shadow: 0 3px 12px rgba(0,0,0,0.18); flex-wrap: wrap;';
                             const actionBtn = (info.actionUrl && info.actionText) 
@@ -1032,16 +1032,16 @@
                     banner.id = bannerId;
                     
                     let bg = 'linear-gradient(90deg, #d97706 0%, #f59e0b 100%)';
-                    let icon = '⚠️';
+                    let icon = '<svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg>';
                     if (item.type === 'danger') {
                         bg = 'linear-gradient(90deg, #dc2626 0%, #ef4444 100%)';
-                        icon = '🚫';
+                        icon = '<svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>';
                     } else if (item.type === 'promo') {
                         bg = 'linear-gradient(90deg, #059669 0%, #10b981 100%)';
-                        icon = '🏷️';
+                        icon = '<svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>';
                     } else if (item.type === 'info') {
                         bg = 'linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%)';
-                        icon = 'ℹ️';
+                        icon = '<svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>';
                     }
 
                     banner.style.cssText = 'background: ' + bg + '; color: #ffffff; padding: 11px 18px; font-size: 0.88rem; font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px; z-index: 1000; position: relative; box-shadow: 0 3px 12px rgba(0,0,0,0.18); flex-wrap: wrap;';
@@ -1089,7 +1089,7 @@
                         <div style="background: var(--surface, #1e293b); border: 1.5px solid var(--border-color, #334155); border-radius: 20px; max-width: 500px; width: 100%; padding: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); color: var(--text-main, #f8fafc); position: relative;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                                 <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
-                                    <span>📢</span>
+                                    <span style="display:inline-flex;align-items:center;color:#10b981;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13v-2z" fill="#10b981" fill-opacity="0.16"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
                                     <span>${item.title || 'Повідомлення платформи'}</span>
                                 </h3>
                                 <button type="button" class="close-modal-ann" style="background: none; border: none; font-size: 1.5rem; color: var(--text-muted, #94a3b8); cursor: pointer; line-height: 1;">&times;</button>
@@ -1175,7 +1175,7 @@
             notifDropdown.style.cssText = 'display: none; position: absolute; top: 62px; right: 20px; width: 340px; max-width: calc(100vw - 30px); background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 16px; box-shadow: 0 16px 40px rgba(0,0,0,0.3); z-index: 2100; overflow: hidden;';
             notifDropdown.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border-color); background: var(--bg-color);">
-                    <span style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">🔔 Центр сповіщень</span>
+                    <span style="font-weight: 800; font-size: 0.95rem; color: var(--text-main); display: inline-flex; align-items: center; gap: 7px;"><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" fill="#10b981" fill-opacity="0.15"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Центр сповіщень</span>
                     <button type="button" id="btnMarkAllNotifsRead" style="background: none; border: none; font-size: 0.78rem; color: #2563eb; cursor: pointer; font-weight: 700; padding: 0;">Позначити всі</button>
                 </div>
                 <div class="notif-body" id="notifList" style="max-height: 380px; overflow-y: auto; padding: 6px 0;">
@@ -1262,7 +1262,7 @@
         if (!items || items.length === 0) {
             list.innerHTML = `
                 <div style="padding: 30px 20px; text-align: center; color: var(--text-muted);">
-                    <div style="font-size: 2rem; margin-bottom: 8px;">🔕</div>
+                    <div style="margin-bottom: 10px; color: var(--text-muted); opacity: 0.7;"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 0 .6 5"/><path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="m2 2 20 20"/></svg></div>
                     <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);">У вас немає нових сповіщень</div>
                     <div style="font-size: 0.8rem; margin-top: 4px;">Тут з'являтимуться оновлення замовлень, повідомлення та відгуки</div>
                 </div>
@@ -1273,10 +1273,10 @@
         list.innerHTML = items.map(n => {
             const isUnread = !n.isRead;
             const timeAgo = formatTimeAgo(n.createdAt);
-            const icon = n.title.includes('замовлення') || n.title.includes('доставк') ? '📦' :
-                         (n.title.includes('відгук') ? '⭐' :
-                         (n.title.includes('повідомлення') ? '💬' :
-                         (n.title.includes('безпек') || n.title.includes('Захист') ? '🛡️' : '🔔')));
+            const icon = n.title.includes('замовлення') || n.title.includes('доставк') ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>' :
+                         (n.title.includes('відгук') ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' :
+                         (n.title.includes('повідомлення') ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' :
+                         (n.title.includes('безпек') || n.title.includes('Захист') ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>')));
 
             return `
                 <a href="${n.link || '#'}" onclick="handleNotifClick(event, ${n.id}, '${n.link || ''}')" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; text-decoration: none; border-bottom: 1px solid var(--border-color); background: ${isUnread ? 'rgba(16, 185, 129, 0.08)' : 'transparent'}; transition: background 0.2s;">
@@ -1375,13 +1375,13 @@
 
     function showInAppToast(notif) {
         if (window.LoopToast && window.LoopToast.info) {
-            window.LoopToast.info(`🔔 ${notif.title}: ${notif.message}`);
+            window.LoopToast.info(`${notif.title}: ${notif.message}`);
             return;
         }
 
         const toast = document.createElement('div');
         toast.style.cssText = 'position: fixed; bottom: 24px; right: 24px; background: var(--surface); color: var(--text-main); border: 1.5px solid var(--border-color); border-left: 4px solid #10b981; border-radius: 12px; padding: 12px 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); z-index: 9999; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: 0.3s; transform: translateY(20px); opacity: 0;';
-        toast.innerHTML = `<span>🔔</span><div><div style="font-size: 0.85rem; font-weight: 800;">${notif.title}</div><div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 400;">${notif.message}</div></div>`;
+        toast.innerHTML = `<span style="display:inline-flex;color:#10b981;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span><div><div style="font-size: 0.85rem; font-weight: 800;">${notif.title}</div><div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 400;">${notif.message}</div></div>`;
         document.body.appendChild(toast);
 
         setTimeout(() => {

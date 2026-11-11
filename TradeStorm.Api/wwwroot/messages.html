@@ -113,6 +113,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script src="/js/loop-icons.js?v=1.0"></script>
 
     <style>
         :root {
@@ -1906,7 +1907,7 @@
             line-height: 1;
         }
     </style>
-    <link rel="stylesheet" href="/css/global.css?v=5.7">
+    <link rel="stylesheet" href="/css/global.css?v=5.8">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
 </head>
 <body class="messages-page">
@@ -1942,7 +1943,7 @@
                     <span class="notif-badge" id="notifBadge" style="display: none;"></span>
                 </button>
 
-                <button class="btn-icon" id="themeToggle" onclick="toggleTheme()" title="Змінити тему">🌙</button>
+                <button class="btn-icon" id="themeToggle" onclick="toggleTheme()" title="Змінити тему"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
 
                 <a href="/create.html" class="btn-create-top">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
@@ -1988,7 +1989,7 @@
                             <span class="dialog-unread-pill" id="totalDialogsCount" style="display: none;">0</span>
                         </div>
                         <button type="button" class="btn-mark-all-read" id="btnMarkAllMessagesRead" onclick="markAllMessagesAsRead()" title="Позначити всі повідомлення як прочитані">
-                            ✓✓ Прочитати всі
+                            <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg> Прочитати всі
                         </button>
                     </div>
 
@@ -2000,8 +2001,8 @@
                     <div class="chat-filter-tabs">
                         <button class="chat-filter-tab active" onclick="setFilterTab('all', this)">Всі</button>
                         <button class="chat-filter-tab" onclick="setFilterTab('unread', this)">Непрочитані</button>
-                        <button class="chat-filter-tab" onclick="setFilterTab('services', this)">🛠 Послуги</button>
-                        <button class="chat-filter-tab" onclick="setFilterTab('products', this)">📦 Товари</button>
+                        <button class="chat-filter-tab" onclick="setFilterTab('services', this)"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Послуги</button>
+                        <button class="chat-filter-tab" onclick="setFilterTab('products', this)"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg> Товари</button>
                     </div>
                 </div>
 
@@ -2020,7 +2021,7 @@
                         <button type="button" id="btnBackToDialogs" class="btn-back-dialogs" onclick="showDialogsListMobile()" title="Назад до списку діалогів">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg>
                         </button>
-                        <div class="pane-avatar" id="activeChatAvatar" style="background: linear-gradient(135deg, #10b981 0%, #2563eb 100%); font-size: 1.15rem;">💬</div>
+                        <div class="pane-avatar" id="activeChatAvatar" style="background: linear-gradient(135deg, #10b981 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center;"><svg class="loop-svg-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></div>
                         <div class="pane-user-text">
                             <a href="#" id="activeChatNameLink" class="pane-user-title">
                                 <span id="activeChatName">Особисті повідомлення</span>
@@ -2092,17 +2093,17 @@
                         
                         <div class="empty-features-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; text-align: left;">
                             <div style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; box-shadow: var(--shadow-sm);">
-                                <div style="font-size: 1.2rem; margin-bottom: 4px;">⚡</div>
+                                <div style="margin-bottom: 6px; color: #f59e0b;"><svg class="loop-svg-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
                                 <div style="font-weight: 800; font-size: 0.82rem; color: var(--text-main);">Миттєвий чат</div>
                                 <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Сповіщення в реальному часі</div>
                             </div>
                             <div style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; box-shadow: var(--shadow-sm);">
-                                <div style="font-size: 1.2rem; margin-bottom: 4px;">🔒</div>
+                                <div style="margin-bottom: 6px; color: #10b981;"><svg class="loop-svg-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
                                 <div style="font-weight: 800; font-size: 0.82rem; color: var(--text-main);">Безпечні покупки</div>
                                 <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Накладений платіж</div>
                             </div>
                             <div style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; box-shadow: var(--shadow-sm);">
-                                <div style="font-size: 1.2rem; margin-bottom: 4px;">📱</div>
+                                <div style="margin-bottom: 6px; color: #38bdf8;"><svg class="loop-svg-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg></div>
                                 <div style="font-weight: 800; font-size: 0.82rem; color: var(--text-main);">Telegram Пуші</div>
                                 <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Дублювання автору в бот</div>
                             </div>
@@ -2161,16 +2162,16 @@
                             Користувач LoopMarket
                         </div>
                         <div id="detailsUserRating" style="display: flex; align-items: center; gap: 4px; font-size: 0.82rem; color: #f59e0b; font-weight: 700; margin-bottom: 12px;">
-                            <span>★ 5.0</span>
+                            <span><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> 5.0</span>
                             <span style="color: var(--text-muted); font-weight: 500;">(надійний продавець)</span>
                         </div>
                         <div id="detailsPhoneWrap" style="width: 100%; margin-bottom: 8px; display: none;"></div>
                         <div style="display: flex; gap: 8px; width: 100%;">
                             <a href="#" id="detailsBtnProfile" class="btn btn-outline btn-sm" style="flex: 1; text-decoration: none; justify-content: center; font-size: 0.8rem; padding: 7px 10px;">
-                                👤 Профіль
+                                <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Профіль
                             </a>
                             <button type="button" onclick="openReviewModal()" class="btn btn-outline btn-sm" style="text-decoration: none; justify-content: center; font-size: 0.8rem; padding: 7px 10px; color: #f59e0b;">
-                                ★ Відгук
+                                <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Відгук
                             </button>
                         </div>
                     </div>
@@ -2179,7 +2180,7 @@
                 <!-- 2. Обговорюване оголошення -->
                 <div class="details-section" id="detailsListingSection">
                     <div class="details-section-title">
-                        <span>📦 Оголошення в діалозі</span>
+                        <span><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg> Оголошення в діалозі</span>
                     </div>
                     <div id="detailsListingCard" style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 14px; overflow: hidden; transition: all 0.2s;">
                         <div style="position: relative; width: 100%; height: 130px; background: var(--bg-color); overflow: hidden;">
@@ -2197,7 +2198,7 @@
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 6px;">
                                 <a href="#" id="detailsBtnBuy" class="btn btn-primary btn-sm" style="text-decoration: none; justify-content: center; font-weight: 700; padding: 8px;">
-                                    🛒 Оформити замовлення
+                                    <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> Оформити замовлення
                                 </a>
                                 <a href="#" id="detailsBtnView" class="btn btn-outline btn-sm" target="_blank" style="text-decoration: none; justify-content: center; font-size: 0.78rem; padding: 6px;">
                                     Переглянути на сайті →
@@ -2206,7 +2207,7 @@
                         </div>
                     </div>
                     <div id="detailsNoListingNotice" style="display: none; padding: 14px; text-align: center; background: var(--surface); border-radius: 12px; border: 1px dashed var(--border-color); color: var(--text-muted); font-size: 0.82rem;">
-                        💬 Діалог без прив'язки до конкретного товару
+                        <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Діалог без прив'язки до конкретного товару
                     </div>
                 </div>
 
@@ -2218,15 +2219,15 @@
                     </div>
                     <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.76rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 7px; line-height: 1.45;">
                         <li style="display: flex; gap: 6px;">
-                            <span style="color: var(--accent-green); font-weight: 700;">✓</span>
+                            <span style="color: var(--accent-green); display: inline-flex; align-items: center;"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
                             <span><b>Накладений платіж:</b> перевіряйте стан посилки у відділенні пошти перед оплатою.</span>
                         </li>
                         <li style="display: flex; gap: 6px;">
-                            <span style="color: var(--accent-green); font-weight: 700;">✓</span>
+                            <span style="color: var(--accent-green); display: inline-flex; align-items: center;"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
                             <span><b>Особиста зустріч:</b> обирайте людні та освітлені громадські місця (кав'ярні, ТЦ).</span>
                         </li>
                         <li style="display: flex; gap: 6px;">
-                            <span style="color: var(--accent-green); font-weight: 700;">✓</span>
+                            <span style="color: var(--accent-green); display: inline-flex; align-items: center;"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
                             <span><b>Захист даних:</b> ніколи не вводьте CVV-код та паролі з SMS за сторонніми посиланнями.</span>
                         </li>
                     </ul>
@@ -2269,11 +2270,11 @@
                 <div style="margin-bottom: 14px;">
                     <label style="display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Оцінка за співпрацю:</label>
                     <select id="reviewRating" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px; color: var(--text-main); font-weight: 700; outline: none;">
-                        <option value="5">⭐⭐⭐⭐⭐ 5 / 5 (Відмінно, рекомендую)</option>
-                        <option value="4">⭐⭐⭐⭐ 4 / 5 (Добре)</option>
-                        <option value="3">⭐⭐⭐ 3 / 5 (Нормально)</option>
-                        <option value="2">⭐⭐ 2 / 5 (Погано)</option>
-                        <option value="1">⭐ 1 / 5 (Не рекомендую)</option>
+                        <option value="5">5 / 5 (Відмінно, рекомендую)</option>
+                        <option value="4">4 / 5 (Добре)</option>
+                        <option value="3">3 / 5 (Нормально)</option>
+                        <option value="2">2 / 5 (Погано)</option>
+                        <option value="1">1 / 5 (Не рекомендую)</option>
                     </select>
                 </div>
                 <div style="margin-bottom: 18px;">
@@ -2370,7 +2371,7 @@
         }
         function updateThemeButton(t) {
             const btn = document.getElementById('themeToggle');
-            if (btn) btn.innerText = (t === 'dark') ? '☀️' : '🌙';
+            if (btn) btn.innerHTML = window.LoopIcons ? LoopIcons.svg(t === 'dark' ? 'sun' : 'moon', 18) : (t === 'dark' ? 'Sun' : 'Dark');
         }
         const savedTheme = localStorage.getItem('loopTheme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -2698,7 +2699,8 @@
                 const fullName = `${p.firstName || 'Користувач'} ${p.lastName || ''}`.trim();
                 const showBadge = (p.isWaiting || (p.unreadCount && p.unreadCount > 0)) && !isCurrent;
                 const badgeText = (p.unreadCount && p.unreadCount > 0) ? (p.unreadCount > 99 ? '99+' : p.unreadCount) : '•';
-                const snippetRaw = (p.lastMessage && String(p.lastMessage).startsWith('data:image/')) ? '📷 Фотографія' : (p.lastMessage || 'Натисніть для листування');
+                const isImgSnippet = p.lastMessage && String(p.lastMessage).startsWith('data:image/');
+                const snippetHtml = isImgSnippet ? `${window.LoopIcons ? LoopIcons.svg('camera', { size: 13, color: '#38bdf8' }) + ' ' : ''}Фотографія` : escapeHtml(p.lastMessage || 'Натисніть для листування');
                 return `
                     <div class="chat-item ${isCurrent ? 'active' : ''} ${showBadge ? 'unread' : ''}" data-user-id="${p.id}" onclick="selectDialog(${p.id})">
                         <div class="chat-avatar-box">
@@ -2711,7 +2713,7 @@
                                 <span class="chat-item-time">${timeStr}</span>
                             </div>
                             <div class="chat-item-snippet-row">
-                                <span class="chat-item-last-msg">${p.isDraft ? '<span class="new-draft-pill">Новий діалог</span>' : escapeHtml(snippetRaw)}</span>
+                                <span class="chat-item-last-msg">${p.isDraft ? '<span class="new-draft-pill">Новий діалог</span>' : snippetHtml}</span>
                                 ${showBadge ? `<span class="unread-msg-badge">${badgeText}</span>` : ''}
                             </div>
                         </div>
@@ -2874,10 +2876,10 @@
                 const tagEl = document.getElementById('productTag');
                 if (isServ) {
                     tagEl.className = 'context-listing-tag service';
-                    tagEl.innerText = '🛠 Послуга';
+                    tagEl.innerHTML = (window.LoopIcons ? LoopIcons.svg('wrench', { size: 13, color: '#8b5cf6' }) + ' ' : '') + 'Послуга';
                 } else {
                     tagEl.className = 'context-listing-tag';
-                    tagEl.innerText = '📦 Товар';
+                    tagEl.innerHTML = (window.LoopIcons ? LoopIcons.svg('package', { size: 13, color: '#10b981' }) + ' ' : '') + 'Товар';
                 }
 
                 document.getElementById('productLink').href = `/details.html?id=${listingItem.code || listingItem.id}`;
@@ -3024,7 +3026,7 @@
                         if (ratingEl && Array.isArray(reviews)) {
                             if (reviews.length > 0) {
                                 const avg = (reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1);
-                                ratingEl.innerHTML = `<span>★ ${avg}</span> <span style="color: var(--text-muted); font-weight: 500;">(${reviews.length} відгуків)</span>`;
+                                ratingEl.innerHTML = `<span>${window.LoopIcons ? LoopIcons.svg('starFilled', { size: 14, color: '#f59e0b' }) : ''} ${avg}</span> <span style="color: var(--text-muted); font-weight: 500;">(${reviews.length} відгуків)</span>`;
                             } else {
                                 ratingEl.innerHTML = `<span style="color: var(--text-muted); font-weight: 500;">Новий користувач (0 відгуків)</span>`;
                             }
@@ -3077,22 +3079,22 @@
             let chips = [];
             if (isService) {
                 chips = [
-                    '🛠 Вітаю! Хочу замовити вашу послугу',
-                    '📅 Коли у вас є вільний час для виконання?',
-                    '📍 Чи можливий виїзд за моєю адресою?',
-                    '🤝 Яка остання ціна? Можливий торг?'
+                    { icon: 'wrench', color: '#8b5cf6', text: 'Вітаю! Хочу замовити вашу послугу' },
+                    { icon: 'calendar', color: '#38bdf8', text: 'Коли у вас є вільний час для виконання?' },
+                    { icon: 'mapPin', color: '#ef4444', text: 'Чи можливий виїзд за моєю адресою?' },
+                    { icon: 'banknote', color: '#10b981', text: 'Яка остання ціна? Можливий торг?' }
                 ];
             } else {
                 chips = [
-                    '📦 Вітаю! Оголошення ще актуальне?',
-                    '🤝 Яка остання ціна? Чи можливий торг?',
-                    '📍 Де і коли зручно зустрітися?',
-                    '🚚 Чи відправляєте поштою?'
+                    { icon: 'package', color: '#10b981', text: 'Вітаю! Оголошення ще актуальне?' },
+                    { icon: 'banknote', color: '#10b981', text: 'Яка остання ціна? Чи можливий торг?' },
+                    { icon: 'mapPin', color: '#ef4444', text: 'Де і коли зручно зустрітися?' },
+                    { icon: 'truck', color: '#38bdf8', text: 'Чи відправляєте поштою?' }
                 ];
             }
 
             wrap.innerHTML = chips.map(c => `
-                <button type="button" class="quick-chip-btn" onclick="sendQuickText('${c.replace(/'/g, "\'")}')">${c}</button>
+                <button type="button" class="quick-chip-btn" onclick="sendQuickText('${c.text.replace(/'/g, "\\'")}')">${window.LoopIcons ? LoopIcons.svg(c.icon, { size: 13, color: c.color }) + ' ' : ''}${c.text}</button>
             `).join('');
         }
 
@@ -3511,7 +3513,7 @@
             return `
             <div class="chat-order-card ${isService ? 'service-order-card' : ''}">
                 <div class="coc-header">
-                    <span class="coc-badge">${isService ? '🛠 ЗАМОВЛЕННЯ ПОСЛУГИ' : '📦 ЗАМОВЛЕННЯ ТОВАРУ'}</span>
+                    <span class="coc-badge">${isService ? ((window.LoopIcons ? LoopIcons.svg('wrench', { size: 13, color: '#8b5cf6' }) + ' ' : '') + 'ЗАМОВЛЕННЯ ПОСЛУГИ') : ((window.LoopIcons ? LoopIcons.svg('package', { size: 13, color: '#10b981' }) + ' ' : '') + 'ЗАМОВЛЕННЯ ТОВАРУ')}</span>
                     ${orderCode ? `<span class="coc-code">${escapeHtml(orderCode)}</span>` : ''}
                 </div>
                 <div class="coc-product-row">
@@ -3528,11 +3530,11 @@
                 </div>
                 <hr class="coc-divider">
                 <div class="coc-grid">
-                    ${buyer ? `<div class="coc-row"><span class="coc-label">👤 ${isService ? 'Замовник' : 'Покупець'}:</span><span class="coc-val">${escapeHtml(buyer)}</span></div>` : ''}
-                    ${delivery ? `<div class="coc-row"><span class="coc-label">📍 ${isService ? 'Локація' : 'Доставка'}:</span><span class="coc-val">${escapeHtml(delivery)}</span></div>` : ''}
-                    ${branch ? `<div class="coc-row"><span class="coc-label">🏢 ${isService ? 'Деталі' : 'Відділення'}:</span><span class="coc-val">${escapeHtml(branch)}</span></div>` : ''}
-                    ${payment ? `<div class="coc-row"><span class="coc-label">💳 Оплата:</span><span class="coc-val">${escapeHtml(payment)}</span></div>` : ''}
-                    ${comment ? `<div class="coc-row"><span class="coc-label">💬 Коментар:</span><span class="coc-val">${escapeHtml(comment)}</span></div>` : ''}
+                    ${buyer ? `<div class="coc-row"><span class="coc-label">${window.LoopIcons ? LoopIcons.svg('user', 13) + ' ' : ''}${isService ? 'Замовник' : 'Покупець'}:</span><span class="coc-val">${escapeHtml(buyer)}</span></div>` : ''}
+                    ${delivery ? `<div class="coc-row"><span class="coc-label">${window.LoopIcons ? LoopIcons.svg('mapPin', { size: 13, color: '#ef4444' }) + ' ' : ''}${isService ? 'Локація' : 'Доставка'}:</span><span class="coc-val">${escapeHtml(delivery)}</span></div>` : ''}
+                    ${branch ? `<div class="coc-row"><span class="coc-label">${window.LoopIcons ? LoopIcons.svg('building', 13) + ' ' : ''}${isService ? 'Деталі' : 'Відділення'}:</span><span class="coc-val">${escapeHtml(branch)}</span></div>` : ''}
+                    ${payment ? `<div class="coc-row"><span class="coc-label">${window.LoopIcons ? LoopIcons.svg('creditCard', { size: 13, color: '#10b981' }) + ' ' : ''}Оплата:</span><span class="coc-val">${escapeHtml(payment)}</span></div>` : ''}
+                    ${comment ? `<div class="coc-row"><span class="coc-label">${window.LoopIcons ? LoopIcons.svg('chat', { size: 13, color: '#38bdf8' }) + ' ' : ''}Коментар:</span><span class="coc-val">${escapeHtml(comment)}</span></div>` : ''}
                 </div>
                 <a href="/profile.html#orders" class="coc-btn">
                     <span>Деталі замовлення в кабінеті</span>
@@ -3625,9 +3627,9 @@
             if (detailsWrap) {
                 detailsWrap.style.display = 'block';
                 if (window.isChatPhoneRevealed) {
-                    detailsWrap.innerHTML = `<a href="tel:${escapeHtml(phone)}" class="btn btn-outline btn-sm" style="width: 100%; box-sizing: border-box; text-decoration: none; justify-content: center; font-size: 0.82rem; padding: 7px 10px; color: #10b981; border-color: rgba(16,185,129,0.45); font-weight: 800;">📞 ${escapeHtml(phone)}</a>`;
+                    detailsWrap.innerHTML = `<a href="tel:${escapeHtml(phone)}" class="btn btn-outline btn-sm" style="width: 100%; box-sizing: border-box; text-decoration: none; justify-content: center; font-size: 0.82rem; padding: 7px 10px; color: #10b981; border-color: rgba(16,185,129,0.45); font-weight: 800;">${window.LoopIcons ? LoopIcons.svg('phone', { size: 14, color: '#10b981' }) + ' ' : ''}${escapeHtml(phone)}</a>`;
                 } else {
-                    detailsWrap.innerHTML = `<button type="button" id="detailsBtnRevealPhone" onclick="handleRevealChatPhone(event)" class="btn btn-outline btn-sm" style="width: 100%; box-sizing: border-box; justify-content: center; font-size: 0.8rem; padding: 7px 10px;">📞 Показати номер телефону</button>`;
+                    detailsWrap.innerHTML = `<button type="button" id="detailsBtnRevealPhone" onclick="handleRevealChatPhone(event)" class="btn btn-outline btn-sm" style="width: 100%; box-sizing: border-box; justify-content: center; font-size: 0.8rem; padding: 7px 10px;">${window.LoopIcons ? LoopIcons.svg('phone', { size: 14, color: '#10b981' }) + ' ' : ''}Показати номер телефону</button>`;
                 }
             }
         }
@@ -3898,9 +3900,9 @@
         };
     </script>
     <!-- Realtime In-App Push Notifications -->
-    <script src="/js/push-notifications.js"></script>
-    <script src="/js/responsive-nav.js?v=3.5" defer></script>
-    <script src="/js/loop-dialogs.js"></script>
+    <script src="/js/push-notifications.js?v=1.1"></script>
+    <script src="/js/responsive-nav.js?v=3.6" defer></script>
+    <script src="/js/loop-dialogs.js?v=1.1"></script>
     <script>
         // ==================== ПОЗНАЧЕННЯ ВСІХ ПОВІДОМЛЕНЬ ПРОЧИТАНИМИ ====================
         window.markAllMessagesAsRead = async function() {
@@ -3944,9 +3946,9 @@
                     });
 
                     if (window.LoopToast) {
-                        LoopToast.success('✨ Всі повідомлення позначено як прочитані');
+                        LoopToast.success('Всі повідомлення позначено як прочитані');
                     } else if (typeof showToast === 'function') {
-                        showToast('Успіх', 'Всі повідомлення прочитано', '✓');
+                        showToast('Успіх', 'Всі повідомлення прочитано', 'success');
                     }
                 }
             } catch(e) {
@@ -4093,7 +4095,7 @@
                 <div class="logo-circle" style="width: 32px; height: 32px; font-size: 1rem;">L</div>
                 <span style="color: var(--text-main);">Loop<span style="color: #10b981;">Market</span></span>
             </a>
-            <button type="button" class="btn-drawer-close" onclick="closeMobileNavDrawer()" aria-label="Закрити">✕</button>
+            <button type="button" class="btn-drawer-close" onclick="closeMobileNavDrawer()" aria-label="Закрити"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
 
         <div class="drawer-user-card" id="drawerUserCard">

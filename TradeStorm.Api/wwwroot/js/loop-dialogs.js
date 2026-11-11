@@ -32,7 +32,7 @@
             const toast = document.createElement('div');
             toast.className = `loop-toast ${type}`;
 
-            let iconHtml = 'ℹ️';
+            let iconHtml = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`;
             if (type === 'success') {
                 iconHtml = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
             } else if (type === 'error') {
@@ -86,7 +86,7 @@
                 const confirmText = opts.confirmText || 'Зрозуміло';
                 const type = opts.type || 'info';
 
-                let iconHtml = 'ℹ️';
+                let iconHtml = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`;
                 if (type === 'success') {
                     iconHtml = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="20 6 9 17 4 12"/></svg>`;
                 } else if (type === 'error' || type === 'danger') {
@@ -250,19 +250,19 @@
                     <div class="loop-dialog-radio-group">
                         <label class="loop-dialog-radio-item selected">
                             <input type="radio" name="complaintReason" value="Шахрайство або фішинг" checked style="accent-color: #10b981;">
-                            <span>🚫 Шахрайство або підозріла оплата</span>
+                            <span style="display:inline-flex;align-items:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg> Шахрайство або підозріла оплата</span>
                         </label>
                         <label class="loop-dialog-radio-item">
                             <input type="radio" name="complaintReason" value="Спам або нав'язлива реклама" style="accent-color: #10b981;">
-                            <span>📢 Спам або реклама</span>
+                            <span style="display:inline-flex;align-items:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Спам або реклама</span>
                         </label>
                         <label class="loop-dialog-radio-item">
                             <input type="radio" name="complaintReason" value="Некоректна поведінка" style="accent-color: #10b981;">
-                            <span>🤬 Образи або груба поведінка</span>
+                            <span style="display:inline-flex;align-items:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg> Образи або груба поведінка</span>
                         </label>
                         <label class="loop-dialog-radio-item">
                             <input type="radio" name="complaintReason" value="Невідповідність товару опису" style="accent-color: #10b981;">
-                            <span>📦 Невідповідність товару / послуги</span>
+                            <span style="display:inline-flex;align-items:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg> Невідповідність товару / послуги</span>
                         </label>
                     </div>
 

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 — Сторінку не знайдено | LoopMarket</title>
-    <link rel="stylesheet" href="/css/global.css?v=5.7">
+    <link rel="stylesheet" href="/css/global.css?v=5.8">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -312,7 +312,7 @@
         </a>
         <div class="header-actions">
             <button class="theme-btn" id="themeToggleBtn" title="Змінити тему" onclick="toggleTheme()">
-                🌙
+                <svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="#38bdf8" fill-opacity="0.2"/></svg>
             </button>
             <a href="/index.html" class="btn-action-main btn-secondary" style="padding: 8px 14px; font-size: 0.88rem;">
                 Головна
@@ -343,25 +343,25 @@
         <!-- ШВИДКА НАВІГАЦІЯ -->
         <div class="quick-nav-grid">
             <a href="/index.html" class="nav-card">
-                <span class="nav-card-icon">🛍</span>
+                <span class="nav-card-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" fill="#10b981" fill-opacity="0.14"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
                 <span class="nav-card-title">Каталог товарів</span>
                 <span class="nav-card-desc">Електроніка, одяг, дім, авто та інші популярні категорії</span>
             </a>
 
             <a href="/index.html?type=service" class="nav-card">
-                <span class="nav-card-icon">🛠</span>
+                <span class="nav-card-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" fill="#38bdf8" fill-opacity="0.14"/></svg></span>
                 <span class="nav-card-title">Послуги майстрів</span>
                 <span class="nav-card-desc">Ремонт, сантехніка, електрика, клінінг та послуги фахівців</span>
             </a>
 
             <a href="/messages.html" class="nav-card">
-                <span class="nav-card-icon">💬</span>
+                <span class="nav-card-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="#8b5cf6" fill-opacity="0.14"/></svg></span>
                 <span class="nav-card-title">Повідомлення</span>
                 <span class="nav-card-desc">Ваші діалоги з продавцями та замовниками платформи</span>
             </a>
 
             <a href="/profile.html" class="nav-card">
-                <span class="nav-card-icon">👤</span>
+                <span class="nav-card-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4" fill="#f59e0b" fill-opacity="0.16"/></svg></span>
                 <span class="nav-card-title">Особистий кабінет</span>
                 <span class="nav-card-desc">Ваші замовлення, покупки, оголошення та профіль</span>
             </a>
@@ -372,7 +372,7 @@
                 ← Повернутися на головну
             </a>
             <a href="https://t.me/LoopMarketSupport" target="_blank" class="btn-action-main btn-secondary">
-                🆘 Підтримка: @LoopMarketSupport
+                <svg class="loop-svg-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"/></svg>Підтримка: @LoopMarketSupport
             </a>
         </div>
 
@@ -394,7 +394,7 @@
 
         function updateThemeBtnIcon(theme) {
             const btn = document.getElementById('themeToggleBtn');
-            if (btn) btn.innerText = theme === 'dark' ? '☀️' : '🌙';
+            if (btn) btn.innerHTML = theme === 'dark' ? '<svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" fill="#f59e0b" fill-opacity="0.22"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>' : '<svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="#38bdf8" fill-opacity="0.2"/></svg>';
         }
 
         (function() {
@@ -402,6 +402,6 @@
             updateThemeBtnIcon(theme);
         })();
     </script>
-    <script src="/js/responsive-nav.js?v=3.5" defer></script>
+    <script src="/js/responsive-nav.js?v=3.6" defer></script>
 </body>
 </html>

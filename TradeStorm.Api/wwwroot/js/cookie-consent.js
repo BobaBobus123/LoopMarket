@@ -32,7 +32,7 @@
     banner.innerHTML = `
         <div style="flex: 1;">
             <div style="font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                <span>🍪 Ми цінуємо вашу приватність</span>
+                <span style="display:inline-flex;align-items:center;gap:8px;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5" fill="#f59e0b" fill-opacity="0.18"/><path d="M8.5 8.5v.01M16 15.5v.01M12 12v.01M11 17v.01M7 14v.01"/></svg> Ми цінуємо вашу приватність</span>
             </div>
             <div style="color: var(--text-muted, #64748b); font-size: 0.85rem;">
                 Loop Market використовує виключно захищені сесійні файли cookies для збереження вашої авторизації та налаштувань.

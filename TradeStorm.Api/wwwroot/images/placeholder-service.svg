@@ -57,8 +57,11 @@
   <g transform="translate(400, 435)">
     <!-- Pill background -->
     <rect x="-150" y="-18" width="300" height="36" rx="18" fill="#1e293b" fill-opacity="0.9" stroke="#334155" stroke-width="1.2" />
-    <text x="0" y="6" text-anchor="middle" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-size="14" font-weight="700" fill="#93c5fd">
-      🛠 Послуга або робота фахівця
+    <g transform="translate(-124, -9) scale(0.75)" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" fill="rgba(147,197,253,0.14)"/>
+    </g>
+    <text x="12" y="5" text-anchor="middle" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-size="14" font-weight="700" fill="#93c5fd">
+      Послуга або робота фахівця
     </text>
   </g>
 

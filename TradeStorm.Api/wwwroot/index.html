@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="/js/loop-icons.js?v=1.0"></script>
 
     <script>
     (function() {
@@ -2354,7 +2355,7 @@
         }
 
     </style>
-    <link rel="stylesheet" href="/css/global.css?v=5.7">
+    <link rel="stylesheet" href="/css/global.css?v=5.8">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
     <style>
         /* ==================== OLX-STYLE AD BANNER ==================== */
@@ -2584,7 +2585,7 @@
             </button>
             <svg class="mobile-search-icon" id="mobileSearchIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <input type="text" id="mobileTopSearchInput" class="mobile-search-input" placeholder="Пошук за назвою чи брендом..." autocomplete="off">
-            <button type="button" id="mobileTopSearchClear" class="mobile-search-clear" style="display: none;" onclick="clearMobileSearch()">✕</button>
+            <button type="button" id="mobileTopSearchClear" class="mobile-search-clear" style="display: none;" onclick="clearMobileSearch()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
             <button type="button" class="mobile-search-submit-btn" id="mobileSearchSubmitBtn" style="display: none;" onclick="submitMobileSearch()">Знайти</button>
         </div>
     </div>
@@ -2594,41 +2595,41 @@
         <!-- Стан 1: Швидкі популярні запити та категорії -->
         <div id="mobileSearchSuggestionsDefault">
             <div style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
-                🔥 Популярні пошуки
+                <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="#f97316" fill-opacity="0.22" stroke="#f97316" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>Популярні пошуки
             </div>
             <div class="quick-suggest-tags" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px;">
-                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('iPhone')">📱 iPhone</button>
-                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Ноутбук')">💻 Ноутбук</button>
-                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Кросівки')">👟 Кросівки</button>
-                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Куртка')">🧥 Куртка</button>
-                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Велосипед')">🚲 Велосипед</button>
-                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Генератор')">⚡ Генератор</button>
-                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Диван')">🛋️ Диван</button>
-                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Навушники')">🎧 Навушники</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('iPhone')"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg> iPhone</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Ноутбук')"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/></svg> Ноутбук</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Кросівки')"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg> Кросівки</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Куртка')"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg> Куртка</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Велосипед')"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg> Велосипед</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Генератор')"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" fill-opacity="0.22" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Генератор</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Диван')"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/><path d="M4 18v2M20 18v2"/></svg> Диван</button>
+                <button type="button" class="quick-suggest-chip" onclick="applyQuickSearch('Навушники')"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></svg> Навушники</button>
             </div>
 
             <div style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
-                📂 Популярні категорії
+                <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>Популярні категорії
             </div>
             <div class="quick-cat-list" style="display: flex; flex-direction: column; gap: 8px;">
                 <div class="quick-cat-row" onclick="filterByCategory('1'); exitMobileSearchMode();">
-                    <span>📱 Електроніка та техніка</span>
+                    <span style="display:inline-flex;align-items:center;gap:8px;"><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg>Електроніка та техніка</span>
                     <span style="color: var(--text-muted); font-size: 1.1rem;">→</span>
                 </div>
                 <div class="quick-cat-row" onclick="filterByCategory('2'); exitMobileSearchMode();">
-                    <span>🚗 Транспорт та автотовари</span>
+                    <span style="display:inline-flex;align-items:center;gap:8px;"><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>Транспорт та автотовари</span>
                     <span style="color: var(--text-muted); font-size: 1.1rem;">→</span>
                 </div>
                 <div class="quick-cat-row" onclick="filterByCategory('3'); exitMobileSearchMode();">
-                    <span>👕 Мода, одяг та взуття</span>
+                    <span style="display:inline-flex;align-items:center;gap:8px;"><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>Мода, одяг та взуття</span>
                     <span style="color: var(--text-muted); font-size: 1.1rem;">→</span>
                 </div>
                 <div class="quick-cat-row" onclick="filterByCategory('4'); exitMobileSearchMode();">
-                    <span>🏠 Дім, сад та меблі</span>
+                    <span style="display:inline-flex;align-items:center;gap:8px;"><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a2 2 0 0 1-2 2h-4.5v-6.5h-5V22H5a2 2 0 0 1-2-2z"/></svg>Дім, сад та меблі</span>
                     <span style="color: var(--text-muted); font-size: 1.1rem;">→</span>
                 </div>
                 <div class="quick-cat-row" onclick="filterByCategory('8'); exitMobileSearchMode();">
-                    <span>🛠 Послуги та робота</span>
+                    <span style="display:inline-flex;align-items:center;gap:8px;"><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Послуги та робота</span>
                     <span style="color: var(--text-muted); font-size: 1.1rem;">→</span>
                 </div>
             </div>
@@ -2642,7 +2643,7 @@
             <div id="mobileSearchList" style="display: flex; flex-direction: column; gap: 8px;"></div>
             <div id="mobileSearchSeeAllBtn" style="margin-top: 16px; text-align: center;">
                 <button type="button" onclick="submitMobileSearch()" style="width: 100%; padding: 13px; border-radius: 12px; border: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
-                    🔍 Показати всі результати в каталозі
+                    <svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Показати всі результати в каталозі
                 </button>
             </div>
         </div>
@@ -2659,7 +2660,7 @@
     <div class="container" style="padding-top: 10px; padding-bottom: 4px;">
         <div class="categories-scroll-wrapper" id="categoriesScrollWrapper">
             <div class="categories-scroll-list" id="categoryPillsList">
-                <button type="button" class="cat-pill active" data-category="" onclick="filterByCategory('', this)">✨ Всі товари</button>
+                <button type="button" class="cat-pill active" data-category="" onclick="filterByCategory('', this)"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" fill-opacity="0.22" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>Всі товари</button>
             </div>
         </div>
         <!-- ДИНАМІЧНИЙ РЯДОК ПІДКАТЕГОРІЙ -->
@@ -2674,10 +2675,10 @@
     <!-- ШВИДКІ ТЕГИ-ФІЛЬТРИ В 1 КЛІК (БЕЗ ЗАЙВИХ КНОПОК) -->
     <div class="container quick-tags-container">
         <div class="quick-tags-scroller" id="quickTagsScroller">
-            <button type="button" class="quick-tag-pill" id="qtagNew" onclick="toggleQuickTag('new', this)">✨ Тільки нове</button>
-            <button type="button" class="quick-tag-pill" id="qtagShipping" onclick="toggleQuickTag('shipping', this)">📦 З доставкою</button>
-            <button type="button" class="quick-tag-pill" id="qtagPrice" onclick="toggleQuickTag('price', this)">🏷️ До 1 000 ₴</button>
-            <button type="button" class="quick-tag-pill" id="qtagVip" onclick="toggleQuickTag('vip', this)">⭐ ТОП-оголошення</button>
+            <button type="button" class="quick-tag-pill" id="qtagNew" onclick="toggleQuickTag('new', this)"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="#10b981" fill-opacity="0.2" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>Тільки нове</button>
+            <button type="button" class="quick-tag-pill" id="qtagShipping" onclick="toggleQuickTag('shipping', this)"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>З доставкою</button>
+            <button type="button" class="quick-tag-pill" id="qtagPrice" onclick="toggleQuickTag('price', this)"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="#10b981"/></svg>До 1 000 ₴</button>
+            <button type="button" class="quick-tag-pill" id="qtagVip" onclick="toggleQuickTag('vip', this)"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round" style="margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>ТОП-оголошення</button>
         </div>
     </div>
 
@@ -2765,7 +2766,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
                     <div>
                         <div style="display: inline-flex; align-items: center; gap: 6px; background: #2563eb; color: white; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">
-                            🛠 Послуги та сервіс
+                            <svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Послуги та сервіс
                         </div>
                         <h3 style="margin: 0 0 6px 0; font-size: 1.3rem; font-weight: 800; color: var(--text-main);">
                             Послуги та робота від перевірених виконавців
@@ -2820,13 +2821,13 @@
                             <span class="olx-promo-badge">ADS</span>
                         </div>
                         <div class="olx-promo-text">
-                            <div class="olx-promo-title">📢 Тут могла бути ваша реклама!</div>
+                            <div class="olx-promo-title" style="display:flex;align-items:center;gap:8px;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13v-2z" fill="#10b981" fill-opacity="0.16"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg><span>Тут могла бути ваша реклама!</span></div>
                             <div class="olx-promo-sub">Залучайте тисячі покупців щодня на LoopMarket. Розміщуйте товари вашого бренду, банери чи акційні пропозиції.</div>
                         </div>
                     </div>
                     <div class="olx-promo-actions">
                         <a href="https://t.me/LoopMarketSupport" target="_blank" class="olx-promo-btn">
-                            <span>Розмістити рекламу 📢</span>
+                            <span style="display:inline-flex;align-items:center;gap:6px;">Розмістити рекламу <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
                         </a>
                         <button type="button" class="olx-promo-close" onclick="window.dismissCatalogPromo ? window.dismissCatalogPromo() : (this.closest('.catalog-promo-slot').style.display='none')" title="Закрити рекламу">&times;</button>
                     </div>
@@ -2852,17 +2853,17 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="20" y1="14" y2="14"/><line x1="4" x2="20" y1="7" y2="7"/><circle cx="14" cy="21" r="2"/><circle cx="8" cy="14" r="2"/><circle cx="16" cy="7" r="2"/></svg>
                 <span>Фільтри пошуку</span>
             </div>
-            <button type="button" class="btn-sheet-close" onclick="closeMobileFilterSheet()" aria-label="Закрити">✕</button>
+            <button type="button" class="btn-sheet-close" onclick="closeMobileFilterSheet()" aria-label="Закрити"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
         </div>
         <div class="mobile-filter-sheet-body">
             <!-- ⚡ Швидкі параметри в 1 клік -->
             <div class="sheet-group">
-                <div class="sheet-group-title">⚡ Швидкі фільтри</div>
+                <div class="sheet-group-title" style="display:flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="#f59e0b" fill-opacity="0.22" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Швидкі фільтри</div>
                 <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                    <button type="button" class="sheet-cond-pill" id="sqtagNew" onclick="toggleQuickTag('new', this)">✨ Тільки нове</button>
-                    <button type="button" class="sheet-cond-pill" id="sqtagShipping" onclick="toggleQuickTag('shipping', this)">📦 З доставкою</button>
-                    <button type="button" class="sheet-cond-pill" id="sqtagPrice" onclick="toggleQuickTag('price', this)">🏷️ До 1 000 ₴</button>
-                    <button type="button" class="sheet-cond-pill" id="sqtagVip" onclick="toggleQuickTag('vip', this)">⭐ ТОП-оголошення</button>
+                    <button type="button" class="sheet-cond-pill" id="sqtagNew" onclick="toggleQuickTag('new', this)"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="#10b981" fill-opacity="0.2" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>Тільки нове</button>
+                    <button type="button" class="sheet-cond-pill" id="sqtagShipping" onclick="toggleQuickTag('shipping', this)"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>З доставкою</button>
+                    <button type="button" class="sheet-cond-pill" id="sqtagPrice" onclick="toggleQuickTag('price', this)"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="#10b981"/></svg>До 1 000 ₴</button>
+                    <button type="button" class="sheet-cond-pill" id="sqtagVip" onclick="toggleQuickTag('vip', this)"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round" style="margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>ТОП-оголошення</button>
                 </div>
             </div>
 
@@ -2906,7 +2907,7 @@
             <div class="sheet-group">
                 <div class="sheet-group-title">Категорія</div>
                 <div class="sheet-cat-list" id="mobileSheetCategoryList">
-                    <button type="button" class="sheet-cat-item active" data-category="" onclick="selectSheetCategory('', this)"><span>✨ Всі категорії</span><span>✓</span></button>
+                    <button type="button" class="sheet-cat-item active" data-category="" onclick="selectSheetCategory('', this)"><span style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="#10b981" fill-opacity="0.2" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>Всі категорії</span><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></button>
                 </div>
             </div>
         </div>
@@ -3229,7 +3230,7 @@
             }
 
             if (typeof LoopToast !== 'undefined') {
-                LoopToast.success(isFav ? "Видалено з обраного" : "Додано в обране ❤️");
+                LoopToast.success(isFav ? "Видалено з обраного" : "Додано в обране");
             }
 
             const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
@@ -3255,20 +3256,20 @@
                 const pillsList = document.getElementById('categoryPillsList');
                 if (pillsList) {
                     pillsList.innerHTML = `
-                        <button type="button" class="cat-pill active" data-category="" onclick="filterByCategory('', this)">🌟 Всі</button>
-                        <button type="button" class="cat-pill" data-mode="goods" onclick="setCatalogMode('goods', event)">📦 Товари</button>
-                        <button type="button" class="cat-pill" data-mode="services" onclick="setCatalogMode('services', event)">🛠️ Послуги</button>
+                        <button type="button" class="cat-pill active" data-category="" onclick="filterByCategory('', this)"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" fill-opacity="0.22" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>Всі</button>
+                        <button type="button" class="cat-pill" data-mode="goods" onclick="setCatalogMode('goods', event)"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>Товари</button>
+                        <button type="button" class="cat-pill" data-mode="services" onclick="setCatalogMode('services', event)"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Послуги</button>
                     `;
                 }
 
                 const sheetCatList = document.getElementById('mobileSheetCategoryList');
                 if (sheetCatList) {
-                    sheetCatList.innerHTML = `<button type="button" class="sheet-cat-item active" data-category="" onclick="selectSheetCategory('', this)"><span>✨ Всі категорії</span><span>✓</span></button>`;
+                    sheetCatList.innerHTML = `<button type="button" class="sheet-cat-item active" data-category="" onclick="selectSheetCategory('', this)"><span style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="#10b981" fill-opacity="0.2" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>Всі категорії</span><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></button>`;
                 }
 
                 categories.forEach(c => {
                     const safeName = c.name.replace(/'/g, "\\'");
-                    const icon = c.icon || '🏷️';
+                    const icon = window.LoopIcons ? `<span class="cat-icon-svg">${window.LoopIcons.fromCategory(c.icon, c.name, { size: 16 })}</span>` : '';
                     if (list) list.innerHTML += `<li class="category-item" data-category="${c.name}" onclick="filterByCategory('${safeName}', this)">${icon} ${c.name}</li>`;
                     if (pillsList) {
                         pillsList.innerHTML += `<button type="button" class="cat-pill" data-category="${c.name}" onclick="filterByCategory('${safeName}', this)">${icon} ${c.name}</button>`;
@@ -3303,11 +3304,11 @@
 
             wrap.style.display = 'block';
             list.innerHTML = `
-                <button type="button" class="subcat-chip ${!selectedSubcategoryName ? 'active' : ''}" onclick="filterBySubcategory(null, this)">✨ Всі ${current.name}</button>
+                <button type="button" class="subcat-chip ${!selectedSubcategoryName ? 'active' : ''}" onclick="filterBySubcategory(null, this)">${window.LoopIcons ? window.LoopIcons.svg('sparkles', { size: 13 }) : ''} Всі ${current.name}</button>
             ` + current.subcategories.map(s => {
                 const safeSub = s.name.replace(/'/g, "\\'");
                 const isActive = selectedSubcategoryName === s.name ? 'active' : '';
-                return `<button type="button" class="subcat-chip ${isActive}" onclick="filterBySubcategory('${safeSub}', this)">${s.icon || '🏷️'} ${s.name}</button>`;
+                return `<button type="button" class="subcat-chip ${isActive}" onclick="filterBySubcategory('${safeSub}', this)">${window.LoopIcons ? window.LoopIcons.fromCategory(s.icon, s.name, { size: 13 }) : ''} ${s.name}</button>`;
             }).join('');
         }
 
@@ -3383,7 +3384,7 @@
                         <img src="${ytThumb}" class="card-img" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
                         <span class="card-badge-video" title="YouTube відео"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> YouTube</span>
                         <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;">
-                            <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.35);">▶</div>
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.35);"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
                         </div>
                     `;
                 }
@@ -3394,7 +3395,7 @@
                             <video src="${escapeHtml(videoUrl)}#t=0.5" preload="metadata" muted playsinline style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none;"></video>
                             <span class="card-badge-video" title="Відеоогляд"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Відео</span>
                             <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;">
-                                <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.35);">▶</div>
+                                <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.35);"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
                             </div>
                         </div>
                     `;
@@ -3407,7 +3408,7 @@
                             <iframe src="https://www.instagram.com/p/${igMatch[1]}/embed/" style="position: absolute; top: -64px; left: -2px; width: calc(100% + 4px); height: calc(100% + 160px); border: none; pointer-events: none;" scrolling="no" frameborder="0" loading="lazy"></iframe>
                             <span class="card-badge-video" title="Instagram Reel"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Reel</span>
                             <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 2;">
-                                <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; box-shadow: 0 4px 14px rgba(0,0,0,0.4);">▶</div>
+                                <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 14px rgba(0,0,0,0.4);"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
                             </div>
                         </div>
                     `;
@@ -3415,7 +3416,7 @@
 
                 return `
                     <div class="card-media-box" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #090d16 0%, #1e293b 100%); color: #38bdf8; font-weight: 800; text-align: center; gap: 6px;">
-                        <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(56,189,248,0.2); border: 2px solid rgba(56,189,248,0.5); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">▶</div>
+                        <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(56,189,248,0.2); border: 2px solid rgba(56,189,248,0.5); display: flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
                         <span style="font-size: 0.76rem; letter-spacing: 0.5px;">ВІДЕООГЛЯД</span>
                     </div>
                 `;
@@ -3445,7 +3446,7 @@
             let serviceTag = '';
 
             if (isService) {
-                categoryDisplay = '🛠 Послуга від майстра';
+                categoryDisplay = '<svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Послуга від майстра';
                 actionBtnText = 'Замовити послугу →';
                 actionBtnStyle = 'font-weight: 800; color: #2563eb;';
 
@@ -3456,9 +3457,9 @@
                 }
 
                 if (item.isShippingAvailable) {
-                    serviceTag = '<span class="shipping-tag" style="background: rgba(37,99,235,0.1); color: #2563eb;" title="Можливий виїзд майстра">🚗 З виїздом</span>';
+                    serviceTag = '<span class="shipping-tag" style="background: rgba(37,99,235,0.1); color: #2563eb;" title="Можливий виїзд майстра"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px;"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>З виїздом</span>';
                 } else {
-                    serviceTag = '<span class="shipping-tag" style="background: rgba(16,185,129,0.1); color: var(--primary-light);" title="Онлайн або на локації">🌐 Онлайн / Локація</span>';
+                    serviceTag = '<span class="shipping-tag" style="background: rgba(16,185,129,0.1); color: var(--primary-light);" title="Онлайн або на локації"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px;"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>Онлайн / Локація</span>';
                 }
             } else if (item.isShippingAvailable) {
                 serviceTag = '<span class="shipping-tag" title="Можлива доставка">' + ICONS.package + ' Доставка</span>';
@@ -3468,7 +3469,7 @@
                 <div class="card ${isSold ? 'card-sold' : ''}" style="animation-delay: ${delayIndex * 0.03}s;">
                     <div class="card-img-wrapper" onclick="saveListingScrollPosition(); window.location.href='/details.html?id=${item.code || item.id}'">
                         ${getCardMediaHtml(item)}
-                        ${isSold ? '<span class="card-badge badge-sold">Продано</span>' : (item.isFeatured ? '<span class="card-badge" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; font-weight: 800; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);">⭐ ТОП</span>' : (isService ? '<span class="card-badge" style="background:#2563eb; color:white;">🛠 Послуга</span>' : (isNew ? '<span class="card-badge badge-new">Нове</span>' : '')))}
+                        ${isSold ? '<span class="card-badge badge-sold">Продано</span>' : (item.isFeatured ? '<span class="card-badge" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; font-weight: 800; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4); display:inline-flex; align-items:center; gap:4px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>ТОП</span>' : (isService ? '<span class="card-badge" style="background:#2563eb; color:white; display:inline-flex; align-items:center; gap:4px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Послуга</span>' : (isNew ? '<span class="card-badge badge-new">Нове</span>' : '')))}
                         <button onclick="toggleFavorite(${item.id}, event)" class="btn-fav" title="Додати в обране">${favIcon}</button>
                     </div>
                     <div class="card-content">
@@ -3739,8 +3740,8 @@
             if (resetPage) catalogCurrentPage = 1;
             renderCatalogCurrentPage();
 
-            let defaultTitle = (catalogMode === 'services') ? "🛠 Послуги та сервіси" : (catalogMode === 'goods' ? "📦 Каталог товарів" : "🌟 Всі свіжі оголошення");
-            document.getElementById('gridTitle').innerText = selectedCategoryName || (query ? `Результати пошуку: "${query}"` : defaultTitle);
+            let defaultTitle = (catalogMode === 'services') ? '<svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Послуги та сервіси' : (catalogMode === 'goods' ? '<svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg> Каталог товарів' : '<svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg> Всі свіжі оголошення');
+            const gridTitleEl = document.getElementById('gridTitle'); if (gridTitleEl) { const selectedCatObj = selectedCategoryName ? (window.allCategoriesTree || []).find(c => c.name === selectedCategoryName) : null; gridTitleEl.innerHTML = selectedCategoryName ? ((window.LoopIcons ? window.LoopIcons.fromCategory(selectedCatObj ? selectedCatObj.icon : '', selectedCategoryName, { size: 20 }) + ' ' : '') + escapeHtml(selectedCategoryName)) : (query ? `Результати пошуку: "${escapeHtml(query)}"` : defaultTitle); }
             
             if (window.updateMobileFilterCountBadge) updateMobileFilterCountBadge();
             const mSort = document.getElementById('mobileSortFilterSelect');
@@ -4057,7 +4058,7 @@
                 if (listEl) {
                     listEl.innerHTML = `
                         <div style="text-align: center; padding: 30px 10px; color: var(--text-muted); background: var(--surface); border-radius: 12px; border: 1px dashed var(--border-color);">
-                            <div style="font-size: 1.8rem; margin-bottom: 6px;">🔍</div>
+                            <div style="margin-bottom: 8px; color: var(--text-muted); opacity: 0.7;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
                             <div style="font-weight: 700;">Нічого не знайдено за запитом "${escapeHtml(query)}"</div>
                             <div style="font-size: 0.85rem; margin-top: 4px;">Спробуйте інше слово або перевірте правопис</div>
                         </div>
@@ -4086,7 +4087,7 @@
                                 <div class="mobile-suggest-title">${titleHtml}</div>
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <span class="mobile-suggest-price">${price}</span>
-                                    <span style="font-size: 0.76rem; color: var(--text-muted);">📍 ${escapeHtml(city)}</span>
+                                    <span style="font-size: 0.76rem; color: var(--text-muted); display:inline-flex; align-items:center; gap:3px;">${ICONS.pin} ${escapeHtml(city)}</span>
                                 </div>
                             </div>
                         </a>
@@ -4215,9 +4216,9 @@
 
     </script>
     <!-- Realtime In-App Push Notifications -->
-    <script src="/js/push-notifications.js"></script>
-    <script src="/js/responsive-nav.js?v=3.5" defer></script>
-    <script src="/js/loop-dialogs.js"></script>
+    <script src="/js/push-notifications.js?v=1.1"></script>
+    <script src="/js/responsive-nav.js?v=3.6" defer></script>
+    <script src="/js/loop-dialogs.js?v=1.1"></script>
     <script>
         // ========================================================
         // 🔍 LIVE INSTANT SEARCH & AUTOCOMPLETE
@@ -4358,7 +4359,7 @@
         }
 
     </script>
-    <script src="/js/cookie-consent.js"></script>
+    <script src="/js/cookie-consent.js?v=1.1"></script>
     <script>
         // ==================== БОКОВЕ МЕНЮ "ТРИ ПОЛОСКИ" ====================
         window.toggleMobileNavDrawer = function(e) {
@@ -4520,7 +4521,7 @@
                 <div class="logo-circle" style="width: 32px; height: 32px; font-size: 1rem;">L</div>
                 <span>Loop<span style="color: #10b981;">Market</span></span>
             </div>
-            <button type="button" class="btn-drawer-close" onclick="closeMobileNavDrawer()" aria-label="Закрити">✕</button>
+            <button type="button" class="btn-drawer-close" onclick="closeMobileNavDrawer()" aria-label="Закрити"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
         </div>
 
         <div class="drawer-user-card" id="drawerUserCard">

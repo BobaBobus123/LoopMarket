@@ -2052,3 +2052,27 @@ h1, h2, h3, .heading-brand, .hero-title, .section-title, .modal-title {
         gap: 16px !important;
     }
 }
+
+
+/* --- Vector SVG Icon Alignment --- */
+.loop-svg-icon {
+    display: inline-block;
+    vertical-align: -0.15em;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.loop-svg-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.cat-icon-svg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--primary, #10b981);
+}

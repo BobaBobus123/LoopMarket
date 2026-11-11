@@ -1656,8 +1656,9 @@
         }
 
     </style>
-    <link rel="stylesheet" href="/css/global.css?v=5.7">
+    <link rel="stylesheet" href="/css/global.css?v=5.8">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
+    <script src="/js/loop-icons.js?v=1.0"></script>
 </head>
 <body>
     <header>
@@ -1754,7 +1755,7 @@
                     <div class="stat-lbl">Оголошень</div>
                 </div>
                 <div class="stat-pill" onclick="switchTab('reviews')" title="Рейтинг та відгуки">
-                    <div class="stat-num" id="sidebarAvgRating">5.0 ★</div>
+                    <div class="stat-num" id="sidebarAvgRating">5.0 <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
                     <div class="stat-lbl">Рейтинг</div>
                 </div>
                 <div class="stat-pill" onclick="switchTab('services')" title="Послуги майстра">
@@ -1828,8 +1829,8 @@
                         <div style="font-size: 1.8rem; font-weight: 800; color: #10b981;" id="servStatEarnings">0 ₴</div>
                         <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 4px;">Зароблено на послугах</div>
                         <div style="font-size: 0.72rem; color: #10b981; margin-top: 4px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 4px;">
-                            <span>⚡ Авто-розрахунок</span>
-                            <button type="button" onclick="loadMyServicesStats()" title="Оновити розрахунок заробітку" style="background: none; border: none; cursor: pointer; color: #10b981; font-size: 0.85rem; padding: 0;">🔄</button>
+                            <span><svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Авто-розрахунок</span>
+                            <button type="button" onclick="loadMyServicesStats()" title="Оновити розрахунок заробітку" style="background: none; border: none; cursor: pointer; color: #10b981; font-size: 0.85rem; padding: 0; display: inline-flex; align-items: center;"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></button>
                         </div>
                     </div>
                     <div style="background: var(--surface); padding: 18px; border-radius: 14px; border: 1.5px solid var(--border-color); text-align: center; box-shadow: var(--card-shadow);">
@@ -1862,36 +1863,36 @@
             </div>
 
             
-            <!-- РОЗДІЛ: 📊 СТАТИСТИКА ТА ДОХОДИ (LOOP АНАЛІТИКА) -->
+            <!-- РОЗДІЛ: СТАТИСТИКА ТА ДОХОДИ (LOOP АНАЛІТИКА) -->
             <div id="analyticsContainerTab" style="display: none; margin-top: 10px;">
                 <!-- 5 Карток аналітики -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px;">
                     <div style="background: var(--surface); padding: 18px; border-radius: 14px; border: 1.5px solid var(--border-color); box-shadow: var(--card-shadow);">
-                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">👁️ Перегляди</div>
+                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;"><svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> Перегляди</div>
                         <div style="font-size: 1.85rem; font-weight: 800; color: #10b981; margin: 4px 0;" id="statTotalViews">0</div>
                         <div style="font-size: 0.78rem; color: var(--text-muted);">Активних товарів: <b id="statActiveCount">0</b></div>
                     </div>
 
                     <div style="background: var(--surface); padding: 18px; border-radius: 14px; border: 1.5px solid var(--border-color); box-shadow: var(--card-shadow);">
-                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">❤️ Вподобання</div>
+                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;"><svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> Вподобання</div>
                         <div style="font-size: 1.85rem; font-weight: 800; color: #ef4444; margin: 4px 0;" id="statTotalFavs">0</div>
                         <div style="font-size: 0.78rem; color: var(--text-muted);">Додано покупцями в обране</div>
                     </div>
 
                     <div style="background: var(--surface); padding: 18px; border-radius: 14px; border: 1.5px solid var(--border-color); box-shadow: var(--card-shadow);">
-                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">🛡️ Завершені угоди</div>
+                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;"><svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg> Завершені угоди</div>
                         <div style="font-size: 1.85rem; font-weight: 800; color: #2563eb; margin: 4px 0;" id="statCompletedOrders">0</div>
                         <div style="font-size: 0.78rem; color: var(--text-muted);">Успішно підтверджені замовлення</div>
                     </div>
 
                     <div style="background: var(--surface); padding: 18px; border-radius: 14px; border: 1.5px solid var(--border-color); box-shadow: var(--card-shadow);">
-                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">💰 Отриманий дохід</div>
+                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;"><svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg> Отриманий дохід</div>
                         <div style="font-size: 1.85rem; font-weight: 800; color: #10b981; margin: 4px 0;" id="statTotalRevenue">0 ₴</div>
                         <div style="font-size: 0.78rem; color: var(--text-muted);">Виплачено на рахунок продавця</div>
                     </div>
 
                     <div style="background: var(--surface); padding: 18px; border-radius: 14px; border: 1.5px solid var(--border-color); box-shadow: var(--card-shadow);">
-                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">⭐ Рейтинг довіри</div>
+                        <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;"><svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Рейтинг довіри</div>
                         <div style="font-size: 1.85rem; font-weight: 800; color: #f59e0b; margin: 4px 0;" id="statAvgRating">5.0</div>
                         <div style="font-size: 0.78rem; color: var(--text-muted);"><b id="statVerifiedCount">0</b> перевірених відгуків</div>
                     </div>
@@ -1901,7 +1902,7 @@
                 <div style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 22px; margin-bottom: 24px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                         <div>
-                            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0;">🏆 Топ ваших популярних пропозицій</h3>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg> Топ ваших популярних пропозицій</h3>
                             <p style="font-size: 0.82rem; color: var(--text-muted); margin: 2px 0 0 0;">Оголошення з найбільшою кількістю переглядів та інтересом покупців</p>
                         </div>
                     </div>
@@ -1916,8 +1917,8 @@
             <div id="profileReviewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); justify-content: center; align-items: center; z-index: 2500;">
                 <div style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 24px; width: 440px; max-width: calc(100vw - 32px); box-shadow: 0 16px 40px rgba(0,0,0,0.35);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--text-main);">⭐ Оцінити угоду</h3>
-                        <button type="button" onclick="closeProfileReviewModal()" style="background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">✕</button>
+                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--text-main);"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Оцінити угоду</h3>
+                        <button type="button" onclick="closeProfileReviewModal()" style="background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; display: inline-flex; align-items: center;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                     </div>
                     <div id="reviewOrderTitle" style="font-size: 0.88rem; font-weight: 600; color: var(--primary-light); margin-bottom: 14px;"></div>
                     
@@ -1928,11 +1929,11 @@
                         <div style="margin-bottom: 16px;">
                             <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Ваша оцінка *</label>
                             <select id="reviewRatingSelect" style="width: 100%; padding: 10px 12px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-size: 0.95rem; font-weight: 700; outline: none;">
-                                <option value="5">⭐⭐⭐⭐⭐ 5 - Чудово, рекомендую!</option>
-                                <option value="4">⭐⭐⭐⭐ 4 - Добре</option>
-                                <option value="3">⭐⭐⭐ 3 - Нормально</option>
-                                <option value="2">⭐⭐ 2 - Є зауваження</option>
-                                <option value="1">⭐ 1 - Погано</option>
+                                <option value="5">5 - Чудово, рекомендую!</option>
+                                <option value="4">4 - Добре</option>
+                                <option value="3">3 - Нормально</option>
+                                <option value="2">2 - Є зауваження</option>
+                                <option value="1">1 - Погано</option>
                             </select>
                         </div>
 
@@ -1999,7 +2000,7 @@
                                     <span>Безпека та верифікація облікового запису</span>
                                 </div>
                                 <span style="font-size: 0.78rem; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.12); padding: 4px 10px; border-radius: 8px;">
-                                    🟢 Акаунт активний
+                                    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10b981;margin-right:4px;"></span> Акаунт активний
                                 </span>
                             </div>
 
@@ -2010,7 +2011,7 @@
                                         <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-main); margin-top: 2px;" id="secEmailText">Завантаження...</div>
                                     </div>
                                     <span id="emailVerifyBadge" style="font-size: 0.76rem; font-weight: 800; padding: 4px 10px; border-radius: 8px; background: rgba(16,185,129,0.15); color: #10b981;">
-                                        ✅ Підтверджено
+                                        <svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Підтверджено
                                     </span>
                                 </div>
 
@@ -2020,18 +2021,18 @@
                                         <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-main); margin-top: 2px;" id="secPhoneText">Завантаження...</div>
                                     </div>
                                     <span style="font-size: 0.76rem; font-weight: 800; padding: 4px 10px; border-radius: 8px; background: rgba(16,185,129,0.15); color: #10b981;">
-                                        ✅ Активний
+                                        <svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Активний
                                     </span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- РОЗДІЛ: 🏢 БІЗНЕС-АКАУНТ, БРЕНД ОДЯГУ ТА VIP-ПАРТНЕРСТВО -->
+                        <!-- РОЗДІЛ: БІЗНЕС-АКАУНТ, БРЕНД ОДЯГУ ТА VIP-ПАРТНЕРСТВО -->
                         <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%), var(--bg-color); border: 1.5px solid rgba(37,99,235,0.25); border-radius: 16px; padding: 22px; margin-bottom: 24px; box-shadow: 0 4px 18px rgba(37,99,235,0.06);">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                                 <div>
                                     <div style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); font-family: 'Unbounded', sans-serif; display: flex; align-items: center; gap: 10px;">
-                                        <span>💎</span>
+                                        <span style="color:#38bdf8;display:inline-flex;"><svg class="loop-svg-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg></span>
                                         <span>Офіційний Бренд & Бізнес-акаунт</span>
                                     </div>
                                     <p style="font-size: 0.84rem; color: var(--text-muted); margin: 4px 0 0 0;">
@@ -2061,10 +2062,10 @@
 
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 14px; border-top: 1px solid var(--border-color);">
                                 <div style="font-size: 0.8rem; color: var(--text-muted); max-width: 580px;">
-                                    📌 <b>Офіційний статус «Бренд»:</b> надає золотий бейдж 💎 у каталозі, пріоритет у пошуку, закріплення новинок у ТОП-блоці та підтримку відеооглядів (Reels / TikTok).
+                                    <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg> <b>Офіційний статус «Бренд»:</b> надає золотий бейдж у каталозі, пріоритет у пошуку, закріплення новинок у ТОП-блоці та підтримку відеооглядів (Reels / TikTok).
                                 </div>
                                 <button type="button" onclick="requestBrandVerificationModal()" style="padding: 10px 18px; border-radius: 12px; border: none; background: linear-gradient(135deg, #2563eb 0%, #10b981 100%); color: white; font-weight: 800; font-size: 0.86rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(37,99,235,0.3);">
-                                    <span>💎 Подати заявку на статус Бренду</span>
+                                    <span><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg> Подати заявку на статус Бренду</span>
                                 </button>
                             </div>
                         </div>
@@ -2110,14 +2111,14 @@
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(37, 99, 235, 0.15); color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
-                        📦
+                        <svg class="loop-svg-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
                     </div>
                     <div>
                         <h3 class="modal-title" style="margin: 0; font-size: 1.25rem;">Відправка замовлення</h3>
                         <div style="font-size: 0.82rem; color: var(--text-muted);" id="shipModalSubtitle">Замовлення #...</div>
                     </div>
                 </div>
-                <button type="button" onclick="closeShippingModal()" style="background: transparent; border: none; font-size: 1.3rem; color: var(--text-muted); cursor: pointer; padding: 4px 8px; border-radius: 8px;">✕</button>
+                <button type="button" onclick="closeShippingModal()" style="background: transparent; border: none; font-size: 1.3rem; color: var(--text-muted); cursor: pointer; padding: 4px 8px; border-radius: 8px; display: inline-flex; align-items: center;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
 
             <!-- Вибір поштової служби -->
@@ -2126,10 +2127,10 @@
             </label>
             <div style="display: flex; gap: 10px; margin-bottom: 18px;">
                 <button type="button" id="carrierBtnNP" onclick="selectCarrier('novaposhta')" style="flex: 1; padding: 12px 10px; border-radius: 12px; border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.1); color: var(--text-main); font-weight: 800; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;">
-                    🔴 Нова Пошта <span style="font-size: 0.72rem; opacity: 0.85; font-weight: 700;">(14 цифр)</span>
+                    <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;"></span> Нова Пошта <span style="font-size: 0.72rem; opacity: 0.85; font-weight: 700;">(14 цифр)</span>
                 </button>
                 <button type="button" id="carrierBtnUP" onclick="selectCarrier('ukrposhta')" style="flex: 1; padding: 12px 10px; border-radius: 12px; border: 2px solid var(--border-color); background: var(--surface); color: var(--text-muted); font-weight: 800; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;">
-                    🟡 Укрпошта <span style="font-size: 0.72rem; opacity: 0.85; font-weight: 700;">(13 цифр)</span>
+                    <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b;"></span> Укрпошта <span style="font-size: 0.72rem; opacity: 0.85; font-weight: 700;">(13 цифр)</span>
                 </button>
             </div>
 
@@ -2144,7 +2145,7 @@
             </div>
 
             <button type="button" id="btnAutoGenerateTtn" onclick="autoGenerateNovaPoshtaTtn()" style="width: 100%; margin-bottom: 12px; padding: 10px 14px; border-radius: 10px; border: 1.5px dashed #ef4444; background: rgba(239, 68, 68, 0.08); color: #ef4444; font-weight: 800; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;">
-                ⚡ Створити ТТН автоматично через API Нової Пошти
+                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Створити ТТН автоматично через API Нової Пошти
             </button>
 
             <div style="position: relative; margin-bottom: 12px;">
@@ -2153,13 +2154,13 @@
 
             <!-- Блок валідації та пояснення -->
             <div id="shipValidationBox" style="margin-bottom: 22px; font-size: 0.83rem; padding: 12px 14px; border-radius: 10px; line-height: 1.45; background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.25); color: var(--text-main); transition: 0.2s;">
-                ℹ️ Введіть номер накладної Нової Пошти (рівно 14 цифр). Після збереження номер ТТН автоматично відправиться покупцеві у внутрішній чат та системні сповіщення.
+                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg> Введіть номер накладної Нової Пошти (рівно 14 цифр). Після збереження номер ТТН автоматично відправиться покупцеві у внутрішній чат та системні сповіщення.
             </div>
 
             <div class="modal-actions" style="gap: 10px;">
                 <button type="button" class="btn-cancel" onclick="closeShippingModal()">Скасувати</button>
                 <button type="button" id="btnSubmitShipping" onclick="submitShippingAction()" style="flex: 1.4; padding: 13px 16px; border-radius: 10px; border: none; background: linear-gradient(135deg, #10b981 0%, #2563eb 100%); color: white; font-weight: 800; font-size: 0.92rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);">
-                    🚀 Підтвердити та відправити
+                    <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Підтвердити та відправити
                 </button>
             </div>
         </div>
@@ -2172,14 +2173,14 @@
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(239, 68, 68, 0.12); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
-                        📦
+                        <svg class="loop-svg-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
                     </div>
                     <div>
                         <h3 class="modal-title" style="margin: 0; font-size: 1.15rem;">Відстеження Нова Пошта</h3>
                         <div style="font-size: 0.82rem; color: var(--text-muted);" id="trackModalTtn">ТТН: ...</div>
                     </div>
                 </div>
-                <button type="button" onclick="closeTrackingModal()" style="background: transparent; border: none; font-size: 1.3rem; color: var(--text-muted); cursor: pointer; padding: 4px 8px;">✕</button>
+                <button type="button" onclick="closeTrackingModal()" style="background: transparent; border: none; font-size: 1.3rem; color: var(--text-muted); cursor: pointer; padding: 4px 8px; display: inline-flex; align-items: center;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             <div id="trackingContent" style="padding: 10px 0;">
                 <div style="text-align: center; padding: 20px; color: var(--text-muted);">Завантаження даних...</div>
@@ -2194,7 +2195,7 @@
     <div class="modal-overlay" id="serviceCompleteModal">
         <div class="modal-box" style="max-width: 440px; text-align: center; padding: 26px;">
             <div style="width: 58px; height: 58px; border-radius: 18px; background: rgba(16, 185, 129, 0.15); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 16px;">
-                ✅
+                <svg class="loop-svg-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
             <h3 class="modal-title" style="margin-bottom: 8px;">Виконання послуги</h3>
             <p class="modal-text" id="serviceCompleteText" style="margin-bottom: 20px; font-size: 0.92rem; line-height: 1.45;">
@@ -2203,7 +2204,7 @@
             <div class="modal-actions" style="gap: 10px;">
                 <button type="button" class="btn-cancel" onclick="closeServiceCompleteModal()">Скасувати</button>
                 <button type="button" id="btnConfirmServiceComplete" onclick="confirmServiceCompleteAction()" style="flex: 1.2; padding: 12px; border-radius: 10px; border: none; background: #10b981; color: white; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
-                    ✓ Так, виконано
+                    <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Так, виконано
                 </button>
             </div>
         </div>
@@ -2212,7 +2213,7 @@
     <!-- 3. Універсальне модальне вікно підтвердження статусу -->
     <div class="modal-overlay" id="generalConfirmModal">
         <div class="modal-box" style="max-width: 420px; text-align: center; padding: 26px;">
-            <div id="generalConfirmIcon" style="font-size: 2.6rem; margin-bottom: 12px;">⚡</div>
+            <div id="generalConfirmIcon" style="font-size: 2.6rem; margin-bottom: 12px; display: inline-flex; align-items: center; justify-content: center; color: #f59e0b;"><svg class="loop-svg-icon" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
             <h3 class="modal-title" id="generalConfirmTitle" style="margin-bottom: 8px;">Підтвердження дії</h3>
             <p class="modal-text" id="generalConfirmMessage" style="margin-bottom: 22px; font-size: 0.92rem; line-height: 1.45;">Ви впевнені?</p>
             <div class="modal-actions" style="gap: 10px;">
@@ -2228,8 +2229,8 @@
     <div class="modal-overlay" id="editPriceModal">
         <div class="modal-box" style="max-width: 420px; text-align: left; padding: 26px;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-                <h3 class="modal-title" style="margin: 0; font-size: 1.2rem;">✏️ Зміна суми замовлення</h3>
-                <button type="button" onclick="closeEditPriceModal()" style="background: transparent; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; padding: 4px;">✕</button>
+                <h3 class="modal-title" style="margin: 0; font-size: 1.2rem;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg> Зміна суми замовлення</h3>
+                <button type="button" onclick="closeEditPriceModal()" style="background: transparent; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; padding: 4px; display: inline-flex; align-items: center;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             <p style="font-size: 0.86rem; color: var(--text-muted); margin-bottom: 14px;" id="editPriceSubtitle">
                 Вкажіть точний заробіток / фінальну вартість замовлення:
@@ -2249,7 +2250,7 @@
 
     <!-- 5. Спливаючий тост підтвердження дій -->
     <div id="actionToast" style="position: fixed; bottom: 28px; right: 28px; z-index: 2500; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 16px; padding: 16px 22px; box-shadow: 0 16px 40px rgba(0,0,0,0.35); display: none; align-items: center; gap: 14px; max-width: 440px; transform: translateY(40px); opacity: 0; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;">
-        <div id="toastIcon" style="font-size: 1.6rem; flex-shrink: 0;">✨</div>
+        <div id="toastIcon" style="font-size: 1.6rem; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: #10b981;"><svg class="loop-svg-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg></div>
         <div>
             <div id="toastTitle" style="font-weight: 800; font-size: 0.95rem; color: var(--text-main); margin-bottom: 2px;">Успішно</div>
             <div id="toastMessage" style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.4;">Дію виконано!</div>
@@ -2667,12 +2668,12 @@
                             const isBrandUser = meData.isPremium && (meData.premiumPlan === 'brand_annual' || meData.premiumPlan === 'brand' || meData.premiumPlan === 'vip_lifetime');
                             if (brandBadge) {
                                 if (isBrandUser) {
-                                    brandBadge.innerHTML = '💎 Верифікований Бренд';
+                                    brandBadge.innerHTML = (window.LoopIcons ? LoopIcons.svg('gem', { size: 14, color: '#10b981' }) + ' ' : '') + 'Верифікований Бренд';
                                     brandBadge.style.background = 'linear-gradient(135deg, rgba(37,99,235,0.2), rgba(16,185,129,0.2))';
                                     brandBadge.style.color = '#10b981';
                                     brandBadge.style.border = '1px solid rgba(16,185,129,0.4)';
                                 } else if (meData.isPremium) {
-                                    brandBadge.innerHTML = '👑 PRO Партнер';
+                                    brandBadge.innerHTML = (window.LoopIcons ? LoopIcons.svg('crown', { size: 14, color: '#f59e0b' }) + ' ' : '') + 'PRO Партнер';
                                     brandBadge.style.color = '#f59e0b';
                                 } else {
                                     brandBadge.innerHTML = 'Особистий акаунт';
@@ -2752,7 +2753,7 @@
                             const emailActionBox = document.getElementById('emailVerificationActionBox');
                             if (meData.isEmailVerified) {
                                 if (emailBadge) {
-                                    emailBadge.innerText = '✅ Підтверджено';
+                                    emailBadge.innerHTML = (window.LoopIcons ? LoopIcons.svg('checkCircle', { size: 13, color: '#10b981' }) + ' ' : '') + 'Підтверджено';
                                     emailBadge.style.background = 'rgba(16, 185, 129, 0.15)';
                                     emailBadge.style.color = '#10b981';
                                 }
@@ -2924,7 +2925,7 @@
                         const res = await fetch(`/api/reviews/user/${userId}`);
                         const data = await res.json();
 
-                        const avg = (data.averageRating && !isNaN(data.averageRating)) ? Number(data.averageRating).toFixed(1) : '5.0'; document.getElementById('sidebarAvgRating').innerText = avg + ' ★';
+                        const avg = (data.averageRating && !isNaN(data.averageRating)) ? Number(data.averageRating).toFixed(1) : '5.0'; document.getElementById('sidebarAvgRating').innerHTML = avg + ' ' + (window.LoopIcons ? LoopIcons.svg('starFilled', { size: 14, color: '#f59e0b' }) : '');
                         document.getElementById('sidebarTotalReviews').innerText = data.totalReviews;
                         document.getElementById('sidebarStars').innerHTML = renderStars(data.averageRating);
 
@@ -3046,7 +3047,7 @@
                     }
 
                     if (typeof LoopToast !== 'undefined') {
-                        LoopToast.success(isFav ? "Видалено з обраного" : "Додано в обране ❤️");
+                        LoopToast.success(isFav ? "Видалено з обраного" : "Додано в обране");
                     }
 
                     const curToken = localStorage.getItem('loopToken') || localStorage.getItem('token') || token;
@@ -3185,7 +3186,7 @@
                                 <img src="${ytThumb}" class="card-img" alt="${escapeHtml(item.title)}" onerror="this.onerror=null; this.src='/images/placeholder.svg';">
                                 <span class="card-badge-video" title="YouTube відео"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> YouTube</span>
                                 <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;">
-                                    <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem;">▶</div>
+                                    <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white;"><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
                                 </div>
                             `;
                         }
@@ -3196,7 +3197,7 @@
                                     <video src="${escapeHtml(videoUrl)}#t=0.5" preload="metadata" muted playsinline style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none;"></video>
                                     <span class="card-badge-video" title="Відеоогляд"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Відео</span>
                                     <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;">
-                                        <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem;">▶</div>
+                                        <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white;"><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
                                     </div>
                                 </div>
                             `;
@@ -3209,7 +3210,7 @@
                                     <iframe src="https://www.instagram.com/p/${igMatch[1]}/embed/" style="position: absolute; top: -64px; left: -2px; width: calc(100% + 4px); height: calc(100% + 160px); border: none; pointer-events: none;" scrolling="no" frameborder="0" loading="lazy"></iframe>
                                     <span class="card-badge-video" title="Instagram Reel"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg> Reel</span>
                                     <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 2;">
-                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">▶</div>
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.4);"><svg class="loop-svg-icon" width="17" height="17" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
                                     </div>
                                 </div>
                             `;
@@ -3244,7 +3245,7 @@
                         <div class="card">
                             <div class="card-img-wrapper" onclick="window.location.href='/${item.status === 'Draft' ? 'edit' : 'details'}.html?id=${item.code || item.id}'">
                                 ${getProfileCardMediaHtml(item)}
-                                ${item.status === 'Draft' ? '<span style="position:absolute; top:10px; left:10px; z-index:4; background:rgba(245,158,11,0.94); color:#fff; font-size:0.72rem; font-weight:800; padding:4px 9px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.28);">📝 Чернетка • додайте фото</span>' : ''}
+                                ${item.status === 'Draft' ? '<span style="position:absolute; top:10px; left:10px; z-index:4; background:rgba(245,158,11,0.94); color:#fff; font-size:0.72rem; font-weight:800; padding:4px 9px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.28); display:inline-flex; align-items:center; gap:4px;">' + (window.LoopIcons ? LoopIcons.svg('edit', 12) + ' ' : '') + 'Чернетка • додайте фото</span>' : ''}
                             </div>
                             <div class="card-content">
                                 <div class="card-title">${item.title}</div>
@@ -3281,7 +3282,7 @@
                         if (paginationWrapper) paginationWrapper.style.display = 'none';
                         container.innerHTML = `
                             <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: var(--surface); border: 1.5px dashed var(--border-color); border-radius: 16px;">
-                                <div style="font-size: 2.4rem; margin-bottom: 10px;">❤️</div>
+                                <div style="margin-bottom: 12px; color: #ef4444;">${window.LoopIcons ? LoopIcons.svg('heart', 36) : ''}</div>
                                 <h4 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">Список обраного порожній</h4>
                                 <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 18px;">Тут зберігатимуться товари та послуги, які ви відзначили сердечком.</p>
                                 <a href="/index.html" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 0.9rem;">
@@ -3382,7 +3383,7 @@
         window.loadUserOrders = async function(subTab = 'purchases') {
             const list = document.getElementById('ordersList');
             if (!list) return;
-            list.innerHTML = '<p style="color: var(--text-muted); padding: 20px;">⏳ Завантаження замовлень...</p>';
+            list.innerHTML = `<p style="color: var(--text-muted); padding: 20px;">${window.LoopIcons ? LoopIcons.svg('clock', { size: 15, color: '#38bdf8' }) + ' ' : ''}Завантаження замовлень...</p>`;
 
             const endpoint = subTab === 'sales' ? '/api/orders/my-sales' : '/api/orders/my-purchases';
 
@@ -3407,7 +3408,7 @@
                         <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
                             <p style="margin-bottom: 12px;">Не вдалося завантажити список замовлень.</p>
                             <button class="btn btn-secondary" onclick="loadUserOrders('${subTab}')" style="padding: 8px 18px; border-radius: 8px; cursor: pointer;">
-                                🔄 Спробувати знову
+                                ${window.LoopIcons ? LoopIcons.svg('refresh', 14) + ' ' : ''}Спробувати знову
                             </button>
                         </div>
                     `;
@@ -3422,7 +3423,7 @@
                     <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
                         <p style="color: #ef4444; margin-bottom: 12px;">Помилка завантаження замовлень із сервера.</p>
                         <button class="btn btn-secondary" onclick="loadUserOrders('${subTab}')" style="padding: 8px 18px; border-radius: 8px; cursor: pointer;">
-                            🔄 Оновити
+                            ${window.LoopIcons ? LoopIcons.svg('refresh', 14) + ' ' : ''}Оновити
                         </button>
                     </div>
                 `;
@@ -3436,7 +3437,7 @@
             if (!orders || orders.length === 0) {
                 list.innerHTML = `
                     <div style="text-align: center; padding: 40px 20px; background: var(--surface); border: 1.5px dashed var(--border-color); border-radius: 16px;">
-                        <div style="font-size: 2.5rem; margin-bottom: 10px;">${subTab === 'sales' ? '📋' : '🛍'}</div>
+                        <div style="margin-bottom: 10px; color: #10b981;">${window.LoopIcons ? LoopIcons.svg(subTab === 'sales' ? 'clipboard' : 'shoppingBag', 36) : ''}</div>
                         <h3 style="font-size: 1.15rem; color: var(--text-main); margin-bottom: 6px;">
                             ${subTab === 'sales' ? 'У вас ще немає проданих товарів чи послуг' : 'Ви ще не робили замовлень'}
                         </h3>
@@ -3491,9 +3492,9 @@
                                     <div><strong style="color: var(--text-main); font-weight: 600;">${o.isService ? 'Обсяг робіт:' : 'Відділення:'}</strong> ${escapeHtml(o.deliveryBranch)}</div>
                                     <div><strong style="color: var(--text-main); font-weight: 600;">Оплата:</strong> ${escapeHtml(o.paymentMethod)}</div>
                                     ${o.comment ? `<div><strong style="color: var(--text-main); font-weight: 600;">Коментар:</strong> <em>${escapeHtml(o.comment)}</em></div>` : ''}
-                                    ${o.trackingNumber ? `<div><strong>🏷 Номер ТТН:</strong> <code style="background: var(--bg-color); padding: 2px 6px; border-radius: 4px; font-weight: bold;">${o.trackingNumber}</code> <button type="button" onclick="trackNovaPoshtaTtn('${o.trackingNumber}')" style="margin-left: 6px; padding: 2px 8px; font-size: 0.72rem; font-weight: 700; border-radius: 6px; border: 1px solid #ef4444; background: rgba(239,68,68,0.1); color: #ef4444; cursor: pointer;">📦 Відстежити ТТН</button></div>` : 
+                                    ${o.trackingNumber ? `<div><strong>${window.LoopIcons ? LoopIcons.svg('tag', { size: 13, color: '#38bdf8' }) + ' ' : ''}Номер ТТН:</strong> <code style="background: var(--bg-color); padding: 2px 6px; border-radius: 4px; font-weight: bold;">${o.trackingNumber}</code> <button type="button" onclick="trackNovaPoshtaTtn('${o.trackingNumber}')" style="margin-left: 6px; padding: 2px 8px; font-size: 0.72rem; font-weight: 700; border-radius: 6px; border: 1px solid #ef4444; background: rgba(239,68,68,0.1); color: #ef4444; cursor: pointer;">${window.LoopIcons ? LoopIcons.svg('package', 12) + ' ' : ''}Відстежити ТТН</button></div>` : 
                                       ((o.deliveryBranch && (o.deliveryBranch.includes('зустріч') || o.deliveryBranch.includes('Самовивіз'))) || (o.paymentMethod && o.paymentMethod.includes('зустрічі'))) ? 
-                                      `<div style="color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 0.8rem; background: rgba(16,185,129,0.1); padding: 2px 8px; border-radius: 6px;">🤝 Особиста зустріч (ТТН не потрібна)</div>` : ''}
+                                      `<div style="color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 0.8rem; background: rgba(16,185,129,0.1); padding: 2px 8px; border-radius: 6px;">${window.LoopIcons ? LoopIcons.svg('users', { size: 13, color: '#10b981' }) + ' ' : ''}Особиста зустріч (ТТН не потрібна)</div>` : ''}
                                 </div>
                             </div>
 
@@ -3504,7 +3505,7 @@
                                         <span>${o.totalPrice} ₴</span>
                                         ${subTab === 'sales' ? `
                                             <button type="button" onclick="openEditPriceModal(${o.id}, ${o.totalPrice})" title="Змінити суму" style="background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 1px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">
-                                                ✏️
+                                                ${window.LoopIcons ? LoopIcons.svg('pencil', 12) : 'Ред.'}
                                             </button>
                                         ` : ''}
                                     </div>
@@ -3524,10 +3525,10 @@
                             ${subTab === 'sales' ? `
                                 ${(o.status === 'Pending' || o.status === 'PendingConfirmation') ? `
                                     <button type="button" onclick="openGeneralStatusConfirm(${o.id}, 'Confirmed', '${o.orderCode || ""}')" style="padding: 8px 16px; background: var(--primary-light); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
-                                        ✓ Підтвердити
+                                        ${window.LoopIcons ? LoopIcons.svg('check', 14) + ' ' : ''}Підтвердити
                                     </button>
                                     <button type="button" onclick="openGeneralStatusConfirm(${o.id}, 'Cancelled', '${o.orderCode || ""}')" style="padding: 8px 16px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
-                                        ✕ Відхилити
+                                        ${window.LoopIcons ? LoopIcons.svg('x', 14) + ' ' : ''}Відхилити
                                     </button>
                                 ` : ''}
                                 ${o.status === 'Confirmed' ? `
@@ -3538,36 +3539,36 @@
                                         if (isPickup) {
                                             return `
                                                 <button type="button" onclick="confirmInPersonHandover(${o.id}, '${o.orderCode || ""}', ${o.totalPrice})" style="padding: 8px 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-weight: 800; font-size: 0.86rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(16,185,129,0.3); display: inline-flex; align-items: center; gap: 6px;">
-                                                    🤝 Підтвердити передачу (Зустріч)
+                                                    ${window.LoopIcons ? LoopIcons.svg('checkCircle', 14) + ' ' : ''}Підтвердити передачу (Зустріч)
                                                 </button>
                                             `;
                                         }
                                         return `
                                             <button type="button" onclick="openShipOrderModal(${o.id}, ${o.isService}, ${o.totalPrice}, '${o.orderCode || ""}')" style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
-                                                ${o.isService ? `✅ Позначити як виконано (+${o.totalPrice} ₴)` : '🚚 Вказати ТТН / Відправлено'}
+                                                ${o.isService ? `${window.LoopIcons ? LoopIcons.svg('checkCircle', 14) + ' ' : ''}Позначити як виконано (+${o.totalPrice} ₴)` : `${window.LoopIcons ? LoopIcons.svg('truck', 14) + ' ' : ''}Вказати ТТН / Відправлено`}
                                             </button>
                                         `;
                                     })()}
                                     <button type="button" onclick="openGeneralStatusConfirm(${o.id}, 'Cancelled', '${o.orderCode || ""}')" style="padding: 8px 16px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
-                                        ✕ Скасувати
+                                        ${window.LoopIcons ? LoopIcons.svg('x', 14) + ' ' : ''}Скасувати
                                     </button>
                                 ` : ''}
                                 <a href="/messages.html?seller=${o.buyerId}&item=${o.listingId}" style="text-decoration: none; padding: 8px 16px; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; font-weight: 700; font-size: 0.86rem; display: inline-flex; align-items: center; gap: 6px;">
-                                    💬 Чат з покупцем
+                                    ${window.LoopIcons ? LoopIcons.svg('chat', 14) + ' ' : ''}Чат з покупцем
                                 </a>
                             ` : `
                                 ${(o.status === 'Pending' || o.status === 'PendingConfirmation') ? `
                                     <button type="button" onclick="openGeneralStatusConfirm(${o.id}, 'Cancelled', '${o.orderCode || ""}')" style="padding: 8px 16px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: 0.2s;">
-                                        ✕ Скасувати замовлення
+                                        ${window.LoopIcons ? LoopIcons.svg('x', 14) + ' ' : ''}Скасувати замовлення
                                     </button>
                                 ` : ''}
                                 ${o.status === 'Completed' ? `
                                     <button type="button" onclick="openOrderReviewModal(${o.sellerId}, ${o.listingId}, '${o.listingTitle.replace(/'/g, "\\'")}')" style="padding: 8px 16px; background: rgba(245, 158, 11, 0.14); color: #d97706; border: 1.5px solid rgba(245, 158, 11, 0.35); border-radius: 8px; font-weight: 800; font-size: 0.86rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;">
-                                        ⭐ Оцінити продавця
+                                        ${window.LoopIcons ? LoopIcons.svg('starFilled', { size: 14, color: '#f59e0b' }) + ' ' : ''}Оцінити продавця
                                     </button>
                                 ` : ''}
                                 <a href="/messages.html?seller=${o.sellerId}&item=${o.listingId}" style="text-decoration: none; padding: 8px 16px; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; font-weight: 700; font-size: 0.86rem; display: inline-flex; align-items: center; gap: 6px;">
-                                    💬 Чат з продавцем
+                                    ${window.LoopIcons ? LoopIcons.svg('chat', 14) + ' ' : ''}Чат з продавцем
                                 </a>
                             `}
                         </div>
@@ -3585,12 +3586,17 @@
         let currentEditPriceOrderId = null;
 
         // Показ спливаючого тосту
-        window.showToast = function(title, message, icon = '✨') {
+        window.showToast = function(title, message, icon = 'sparkles') {
             const toast = document.getElementById('actionToast');
             if (!toast) return;
             document.getElementById('toastTitle').innerText = title;
             document.getElementById('toastMessage').innerText = message;
-            document.getElementById('toastIcon').innerText = icon;
+            const toastIconEl = document.getElementById('toastIcon');
+            if (toastIconEl) {
+                const iconKey = { '✓': 'check', '✅': 'checkCircle', '✕': 'x', '❌': 'ban', '⚠️': 'alertTriangle', 'ℹ️': 'info', '🚀': 'rocket', '📦': 'package', '🎉': 'sparkles', '🤝': 'checkCircle', '💰': 'banknote', '✨': 'sparkles', success: 'checkCircle', error: 'ban', warning: 'alertTriangle', info: 'info' }[icon] || (/^[a-zA-Z]+$/.test(icon) ? icon : 'sparkles');
+                const iconColor = (iconKey === 'ban' || iconKey === 'x') ? '#ef4444' : (iconKey === 'alertTriangle' ? '#f59e0b' : (iconKey === 'info' ? '#38bdf8' : '#10b981'));
+                toastIconEl.innerHTML = window.LoopIcons ? LoopIcons.svg(iconKey, { size: 22, color: iconColor }) : '';
+            }
             toast.style.display = 'flex';
             requestAnimationFrame(() => {
                 toast.style.opacity = '1';
@@ -3672,7 +3678,7 @@
                 valBox.style.background = 'rgba(37,99,235,0.08)';
                 valBox.style.borderColor = 'rgba(37,99,235,0.25)';
                 valBox.style.color = 'var(--text-main)';
-                valBox.innerHTML = `ℹ️ Номер ТТН ${carrierName} повинен містити <strong>рівно ${reqLen} цифр</strong>. Введіть номер накладної для відправки товару.`;
+                valBox.innerHTML = `${window.LoopIcons ? LoopIcons.svg('info', { size: 15, color: '#38bdf8' }) + ' ' : ''}Номер ТТН ${carrierName} повинен містити <strong>рівно ${reqLen} цифр</strong>. Введіть номер накладної для відправки товару.`;
             } else if (digits.length === reqLen) {
                 counter.style.background = 'rgba(16, 185, 129, 0.15)';
                 counter.style.color = '#10b981';
@@ -3680,7 +3686,7 @@
                 valBox.style.background = 'rgba(16, 185, 129, 0.1)';
                 valBox.style.borderColor = 'rgba(16, 185, 129, 0.35)';
                 valBox.style.color = '#10b981';
-                valBox.innerHTML = `✅ Номер ТТН коректний (${reqLen} цифр). При підтвердженні покупцю в чат надійде повідомлення з ТТН: <strong>${digits}</strong>`;
+                valBox.innerHTML = `${window.LoopIcons ? LoopIcons.svg('checkCircle', { size: 15, color: '#10b981' }) + ' ' : ''}Номер ТТН коректний (${reqLen} цифр). При підтвердженні покупцю в чат надійде повідомлення з ТТН: <strong>${digits}</strong>`;
             } else if (digits.length < reqLen) {
                 counter.style.background = 'rgba(245, 158, 11, 0.15)';
                 counter.style.color = '#f59e0b';
@@ -3689,7 +3695,7 @@
                 valBox.style.borderColor = 'rgba(245, 158, 11, 0.35)';
                 valBox.style.color = '#f59e0b';
                 const left = reqLen - digits.length;
-                valBox.innerHTML = `⚠️ ТТН ${carrierName} повинна містити <strong>${reqLen} цифр</strong>. Зараз введено: <strong>${digits.length}</strong> (залишилось ввести ще ${left} цифр).`;
+                valBox.innerHTML = `${window.LoopIcons ? LoopIcons.svg('alertTriangle', { size: 15, color: '#f59e0b' }) + ' ' : ''}ТТН ${carrierName} повинна містити <strong>${reqLen} цифр</strong>. Зараз введено: <strong>${digits.length}</strong> (залишилось ввести ще ${left} цифр).`;
             } else {
                 counter.style.background = 'rgba(239, 68, 68, 0.15)';
                 counter.style.color = '#ef4444';
@@ -3698,7 +3704,7 @@
                 valBox.style.borderColor = 'rgba(239, 68, 68, 0.35)';
                 valBox.style.color = '#ef4444';
                 const excess = digits.length - reqLen;
-                valBox.innerHTML = `❌ Помилка: забагато цифр! ТТН ${carrierName} повинна складатись рівно з <strong>${reqLen} цифр</strong>. Ви ввели <strong>${digits.length}</strong> цифр (на ${excess} більше). Видаліть зайві цифри.`;
+                valBox.innerHTML = `${window.LoopIcons ? LoopIcons.svg('ban', { size: 15, color: '#ef4444' }) + ' ' : ''}Помилка: забагато цифр! ТТН ${carrierName} повинна складатись рівно з <strong>${reqLen} цифр</strong>. Ви ввели <strong>${digits.length}</strong> цифр (на ${excess} більше). Видаліть зайві цифри.`;
             }
         };
 
@@ -3739,21 +3745,21 @@
                     closeShippingModal();
                     loadUserOrders(currentOrderSubTab);
                     if (typeof loadMyServicesStats === 'function') loadMyServicesStats();
-                    showToast('📦 Відправлено!', `Замовлення ${currentShipOrderCode || ('#' + currentShipOrderId)} відправлено (${carrierTitle}). Покупцю надіслано ТТН (${digits}) в чат!`, '🚀');
+                    showToast('Відправлено!', `Замовлення ${currentShipOrderCode || ('#' + currentShipOrderId)} відправлено (${carrierTitle}). Покупцю надіслано ТТН (${digits}) в чат!`, 'rocket');
                 } else {
                     const data = await res.json();
                     const valBox = document.getElementById('shipValidationBox');
                     valBox.style.background = 'rgba(239, 68, 68, 0.1)';
                     valBox.style.borderColor = 'rgba(239, 68, 68, 0.35)';
                     valBox.style.color = '#ef4444';
-                    valBox.innerHTML = `❌ ${data.error || 'Не вдалося відправити замовлення'}`;
+                    valBox.innerHTML = `${window.LoopIcons ? LoopIcons.svg('ban', { size: 15, color: '#ef4444' }) + ' ' : ''}${data.error || 'Не вдалося відправити замовлення'}`;
                 }
             } catch(e) {
                 const valBox = document.getElementById('shipValidationBox');
                 valBox.style.background = 'rgba(239, 68, 68, 0.1)';
                 valBox.style.borderColor = 'rgba(239, 68, 68, 0.35)';
                 valBox.style.color = '#ef4444';
-                valBox.innerHTML = `❌ Помилка з'єднання з сервером`;
+                valBox.innerHTML = `${window.LoopIcons ? LoopIcons.svg('ban', { size: 15, color: '#ef4444' }) + ' ' : ''}Помилка з'єднання з сервером`;
             } finally {
                 btn.disabled = false;
                 btn.innerText = oldText;
@@ -3768,11 +3774,11 @@
             const originalText = btn.innerHTML;
             
             btn.disabled = true;
-            btn.innerHTML = '⏳ Створення ТТН у Новій Пошті...';
+            btn.innerHTML = `${window.LoopIcons ? LoopIcons.svg('clock', 15) + ' ' : ''}Створення ТТН у Новій Пошті...`;
             valBox.style.background = 'rgba(37,99,235,0.08)';
             valBox.style.borderColor = 'rgba(37,99,235,0.25)';
             valBox.style.color = 'var(--text-main)';
-            valBox.innerHTML = '🔄 Відправка запиту до API Нової Пошти...';
+            valBox.innerHTML = `${window.LoopIcons ? LoopIcons.svg('refresh', { size: 15, color: '#38bdf8' }) + ' ' : ''}Відправка запиту до API Нової Пошти...`;
 
             try {
                 const token = localStorage.getItem('loopToken');
@@ -3795,18 +3801,18 @@
                     closeShippingModal();
                     loadUserOrders(currentOrderSubTab);
                     if (typeof loadMyServicesStats === 'function') loadMyServicesStats();
-                    showToast('🎉 ТТН Створено!', `Накладну Нової Пошти №${data.ttnNumber} успішно сформовано! Замовлення позначено як відправлене.`, '📦');
+                    showToast('ТТН Створено!', `Накладну Нової Пошти №${data.ttnNumber} успішно сформовано! Замовлення позначено як відправлене.`, 'package');
                 } else {
                     valBox.style.background = 'rgba(239, 68, 68, 0.1)';
                     valBox.style.borderColor = 'rgba(239, 68, 68, 0.35)';
                     valBox.style.color = '#ef4444';
-                    valBox.innerHTML = `❌ Помилка створення ТТН: ${data.error || 'Перевірте адресу або введіть номер вручну'}`;
+                    valBox.innerHTML = `${window.LoopIcons ? LoopIcons.svg('ban', { size: 15, color: '#ef4444' }) + ' ' : ''}Помилка створення ТТН: ${data.error || 'Перевірте адресу або введіть номер вручну'}`;
                 }
             } catch (err) {
                 valBox.style.background = 'rgba(239, 68, 68, 0.1)';
                 valBox.style.borderColor = 'rgba(239, 68, 68, 0.35)';
                 valBox.style.color = '#ef4444';
-                valBox.innerHTML = `❌ Помилка зв'язку з API Нової Пошти`;
+                valBox.innerHTML = `${window.LoopIcons ? LoopIcons.svg('ban', { size: 15, color: '#ef4444' }) + ' ' : ''}Помилка зв'язку з API Нової Пошти`;
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = originalText;
@@ -3818,7 +3824,7 @@
             const codeText = orderCode ? ` (${orderCode})` : '';
             const confirmed = await LoopDialog.confirm(
                 `Ви зустрілися з покупцем особисто, передали товар та отримали оплату (${price} ₴)?\nНомер ТТН пошти не потрібен. Замовлення буде позначено як «Завершено».`,
-                `🤝 Підтвердження передачі товару${codeText}`
+                `Підтвердження передачі товару${codeText}`
             );
             if (!confirmed) return;
 
@@ -3833,15 +3839,15 @@
                 });
 
                 if (res.ok) {
-                    showToast('🤝 Угода успішно завершена!', 'Товар передано особисто покупцю. Замовлення закрито!', '🎉');
+                    showToast('Угода успішно завершена!', 'Товар передано особисто покупцю. Замовлення закрито!', 'checkCircle');
                     loadUserOrders(currentOrderSubTab);
                     if (typeof loadMyServicesStats === 'function') loadMyServicesStats();
                 } else {
                     const err = await res.json().catch(() => ({}));
-                    showToast('Помилка', err.error || 'Не вдалося завершити замовлення', '❌');
+                    showToast('Помилка', err.error || 'Не вдалося завершити замовлення', 'ban');
                 }
             } catch(e) {
-                showToast('Помилка', 'Збій мережі', '❌');
+                showToast('Помилка', 'Збій мережі', 'ban');
             }
         };
 
@@ -3852,7 +3858,7 @@
             if (!modal) return;
             
             titleEl.innerText = `ТТН: ${ttn}`;
-            contentEl.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-muted);">⏳ Отримання інформації від сервера Нової Пошти...</div>`;
+            contentEl.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-muted);">${window.LoopIcons ? LoopIcons.svg('clock', { size: 15, color: '#38bdf8' }) + ' ' : ''}Отримання інформації від сервера Нової Пошти...</div>`;
             modal.classList.add('active');
             
             try {
@@ -3871,11 +3877,11 @@
                             <div style="font-size: 1.05rem; font-weight: 800; color: var(--text-main);">${data.status || 'Інформація оновлюється'}</div>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: var(--text-main);">
-                            ${data.citySender ? `<div><strong>📍 Звідки:</strong> ${data.citySender}</div>` : ''}
-                            ${data.cityRecipient ? `<div><strong>🏁 Куди:</strong> ${data.cityRecipient}${data.warehouseRecipient ? ` (${data.warehouseRecipient})` : ''}</div>` : ''}
-                            ${data.scheduledDeliveryDate ? `<div><strong>📅 Очікувана доставка:</strong> ${data.scheduledDeliveryDate}</div>` : ''}
-                            ${data.actualDeliveryDate ? `<div><strong>✅ Фактично доставлено:</strong> ${data.actualDeliveryDate}</div>` : ''}
-                            ${data.documentCost ? `<div><strong>💰 Вартість доставки:</strong> ${data.documentCost} ₴</div>` : ''}
+                            ${data.citySender ? `<div><strong>${window.LoopIcons ? LoopIcons.svg('mapPin', { size: 14, color: '#ef4444' }) + ' ' : ''}Звідки:</strong> ${data.citySender}</div>` : ''}
+                            ${data.cityRecipient ? `<div><strong>${window.LoopIcons ? LoopIcons.svg('flag', { size: 14, color: '#10b981' }) + ' ' : ''}Куди:</strong> ${data.cityRecipient}${data.warehouseRecipient ? ` (${data.warehouseRecipient})` : ''}</div>` : ''}
+                            ${data.scheduledDeliveryDate ? `<div><strong>${window.LoopIcons ? LoopIcons.svg('calendar', { size: 14, color: '#38bdf8' }) + ' ' : ''}Очікувана доставка:</strong> ${data.scheduledDeliveryDate}</div>` : ''}
+                            ${data.actualDeliveryDate ? `<div><strong>${window.LoopIcons ? LoopIcons.svg('checkCircle', { size: 14, color: '#10b981' }) + ' ' : ''}Фактично доставлено:</strong> ${data.actualDeliveryDate}</div>` : ''}
+                            ${data.documentCost ? `<div><strong>${window.LoopIcons ? LoopIcons.svg('banknote', { size: 14, color: '#10b981' }) + ' ' : ''}Вартість доставки:</strong> ${data.documentCost} ₴</div>` : ''}
                         </div>
                         <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color); text-align: right;">
                             <a href="https://tracking.novaposhta.ua/#/uk/cargo/${encodeURIComponent(ttn)}" target="_blank" rel="noopener noreferrer" style="font-size: 0.82rem; color: #3b82f6; text-decoration: underline; font-weight: 600;">
@@ -3887,12 +3893,12 @@
                     const errText = (data && data.error) ? data.error : 'Накладна ще не внесена до системи перевізника або статус оновлюється';
                     contentEl.innerHTML = `
                         <div style="padding: 16px; background: rgba(239,68,68,0.1); border-radius: 12px; border: 1px solid rgba(239,68,68,0.25); color: #ef4444; font-size: 0.9rem;">
-                            <div style="font-weight: 700; margin-bottom: 4px;">⚠️ Статус накладної</div>
+                            <div style="font-weight: 700; margin-bottom: 4px;">${window.LoopIcons ? LoopIcons.svg('alertTriangle', { size: 15, color: '#ef4444' }) + ' ' : ''}Статус накладної</div>
                             <div>${errText}</div>
                             <div style="margin-top: 12px; font-size: 0.82rem; color: var(--text-muted);">
                                 Ви можете перевірити статус безпосередньо в базі перевізника: <br>
                                 <a href="https://tracking.novaposhta.ua/#/uk/cargo/${encodeURIComponent(ttn)}" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: underline; font-weight: 700; display: inline-block; margin-top: 4px;">
-                                    Відкрити tracking.novaposhta.ua ↗
+                                    Відкрити tracking.novaposhta.ua ${window.LoopIcons ? LoopIcons.svg('externalLink', 13) : ''}
                                 </a>
                             </div>
                         </div>
@@ -3902,12 +3908,12 @@
                 console.error("Tracking error:", e);
                 contentEl.innerHTML = `
                     <div style="padding: 16px; background: rgba(239,68,68,0.1); border-radius: 12px; border: 1px solid rgba(239,68,68,0.25); color: #ef4444; font-size: 0.9rem;">
-                        <div style="font-weight: 700; margin-bottom: 4px;">⚠️ Тимчасова затримка перевізника</div>
+                        <div style="font-weight: 700; margin-bottom: 4px;">${window.LoopIcons ? LoopIcons.svg('alertTriangle', { size: 15, color: '#ef4444' }) + ' ' : ''}Тимчасова затримка перевізника</div>
                         <div>Не вдалося зв'язатися з API Нової Пошти для накладної ${ttn}.</div>
                         <div style="margin-top: 12px; font-size: 0.82rem; color: var(--text-muted);">
                             Перевірте накладно на сайті: <br>
                             <a href="https://tracking.novaposhta.ua/#/uk/cargo/${encodeURIComponent(ttn)}" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: underline; font-weight: 700; display: inline-block; margin-top: 4px;">
-                                Відкрити на сайті Нової Пошти ↗
+                                Відкрити на сайті Нової Пошти ${window.LoopIcons ? LoopIcons.svg('externalLink', 13) : ''}
                             </a>
                         </div>
                     </div>
@@ -3926,8 +3932,8 @@
             currentServiceOrderPrice = currentPrice;
             document.getElementById('serviceCompleteText').innerHTML = `
                 Позначити замовлення <strong>#${orderId}</strong> як виконане?<br><br>
-                💰 До вашого заробітку буде зараховано: <strong style="color: #10b981; font-size: 1.15rem;">+${currentPrice} ₴</strong>.<br>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">(Якщо сума змінилася, скасуйте та скористайтеся кнопкою ✏️ Змінити біля ціни).</span>
+                ${window.LoopIcons ? LoopIcons.svg('banknote', { size: 15, color: '#10b981' }) + ' ' : ''}До вашого заробітку буде зараховано: <strong style="color: #10b981; font-size: 1.15rem;">+${currentPrice} ₴</strong>.<br>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">(Якщо сума змінилася, скасуйте та скористайтеся кнопкою ${window.LoopIcons ? LoopIcons.svg('pencil', 12) + ' ' : ''}Змінити біля ціни).</span>
             `;
             document.getElementById('serviceCompleteModal').classList.add('active');
         };
@@ -3941,7 +3947,7 @@
             if (!currentServiceOrderId) return;
             const oid = currentServiceOrderId;
             closeServiceCompleteModal();
-            await executeOrderStatusUpdate(oid, 'Completed', null, '✅ Послугу виконано!', `Замовлення #${oid} успішно завершено! Заробіток зараховано.`);
+            await executeOrderStatusUpdate(oid, 'Completed', null, 'Послугу виконано!', `Замовлення #${oid} успішно завершено! Заробіток зараховано.`);
         };
 
         // 3. УНІВЕРСАЛЬНЕ ПІДТВЕРДЖЕННЯ (Confirmed / Cancelled)
@@ -3954,21 +3960,21 @@
             const btnEl = document.getElementById('generalConfirmBtnAction');
 
             if (newStatus === 'Confirmed') {
-                iconEl.innerText = '✓';
+                iconEl.innerHTML = window.LoopIcons ? LoopIcons.svg('checkCircle', { size: 36, color: '#10b981' }) : '';
                 iconEl.style.color = '#10b981';
                 titleEl.innerText = 'Підтвердити замовлення?';
                 msgEl.innerText = `Ви підтверджуєте замовлення ${dispCode}. Покупець отримає сповіщення.`;
-                btnEl.innerText = '✓ Підтвердити';
+                btnEl.innerHTML = (window.LoopIcons ? LoopIcons.svg('check', 15) + ' ' : '') + 'Підтвердити';
                 btnEl.style.background = '#10b981';
             } else if (newStatus === 'Cancelled') {
-                iconEl.innerText = '✕';
+                iconEl.innerHTML = window.LoopIcons ? LoopIcons.svg('ban', { size: 36, color: '#ef4444' }) : '';
                 iconEl.style.color = '#ef4444';
                 titleEl.innerText = 'Скасувати замовлення?';
                 msgEl.innerText = `Ви впевнені, що бажаєте скасувати замовлення ${dispCode}? Цю дію не можна скасувати.`;
-                btnEl.innerText = '✕ Скасувати замовлення';
+                btnEl.innerHTML = (window.LoopIcons ? LoopIcons.svg('x', 15) + ' ' : '') + 'Скасувати замовлення';
                 btnEl.style.background = '#ef4444';
             } else {
-                iconEl.innerText = '⚡';
+                iconEl.innerHTML = window.LoopIcons ? LoopIcons.svg('zap', { size: 36, color: '#2563eb' }) : '';
                 iconEl.style.color = '#2563eb';
                 titleEl.innerText = 'Зміна статусу';
                 msgEl.innerText = `Змінити статус замовлення ${dispCode} на '${newStatus}'?`;
@@ -3978,7 +3984,7 @@
 
             btnEl.onclick = async () => {
                 closeGeneralConfirmModal();
-                const successTitle = (newStatus === 'Confirmed') ? '✓ Підтверджено!' : '✕ Скасовано';
+                const successTitle = (newStatus === 'Confirmed') ? 'Підтверджено!' : 'Скасовано';
                 const successMsg = (newStatus === 'Confirmed') ? `Замовлення ${dispCode} підтверджено.` : `Замовлення ${dispCode} скасовано.`;
                 await executeOrderStatusUpdate(orderId, newStatus, null, successTitle, successMsg);
             };
@@ -4011,7 +4017,7 @@
             if (!currentEditPriceOrderId) return;
             const val = parseFloat(document.getElementById('editPriceInput').value);
             if (isNaN(val) || val < 0) {
-                showToast('Помилка', 'Введіть коректну суму від 0 грн', '⚠️');
+                showToast('Помилка', 'Введіть коректну суму від 0 грн', 'alertTriangle');
                 return;
             }
 
@@ -4031,13 +4037,13 @@
                 if (res.ok) {
                     loadUserOrders(currentOrderSubTab);
                     if (typeof loadMyServicesStats === 'function') loadMyServicesStats();
-                    showToast('Суму оновлено!', `Заробіток за замовленням #${oid} встановлено: ${val} ₴`, '💰');
+                    showToast('Суму оновлено!', `Заробіток за замовленням #${oid} встановлено: ${val} ₴`, 'banknote');
                 } else {
                     const data = await res.json();
-                    showToast('Помилка', data.error || 'Не вдалося змінити суму', '❌');
+                    showToast('Помилка', data.error || 'Не вдалося змінити суму', 'ban');
                 }
             } catch(e) {
-                showToast('Помилка', "Немає зв'язку з сервером", '❌');
+                showToast('Помилка', "Немає зв'язку з сервером", 'ban');
             }
         };
 
@@ -4056,13 +4062,13 @@
                 if (res.ok) {
                     loadUserOrders(currentOrderSubTab);
                     if (typeof loadMyServicesStats === 'function') loadMyServicesStats();
-                    showToast(toastTitle, toastMsg, (newStatus === 'Completed' || newStatus === 'Confirmed') ? '✅' : 'ℹ️');
+                    showToast(toastTitle, toastMsg, (newStatus === 'Completed' || newStatus === 'Confirmed') ? 'checkCircle' : 'info');
                 } else {
                     const data = await res.json();
-                    showToast('Помилка', data.error || 'Не вдалося оновити статус', '❌');
+                    showToast('Помилка', data.error || 'Не вдалося оновити статус', 'ban');
                 }
             } catch(e) {
-                showToast('Помилка', "Помилка зв'язку з сервером", '❌');
+                showToast('Помилка', "Помилка зв'язку з сервером", 'ban');
             }
         }
 
@@ -4202,13 +4208,13 @@
                                             ${item.title}
                                         </a>
                                         <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
-                                            ${item.isService ? '🛠 Послуга' : '📦 Товар'} • Статус: <b>${item.status}</b>
+                                            ${item.isService ? ((window.LoopIcons ? LoopIcons.svg('wrench', { size: 13, color: '#8b5cf6' }) + ' ' : '') + 'Послуга') : ((window.LoopIcons ? LoopIcons.svg('package', { size: 13, color: '#10b981' }) + ' ' : '') + 'Товар')} • Статус: <b>${item.status}</b>
                                         </div>
                                     </div>
                                 </div>
                                 <div style="text-align: right; flex-shrink: 0;">
                                     <div style="font-weight: 800; font-size: 0.95rem; color: #10b981;">${(item.price || 0).toLocaleString('uk-UA')} ₴</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted);">👁️ ${item.viewsCount || 0} переглядів</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">${window.LoopIcons ? LoopIcons.svg('eye', 13) + ' ' : ''}${item.viewsCount || 0} переглядів</div>
                                 </div>
                             </div>
                         `).join('');
@@ -4240,7 +4246,7 @@
                 if (!data.services || data.services.length === 0) {
                     wrapper.innerHTML = `
                         <div style="text-align: center; padding: 48px 20px; background: var(--surface); border-radius: 16px; border: 1.5px dashed var(--border-color);">
-                            <div style="font-size: 2.5rem; margin-bottom: 12px;">🛠</div>
+                            <div style="margin-bottom: 12px; color: #8b5cf6;">${window.LoopIcons ? LoopIcons.svg('wrench', 36) : ''}</div>
                             <h4 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 6px; color: var(--text-main);">У вас поки немає розміщених послуг</h4>
                             <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 500px; margin: 0 auto 18px auto;">
                                 Пропонуйте дизайн, прибирання, переїзди або ремонт техніки іншим користувачам платформи LoopMarket!
@@ -4266,7 +4272,7 @@
                                         <img src="${img}" style="width: 70px; height: 70px; border-radius: 12px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border-color);" onerror="this.onerror=null; this.src='/images/placeholder-service.svg';">
                                         <div style="min-width: 0;">
                                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                                <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #2563eb; background: rgba(37,99,235,0.1); padding: 2px 8px; border-radius: 6px;">🛠 Послуга</span>
+                                                <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #2563eb; background: rgba(37,99,235,0.1); padding: 2px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">${window.LoopIcons ? LoopIcons.svg('wrench', 12) : ''} Послуга</span>
                                                 <span style="font-size: 0.75rem; color: var(--text-muted); background: var(--bg-color); padding: 2px 8px; border-radius: 6px;">${s.condition || 'Погодинно'}</span>
                                             </div>
                                             <h4 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 380px;">${s.title}</h4>
@@ -4320,7 +4326,7 @@
                 return;
             }
 
-            const confirmMsg = `Подати заявку на верифікацію офіційного статусу бренду «${brandName}»?\n\nАдміністрація LoopMarket розгляне ваші дані та активує бейдж 💎 Офіційний Бренд.`;
+            const confirmMsg = `Подати заявку на верифікацію офіційного статусу бренду «${brandName}»?\n\nАдміністрація LoopMarket розгляне ваші дані та активує бейдж «Офіційний Бренд».`;
             let ok = false;
             if (typeof LoopDialog !== 'undefined' && LoopDialog.confirm) {
                 ok = await LoopDialog.confirm(confirmMsg, { title: "Верифікація бренду", confirmText: "Подати заявку" });
@@ -4351,9 +4357,9 @@
                 }).catch(() => {});
 
                 if (typeof LoopToast !== 'undefined') {
-                    LoopToast.success("Заявку на отримання статусу «💎 Офіційний Бренд» успішно надіслано адміністратору!");
+                    LoopToast.success("Заявку на отримання статусу «Офіційний Бренд» успішно надіслано адміністратору!");
                 } else {
-                    alert("Заявку на отримання статусу «💎 Офіційний Бренд» успішно надіслано адміністратору!");
+                    alert("Заявку на отримання статусу «Офіційний Бренд» успішно надіслано адміністратору!");
                 }
             } catch(e) {
                 alert("Дякуємо! Ваша заявка збережена та передана модераторам.");
@@ -4386,9 +4392,9 @@
         })();
     </script>
     <!-- Realtime In-App Push Notifications -->
-    <script src="/js/push-notifications.js"></script>
-    <script src="/js/responsive-nav.js?v=3.5" defer></script>
-    <script src="/js/loop-dialogs.js"></script>
-    <script src="/js/cookie-consent.js"></script>
+    <script src="/js/push-notifications.js?v=1.1"></script>
+    <script src="/js/responsive-nav.js?v=3.6" defer></script>
+    <script src="/js/loop-dialogs.js?v=1.1"></script>
+    <script src="/js/cookie-consent.js?v=1.1"></script>
 </body>
 </html>

@@ -6,6 +6,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="/js/loop-icons.js?v=1.0"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -734,7 +735,7 @@
         }
 
     </style>
-    <link rel="stylesheet" href="/css/global.css?v=5.7">
+    <link rel="stylesheet" href="/css/global.css?v=5.8">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
 </head>
 <body>
@@ -776,7 +777,7 @@
                     <span class="notif-badge" id="notifBadge" style="display: none;"></span>
                 </button>
 
-                <button class="btn-icon" id="themeToggleBtn" onclick="toggleTheme()" title="Змінити тему">🌙</button>
+                <button class="btn-icon" id="themeToggleBtn" title="Змінити тему"><span id="themeIcon" style="display:inline-flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span></button>
 
                 <a href="/create.html" class="btn-create-top">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
@@ -804,7 +805,7 @@
         <div class="creation-card">
             <h1 id="pageHeading">Редагувати оголошення</h1>
             <div id="draftEditBanner" style="display: none; background: rgba(245, 158, 11, 0.12); border: 1.5px solid rgba(245, 158, 11, 0.5); color: #f59e0b; padding: 13px 16px; border-radius: 12px; margin-bottom: 18px; font-size: 0.9rem; font-weight: 700; line-height: 1.45;">
-                📝 <b>Це чернетка оголошення (очікує фото або відео).</b> Завантажте щонайменше 1 фотографію або додайте відео та натисніть «Додати медіа та опублікувати» — товар одразу з'явиться в каталозі!
+                <svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg> <b>Це чернетка оголошення (очікує фото або відео).</b> Завантажте щонайменше 1 фотографію або додайте відео та натисніть «Додати медіа та опублікувати» — товар одразу з'явиться в каталозі!
             </div>
 
             <!-- Перемикач типу оголошення -->
@@ -812,11 +813,11 @@
                 <label style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; color: var(--text-main);">Тип оголошення:</label>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <button type="button" id="btnTypeProduct" onclick="setEditListingType('product')" style="padding: 12px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; border: 2px solid var(--primary-light); background: var(--primary-soft); color: var(--primary-light); display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;">
-                        📦 Фізичний товар
+                        <svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg> Фізичний товар
                     </button>
                     <button type="button" id="btnTypeService" onclick="setEditListingType('service')" style="padding: 12px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; border: 2px solid var(--border-color); background: var(--surface); color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                        🛠 Послуга або робота
+                        Послуга або робота
                     </button>
                 </div>
             </div>
@@ -844,17 +845,17 @@
                         <div class="form-group">
                             <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">Тип тарифікації</label>
                             <select id="serviceRateType" class="modern-input" onchange="onServiceRateTypeChanged()">
-                                <option value="hourly" selected>⏱ Погодинна оплата (грн / год)</option>
-                                <option value="fixed">🏷 Фіксована ціна за всю роботу (грн)</option>
-                                <option value="negotiated">🤝 За домовленістю / від базової суми</option>
+                                <option value="hourly" selected>Погодинна оплата (грн / год)</option>
+                                <option value="fixed">Фіксована ціна за всю роботу (грн)</option>
+                                <option value="negotiated">За домовленістю / від базової суми</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">Формат надання</label>
                             <select id="serviceFormat" class="modern-input" onchange="onServiceFormatChanged()">
-                                <option value="visit" selected>🚗 З виїздом за адресою клієнта</option>
-                                <option value="on_site">📍 У майстерні / в офісі виконавця</option>
-                                <option value="online">🌐 Онлайн / Дистанційно (Zoom, Telegram, Meet)</option>
+                                <option value="visit" selected>З виїздом за адресою клієнта</option>
+                                <option value="on_site">У майстерні / в офісі виконавця</option>
+                                <option value="online">Онлайн / Дистанційно (Zoom, Telegram, Meet)</option>
                             </select>
                         </div>
                     </div>
@@ -862,7 +863,7 @@
                     <!-- Швидкий перемикач: Працюю тільки онлайн -->
                     <div style="display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 10px 14px; background: rgba(37,99,235,0.08); border-radius: 10px; border: 1px solid rgba(37,99,235,0.2);">
                         <input type="checkbox" id="serviceIsOnlineOnly" onchange="toggleOnlineMode(this.checked)" style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer; margin: 0;">
-                        <label for="serviceIsOnlineOnly" style="margin: 0; font-weight: 700; font-size: 0.88rem; color: #2563eb; cursor: pointer; user-select: none;">🌐 Надавати послугу виключно онлайн (дистанційно по всій Україні, приховати карту)</label>
+                        <label for="serviceIsOnlineOnly" style="margin: 0; font-weight: 700; font-size: 0.88rem; color: #2563eb; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 6px;"><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> Надавати послугу виключно онлайн (дистанційно по всій Україні, приховати карту)</label>
                     </div>
                 </div>
 
@@ -878,26 +879,26 @@
                 <div class="form-group"><label id="descriptionLabel">Детальний опис</label><textarea id="description" class="modern-input" required rows="4"></textarea></div>
                 <div class="form-group" id="locationGroup">
                     <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
-                        <label id="locationLabel" style="font-weight: 700; color: var(--text-main); margin: 0;">📍 Точна адреса на карті</label>
+                        <label id="locationLabel" style="font-weight: 700; color: var(--text-main); margin: 0; display: inline-flex; align-items: center; gap: 6px;"><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Точна адреса на карті</label>
                         <span id="mapHintBadge" style="font-size: 0.8rem; color: var(--primary-light); font-weight: 700;">OpenStreetMap інтерактивна мітка</span>
                     </div>
 
                     <div id="mapWrapper">
                         <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                            <input type="text" id="mapSearchInput" placeholder="🔍 Введіть вулицю та номер будинку (наприклад: Соборна 15, Кременчук)" class="modern-input" style="flex: 1; margin: 0;" onkeydown="if(event.key==='Enter'){event.preventDefault();searchAddressOnMap();}">
+                            <input type="text" id="mapSearchInput" placeholder="Введіть вулицю та номер будинку (наприклад: Соборна 15, Кременчук)" class="modern-input" style="flex: 1; margin: 0;" onkeydown="if(event.key==='Enter'){event.preventDefault();searchAddressOnMap();}">
                             <button type="button" onclick="searchAddressOnMap()" class="btn-outline" style="white-space: nowrap; font-weight: 700; padding: 0 16px; border-radius: 8px; cursor: pointer; background: var(--surface); color: var(--text-main); border: 1.5px solid var(--border-color); transition: 0.2s;">Знайти на карті</button>
-                            <button type="button" onclick="locateUserPosition()" title="Моє місцезнаходження" class="btn-outline" style="padding: 0 14px; font-size: 1.1rem; border-radius: 8px; cursor: pointer; background: var(--surface); border: 1.5px solid var(--border-color); transition: 0.2s;">📍</button>
+                            <button type="button" onclick="locateUserPosition()" title="Моє місцезнаходження" class="btn-outline" style="padding: 0 14px; border-radius: 8px; cursor: pointer; background: var(--surface); border: 1.5px solid var(--border-color); transition: 0.2s; display: inline-flex; align-items: center; justify-content: center;"><svg class="loop-svg-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></button>
                         </div>
                         <div id="map" style="height: 250px; border-radius: 12px; border: 2px solid var(--border-color); margin-bottom: 8px; z-index: 1;"></div>
                     </div>
 
                     <div id="onlineNoticeBox" style="display: none; padding: 14px 18px; background: rgba(37,99,235,0.08); border: 1.5px dashed #2563eb; border-radius: 12px; margin-bottom: 10px; color: #1d4ed8; font-size: 0.9rem; line-height: 1.4;">
-                        🌐 <strong>Дистанційний формат:</strong> Фізична адреса для цієї послуги не потрібна. Клієнти зможуть оформити замовлення онлайн з будь-якого куточка України.
+                        <svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> <strong>Дистанційний формат:</strong> Фізична адреса для цієї послуги не потрібна. Клієнти зможуть оформити замовлення онлайн з будь-якого куточка України.
                     </div>
 
                     <input type="text" id="location" class="modern-input" required placeholder="Точна адреса (вулиця, номер будинку, район або місто)">
                     <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">
-                        💡 <i>Клікніть або перетягніть мітку на карті для точного визначення, або впишіть назву вулиці та номер будинку вручну.</i>
+                        <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> <i>Клікніть або перетягніть мітку на карті для точного визначення, або впишіть назву вулиці та номер будинку вручну.</i>
                     </div>
                 </div>
 
@@ -923,14 +924,14 @@
                     <div class="video-upload-box" id="videoUploadBox" style="margin-top: 22px; padding: 18px 20px; background: rgba(37, 99, 235, 0.04); border: 1.5px dashed rgba(37, 99, 235, 0.35); border-radius: 14px;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="font-size: 1.3rem;">🎬</span>
+                                <span style="display: inline-flex; align-items: center;"><svg class="loop-svg-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/></svg></span>
                                 <div>
                                     <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-main); margin-bottom: 2px;">Відеопрезентація товару або бренду</h4>
                                     <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Оголошення з відео збирають у 3 рази більше замовлень та отримують пріоритет.</p>
                                 </div>
                             </div>
                             <span id="videoProStatusBadge" style="font-size: 0.74rem; font-weight: 800; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.22)); color: #d97706; padding: 5px 12px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.4); display: inline-flex; align-items: center; gap: 6px;">
-                                👑 Тільки для передплатників PRO
+                                <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg> Тільки для передплатників PRO
                             </span>
                         </div>
 
@@ -938,7 +939,7 @@
                         <div id="videoProLockBanner" style="display: none; background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.06) 100%); border: 1.5px solid rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
                             <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 240px;">
                                 <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: #fff; flex-shrink: 0; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);">
-                                    👑
+                                    <svg class="loop-svg-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg>
                                 </div>
                                 <div>
                                     <div style="font-weight: 800; font-size: 0.92rem; color: #d97706; margin-bottom: 2px;">
@@ -950,7 +951,7 @@
                                 </div>
                             </div>
                             <button type="button" onclick="openPremiumModal()" class="btn-pro-unlock" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; font-weight: 800; font-size: 0.85rem; padding: 10px 18px; border-radius: 10px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
-                                <span>👑 Отримати PRO</span>
+                                <span style="display: inline-flex; align-items: center; gap: 6px;"><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg> Отримати PRO</span>
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                             </button>
                         </div>
@@ -958,17 +959,17 @@
                         <!-- Video Mode Switcher -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
                             <button type="button" id="tabVideoFile" class="btn-video-tab active" onclick="switchVideoMode('file')">
-                                📁 Завантажити відеофайл (MP4 / WebM)
+                                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Завантажити відеофайл (MP4 / WebM)
                             </button>
                             <button type="button" id="tabVideoLink" class="btn-video-tab" onclick="switchVideoMode('link')">
-                                🔗 Посилання (Instagram / Reels / YouTube / TikTok)
+                                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Посилання (Instagram / Reels / YouTube / TikTok)
                             </button>
                         </div>
 
                         <div id="videoFileModeBox">
                             <input type="file" id="videoFileInput" accept="video/mp4,video/webm,video/quicktime,video/x-matroska" style="display: none;" onchange="handleVideoFileSelect(this.files[0])">
                             <div class="video-dropzone" id="videoDropzone" onclick="if(!isUserPremium){ openPremiumModal(); } else { document.getElementById('videoFileInput').click(); }">
-                                <div style="font-size: 1.6rem; margin-bottom: 4px;">📹</div>
+                                <div style="margin-bottom: 6px; display: flex; justify-content: center;"><svg class="loop-svg-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg></div>
                                 <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-main);">Виберіть або перетягніть відео сюди</div>
                                 <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 3px;">Підтримуються MP4, WebM, MOV, MKV (до 100 МБ)</div>
                             </div>
@@ -989,7 +990,7 @@
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Відео прикріплено
                                 </span>
                                 <button type="button" onclick="removeVideo()" style="background: none; border: none; color: #ef4444; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                                    🗑️ Видалити відео
+                                    <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg> Видалити відео
                                 </button>
                             </div>
                         </div>
@@ -1267,7 +1268,7 @@
                 if (locInput && locInput.value === 'Онлайн / Дистанційно') {
                     locInput.value = window.savedPhysicalLocation || 'Кременчук';
                 }
-                if (locLabel) locLabel.innerText = '📍 Точна адреса на карті';
+                if (locLabel) locLabel.innerHTML = '<svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Точна адреса на карті';
                 setTimeout(() => { if (map) map.invalidateSize(); }, 250);
             }
         };
@@ -1347,7 +1348,7 @@
                     const categories = await res.json();
                     const select = document.getElementById('categoryId');
                     if (select) {
-                        select.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                        select.innerHTML = categories.map(c => `<option value="${c.id}">${escapeHtml(window.LoopIcons ? window.LoopIcons.stripEmojis(c.name) : c.name)}</option>`).join('');
                     }
                 }
             } catch (e) {
@@ -1389,7 +1390,7 @@
                     statusBadge.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.22))';
                     statusBadge.style.color = '#059669';
                     statusBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-                    statusBadge.innerHTML = '👑 PRO-продавець: Додавання відео активне';
+                    statusBadge.innerHTML = '<svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg> PRO-продавець: Додавання відео активне';
                 }
             } else {
                 if (lockBanner) lockBanner.style.display = 'flex';
@@ -1397,7 +1398,7 @@
                     statusBadge.style.background = 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.22))';
                     statusBadge.style.color = '#d97706';
                     statusBadge.style.borderColor = 'rgba(245, 158, 11, 0.4)';
-                    statusBadge.innerHTML = '👑 Тільки для передплатників PRO';
+                    statusBadge.innerHTML = '<svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg> Тільки для передплатників PRO';
                 }
             }
         }
@@ -1430,7 +1431,7 @@
                     cardAnnual.style.borderColor = 'var(--border-color)';
                     cardAnnual.style.background = 'var(--bg-color)';
                 }
-                if (btn) btn.innerHTML = '<span>👑 Оплатити 199 ₴ та активувати PRO</span>';
+                if (btn) btn.innerHTML = '<span style="display: inline-flex; align-items: center; gap: 6px;"><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg> Оплатити 199 ₴ та активувати PRO</span>';
             } else {
                 if (cardAnnual) {
                     cardAnnual.style.borderColor = '#10b981';
@@ -1440,7 +1441,7 @@
                     cardMonthly.style.borderColor = 'var(--border-color)';
                     cardMonthly.style.background = 'var(--bg-color)';
                 }
-                if (btn) btn.innerHTML = '<span>💎 Оплатити 1490 ₴ та активувати Бренд</span>';
+                if (btn) btn.innerHTML = '<span style="display: inline-flex; align-items: center; gap: 6px;"><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg> Оплатити 1490 ₴ та активувати Бренд</span>';
             if (typeof updateModalOfficialData === 'function') {
                 updateModalOfficialData(price, planId === 'pro_monthly' ? 'Loop PRO' : 'Бренд & Бізнес');
             }
@@ -1468,7 +1469,7 @@
 
         async function submitPremiumCheckout() {
             if (!token) {
-                showToast('Авторизація', 'Будь ласка, увійдіть в акаунт для підключення PRO', '⚠️');
+                LoopToast.warning('Будь ласка, увійдіть в акаунт для підключення PRO');
                 setTimeout(() => window.location.href = '/login.html', 1500);
                 return;
             }
@@ -1477,7 +1478,7 @@
             const origHtml = btn ? btn.innerHTML : '';
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '⏳ Обробка платежу...';
+                btn.innerHTML = '<svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Обробка платежу...';
             }
 
             try {
@@ -1498,13 +1499,13 @@
                     isUserPremium = true;
                     closePremiumModal();
                     updatePremiumUI(data);
-                    showToast('🎉 Вітаємо з PRO!', 'Підписку успішно активовано! Тепер ви можете додавати відеопрезентації до своїх товарів.', '👑');
+                    LoopToast.success('Вітаємо з PRO! Підписку успішно активовано.');
                 } else {
                     const err = await res.json().catch(() => ({}));
-                    showToast('Помилка', err.error || 'Не вдалося активувати підписку', '❌');
+                    LoopToast.error(err.error || 'Не вдалося активувати підписку');
                 }
             } catch(e) {
-                showToast('Помилка', "Збій зв'язку з платіжним сервером", '❌');
+                LoopToast.error("Збій зв'язку з платіжним сервером");
             } finally {
                 if (btn) {
                     btn.disabled = false;
@@ -1824,7 +1825,7 @@
                     const db = document.getElementById('draftEditBanner');
                     if (db) db.style.display = 'block';
                     const saveBtn = document.querySelector('.btn-publish');
-                    if (saveBtn) saveBtn.innerText = '🚀 Додати медіа та опублікувати';
+                    if (saveBtn) saveBtn.innerHTML = (window.LoopIcons ? LoopIcons.svg('rocket', 16) + ' ' : '') + 'Додати медіа та опублікувати';
                 }
                 window.savedPhysicalLocation = item.location && !item.location.toLowerCase().includes('онлайн') ? item.location : 'Кременчук';
 
@@ -1856,7 +1857,7 @@
                             const banner = document.createElement('div');
                             banner.id = 'adminEditListingBanner';
                             banner.style.cssText = 'background: rgba(37,99,235,0.08); border: 1.5px solid #2563eb; color: #1d4ed8; padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 10px;';
-                            banner.innerHTML = `<span>🛡️</span> <div>Режим адміністратора: Ви редагуєте оголошення користувача <b>ID #${item.sellerId}</b> (Код товару: <code>${item.code || item.id}</code>). Ваші зміни мають найвищий пріоритет.</div>`;
+                            banner.innerHTML = `<span>${window.LoopIcons ? LoopIcons.svg('shieldCheck', { size: 18, color: '#38bdf8' }) : ''}</span> <div>Режим адміністратора: Ви редагуєте оголошення користувача <b>ID #${item.sellerId}</b> (Код товару: <code>${item.code || item.id}</code>). Ваші зміни мають найвищий пріоритет.</div>`;
                             heading.parentElement.insertBefore(banner, heading.nextSibling);
                         }
                     }
@@ -2070,14 +2071,15 @@
                 LoopToast.error(err.message || "Помилка збереження");
                 statusDiv.innerText = err.message;
                 statusDiv.style.color = "#ef4444";
-                btn.innerText = (window.currentListing && window.currentListing.status === 'Draft') ? "🚀 Додати медіа та опублікувати" : "Зберегти зміни";
+                btn.innerHTML = (window.currentListing && window.currentListing.status === 'Draft') ? ((window.LoopIcons ? LoopIcons.svg('rocket', 16) + ' ' : '') + 'Додати медіа та опублікувати') : 'Зберегти зміни';
                 btn.disabled = false;
             }
         });
     </script>
 
-    <script src="/js/responsive-nav.js?v=3.5" defer></script>
-    <script src="/js/loop-dialogs.js">
+    <script src="/js/responsive-nav.js?v=3.6" defer></script>
+    <script src="/js/loop-dialogs.js?v=1.1"></script>
+    <script>
         function switchPremiumPayTab(tab) {
             const tabs = ['mono', 'iban', 'demo'];
             tabs.forEach(t => {
@@ -2103,10 +2105,10 @@
             const iban = 'UA213052990000026007890123456';
             const fullText = `Отримувач: ФОП Маркетплейс LoopMarket\nЄДРПОУ: 3456789012\nIBAN: ${iban}\nБанк: АТ «Універсал Банк» (Monobank)\nПризначення: Оплата послуги доступу до тарифу Loop PRO`;
             navigator.clipboard.writeText(fullText).then(() => {
-                if (typeof showToast === 'function') {
-                    showToast('Скопійовано!', 'Офіційні реквізити IBAN скопійовано в буфер обміну', '📋');
+                if (window.LoopToast && typeof LoopToast.success === 'function') {
+                    LoopToast.success('Офіційні реквізити IBAN скопійовано в буфер обміну', 'Скопійовано!');
                 } else {
-                    alert('📋 Реквізити IBAN скопійовано в буфер обміну!');
+                    alert('Реквізити IBAN скопійовано в буфер обміну!');
                 }
             }).catch(() => {
                 alert('IBAN: ' + iban);
@@ -2153,7 +2155,7 @@
             <button type="button" onclick="closePremiumModal()" style="position: absolute; top: 18px; right: 18px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); border-radius: 50%; width: 34px; height: 34px; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
 
             <div style="text-align: center; margin-bottom: 22px;">
-                <div style="display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); font-size: 1.8rem; color: #fff; margin-bottom: 12px; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);">👑</div>
+                <div style="display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); font-size: 1.8rem; color: #fff; margin-bottom: 12px; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);"><svg class="loop-svg-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg></div>
                 <h2 style="font-size: 1.45rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">Підписка LoopMarket PRO</h2>
                 <p style="font-size: 0.88rem; color: var(--text-muted); max-width: 480px; margin: 0 auto;">Підвищуйте продажі та отримуйте в 3 рази більше дзвінків і повідомлень від зацікавлених клієнтів.</p>
             </div>
@@ -2170,10 +2172,10 @@
                         <span style="font-size: 0.78rem; color: var(--text-muted);">/ місяць</span>
                     </div>
                     <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.78rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 6px;">
-                        <li>🎬 Додавання відеооглядів</li>
-                        <li>👑 Золота плашка PRO у профілі</li>
-                        <li>📸 До 10 фотографій у картці</li>
-                        <li>🚀 Пріоритет у каталозі</li>
+                        <li><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="2"/><polygon points="23 7 16 12 23 17 23 7"/></svg> Додавання відеооглядів</li>
+                        <li><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg> Золота плашка PRO у профілі</li>
+                        <li><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg> До 10 фотографій у картці</li>
+                        <li><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Пріоритет у каталозі</li>
                     </ul>
                 </div>
 
@@ -2187,10 +2189,10 @@
                         <span style="font-size: 0.78rem; color: var(--text-muted);">/ рік (~124 ₴/міс)</span>
                     </div>
                     <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.78rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 6px;">
-                        <li>💎 Усі переваги Loop PRO</li>
-                        <li>🏷️ Офіційний статус «Бренд»</li>
-                        <li>📌 Закріплення в ТОПі товарів</li>
-                        <li>📊 Розширена аналітика продажів</li>
+                        <li><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg> Усі переваги Loop PRO</li>
+                        <li><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg> Офіційний статус «Бренд»</li>
+                        <li><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg> Закріплення в ТОПі товарів</li>
+                        <li><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Розширена аналітика продажів</li>
                     </ul>
                 </div>
             </div>
@@ -2200,13 +2202,13 @@
                 <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; display: block;">Оберіть зручний спосіб оплати:</label>
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px;">
                     <button type="button" id="payTabMono" class="btn-pro-tab active" onclick="switchPremiumPayTab('mono')" style="padding: 10px 8px; border-radius: 10px; border: 1.5px solid #2563eb; background: rgba(37,99,235,0.08); font-size: 0.8rem; font-weight: 800; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                        🖤 Monobank
+                        <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Monobank
                     </button>
                     <button type="button" id="payTabIban" class="btn-pro-tab" onclick="switchPremiumPayTab('iban')" style="padding: 10px 8px; border-radius: 10px; border: 1.5px solid var(--border-color); background: var(--bg-color); font-size: 0.8rem; font-weight: 700; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                        🏛️ IBAN / ФОП
+                        <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg> IBAN / ФОП
                     </button>
                     <button type="button" id="payTabDemo" class="btn-pro-tab" onclick="switchPremiumPayTab('demo')" style="padding: 10px 8px; border-radius: 10px; border: 1.5px solid var(--border-color); background: var(--bg-color); font-size: 0.8rem; font-weight: 700; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                        ⚡ Тест / Демо
+                        <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Тест / Демо
                     </button>
                 </div>
 
@@ -2216,11 +2218,11 @@
                     <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0 0 12px 0;">Оплатіть підписку за прямим банківським посиланням. Обов'язково вкажіть ваш ID у коментарі до платежу.</p>
                     <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
                         <a id="monoDirectPayLink" href="https://send.monobank.ua/jar/test_loop_pro" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #000; color: #fff; text-decoration: none; padding: 11px 20px; border-radius: 10px; font-weight: 800; font-size: 0.86rem; box-shadow: 0 4px 14px rgba(0,0,0,0.3);">
-                            <span>🖤 Оплатити в 1 клік (<span id="monoPriceLabel">199 ₴</span>)</span>
+                            <span><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Оплатити в 1 клік (<span id="monoPriceLabel">199 ₴</span>)</span>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                         </a>
                         <a id="btnMonoTgConfirm" href="https://t.me/LoopMarketSupport" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #2563eb; color: #fff; text-decoration: none; padding: 11px 16px; border-radius: 10px; font-weight: 700; font-size: 0.85rem;">
-                            💬 Чек у підтримку
+                            <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Чек у підтримку
                         </a>
                     </div>
                 </div>
@@ -2228,7 +2230,7 @@
                 <!-- 2. Official IBAN / FOP Box -->
                 <div id="ibanPayBox" style="display: none; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 14px; padding: 16px;">
                     <div style="font-size: 0.85rem; font-weight: 800; color: #2563eb; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
-                        🏛️ Офіційні банківські реквізити для оплати
+                        <svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg> Офіційні банківські реквізити для оплати
                     </div>
                     <div style="display: grid; gap: 6px; font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45;">
                         <div><b>Одержувач:</b> ФОП Маркетплейс LoopMarket</div>
@@ -2239,10 +2241,10 @@
                     </div>
                     <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
                         <button type="button" onclick="copyIbanDetails()" style="flex: 1; min-width: 160px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--surface); color: var(--text-main); font-weight: 800; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                            📋 Скопіювати IBAN
+                            <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg> Скопіювати IBAN
                         </button>
                         <a id="btnIbanTgConfirm" href="https://t.me/LoopMarketSupport" target="_blank" style="flex: 1; min-width: 160px; text-align: center; text-decoration: none; padding: 10px 14px; border-radius: 10px; background: #2563eb; color: #fff; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                            💬 Надіслати квитанцію в TG
+                            <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Надіслати квитанцію в TG
                         </a>
                     </div>
                 </div>
@@ -2252,13 +2254,13 @@
                     <div style="font-weight: 800; font-size: 0.95rem; color: #10b981; margin-bottom: 4px;">Миттєва тестова активація</div>
                     <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0 0 12px 0;">Симуляція успішного платежу для перевірки роботи відеопрезентацій та PRO-статусу в реальному часі.</p>
                     <button type="button" id="btnSubmitPremiumCheckout" onclick="submitPremiumCheckout()" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; font-weight: 800; font-size: 0.92rem; padding: 12px 22px; border-radius: 10px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);">
-                        <span>👑 Миттєво активувати тариф (<span id="demoPriceLabel">199 ₴</span>)</span>
+                        <span><svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg> Миттєво активувати тариф (<span id="demoPriceLabel">199 ₴</span>)</span>
                     </button>
                 </div>
             </div>
 
             <div style="text-align: center; font-size: 0.74rem; color: var(--text-muted);">
-                🔒 Офіційна оплата. Статус PRO надається автоматично або підтверджується адміністратором в 1 клік.
+                <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Офіційна оплата. Статус PRO надається автоматично або підтверджується адміністратором в 1 клік.
             </div>
         </div>
     </div>

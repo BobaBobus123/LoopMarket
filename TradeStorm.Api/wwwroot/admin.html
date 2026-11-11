@@ -62,7 +62,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Панель оператора безпеки — LoopMarket</title>
-    <link rel="stylesheet" href="/css/global.css?v=5.7">
+    <link rel="stylesheet" href="/css/global.css?v=5.8">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -612,6 +612,7 @@
             .complaints-grid { grid-template-columns: 1fr; }
         }
     </style>
+    <script src="/js/loop-icons.js?v=1.0"></script>
 </head>
 <body>
     <header class="admin-header">
@@ -623,7 +624,7 @@
                     <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">Центр керування та безпеки</div>
                 </div>
             </a>
-            <span class="admin-brand-badge">🛡️ Оператор безпеки</span>
+            <span class="admin-brand-badge"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg> Оператор безпеки</span>
         </div>
 
         <div class="admin-user-nav">
@@ -631,13 +632,13 @@
                 <span id="themeIcon"></span>
             </button>
             <a href="/messages.html" class="btn-action neutral" title="Перейти до чатів">
-                💬 Чат
+                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Чат
             </a>
             <a href="/docs.html" target="_blank" class="btn-action neutral" title="Документація API (доступно лише для адміністратора)">
-                📚 API Docs
+                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> API Docs
             </a>
             <a href="/index.html" class="btn-action neutral" title="Перейти на маркетплейс">
-                🏪 Маркетплейс
+                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/></svg> Маркетплейс
             </a>
             <div id="operatorProfileBadge" style="display: flex; align-items: center; gap: 8px; padding-left: 10px; border-left: 1px solid var(--border-color);">
                 <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(37,99,235,0.15); color: #2563eb; display: flex; align-items: center; justify-content: center; font-weight: 800;" id="adminAvatarLetter">A</div>
@@ -719,29 +720,29 @@
         <!-- TABS BAR -->
         <div class="admin-tabs">
             <button class="admin-tab active" onclick="switchAdminTab('complaints')">
-                🚨 Скарги та Підтримка
+                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Скарги та Підтримка
                 <span class="tab-badge danger" id="complaintsTabBadge" style="display: none;">0</span>
             </button>
             <button class="admin-tab" onclick="switchAdminTab('users')">
-                👥 Користувачі та Модерація
+                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Користувачі та Модерація
             </button>
             <button class="admin-tab" onclick="switchAdminTab('listings')">
-                📦 Оголошення та ТОП
+                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg> Оголошення та ТОП
             </button>
             <button class="admin-tab" onclick="switchAdminTab('orders')">
-                🚚 Арбітраж угод
+                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg> Арбітраж угод
             </button>
             <button class="admin-tab" onclick="switchAdminTab('broadcast')">
-                📢 Розсилка та Інфо-банер
+                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Розсилка та Інфо-банер
             </button>
             <button class="admin-tab" onclick="switchAdminTab('categories')">
-                🏷️ Категорії
+                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg> Категорії
             </button>
             <button class="admin-tab" onclick="switchAdminTab('audit')">
-                📜 Журнал аудиту
+                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg> Журнал аудиту
             </button>
             <button class="admin-tab" onclick="switchAdminTab('export')">
-                📊 Експорт даних
+                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Експорт даних
             </button>
         </div>
 
@@ -749,16 +750,16 @@
         <section id="panel-complaints" class="tab-panel active">
             <div class="panel-toolbar">
                 <div style="font-weight: 800; font-size: 1.15rem;">
-                    🚨 Скарги користувачів та підозра на шахрайство
+                    <svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Скарги користувачів та підозра на шахрайство
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <select id="complaintsFilterStatus" class="filter-select" onchange="loadComplaints()">
                         <option value="All" selected>Всі статуси</option>
-                        <option value="Pending">⚠️ Очікують розгляду</option>
-                        <option value="Resolved">✅ Вирішені</option>
-                        <option value="Dismissed">❌ Відхилені</option>
+                        <option value="Pending">Очікують розгляду</option>
+                        <option value="Resolved">Вирішені</option>
+                        <option value="Dismissed">Відхилені</option>
                     </select>
-                    <button class="btn-action primary" onclick="loadComplaints()">🔄 Оновити</button>
+                    <button class="btn-action primary" onclick="loadComplaints()"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg> Оновити</button>
                 </div>
             </div>
 
@@ -784,12 +785,12 @@
                     </select>
                     <select id="usersStatusFilter" class="filter-select" onchange="filterUsersTable()">
                         <option value="All">Всі статуси</option>
-                        <option value="Active">🟢 Активні</option>
-                        <option value="Muted">🔇 Замучені в чаті</option>
-                        <option value="Banned">🔴 Заблоковані</option>
+                        <option value="Active">Активні</option>
+                        <option value="Muted">Замучені в чаті</option>
+                        <option value="Banned">Заблоковані</option>
                     </select>
-                    <button class="btn-action primary" onclick="loadUsers()">🔄 Оновити список</button>
-                    <button class="btn-action success" onclick="openCreateUserModal()" style="font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 2px 8px rgba(16,185,129,0.3);">➕ Додати користувача</button>
+                    <button class="btn-action primary" onclick="loadUsers()"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg> Оновити список</button>
+                    <button class="btn-action success" onclick="openCreateUserModal()" style="font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 2px 8px rgba(16,185,129,0.3);"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Додати користувача</button>
                 </div>
             </div>
 
@@ -800,13 +801,13 @@
                         Всі (<span id="countAnnAll">0</span>)
                     </button>
                     <button type="button" id="annFilterBtnActive" class="admin-tab" onclick="filterAnnouncementsTable('active')" style="padding: 5px 12px; font-size: 0.8rem; border-radius: 8px;">
-                        🟢 Тільки активні (<span id="countAnnActive">0</span>)
+                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10b981;margin-right:4px;"></span> Тільки активні (<span id="countAnnActive">0</span>)
                     </button>
                     <button type="button" id="annFilterBtnAd" class="admin-tab" onclick="filterAnnouncementsTable('ad')" style="padding: 5px 12px; font-size: 0.8rem; border-radius: 8px;">
-                        🏷️ Реклама (<span id="countAnnAd">0</span>)
+                        <svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg> Реклама (<span id="countAnnAd">0</span>)
                     </button>
                     <button type="button" id="annFilterBtnInfo" class="admin-tab" onclick="filterAnnouncementsTable('info')" style="padding: 5px 12px; font-size: 0.8rem; border-radius: 8px;">
-                        ℹ️ Інформаційні (<span id="countAnnInfo">0</span>)
+                        <svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg> Інформаційні (<span id="countAnnInfo">0</span>)
                     </button>
                 </div>
                 <div class="table-responsive">
@@ -841,13 +842,13 @@
                 </div>
                 <select id="listingsStatusFilter" class="admin-form-select" style="width: auto; min-width: 190px; padding: 8px 12px;" onchange="filterListingsTable()">
                     <option value="all">Усі статуси</option>
-                    <option value="Draft">📝 Чернетки (очікують фото)</option>
-                    <option value="Active">🟢 Лише активні</option>
-                    <option value="Sold">🔴 Продані</option>
+                    <option value="Draft">Чернетки (очікують фото)</option>
+                    <option value="Active">Лише активні</option>
+                    <option value="Sold">Продані</option>
                 </select>
-                <button class="btn-action primary" onclick="loadListings()">🔄 Оновити оголошення</button>
-                <button class="btn-action warning" onclick="seedDraftTemplatesAdmin()" title="Створити готові описи по всіх товарних категоріях у статусі Draft">✨ Шаблони по категоріях</button>
-                <button class="btn-action success" onclick="openCreateListingModal()" style="font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 2px 8px rgba(16,185,129,0.3);">➕ Додати оголошення</button>
+                <button class="btn-action primary" onclick="loadListings()"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg> Оновити оголошення</button>
+                <button class="btn-action warning" onclick="seedDraftTemplatesAdmin()" title="Створити готові описи по всіх товарних категоріях у статусі Draft"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> Шаблони по категоріях</button>
+                <button class="btn-action success" onclick="openCreateListingModal()" style="font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 2px 8px rgba(16,185,129,0.3);"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Додати оголошення</button>
             </div>
 
             <div class="admin-card">
@@ -878,9 +879,9 @@
         <section id="panel-orders" class="tab-panel">
             <div class="panel-toolbar">
                 <div style="font-weight: 800; font-size: 1.15rem;">
-                    ⚖️ Арбітраж угод та моніторинг посилок
+                    <svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg> Арбітраж угод та моніторинг посилок
                 </div>
-                <button class="btn-action primary" onclick="loadOrders()">🔄 Оновити замовлення</button>
+                <button class="btn-action primary" onclick="loadOrders()"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg> Оновити замовлення</button>
             </div>
 
             <div class="admin-card">
@@ -912,13 +913,13 @@
             <!-- MARKETING SUB-NAVIGATION PILLS -->
             <div style="display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; background: var(--surface); padding: 8px 12px; border-radius: 14px; border: 1px solid var(--border-color);">
                 <button type="button" id="subtabBtnAd" class="admin-tab active" onclick="switchMarketingSubTab('ad')" style="padding: 8px 16px; font-size: 0.88rem; font-weight: 800; border-radius: 10px;">
-                    🏷️ 1. Рекламний банер (OLX Скайскрепер & Каталог)
+                    <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg> 1. Рекламний банер (OLX Скайскрепер & Каталог)
                 </button>
                 <button type="button" id="subtabBtnInfo" class="admin-tab" onclick="switchMarketingSubTab('info')" style="padding: 8px 16px; font-size: 0.88rem; font-weight: 800; border-radius: 10px;">
-                    ℹ️ 2. Інформаційний банер сайту (Шапка / Модальне)
+                    <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg> 2. Інформаційний банер сайту (Шапка / Модальне)
                 </button>
                 <button type="button" id="subtabBtnBroadcast" class="admin-tab" onclick="switchMarketingSubTab('broadcast')" style="padding: 8px 16px; font-size: 0.88rem; font-weight: 800; border-radius: 10px;">
-                    📢 3. Масова розсилка (В додатку & Telegram)
+                    <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> 3. Масова розсилка (В додатку & Telegram)
                 </button>
             </div>
 
@@ -927,14 +928,14 @@
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
                     <div>
                         <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--text-main);">
-                            <span>🏷️</span> Конструктор рекламного банера (OLX-Style)
+                            <span style="color:#10b981;display:inline-flex;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg></span> Конструктор рекламного банера (OLX-Style)
                         </h3>
                         <p style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 0;">
                             Налаштування вертикального скайскрепера праворуч/ліворуч або горизонтального промо-блоку над каталогом товарів.
                         </p>
                     </div>
                     <span class="status-badge" style="background: rgba(16,185,129,0.12); color: #059669; font-weight: 800; padding: 6px 14px; border-radius: 10px;">
-                        🎯 Спонсорська реклама платформи
+                        <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Спонсорська реклама платформи
                     </span>
                 </div>
 
@@ -944,10 +945,10 @@
                             <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
                             <label style="margin: 0;">Заголовок реклами *</label>
                             <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">⚡ Шаблони:</span>
-                                <button type="button" onclick="applyAdBannerTemplate('official')" style="background: rgba(16,185,129,0.12); color: #059669; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">💎 Фірмовий Loop ADS</button>
-                                <button type="button" onclick="applyAdBannerTemplate('pro')" style="background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🚀 PRO-продавець</button>
-                                <button type="button" onclick="applyAdBannerTemplate('safety')" style="background: rgba(217,119,6,0.12); color: #d97706; border: 1px solid rgba(217,119,6,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🛡️ Безпека угод</button>
+                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;"><svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Шаблони:</span>
+                                <button type="button" onclick="applyAdBannerTemplate('official')" style="background: rgba(16,185,129,0.12); color: #059669; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg> Фірмовий Loop ADS</button>
+                                <button type="button" onclick="applyAdBannerTemplate('pro')" style="background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg> PRO-продавець</button>
+                                <button type="button" onclick="applyAdBannerTemplate('safety')" style="background: rgba(217,119,6,0.12); color: #d97706; border: 1px solid rgba(217,119,6,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg> Безпека угод</button>
                             </div>
                         </div>
                             <input type="text" id="adBannerTitleInput" class="admin-form-input" required value="Тут могла бути ваша реклама!" oninput="updateAdBannerLivePreview()">
@@ -961,13 +962,13 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                             <div class="admin-form-group">
                                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
-                                    <label style="margin: 0;">🖼️ Зображення банера</label>
+                                    <label style="margin: 0;"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> Зображення банера</label>
                                     <div style="display: flex; gap: 6px;">
                                         <button type="button" onclick="applyDefaultLoopMarketAdPreset()" style="background: rgba(16,185,129,0.12); color: #059669; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer;">
-                                            💎 Фірмовий банер LoopMarket
+                                            <svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg> Фірмовий банер LoopMarket
                                         </button>
                                         <button type="button" onclick="document.getElementById('adBannerFileInput').click()" style="background: rgba(37,99,235,0.08); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
-                                            📁 Файл з ПК
+                                            <svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg> Файл з ПК
                                         </button>
                                     </div>
                                 </div>
@@ -975,13 +976,13 @@
                                 <input type="text" id="adBannerImageInput" class="admin-form-input" value="/images/loop-ad-banner.svg" placeholder="/images/loop-ad-banner.svg або https://..." oninput="updateAdBannerLivePreview()">
                             </div>
                             <div class="admin-form-group">
-                                <label>🧭 Позиція розміщення на екрані *</label>
+                                <label><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg> Позиція розміщення на екрані *</label>
                                 <select id="adBannerPlacementSelect" class="admin-form-select" onchange="updateAdBannerLivePreview()">
-                                    <option value="sidebar_both" selected>↔️ Оба боки симетрично (Ліворуч + Праворуч на висоту екрана)</option>
-                                    <option value="sidebar_right">➡️ Лише праворуч (Вертикальний Skyscraper)</option>
-                                    <option value="sidebar_left">⬅️ Лише ліворуч (Вертикальний Skyscraper)</option>
-                                    <option value="catalog">📰 У каталозі товарів (Горизонтальний блок над сіткою)</option>
-                                    <option value="hidden">🚫 Приховано / Вимкнено</option>
+                                    <option value="sidebar_both" selected>Оба боки симетрично (Ліворуч + Праворуч на висоту екрана)</option>
+                                    <option value="sidebar_right">Лише праворуч (Вертикальний Skyscraper)</option>
+                                    <option value="sidebar_left">Лише ліворуч (Вертикальний Skyscraper)</option>
+                                    <option value="catalog">У каталозі товарів (Горизонтальний блок над сіткою)</option>
+                                    <option value="hidden">Приховано / Вимкнено</option>
                                 </select>
                             </div>
                         </div>
@@ -989,7 +990,7 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                             <div class="admin-form-group">
                                 <label>Текст кнопки дії</label>
-                                <input type="text" id="adBannerActionTextInput" class="admin-form-input" value="Розмістити рекламу 📢" oninput="updateAdBannerLivePreview()">
+                                <input type="text" id="adBannerActionTextInput" class="admin-form-input" value="Розмістити рекламу" oninput="updateAdBannerLivePreview()">
                             </div>
                             <div class="admin-form-group">
                                 <label>Посилання переходу (URL кнопки)</label>
@@ -1000,19 +1001,19 @@
                         <div class="admin-form-group">
                             <label>Термін дії реклами</label>
                             <select id="adBannerDurationSelect" class="admin-form-select">
-                                <option value="forever" selected>♾️ Безстроково (до ручного скасування)</option>
-                                <option value="24h">⏰ 24 години</option>
-                                <option value="7d">📅 7 днів (1 тиждень)</option>
-                                <option value="30d">🗓️ 30 днів (1 місяць)</option>
+                                <option value="forever" selected>Безстроково (до ручного скасування)</option>
+                                <option value="24h">24 години</option>
+                                <option value="7d">7 днів (1 тиждень)</option>
+                                <option value="30d">30 днів (1 місяць)</option>
                             </select>
                         </div>
 
                         <div style="display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap;">
                             <button type="submit" class="btn-action success" style="padding: 11px 22px; font-weight: 800; font-size: 0.92rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 4px 14px rgba(16,185,129,0.35);">
-                                🚀 Зберегти та виставити рекламний банер
+                                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg> Зберегти та виставити рекламний банер
                             </button>
                             <button type="button" class="btn-action warning" onclick="handleDeactivateAdBanner()" style="padding: 11px 18px; font-weight: 700;">
-                                🛑 Зняти поточну рекламу
+                                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6"/></svg> Зняти поточну рекламу
                             </button>
                         </div>
                     </form>
@@ -1020,7 +1021,7 @@
                     <!-- LIVE PREVIEW BOX -->
                     <div style="background: var(--bg-color); border: 1.5px dashed var(--border-color); border-radius: 16px; padding: 18px;">
                         <div style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-                            <span>👁️ Живе прев'ю на сайті:</span>
+                            <span><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> Живе прев'ю на сайті:</span>
                             <span id="adPreviewPosBadge" style="color: #2563eb; background: rgba(37,99,235,0.1); padding: 2px 8px; border-radius: 6px;">Оба боки (симетрично)</span>
                         </div>
                         <div id="adLivePreviewBox" style="max-width: 240px; min-height: 340px; margin: 0 auto; display: flex; flex-direction: column; background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 14px; padding: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
@@ -1037,7 +1038,7 @@
                             </div>
                             <div id="adPreviewTitle" style="font-weight: 800; font-size: 0.95rem; margin-bottom: 4px; color: var(--text-main);">Тут могла бути ваша реклама!</div>
                             <div id="adPreviewText" style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 12px;">Залучайте тисячі покупців щодня на LoopMarket...</div>
-                            <div id="adPreviewBtn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; text-align: center; font-size: 0.8rem; font-weight: 800; padding: 8px 12px; border-radius: 8px;">Розмістити рекламу 📢</div>
+                            <div id="adPreviewBtn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; text-align: center; font-size: 0.8rem; font-weight: 800; padding: 8px 12px; border-radius: 8px;">Розмістити рекламу</div>
                         </div>
                     </div>
                 </div>
@@ -1047,7 +1048,7 @@
             <div id="subtabPanelInfo" class="admin-card" style="padding: 26px; margin-bottom: 24px; display: none;">
                 <div style="margin-bottom: 18px;">
                     <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--text-main);">
-                        <span>ℹ️</span> Конструктор інформаційних банерів та сповіщень
+                        <span style="color:#38bdf8;display:inline-flex;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg></span> Конструктор інформаційних банерів та сповіщень
                     </h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 0;">
                         Системні плашки у шапці всіх сторінок сайту або спливаючі модальні вікна (технічні роботи, оновлення правил, акції).
@@ -1059,17 +1060,17 @@
                         <div class="admin-form-group">
                             <label>Тип та терміновість інфо-банера *</label>
                             <select id="infoBannerTypeSelect" class="admin-form-select">
-                                <option value="info" selected>ℹ️ Інформаційне (Синій фон — оновлення, інструкції)</option>
-                                <option value="warning">⚠️ Попередження (Жовтий фон — техроботи, регламент)</option>
-                                <option value="danger">🚫 Термінове / Антифрод (Червоний фон — критична безпека)</option>
-                                <option value="promo">🟢 Святкове / Промоція (Зелений фон)</option>
+                                <option value="info" selected>Інформаційне (Синій фон — оновлення, інструкції)</option>
+                                <option value="warning">Попередження (Жовтий фон — техроботи, регламент)</option>
+                                <option value="danger">Термінове / Антифрод (Червоний фон — критична безпека)</option>
+                                <option value="promo">Святкове / Промоція (Зелений фон)</option>
                             </select>
                         </div>
                         <div class="admin-form-group">
                             <label>Формат відображення *</label>
                             <select id="infoBannerPlacementSelect" class="admin-form-select">
-                                <option value="top" selected>🔝 Плашка у самій шапці сайту (Header bar)</option>
-                                <option value="modal">🪟 Повноекранне модальне вікно (Popup modal)</option>
+                                <option value="top" selected>Плашка у самій шапці сайту (Header bar)</option>
+                                <option value="modal">Повноекранне модальне вікно (Popup modal)</option>
                             </select>
                         </div>
                     </div>
@@ -1078,20 +1079,20 @@
                         <div class="admin-form-group">
                             <label>Цільова сторінка</label>
                             <select id="infoBannerTargetPageSelect" class="admin-form-select">
-                                <option value="all" selected>🌐 Всі сторінки сайту (Global)</option>
-                                <option value="home">🏠 Каталог / Головна сторінка</option>
-                                <option value="details">📦 Картки товарів (Details)</option>
-                                <option value="services">🛠️ Послуги майстрів</option>
+                                <option value="all" selected>Всі сторінки сайту (Global)</option>
+                                <option value="home">Каталог / Головна сторінка</option>
+                                <option value="details">Картки товарів (Details)</option>
+                                <option value="services">Послуги майстрів</option>
                             </select>
                         </div>
                         <div class="admin-form-group">
                             <label>Термін дії</label>
                             <select id="infoBannerDurationSelect" class="admin-form-select">
-                                <option value="forever" selected>♾️ Безстроково (до зняття адміном)</option>
-                                <option value="24h">⏰ 24 години</option>
-                                <option value="3d">📅 3 дні</option>
-                                <option value="7d">📅 7 днів</option>
-                                <option value="30d">🗓️ 30 днів</option>
+                                <option value="forever" selected>Безстроково (до зняття адміном)</option>
+                                <option value="24h">24 години</option>
+                                <option value="3d">3 дні</option>
+                                <option value="7d">7 днів</option>
+                                <option value="30d">30 днів</option>
                             </select>
                         </div>
                     </div>
@@ -1101,10 +1102,10 @@
                         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
                             <label style="margin: 0;">Заголовок інфо-банера *</label>
                             <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">⚡ Шаблони:</span>
-                                <button type="button" onclick="applyInfoBannerTemplate('maintenance')" style="background: rgba(217,119,6,0.12); color: #d97706; border: 1px solid rgba(217,119,6,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🛠️ Техроботи</button>
-                                <button type="button" onclick="applyInfoBannerTemplate('fraud_alert')" style="background: rgba(220,38,38,0.12); color: #dc2626; border: 1px solid rgba(220,38,38,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🚫 Антифішинг</button>
-                                <button type="button" onclick="applyInfoBannerTemplate('release')" style="background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🎉 Оновлення 5.0</button>
+                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;"><svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Шаблони:</span>
+                                <button type="button" onclick="applyInfoBannerTemplate('maintenance')" style="background: rgba(217,119,6,0.12); color: #d97706; border: 1px solid rgba(217,119,6,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Техроботи</button>
+                                <button type="button" onclick="applyInfoBannerTemplate('fraud_alert')" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(220,38,38,0.12); color: #dc2626; border: 1px solid rgba(220,38,38,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg> Антифішинг</button>
+                                <button type="button" onclick="applyInfoBannerTemplate('release')" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg> Оновлення 5.0</button>
                             </div>
                         </div>
                         <input type="text" id="infoBannerTitleInput" class="admin-form-input" placeholder="Наприклад: Оновлення платформи 2.0 або Технічні роботи">
@@ -1127,7 +1128,7 @@
                     </div>
 
                     <button type="submit" class="btn-action primary" style="padding: 11px 22px; font-weight: 800; font-size: 0.92rem; margin-top: 10px;">
-                        🚀 Опублікувати інформаційний банер
+                        <svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Опублікувати інформаційний банер
                     </button>
                 </form>
             </div>
@@ -1136,7 +1137,7 @@
             <div id="subtabPanelBroadcast" class="admin-card" style="padding: 26px; margin-bottom: 24px; display: none;">
                 <div style="margin-bottom: 18px;">
                     <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--text-main);">
-                        <span>📢</span> Масова розсилка повідомлень користувачам
+                        <span style="display:inline-flex;align-items:center;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span> Масова розсилка повідомлень користувачам
                     </h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 0;">
                         Надішле персональне системне сповіщення кожному користувачу у внутрішній дзвіночок сайту та у прив'язаний Telegram-бот.
@@ -1149,10 +1150,10 @@
                             <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
                             <label style="margin: 0;">Тема розсилки *</label>
                             <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">⚡ Шаблони:</span>
-                                <button type="button" onclick="applyBroadcastTemplate('security')" style="background: rgba(220,38,38,0.12); color: #dc2626; border: 1px solid rgba(220,38,38,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🔒 Кібербезпека</button>
-                                <button type="button" onclick="applyBroadcastTemplate('features')" style="background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🚀 Новий функціонал</button>
-                                <button type="button" onclick="applyBroadcastTemplate('sellers')" style="background: rgba(16,185,129,0.12); color: #059669; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🛍️ Для продавців</button>
+                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;"><svg class="loop-svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Шаблони:</span>
+                                <button type="button" onclick="applyBroadcastTemplate('security')" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(220,38,38,0.12); color: #dc2626; border: 1px solid rgba(220,38,38,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Кібербезпека</button>
+                                <button type="button" onclick="applyBroadcastTemplate('features')" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Новий функціонал</button>
+                                <button type="button" onclick="applyBroadcastTemplate('sellers')" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(16,185,129,0.12); color: #059669; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> Для продавців</button>
                             </div>
                         </div>
                             <input type="text" id="broadcastTitleInput" class="admin-form-input" required placeholder="Важливе оновлення безпеки угод LoopMarket">
@@ -1160,9 +1161,9 @@
                         <div class="admin-form-group">
                             <label>Цільова аудиторія</label>
                             <select id="broadcastAudienceSelect" class="admin-form-select">
-                                <option value="all" selected>👥 Всі зареєстровані користувачі</option>
-                                <option value="sellers">🛍️ Тільки продавці (і майстри послуг)</option>
-                                <option value="buyers">🛒 Тільки покупці</option>
+                                <option value="all" selected>Всі зареєстровані користувачі</option>
+                                <option value="sellers">Тільки продавці (і майстри послуг)</option>
+                                <option value="buyers">Тільки покупці</option>
                             </select>
                         </div>
                     </div>
@@ -1174,24 +1175,24 @@
                         <div class="admin-form-group" style="margin: 0; display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 12px;">
                             <input type="checkbox" id="broadcastInAppCheckbox" checked style="width: 18px; height: 18px; accent-color: #10b981; cursor: pointer;">
                             <label for="broadcastInAppCheckbox" style="margin: 0; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
-                                🔔 Внутрішнє сповіщення (дзвіночок)
+                                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Внутрішнє сповіщення (дзвіночок)
                             </label>
                         </div>
                         <div class="admin-form-group" style="margin: 0; display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 12px;">
                             <input type="checkbox" id="broadcastToastCheckbox" checked style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
                             <label for="broadcastToastCheckbox" style="margin: 0; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
-                                ⚡ Live Toast (хто зараз онлайн)
+                                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg> Live Toast (хто зараз онлайн)
                             </label>
                         </div>
                         <div class="admin-form-group" style="margin: 0; display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 12px;">
                             <input type="checkbox" id="broadcastTgCheckbox" checked style="width: 18px; height: 18px; accent-color: #06b6d4; cursor: pointer;">
                             <label for="broadcastTgCheckbox" style="margin: 0; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
-                                🤖 Telegram-боти користувачів
+                                <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg> Telegram-боти користувачів
                             </label>
                         </div>
                     </div>
                     <button type="submit" id="btnSubmitBroadcast" class="btn-action success" style="padding: 12px 24px; font-weight: 800; font-size: 0.95rem; margin-top: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 4px 14px rgba(16,185,129,0.35);">
-                        🚀 Відправити всім користувачам
+                        <svg class="loop-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Відправити всім користувачам
                     </button>
                     <div id="broadcastStatusBox" style="display: none; margin-top: 14px; padding: 12px 16px; border-radius: 10px; font-weight: 700; font-size: 0.88rem;"></div>
                 </form>
@@ -1201,14 +1202,14 @@
                 <div style="padding: 18px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
                     <div>
                         <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
-                            <span>📋 Оголошення та активні банери платформи</span>
+                            <span style="display:inline-flex;align-items:center;gap:8px;"><svg class="loop-svg-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg> Оголошення та активні банери платформи</span>
                             <span id="announcementsCountBadge" class="status-badge" style="background: rgba(37,99,235,0.12); color: #2563eb; font-weight: 800;">0</span>
                         </h3>
                         <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;">
                             Якщо користувач закриває оголошення хрестиком на сайті, воно більше йому не показується, але залишається видимим для нових та інших користувачів.
                         </div>
                     </div>
-                    <button type="button" class="btn-action primary" onclick="loadAnnouncementsList()">🔄 Оновити список</button>
+                    <button type="button" class="btn-action primary" onclick="loadAnnouncementsList()" style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg> Оновити список</button>
                 </div>
 
                 <div class="table-responsive">
@@ -1236,8 +1237,8 @@
         <!-- TAB 6: CATEGORIES MANAGER -->
         <section id="panel-categories" class="tab-panel">
             <div class="panel-toolbar">
-                <div style="font-weight: 800; font-size: 1.15rem;">🏷️ Керування категоріями товарів та послуг</div>
-                <button class="btn-action primary" onclick="openAddCategoryPrompt()">➕ Додати категорію</button>
+                <div style="font-weight: 800; font-size: 1.15rem; display:inline-flex; align-items:center; gap:8px;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg> Керування категоріями товарів та послуг</div>
+                <button class="btn-action primary" onclick="openAddCategoryPrompt()" style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Додати категорію</button>
             </div>
 
             <div class="admin-card">
@@ -1261,7 +1262,7 @@
         <!-- TAB 7: AUDIT LOG -->
         <section id="panel-audit" class="tab-panel">
             <div class="panel-toolbar" style="flex-wrap: wrap; gap: 12px;">
-                <div style="font-weight: 800; font-size: 1.15rem;">📜 Журнал дій операторів (Audit Trail)</div>
+                <div style="font-weight: 800; font-size: 1.15rem; display:inline-flex; align-items:center; gap:8px;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Журнал дій операторів (Audit Trail)</div>
                 <div style="display: flex; align-items: center; gap: 10px; margin-left: auto; flex-wrap: wrap;">
                     <select id="auditFilterAction" class="admin-form-input" onchange="loadAuditLogs()" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
                         <option value="">Всі дії операторів</option>
@@ -1277,7 +1278,7 @@
                         <option value="DeleteUser">Видалення користувача</option>
                     </select>
                     <input type="text" id="auditSearchInput" class="admin-form-input" placeholder="Пошук по деталях/email..." oninput="debounceAuditSearch()" style="width: 220px; padding: 6px 12px; font-size: 0.85rem;">
-                    <button class="btn-action primary" onclick="loadAuditLogs()">🔄 Оновити</button>
+                    <button class="btn-action primary" onclick="loadAuditLogs()" style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg> Оновити</button>
                 </div>
             </div>
 
@@ -1304,59 +1305,59 @@
         <!-- TAB 8: EXPORT & ANALYTICS -->
         <section id="panel-export" class="tab-panel">
             <div class="panel-toolbar">
-                <div style="font-weight: 800; font-size: 1.15rem;">📊 Експорт звітів та даних платформи (CSV з підтримкою Excel)</div>
+                <div style="font-weight: 800; font-size: 1.15rem; display:inline-flex; align-items:center; gap:8px;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg> Експорт звітів та даних платформи (CSV з підтримкою Excel)</div>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
                 <div class="admin-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
-                        <div style="font-size: 1.8rem; margin-bottom: 8px;">👥</div>
+                        <div style="display:flex;justify-content:center;margin-bottom:8px;"><svg class="loop-svg-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
                         <h3 style="margin-top: 0; margin-bottom: 8px;">База користувачів</h3>
                         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
                             Повний реєстр акаунтів, контакти, ролі (Admin/Seller/Buyer), статус верифікації телефону, блокування та Telegram ID.
                         </p>
                     </div>
                     <button type="button" class="btn-action primary" onclick="downloadCsv('users')" style="padding: 10px 16px; justify-content: center; width: 100%;">
-                        📥 Завантажити CSV користувачів
+                        <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Завантажити CSV користувачів
                     </button>
                 </div>
 
                 <div class="admin-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
-                        <div style="font-size: 1.8rem; margin-bottom: 8px;">📦</div>
+                        <div style="display:flex;justify-content:center;margin-bottom:8px;"><svg class="loop-svg-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/></svg></div>
                         <h3 style="margin-top: 0; margin-bottom: 8px;">База замовлень</h3>
                         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
                             Історія угод, унікальні коди (LP-XXXXXX), дані покупця та продавця, суми, статус доставки та ТТН Нової Пошти.
                         </p>
                     </div>
                     <button type="button" class="btn-action success" onclick="downloadCsv('orders')" style="padding: 10px 16px; justify-content: center; width: 100%;">
-                        📥 Завантажити CSV замовлень
+                        <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Завантажити CSV замовлень
                     </button>
                 </div>
 
                 <div class="admin-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
-                        <div style="font-size: 1.8rem; margin-bottom: 8px;">🏷️</div>
+                        <div style="display:flex;justify-content:center;margin-bottom:8px;"><svg class="loop-svg-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg></div>
                         <h3 style="margin-top: 0; margin-bottom: 8px;">База оголошень</h3>
                         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
                             Всі активні товари та послуги, ціни, категорії, закріплення ТОП, продавці з їхніми контактами та містом.
                         </p>
                     </div>
                     <button type="button" class="btn-action neutral" onclick="downloadCsv('listings')" style="padding: 10px 16px; justify-content: center; width: 100%;">
-                        📥 Завантажити CSV оголошень
+                        <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Завантажити CSV оголошень
                     </button>
                 </div>
 
                 <div class="admin-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
-                        <div style="font-size: 1.8rem; margin-bottom: 8px;">🚨</div>
+                        <div style="display:flex;justify-content:center;margin-bottom:8px;"><svg class="loop-svg-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
                         <h3 style="margin-top: 0; margin-bottom: 8px;">Скарги та Тікети</h3>
                         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
                             Повний реєстр звернень у підтримку, причин, контактів заявника, описів проблеми та винесених рішень модерації.
                         </p>
                     </div>
                     <button type="button" class="btn-action danger" onclick="downloadCsv('complaints')" style="padding: 10px 16px; justify-content: center; width: 100%;">
-                        📥 Завантажити CSV тікетів
+                        <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Завантажити CSV тікетів
                     </button>
                 </div>
             </div>
@@ -1367,24 +1368,24 @@
     <div class="admin-modal-overlay" id="replyComplaintModal">
         <div class="admin-modal-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                <h3 style="margin: 0; font-size: 1.25rem;">💬 Офіційна відповідь служби підтримки</h3>
+                <h3 style="margin: 0; font-size: 1.25rem; display:inline-flex; align-items:center; gap:8px;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> Офіційна відповідь служби підтримки</h3>
                 <button onclick="closeReplyModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">&times;</button>
             </div>
             <form id="replyComplaintForm" onsubmit="submitComplaintReply(event)">
                 <input type="hidden" id="replyComplaintId">
                 <div style="margin-bottom: 14px; padding: 12px; background: rgba(37,99,235,0.06); border-radius: 10px; font-size: 0.88rem;">
-                    <div>👤 <b>Одержувач:</b> <span id="replyRecipientName">—</span></div>
-                    <div style="margin-top: 4px;">🎫 <b>Тема звернення:</b> <span id="replyTicketReason">—</span></div>
+                    <div style="display:flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <b>Одержувач:</b> <span id="replyRecipientName">—</span></div>
+                    <div style="margin-top: 4px; display:flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg> <b>Тема звернення:</b> <span id="replyTicketReason">—</span></div>
                 </div>
                 <div class="admin-form-group">
                     <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
                     <label style="margin: 0;">Текст офіційної відповіді користувачу *</label>
                     <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('fraud')" style="background: rgba(220,38,38,0.12); color: #dc2626; border: 1px solid rgba(220,38,38,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">🚫 Бан шахрая</button>
-                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('rules')" style="background: rgba(217,119,6,0.12); color: #d97706; border: 1px solid rgba(217,119,6,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">⚠️ Видалено за правила</button>
-                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('evidence')" style="background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">❓ Мало доказів</button>
-                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('delivery')" style="background: rgba(16,185,129,0.12); color: #059669; border: 1px solid rgba(16,185,129,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">📦 Доставка / НП</button>
-                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('resolved')" style="background: rgba(100,116,139,0.15); color: #475569; border: 1px solid rgba(100,116,139,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">✅ Вирішено</button>
+                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('fraud')" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(220,38,38,0.12); color: #dc2626; border: 1px solid rgba(220,38,38,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg> Бан шахрая</button>
+                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('rules')" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(217,119,6,0.12); color: #d97706; border: 1px solid rgba(217,119,6,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Видалено за правила</button>
+                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('evidence')" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg> Мало доказів</button>
+                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('delivery')" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(16,185,129,0.12); color: #059669; border: 1px solid rgba(16,185,129,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/></svg> Доставка / НП</button>
+                        <button type="button" class="btn-xs" onclick="applyComplaintReplyTemplate('resolved')" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(100,116,139,0.15); color: #475569; border: 1px solid rgba(100,116,139,0.25); border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"><svg class="loop-svg-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg> Вирішено</button>
                     </div>
                 </div>
                     <textarea id="replyMessageText" class="admin-form-input" rows="5" placeholder="Введіть текст офіційної відповіді. Вона надійде користувачеві у внутрішній чат сайту та офіційний Telegram-бот платформи без розкриття ваших особистих контактів..." required style="resize: vertical;"></textarea>
@@ -1392,20 +1393,20 @@
                 <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; font-size: 0.88rem;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                         <input type="checkbox" id="replySendInternalChat" checked>
-                        <span>💬 Надіслати у внутрішній чат сайту (messages.html)</span>
+                        <span style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> Надіслати у внутрішній чат сайту (messages.html)</span>
                     </label>
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                         <input type="checkbox" id="replySendTelegram" checked>
-                        <span>✈️ Надіслати офіційним Telegram-ботом платформи</span>
+                        <span style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Надіслати офіційним Telegram-ботом платформи</span>
                     </label>
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                         <input type="checkbox" id="replyMarkResolved" checked>
-                        <span>✅ Позначити тікет як вирішений</span>
+                        <span style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg> Позначити тікет як вирішений</span>
                     </label>
                 </div>
                 <div style="display: flex; justify-content: flex-end; gap: 10px;">
                     <button type="button" class="btn-action neutral" onclick="closeReplyModal()">Скасувати</button>
-                    <button type="submit" class="btn-action primary" id="btnSubmitReply">🚀 Надіслати офіційну відповідь</button>
+                    <button type="submit" class="btn-action primary" id="btnSubmitReply" style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Надіслати офіційну відповідь</button>
                 </div>
             </form>
         </div>
@@ -1415,7 +1416,7 @@
     <div class="admin-modal-overlay" id="resetPasswordModal">
         <div class="admin-modal-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                <h3 style="margin: 0; font-size: 1.25rem;">🔑 Скидання паролю користувача</h3>
+                <h3 style="margin: 0; font-size: 1.25rem; display:inline-flex; align-items:center; gap:8px;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg> Скидання паролю користувача</h3>
                 <button onclick="closeResetPasswordModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">&times;</button>
             </div>
             <form id="resetPasswordForm" onsubmit="submitResetPassword(event)">
@@ -1429,7 +1430,7 @@
                 </div>
                 <div style="display: flex; justify-content: flex-end; gap: 10px;">
                     <button type="button" class="btn-action neutral" onclick="closeResetPasswordModal()">Скасувати</button>
-                    <button type="submit" class="btn-action primary">💾 Зберегти новий пароль</button>
+                    <button type="submit" class="btn-action primary" style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg> Зберегти новий пароль</button>
                 </div>
             </form>
         </div>
@@ -1440,7 +1441,7 @@
     <div class="admin-modal-overlay" id="createUserModal">
         <div class="admin-modal-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                <h3 style="margin: 0; font-size: 1.25rem;">➕ Додати нового користувача</h3>
+                <h3 style="margin: 0; font-size: 1.25rem; display:inline-flex; align-items:center; gap:8px;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Додати нового користувача</h3>
                 <button onclick="closeCreateUserModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">&times;</button>
             </div>
             <form id="createUserForm" onsubmit="submitCreateUser(event)">
@@ -1480,8 +1481,8 @@
                     <div class="admin-form-group">
                         <label>Верифікація</label>
                         <select id="createVerified" class="admin-form-select">
-                            <option value="true">✅ Підтверджено</option>
-                            <option value="false" selected>⏳ Очікує</option>
+                            <option value="true">Підтверджено</option>
+                            <option value="false" selected>Очікує</option>
                         </select>
                     </div>
                 </div>
@@ -1497,7 +1498,7 @@
     <div class="admin-modal-overlay" id="sendNotificationModal">
         <div class="admin-modal-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                <h3 style="margin: 0; font-size: 1.25rem;">🔔 Сповіщення на акаунт користувача</h3>
+                <h3 style="margin: 0; font-size: 1.25rem; display:inline-flex; align-items:center; gap:8px;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Сповіщення на акаунт користувача</h3>
                 <button onclick="closeSendNotificationModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">&times;</button>
             </div>
             <form id="sendNotificationForm" onsubmit="submitSendNotification(event)">
@@ -1533,7 +1534,7 @@
     <div class="admin-modal-overlay" id="createListingModal">
         <div class="admin-modal-box" style="max-width: 600px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                <h3 style="margin: 0; font-size: 1.25rem;">➕ Додати нове оголошення (в 1 клік)</h3>
+                <h3 style="margin: 0; font-size: 1.25rem; display:inline-flex; align-items:center; gap:8px;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Додати нове оголошення (в 1 клік)</h3>
                 <button onclick="closeCreateListingModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">&times;</button>
             </div>
             <form id="createListingForm" onsubmit="submitCreateListing(event)">
@@ -1599,19 +1600,19 @@
                     <div class="admin-form-group">
                         <label>Статус публікації</label>
                         <select id="listingStatusCreate" class="admin-form-select">
-                            <option value="Active" selected>🟢 Активне (потрібне фото або відео)</option>
-                            <option value="Draft">📝 Чернетка (приховано, фото додам пізніше)</option>
+                            <option value="Active" selected>Активне (потрібне фото або відео)</option>
+                            <option value="Draft">Чернетка (приховано, фото додам пізніше)</option>
                         </select>
                     </div>
                 </div>
                 <div style="display: flex; gap: 20px; align-items: center; margin-top: 10px;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.88rem;">
                         <input type="checkbox" id="listingFeatured" style="width: 18px; height: 18px; cursor: pointer;">
-                        ⭐ Закріпити як ТОП / VIP
+                        <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Закріпити як ТОП / VIP
                     </label>
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.88rem;">
                         <input type="checkbox" id="listingShipping" checked style="width: 18px; height: 18px; cursor: pointer;">
-                        📦 Можлива доставка
+                        <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/></svg> Можлива доставка
                     </label>
                 </div>
                 <div class="admin-modal-actions">
@@ -1628,7 +1629,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
                 <div>
                     <h3 style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
-                        <span>✏️</span> Редагування оголошення користувача
+                        <span style="display:inline-flex;align-items:center;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg></span> Редагування оголошення користувача
                     </h3>
                     <div id="adminEditListingSub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;">
                         Редагування з повними правами адміністратора LoopMarket
@@ -1659,10 +1660,10 @@
                     <div class="admin-form-group">
                         <label>Статус публікації</label>
                         <select id="adminEditListingStatus" class="admin-form-select">
-                            <option value="Active">🟢 Активне (В наявності / опубліковано)</option>
-                            <option value="Draft">📝 Чернетка (Приховано, очікує фото/відео)</option>
-                            <option value="Sold">🔴 Продано (Архівне)</option>
-                            <option value="Reserved">🟡 Зарезервовано (Оформлюється угода)</option>
+                            <option value="Active">Активне (В наявності / опубліковано)</option>
+                            <option value="Draft">Чернетка (Приховано, очікує фото/відео)</option>
+                            <option value="Sold">Продано (Архівне)</option>
+                            <option value="Reserved">Зарезервовано (Оформлюється угода)</option>
                         </select>
                     </div>
                     <div class="admin-form-group">
@@ -1685,7 +1686,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px;">
                         <label style="margin: 0;">Посилання на фотографії (через ';' або з нового рядка)</label>
                         <label class="btn-action primary" style="cursor: pointer; font-size: 0.78rem; padding: 5px 10px; margin: 0;">
-                            📸 Завантажити фото з ПК
+                            <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg> Завантажити фото з ПК
                             <input type="file" id="adminEditListingUploadInput" accept="image/*" multiple style="display: none;" onchange="uploadAdminModalPhotos(this)">
                         </label>
                     </div>
@@ -1694,29 +1695,29 @@
                 </div>
 
                 <div class="admin-form-group">
-                    <label>🎬 Посилання на відеопрезентацію (YouTube, Shorts або /uploads/videos/...)</label>
+                    <label style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg> Посилання на відеопрезентацію (YouTube, Shorts або /uploads/videos/...)</label>
                     <input type="text" id="adminEditListingVideo" class="admin-form-input" placeholder="https://youtube.com/watch?v=... або порожньо">
                 </div>
 
                 <div style="display: flex; gap: 20px; align-items: center; margin-top: 10px; margin-bottom: 14px;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.88rem; font-weight: 700;">
                         <input type="checkbox" id="adminEditListingFeatured" style="width: 18px; height: 18px; cursor: pointer; accent-color: #eab308;">
-                        ⭐ Закріпити як ТОП оголошення
+                        <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Закріпити як ТОП оголошення
                     </label>
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.88rem; font-weight: 700;">
                         <input type="checkbox" id="adminEditListingShipping" style="width: 18px; height: 18px; cursor: pointer; accent-color: #10b981;">
-                        📦 Можлива відправка поштою
+                        <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/></svg> Можлива відправка поштою
                     </label>
                 </div>
 
                 <div class="admin-modal-actions" style="display: flex; justify-content: space-between; align-items: center;">
                     <a id="adminEditListingPublicLink" href="#" target="_blank" style="font-size: 0.82rem; color: #2563eb; font-weight: 700; text-decoration: underline;">
-                        👁️ Переглянути на сайті &rarr;
+                        <svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg> Переглянути на сайті &rarr;
                     </a>
                     <div style="display: flex; gap: 10px;">
                         <button type="button" class="btn-action neutral" onclick="closeAdminEditListingModal()">Скасувати</button>
                         <button type="submit" id="adminEditListingSaveBtn" class="btn-action success" style="padding: 9px 20px; font-weight: 800;">
-                            💾 Зберегти зміни
+                            <svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg> Зберегти зміни
                         </button>
                     </div>
                 </div>
@@ -1728,7 +1729,7 @@
     <div class="admin-modal-overlay" id="editUserModal">
         <div class="admin-modal-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                <h3 style="margin: 0; font-size: 1.25rem;">✏️ Редагування даних користувача</h3>
+                <h3 style="margin: 0; font-size: 1.25rem; display:inline-flex; align-items:center; gap:8px;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg> Редагування даних користувача</h3>
                 <button onclick="closeEditUserModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">&times;</button>
             </div>
             <form id="editUserForm" onsubmit="saveUserChanges(event)">
@@ -1771,17 +1772,17 @@
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div class="admin-form-group">
-                        <label>✉️ Верифікація Email</label>
+                        <label style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> Верифікація Email</label>
                         <select id="editUserEmailVerified" class="admin-form-select">
-                            <option value="true">✅ Підтверджено</option>
-                            <option value="false">⏳ Очікує верифікації</option>
+                            <option value="true">Підтверджено</option>
+                            <option value="false">Очікує верифікації</option>
                         </select>
                     </div>
                     <div class="admin-form-group">
-                        <label>📱 Верифікація Телефону</label>
+                        <label style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg> Верифікація Телефону</label>
                         <select id="editUserPhoneVerified" class="admin-form-select">
-                            <option value="true">✅ Підтверджено</option>
-                            <option value="false">⏳ Очікує верифікації</option>
+                            <option value="true">Підтверджено</option>
+                            <option value="false">Очікує верифікації</option>
                         </select>
                     </div>
                 </div>
@@ -1798,7 +1799,7 @@
         <div class="admin-modal-box" style="max-width: 640px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
                 <h3 style="margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
-                    🔍 Перегляд переписки по скарзі <span id="auditComplaintNum"></span>
+                    <svg class="loop-svg-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Перегляд переписки по скарзі <span id="auditComplaintNum"></span>
                 </h3>
                 <button onclick="closeChatAuditModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">&times;</button>
             </div>
@@ -1819,7 +1820,7 @@
     <div class="admin-modal-overlay" id="orderArbitrationModal">
         <div class="admin-modal-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                <h3 style="margin: 0; font-size: 1.25rem;">⚖️ Арбітраж замовлення <span id="arbOrderTitle"></span></h3>
+                <h3 style="margin: 0; font-size: 1.25rem; display:inline-flex; align-items:center; gap:8px;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg> Арбітраж замовлення <span id="arbOrderTitle"></span></h3>
                 <button onclick="closeOrderModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer;">&times;</button>
             </div>
             <form onsubmit="handleSaveOrderArbitration(event)">
@@ -1830,8 +1831,8 @@
                         <option value="Pending">Очікує оплати / підтвердження</option>
                         <option value="Paid">Оплачено</option>
                         <option value="Shipped">Відправлено (в дорозі)</option>
-                        <option value="Completed">✅ Завершено успішно</option>
-                        <option value="Cancelled">❌ Скасовано (повернення)</option>
+                        <option value="Completed">Завершено успішно</option>
+                        <option value="Cancelled">Скасовано (повернення)</option>
                     </select>
                 </div>
                 <div class="admin-form-group">
@@ -1850,7 +1851,7 @@
         </div>
     </div>
 
-    <script src="/js/loop-dialogs.js"></script>
+    <script src="/js/loop-dialogs.js?v=1.1"></script>
     <script>
         // AUTHENTICATION & ACCESS VERIFICATION
         let token = null;
@@ -2102,7 +2103,7 @@
             if (!list || list.length === 0) {
                 container.innerHTML = `
                     <div style="padding: 40px; text-align: center; color: var(--text-muted); grid-column: 1 / -1; background: var(--surface); border: 1px dashed var(--border-color); border-radius: 16px;">
-                        <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 4px;">✅ Скарг не знайдено</div>
+                        <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; display:inline-flex; align-items:center; gap:8px;">${LoopIcons.svg('checkCircle', { size: 18, color: '#10b981' })} Скарг не знайдено</div>
                         <div style="font-size: 0.85rem;">Всі звернення опрацьовано або немає нових сигналів.</div>
                     </div>`;
                 return;
@@ -2111,7 +2112,7 @@
             container.innerHTML = list.map(c => {
                 const isPending = c.status === 'Pending';
                 const statusClass = c.status.toLowerCase();
-                const statusLabel = c.status === 'Pending' ? '⚠️ Очікує розгляду' : (c.status === 'Resolved' ? '✅ Вирішено' : '❌ Відхилено');
+                const statusLabel = c.status === 'Pending' ? LoopIcons.svg('alertTriangle', { size: 13, color: '#f59e0b' }) + ' Очікує розгляду' : (c.status === 'Resolved' ? LoopIcons.svg('checkCircle', { size: 13, color: '#10b981' }) + ' Вирішено' : LoopIcons.svg('x', { size: 13, color: '#ef4444' }) + ' Відхилено');
                 const createdDate = new Date(c.createdAt).toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' });
 
                 const isSupportTicket = (c.reason && (c.reason.includes('Звернення підтримки') || c.reason.includes('💬')));
@@ -2126,7 +2127,7 @@
                         <div class="complaint-header">
                             <div>
                                 <div class="complaint-reason">
-                                    <span>${isSupportTicket ? '💬' : '🚨'}</span>
+                                    <span style="display:inline-flex;align-items:center;">${isSupportTicket ? LoopIcons.svg('chat', { size: 16, color: '#38bdf8' }) : LoopIcons.svg('alertTriangle', { size: 16, color: '#ef4444' })}</span>
                                     <span>${escapeHtml(c.reason)}</span>
                                     ${isSupportTicket ? '<span style="font-size: 0.72rem; background: rgba(37,99,235,0.12); color: #2563eb; font-weight: 800; padding: 2px 8px; border-radius: 6px; margin-left: 6px;">ПІДТРИМКА TELEGRAM</span>' : ''}
                                 </div>
@@ -2154,7 +2155,7 @@
                                 <div class="complaint-party-row" style="border-top: 1px dashed var(--border-color); padding-top: 6px;">
                                     <span style="color: var(--text-muted);">Оголошення:</span>
                                     <a href="/details.html?id=${c.listingId}" target="_blank" style="color: var(--admin-primary); text-decoration: underline; font-weight: 600;">
-                                        ${escapeHtml(c.listingTitle)} ↗
+                                        ${escapeHtml(c.listingTitle)} ${LoopIcons.svg('externalLink', { size: 13 })}
                                     </a>
                                 </div>` : ''}
                         </div>
@@ -2172,22 +2173,22 @@
 
                         <div class="complaint-actions">
                             <button class="btn-action primary" onclick="openReplyModal(${c.id}, '${escapeHtml(c.reporterName || c.reporterEmail || 'Користувач')}', '${escapeHtml(c.reason)}')">
-                                💬 Відповісти в системі
+                                ${LoopIcons.svg('chat', { size: 14 })} Відповісти в системі
                             </button>
                             ${!isSupportTicket ? `
                                 <button class="btn-action primary" onclick="openChatAudit(${c.id})" title="Переглянути листування між учасниками">
-                                    🔍 Аудит листування
+                                    ${LoopIcons.svg('search', { size: 14 })} Аудит листування
                                 </button>
                             ` : ''}
                             ${isPending ? `
                                 <button class="btn-action danger" onclick="banFraudsterFromComplaint(${c.id}, ${c.targetUserId}, '${escapeHtml(c.targetUserName)}')">
-                                    🚫 Заблокувати
+                                    ${LoopIcons.svg('ban', { size: 14 })} Заблокувати
                                 </button>
                                 <button class="btn-action success" onclick="resolveComplaint(${c.id})">
-                                    ✅ Вирішити
+                                    ${LoopIcons.svg('checkCircle', { size: 14 })} Вирішити
                                 </button>
                                 <button class="btn-action neutral" onclick="dismissComplaint(${c.id})">
-                                    ❌ Відхилити
+                                    ${LoopIcons.svg('x', { size: 14 })} Відхилити
                                 </button>
                             ` : ''}
                         </div>
@@ -2362,20 +2363,20 @@
                 const isBanned = !!u.isBanned;
                 const isMuted = u.mutedUntil && new Date(u.mutedUntil) > new Date();
 
-                let statusBadge = `<span class="status-badge active">🟢 Активний</span>`;
-                if (isBanned) statusBadge = `<span class="status-badge banned">🔴 Заблоковано</span>`;
-                else if (isMuted) statusBadge = `<span class="status-badge muted" title="До ${new Date(u.mutedUntil).toLocaleString('uk-UA')}">🔇 Мут чату</span>`;
+                let statusBadge = `<span class="status-badge active">${LoopIcons.svg('checkCircle', { size: 12, color: '#10b981' })} Активний</span>`;
+                if (isBanned) statusBadge = `<span class="status-badge banned">${LoopIcons.svg('ban', { size: 12, color: '#ef4444' })} Заблоковано</span>`;
+                else if (isMuted) statusBadge = `<span class="status-badge muted" title="До ${new Date(u.mutedUntil).toLocaleString('uk-UA')}">${LoopIcons.svg('bellOff', { size: 12, color: '#f59e0b' })} Мут чату</span>`;
 
                 const isFullVerified = !!(u.isEmailVerified && u.isPhoneVerified);
                 const isPartialVerified = !!(u.isEmailVerified || u.isPhoneVerified);
 
-                let verifyLabel = '⏳ Непідтверджено';
+                let verifyLabel = LoopIcons.svg('clock', { size: 12, color: '#94a3b8' }) + ' Непідтверджено';
                 let verifyClass = 'neutral';
                 if (isFullVerified) {
-                    verifyLabel = '✅ Підтверджено';
+                    verifyLabel = LoopIcons.svg('checkCircle', { size: 12, color: '#10b981' }) + ' Підтверджено';
                     verifyClass = 'success';
                 } else if (isPartialVerified) {
-                    verifyLabel = u.isEmailVerified ? '🟡 Email' : '🟡 Телефон';
+                    verifyLabel = u.isEmailVerified ? LoopIcons.svg('mail', { size: 12, color: '#f59e0b' }) + ' Email' : LoopIcons.svg('smartphone', { size: 12, color: '#f59e0b' }) + ' Телефон';
                     verifyClass = 'warning';
                 }
 
@@ -2385,15 +2386,15 @@
                             ${verifyLabel}
                         </button>
                         <div style="font-size: 0.70rem; color: var(--text-muted); display: flex; gap: 4px; align-items: center;">
-                            <span style="color: ${u.isEmailVerified ? '#10b981' : '#94a3b8'}; font-weight: 600;" title="Верифікація пошти">✉️ ${u.isEmailVerified ? 'так' : 'ні'}</span>
+                            <span style="color: ${u.isEmailVerified ? '#10b981' : '#94a3b8'}; font-weight: 600; display:inline-flex; align-items:center; gap:3px;" title="Верифікація пошти">${LoopIcons.svg('mail', { size: 12 })} ${u.isEmailVerified ? 'так' : 'ні'}</span>
                             <span>•</span>
-                            <span style="color: ${u.isPhoneVerified ? '#10b981' : '#94a3b8'}; font-weight: 600;" title="Верифікація телефону">📱 ${u.isPhoneVerified ? 'так' : 'ні'}</span>
+                            <span style="color: ${u.isPhoneVerified ? '#10b981' : '#94a3b8'}; font-weight: 600; display:inline-flex; align-items:center; gap:3px;" title="Верифікація телефону">${LoopIcons.svg('smartphone', { size: 12 })} ${u.isPhoneVerified ? 'так' : 'ні'}</span>
                         </div>
                     </div>
                 `;
 
                 const roleBadge = u.role === 'Admin' 
-                    ? `<span class="status-badge admin">🛡️ Admin</span>`
+                    ? `<span class="status-badge admin">${LoopIcons.svg('shieldCheck', { size: 12 })} Admin</span>`
                     : `<span class="status-badge user">${u.role || 'User'}</span>`;
 
                 return `
@@ -2404,10 +2405,10 @@
                                 ${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}
                                 ${u.isPremium ? (
                                     (u.premiumPlan === 'brand_annual' || u.premiumPlan === 'brand')
-                                        ? `<span style="display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 6px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(37, 99, 235, 0.15)); color: #10b981; font-size: 0.72rem; font-weight: 800; border: 1px solid rgba(16, 185, 129, 0.4);" title="${u.premiumUntil ? 'До ' + new Date(u.premiumUntil).toLocaleDateString('uk-UA') : 'Бренд'}">💎 Бренд</span>`
+                                        ? `<span style="display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 6px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(37, 99, 235, 0.15)); color: #10b981; font-size: 0.72rem; font-weight: 800; border: 1px solid rgba(16, 185, 129, 0.4);" title="${u.premiumUntil ? 'До ' + new Date(u.premiumUntil).toLocaleDateString('uk-UA') : 'Бренд'}">${LoopIcons.svg('gem', { size: 12, color: '#10b981' })} Бренд</span>`
                                         : (u.premiumPlan === 'vip_lifetime')
-                                            ? `<span style="display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 6px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.15)); color: #8b5cf6; font-size: 0.72rem; font-weight: 800; border: 1px solid rgba(139, 92, 246, 0.4);" title="VIP Безліміт">🌟 VIP</span>`
-                                            : `<span style="display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 6px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.15)); color: #d97706; font-size: 0.72rem; font-weight: 800; border: 1px solid rgba(245, 158, 11, 0.4);" title="${u.premiumUntil ? 'До ' + new Date(u.premiumUntil).toLocaleDateString('uk-UA') : 'PRO'}">👑 PRO</span>`
+                                            ? `<span style="display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 6px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.15)); color: #8b5cf6; font-size: 0.72rem; font-weight: 800; border: 1px solid rgba(139, 92, 246, 0.4);" title="VIP Безліміт">${LoopIcons.svg('sparkles', { size: 12, color: '#8b5cf6' })} VIP</span>`
+                                            : `<span style="display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 6px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.15)); color: #d97706; font-size: 0.72rem; font-weight: 800; border: 1px solid rgba(245, 158, 11, 0.4);" title="${u.premiumUntil ? 'До ' + new Date(u.premiumUntil).toLocaleDateString('uk-UA') : 'PRO'}">${LoopIcons.svg('crown', { size: 12, color: '#d97706' })} PRO</span>`
                                 ) : ''}
                             </div>
                             ${u.isBanned && u.banReason ? `<div style="font-size: 0.72rem; color: #ef4444; margin-top: 2px;">Причина: ${escapeHtml(u.banReason)}</div>` : ''}
@@ -2415,58 +2416,58 @@
                         <td><code>${escapeHtml(u.email)}</code></td>
                         <td>
                             <b>${escapeHtml(formatAdminPhone(u.phoneNumber) || '—')}</b>
-                            ${u.telegramChatId && u.telegramChatId !== 0 ? `<div style="font-size: 0.72rem; color: #2563eb; font-weight: 700; margin-top: 2px;">✈️ TG: ${u.telegramChatId}</div>` : `<div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">✈️ TG: —</div>`}
+                            ${u.telegramChatId && u.telegramChatId !== 0 ? `<div style="font-size: 0.72rem; color: #2563eb; font-weight: 700; margin-top: 2px; display:inline-flex; align-items:center; gap:4px;">${LoopIcons.svg('share', { size: 11, color: '#2563eb' })} TG: ${u.telegramChatId}</div>` : `<div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; display:inline-flex; align-items:center; gap:4px;">${LoopIcons.svg('share', { size: 11 })} TG: —</div>`}
                         </td>
                         <td>
                             ${(u.id === 1 || u.email === 'nikitazhidenko@gmail.com') ? 
-                                '<span class="status-badge admin" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(217, 119, 6, 0.28)); color: #b45309; border: 1.5px solid rgba(245, 158, 11, 0.55); font-weight: 900;">⭐ Головний адмін</span>' : 
+                                '<span class="status-badge admin" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(217, 119, 6, 0.28)); color: #b45309; border: 1.5px solid rgba(245, 158, 11, 0.55); font-weight: 900; display:inline-flex; align-items:center; gap:4px;">' + LoopIcons.svg('starFilled', { size: 12, color: '#d97706' }) + ' Головний адмін</span>' : 
                                 roleBadge}
                         </td>
                         <td>${verifiedBadge}</td>
                         <td>
                             ${(u.id === 1 || u.email === 'nikitazhidenko@gmail.com') ? 
-                                '<span class="status-badge active" style="font-weight: 800; border: 1px solid rgba(16, 185, 129, 0.4);">🔒 Незмінний</span>' : 
+                                '<span class="status-badge active" style="font-weight: 800; border: 1px solid rgba(16, 185, 129, 0.4); display:inline-flex; align-items:center; gap:4px;">' + LoopIcons.svg('lock', { size: 12, color: '#10b981' }) + ' Незмінний</span>' : 
                                 statusBadge}
                         </td>
                         <td>
                             <button type="button" class="btn-action primary" onclick="openUserListingsModal(${u.id}, '${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}', '${escapeHtml(u.email)}')" title="Переглянути всі оголошення користувача" style="padding: 3px 9px; font-weight: 800; font-size: 0.78rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px;">
-                                📦 ${u.listingCount ?? 0} шт.
+                                ${LoopIcons.svg('package', { size: 13 })} ${u.listingCount ?? 0} шт.
                             </button>
                         </td>
                         <td style="text-align: right; white-space: nowrap;">
                             <button class="btn-action ${u.isPremium ? 'warning' : 'neutral'}" onclick="openAdminProModal(${u.id}, '${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}', '${escapeHtml(u.email)}', ${!!u.isPremium}, '${escapeHtml(u.premiumPlan || 'pro_monthly')}', '${u.premiumUntil || ''}')" title="Керування підпискою PRO (надати або зняти)" style="padding: 4px 8px; font-weight: 800; font-size: 0.75rem; border-radius: 8px; color: ${u.isPremium ? '#d97706' : 'var(--text-main)'};">
-                                ${u.isPremium ? ((u.premiumPlan === 'brand_annual' || u.premiumPlan === 'brand') ? '💎 Бренд' : (u.premiumPlan === 'vip_lifetime' ? '🌟 VIP' : '👑 PRO')) : '👑 PRO'}
+                                ${u.isPremium ? ((u.premiumPlan === 'brand_annual' || u.premiumPlan === 'brand') ? LoopIcons.svg('gem', { size: 13 }) + ' Бренд' : (u.premiumPlan === 'vip_lifetime' ? LoopIcons.svg('sparkles', { size: 13 }) + ' VIP' : LoopIcons.svg('crown', { size: 13 }) + ' PRO')) : LoopIcons.svg('crown', { size: 13 }) + ' PRO'}
                             </button>
                             <button class="btn-action primary" onclick="openUserListingsModal(${u.id}, '${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}', '${escapeHtml(u.email)}')" title="Переглянути оголошення користувача">
-                                📦
+                                ${LoopIcons.svg('package', { size: 14 })}
                             </button>
                             <button class="btn-action primary" onclick="openSendNotificationModal(${u.id}, '${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}')" title="Надіслати сповіщення на акаунт">
-                                🔔
+                                ${LoopIcons.svg('bell', { size: 14 })}
                             </button>
                             <button class="btn-action neutral" onclick="openResetPasswordModal(${u.id}, '${escapeHtml(u.email)}')" title="Скинути пароль">
-                                🔑
+                                ${LoopIcons.svg('key', { size: 14 })}
                             </button>
                             <button class="btn-action neutral" onclick="openEditUserModal(${u.id})" title="Редагувати профіль">
-                                ✏️
+                                ${LoopIcons.svg('pencil', { size: 14 })}
                             </button>
                             <button class="btn-action warning" onclick="promptMuteUser(${u.id}, ${isMuted})" title="${isMuted ? 'Зняти мут' : 'Тимчасовий мут чату'}">
-                                ${isMuted ? '🔊' : '🔇'}
+                                ${isMuted ? LoopIcons.svg('bell', { size: 14, color: '#10b981' }) : LoopIcons.svg('bellOff', { size: 14, color: '#f59e0b' })}
                             </button>
                             ${(u.email === 'nikitazhidenko@gmail.com' || u.email === 'nikitazidenko@gmail.com') ? `
-                                <span title="Головний адмін захищений від блокування" style="display: inline-block; padding: 4px 8px; font-size: 0.85rem; color: var(--text-muted); cursor: not-allowed;">🔒</span>
-                                <span title="Головний адмін не може бути видалений" style="display: inline-block; padding: 4px 8px; font-size: 0.85rem; color: var(--text-muted); cursor: not-allowed;">🔒</span>
+                                <span title="Головний адмін захищений від блокування" style="display: inline-flex; align-items:center; padding: 4px 8px; font-size: 0.85rem; color: var(--text-muted); cursor: not-allowed;">${LoopIcons.svg('lock', { size: 14 })}</span>
+                                <span title="Головний адмін не може бути видалений" style="display: inline-flex; align-items:center; padding: 4px 8px; font-size: 0.85rem; color: var(--text-muted); cursor: not-allowed;">${LoopIcons.svg('lock', { size: 14 })}</span>
                             ` : `
                                 ${isBanned ? `
                                     <button class="btn-action success" onclick="toggleBanUser(${u.id}, false, '${escapeHtml(u.firstName)}')">
-                                        🔓 Розбан
+                                        ${LoopIcons.svg('unlock', { size: 13 })} Розбан
                                     </button>
                                 ` : `
                                     <button class="btn-action danger" onclick="toggleBanUser(${u.id}, true, '${escapeHtml(u.firstName)}')">
-                                        🚫 Бан
+                                        ${LoopIcons.svg('ban', { size: 13 })} Бан
                                     </button>
                                 `}
                                 <button class="btn-action danger" onclick="deleteUser(${u.id})" title="Видалити користувача з бази (в 1 клік)">
-                                    🗑️
+                                    ${LoopIcons.svg('trash', { size: 14 })}
                                 </button>
                             `}
                         </td>
@@ -2574,15 +2575,15 @@
             if (user.id === 1 || user.email === 'nikitazhidenko@gmail.com') {
                 roleSelect.value = 'Admin';
                 roleSelect.disabled = true;
-                if (roleNotice) roleNotice.innerHTML = '⭐ <b>Головний адміністратор (Нікіта)</b> має незмінну роль Admin і захищений системою.';
+                if (roleNotice) roleNotice.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;">' + LoopIcons.svg('starFilled', { size: 14, color: '#f59e0b' }) + '<span><b>Головний адміністратор (Нікіта)</b> має незмінну роль Admin і захищений системою.</span></span>';
             } else {
                 roleSelect.disabled = false;
                 if (!isCurrentMainAdmin) {
                     if (optAdmin) optAdmin.disabled = true;
-                    if (roleNotice) roleNotice.innerHTML = '⚠️ Тільки Головний адміністратор (Нікіта) має право призначати нових адміністраторів.';
+                    if (roleNotice) roleNotice.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;">' + LoopIcons.svg('alertTriangle', { size: 14, color: '#f59e0b' }) + '<span>Тільки Головний адміністратор (Нікіта) має право призначати нових адміністраторів.</span></span>';
                 } else {
                     if (optAdmin) optAdmin.disabled = false;
-                    if (roleNotice) roleNotice.innerHTML = 'ℹ️ Призначення адміна надає повний доступ до системи. Нові права активуються після релогіну.';
+                    if (roleNotice) roleNotice.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;">' + LoopIcons.svg('info', { size: 14, color: '#38bdf8' }) + '<span>Призначення адміна надає повний доступ до системи. Нові права активуються після релогіну.</span></span>';
                 }
             }
 
@@ -2696,7 +2697,7 @@
             if (!list || list.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
-                        <div style="font-size: 2.2rem; margin-bottom: 8px;">📭</div>
+                        <div style="display:flex;justify-content:center;margin-bottom:8px;">${LoopIcons.svg('package', { size: 32, color: '#94a3b8' })}</div>
                         <div style="font-weight: 700; font-size: 1rem; color: var(--text-main); margin-bottom: 4px;">У користувача немає оголошень</div>
                         <div style="font-size: 0.85rem;">Користувач ще не створював товарів чи послуг на платформі.</div>
                     </div>
@@ -2722,8 +2723,8 @@
                                         <span style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">${escapeHtml(l.title)}</span>
                                         <code style="font-size: 0.75rem; background: var(--surface); padding: 1px 6px; border-radius: 4px; color: var(--text-muted);">#${escapeHtml(l.code || l.id)}</code>
                                         <span style="padding: 2px 7px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; background: ${st.bg}; color: ${st.color};">${st.label}</span>
-                                        ${l.videoUrl ? '<span style="font-size: 0.72rem; padding: 2px 6px; border-radius: 6px; background: rgba(37,99,235,0.12); color: #2563eb; font-weight: 800;">🎬 Відео</span>' : ''}
-                                        ${l.isFeatured ? '<span style="font-size: 0.72rem; padding: 2px 6px; border-radius: 6px; background: rgba(245, 158, 11, 0.15); color: #d97706; font-weight: 800;">⭐ ТОП</span>' : ''}
+                                        ${l.videoUrl ? '<span style="font-size: 0.72rem; padding: 2px 6px; border-radius: 6px; background: rgba(37,99,235,0.12); color: #2563eb; font-weight: 800; display:inline-flex; align-items:center; gap:3px;">' + LoopIcons.svg('video', { size: 12, color: '#2563eb' }) + ' Відео</span>' : ''}
+                                        ${l.isFeatured ? '<span style="font-size: 0.72rem; padding: 2px 6px; border-radius: 6px; background: rgba(245, 158, 11, 0.15); color: #d97706; font-weight: 800; display:inline-flex; align-items:center; gap:3px;">' + LoopIcons.svg('starFilled', { size: 12, color: '#d97706' }) + ' ТОП</span>' : ''}
                                     </div>
                                     <div style="display: flex; gap: 14px; font-size: 0.8rem; color: var(--text-muted); flex-wrap: wrap;">
                                         <span>Ціна: <b style="color: #10b981; font-size: 0.9rem;">${l.price} ₴</b></span>
@@ -2735,10 +2736,10 @@
                                 </div>
                                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
                                     <a href="/details.html?id=${l.code || l.id}" target="_blank" class="btn-action primary" style="padding: 6px 12px; text-decoration: none; font-size: 0.8rem;" title="Відкрити картку оголошення">
-                                        👁️ Перегляд
+                                        ${LoopIcons.svg('eye', { size: 14 })} Перегляд
                                     </a>
                                     <button type="button" class="btn-action neutral" onclick="openAdminEditListingModal(${l.id})" style="padding: 6px 12px; font-size: 0.8rem; cursor: pointer;" title="Редагувати оголошення в адмінці">
-                                        ✏️ Редагувати
+                                        ${LoopIcons.svg('pencil', { size: 14 })} Редагувати
                                     </button>
                                 </div>
                             </div>
@@ -2819,7 +2820,7 @@
 
             tbody.innerHTML = list.map(l => {
                 const firstImg = l.imageUrl ? String(l.imageUrl).split(';')[0].trim() : '';
-                const img = firstImg ? `<img src="${escapeHtml(firstImg)}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 8px;">` : `<div style="width: 44px; height: 44px; background: rgba(0,0,0,0.05); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-size: 1.2rem;">📦</div>`;
+                const img = firstImg ? `<img src="${escapeHtml(firstImg)}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 8px;">` : `<div style="width: 44px; height: 44px; background: rgba(0,0,0,0.05); border-radius: 8px; display:flex; align-items:center; justify-content:center;">${LoopIcons.svg('package', { size: 20, color: '#94a3b8' })}</div>`;
                 const date = new Date(l.createdAt).toLocaleDateString('uk-UA');
                 const isFeatured = !!l.isFeatured;
 
@@ -2835,7 +2836,7 @@
                             <a href="/details.html?id=${l.code || l.id}" target="_blank" style="font-weight: 700; color: var(--text-main); text-decoration: underline;">
                                 ${escapeHtml(l.title)}
                             </a>
-                            ${l.videoUrl ? '<span style="margin-left: 6px; font-size: 0.72rem; background: rgba(37,99,235,0.1); color: #2563eb; padding: 1px 6px; border-radius: 4px; font-weight: 700;">🎬 Відео</span>' : ''}
+                            ${l.videoUrl ? '<span style="margin-left: 6px; font-size: 0.72rem; background: rgba(37,99,235,0.1); color: #2563eb; padding: 1px 6px; border-radius: 4px; font-weight: 700; display:inline-flex; align-items:center; gap:3px;">' + LoopIcons.svg('video', { size: 11, color: '#2563eb' }) + ' Відео</span>' : ''}
                         </td>
                         <td><b>${l.price} ₴</b></td>
                         <td><span class="status-badge user">${escapeHtml(l.categoryName || 'Інше')}</span></td>
@@ -2843,21 +2844,21 @@
                         <td><code style="font-size: 0.8rem;">${escapeHtml(formatAdminPhone(l.sellerPhone) || l.sellerEmail || '—')}</code></td>
                         <td style="color: var(--text-muted); font-size: 0.82rem;">${date}</td>
                         <td>
-                            ${l.status === 'Draft' ? '<span class="status-badge" style="background:rgba(245,158,11,0.16);color:#f59e0b;border:1px solid rgba(245,158,11,0.4);">📝 Чернетка (без фото)</span>' : (isFeatured ? '<span class="status-badge featured">⭐ ТОП</span>' : '<span class="status-badge active">🟢 Активне</span>')}
+                            ${l.status === 'Draft' ? '<span class="status-badge" style="background:rgba(245,158,11,0.16);color:#f59e0b;border:1px solid rgba(245,158,11,0.4);">' + LoopIcons.svg('fileText', { size: 12, color: '#f59e0b' }) + ' Чернетка (без фото)</span>' : (isFeatured ? '<span class="status-badge featured">' + LoopIcons.svg('starFilled', { size: 12, color: '#d97706' }) + ' ТОП</span>' : '<span class="status-badge active">' + LoopIcons.svg('checkCircle', { size: 12, color: '#10b981' }) + ' Активне</span>')}
                         </td>
                         <td style="text-align: right; white-space: nowrap;">
                             <button class="btn-action ${isFeatured ? 'warning' : 'neutral'}" onclick="toggleFeaturedListing(${l.id})" title="Закріпити в ТОП / зняти">
-                                ⭐
+                                ${LoopIcons.svg(isFeatured ? 'starFilled' : 'star', { size: 14 })}
                             </button>
                             <a href="/details.html?id=${l.code || l.id}" target="_blank" class="btn-action neutral" title="Переглянути">
-                                👁️
+                                ${LoopIcons.svg('eye', { size: 14 })}
                             </a>
-                            <a href="/edit.html?id=${encodeURIComponent(l.code || l.id)}" target="_blank" class="btn-action neutral" title="Додати фото / відео на сторінці редагування">📸</a>
+                            <a href="/edit.html?id=${encodeURIComponent(l.code || l.id)}" target="_blank" class="btn-action neutral" title="Додати фото / відео на сторінці редагування">${LoopIcons.svg('camera', { size: 14 })}</a>
                             <button type="button" class="btn-action primary" onclick="openAdminEditListingModal(${l.id})" title="Редагувати оголошення в адмінці">
-                                ✏️
+                                ${LoopIcons.svg('pencil', { size: 14 })}
                             </button>
                             <button class="btn-action danger" onclick="deleteFraudListing(${l.id}, '${escapeHtml(l.title)}')" title="Видалити">
-                                🗑️
+                                ${LoopIcons.svg('trash', { size: 14 })}
                             </button>
                         </td>
                     </tr>
@@ -2937,9 +2938,9 @@
                     : `<span style="color: var(--text-muted);">—</span>`;
 
                 let statusBadge = `<span class="status-badge user">${escapeHtml(o.status)}</span>`;
-                if (o.status === 'Completed') statusBadge = `<span class="status-badge active">✅ Завершено</span>`;
-                if (o.status === 'Shipped') statusBadge = `<span class="status-badge pending">🚚 Відправлено</span>`;
-                if (o.status === 'Cancelled') statusBadge = `<span class="status-badge banned">❌ Скасовано</span>`;
+                if (o.status === 'Completed') statusBadge = `<span class="status-badge active">${LoopIcons.svg('checkCircle', { size: 12, color: '#10b981' })} Завершено</span>`;
+                if (o.status === 'Shipped') statusBadge = `<span class="status-badge pending">${LoopIcons.svg('truck', { size: 12, color: '#f59e0b' })} Відправлено</span>`;
+                if (o.status === 'Cancelled') statusBadge = `<span class="status-badge banned">${LoopIcons.svg('x', { size: 12, color: '#ef4444' })} Скасовано</span>`;
 
                 return `
                     <tr>
@@ -2959,7 +2960,7 @@
                         <td style="font-size: 0.82rem; color: var(--text-muted);">${date}</td>
                         <td style="text-align: right; white-space: nowrap;">
                             <button class="btn-action primary" onclick="openOrderArbitration(${o.id})" title="Втрутитися в угоду">
-                                ⚖️ Рішення
+                                ${LoopIcons.svg('shieldCheck', { size: 14 })} Рішення
                             </button>
                         </td>
                     </tr>
@@ -3035,21 +3036,21 @@
                 document.getElementById('adBannerTitleInput').value = 'Тут могла бути ваша реклама!';
                 document.getElementById('adBannerMessageInput').value = 'Залучайте тисячі покупців щодня на LoopMarket. Розміщуйте товари вашого бренду, банери чи акційні пропозиції.';
                 document.getElementById('adBannerImageInput').value = '/images/loop-ad-banner.svg';
-                document.getElementById('adBannerActionTextInput').value = 'Розмістити рекламу 📢';
+                document.getElementById('adBannerActionTextInput').value = 'Розмістити рекламу';
                 document.getElementById('adBannerActionUrlInput').value = 'https://t.me/LoopMarketSupport';
                 document.getElementById('adBannerPlacementSelect').value = 'sidebar_both';
             } else if (type === 'pro') {
                 document.getElementById('adBannerTitleInput').value = 'Підвищуйте продажі з PRO-акаунтом!';
                 document.getElementById('adBannerMessageInput').value = 'Отримуйте в 5 разів більше переглядів, пріоритет у пошуку каталогу та довіру покупців з бейджем «Надійний продавець».';
                 document.getElementById('adBannerImageInput').value = '/images/loop-ad-banner.svg';
-                document.getElementById('adBannerActionTextInput').value = 'Підключити PRO ⚡';
+                document.getElementById('adBannerActionTextInput').value = 'Підключити PRO';
                 document.getElementById('adBannerActionUrlInput').value = '/profile.html?tab=settings';
                 document.getElementById('adBannerPlacementSelect').value = 'catalog';
             } else if (type === 'safety') {
                 document.getElementById('adBannerTitleInput').value = 'Купуйте безпечно на LoopMarket!';
                 document.getElementById('adBannerMessageInput').value = 'Накладений платіж та перевірка товару у відділенні Нової Пошти. Жодних сумнівних передоплат стороннім особам.';
                 document.getElementById('adBannerImageInput').value = '/images/loop-ad-banner.svg';
-                document.getElementById('adBannerActionTextInput').value = 'Правила безпеки 🛡️';
+                document.getElementById('adBannerActionTextInput').value = 'Правила безпеки';
                 document.getElementById('adBannerActionUrlInput').value = '/safety.html';
                 document.getElementById('adBannerPlacementSelect').value = 'sidebar_both';
             }
@@ -3070,7 +3071,7 @@
                 document.getElementById('infoBannerMessageInput').value = 'Ніколи не пересилайте паролі, SMS-коди та не вводьте реквізити карти на невідомих сторонніх сайтах. Усі безпечні розрахунки здійснюються виключно всередині LoopMarket.';
                 document.getElementById('infoBannerTypeSelect').value = 'danger';
                 document.getElementById('infoBannerPlacementSelect').value = 'top';
-                document.getElementById('infoBannerActionTextInput').value = 'Правила безпеки 🛡️';
+                document.getElementById('infoBannerActionTextInput').value = 'Правила безпеки';
                 document.getElementById('infoBannerActionUrlInput').value = '/safety.html';
             } else if (type === 'release') {
                 document.getElementById('infoBannerTitleInput').value = 'Зустрічайте оновлення LoopMarket 5.0!';
@@ -3168,13 +3169,13 @@ async function loadAnnouncementsList() {
                 .filter(s => s && !s.includes('placeholder') && !s.includes('no-photo'));
             document.getElementById('adminEditListingImages').value = rawImgs.join(';\n');
             const hintEl = document.getElementById('adminEditListingUploadHint');
-            if (hintEl) hintEl.innerText = item.status === 'Draft' ? '📝 Чернетка без фото. Завантажте фото або додайте відео — статус автоматично стане Активним.' : '';
+            if (hintEl) hintEl.innerHTML = item.status === 'Draft' ? '<span style="display:inline-flex;align-items:center;gap:5px;">' + LoopIcons.svg('fileText', { size: 14, color: '#f59e0b' }) + ' Чернетка без фото. Завантажте фото або додайте відео — статус автоматично стане Активним.</span>' : '';
             window._adminEditInitialStatus = item.status || 'Active';
 
             const catSelect = document.getElementById('adminEditListingCategory');
             if (catSelect) {
                 fetch('/api/categories').then(r => r.json()).then(cats => {
-                    catSelect.innerHTML = cats.map(c => `<option value="${c.id}" ${c.id == item.categoryId ? 'selected' : ''}>${c.name}</option>`).join('');
+                    catSelect.innerHTML = cats.map(c => `<option value="${c.id}" ${c.id == item.categoryId ? 'selected' : ''}>${escapeHtml(LoopIcons.stripEmojis(c.name))}</option>`).join('');
                 }).catch(() => {});
             }
 
@@ -3202,7 +3203,7 @@ async function loadAnnouncementsList() {
             const origHtml = saveBtn ? saveBtn.innerHTML : '';
             if (saveBtn) {
                 saveBtn.disabled = true;
-                saveBtn.innerHTML = '⏳ Збереження...';
+                saveBtn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;">' + LoopIcons.svg('clock', { size: 15 }) + ' Збереження...</span>';
             }
 
             const rawImagesText = document.getElementById('adminEditListingImages').value || '';
@@ -3265,7 +3266,7 @@ async function loadAnnouncementsList() {
             const files = Array.from(input.files || []);
             if (!files.length) return;
             const hintEl = document.getElementById('adminEditListingUploadHint');
-            if (hintEl) hintEl.innerText = '⏳ Завантаження фотографій...';
+            if (hintEl) hintEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:5px;">' + LoopIcons.svg('clock', { size: 14, color: '#38bdf8' }) + ' Завантаження фотографій...</span>';
             try {
                 const fd = new FormData();
                 files.forEach(f => fd.append('files', f));
@@ -3279,10 +3280,10 @@ async function loadAnnouncementsList() {
                 ta.value = [...existing, ...upData.imageUrls].join(';\n');
                 const stSel = document.getElementById('adminEditListingStatus');
                 if (stSel && stSel.value === 'Draft') stSel.value = 'Active';
-                if (hintEl) hintEl.innerText = '✅ Фото завантажено! Натисніть «Зберегти зміни» для публікації.';
+                if (hintEl) hintEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:5px;">' + LoopIcons.svg('checkCircle', { size: 14, color: '#10b981' }) + ' Фото завантажено! Натисніть «Зберегти зміни» для публікації.</span>';
                 LoopToast.success(`Завантажено ${upData.imageUrls.length} фото!`);
             } catch (err) {
-                if (hintEl) hintEl.innerText = '❌ ' + (err.message || 'Помилка');
+                if (hintEl) hintEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:5px;">' + LoopIcons.svg('alertCircle', { size: 14, color: '#ef4444' }) + ' ' + escapeHtml(err.message || 'Помилка') + '</span>';
                 LoopToast.error(err.message || 'Не вдалося завантажити фото');
             } finally {
                 input.value = '';
@@ -3305,7 +3306,7 @@ async function loadAnnouncementsList() {
             document.getElementById('adBannerImageInput').value = '/images/loop-ad-banner.svg';
             document.getElementById('adBannerTitleInput').value = 'Тут могла бути ваша реклама!';
             document.getElementById('adBannerMessageInput').value = 'Залучайте тисячі покупців щодня на LoopMarket. Розміщуйте товари вашого бренду, банери чи акційні пропозиції.';
-            document.getElementById('adBannerActionTextInput').value = 'Розмістити рекламу 📢';
+            document.getElementById('adBannerActionTextInput').value = 'Розмістити рекламу';
             document.getElementById('adBannerActionUrlInput').value = 'https://t.me/LoopMarketSupport';
             document.getElementById('adBannerPlacementSelect').value = 'sidebar_both';
             updateAdBannerLivePreview();
@@ -3375,7 +3376,7 @@ async function loadAnnouncementsList() {
             const title = document.getElementById('adBannerTitleInput')?.value?.trim() || 'Тут могла бути ваша реклама!';
             const desc = document.getElementById('adBannerMessageInput')?.value?.trim() || 'Залучайте тисячі покупців щодня на LoopMarket...';
             const imgUrl = document.getElementById('adBannerImageInput')?.value?.trim() || '';
-            const actionText = document.getElementById('adBannerActionTextInput')?.value?.trim() || 'Розмістити рекламу 📢';
+            const actionText = document.getElementById('adBannerActionTextInput')?.value?.trim() || 'Розмістити рекламу';
             const placement = document.getElementById('adBannerPlacementSelect')?.value || 'sidebar_both';
 
             document.getElementById('adPreviewTitle').innerText = title;
@@ -3422,7 +3423,7 @@ async function loadAnnouncementsList() {
             const prevBtnText = submitBtn ? submitBtn.innerHTML : null;
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '⏳ Збереження...';
+                submitBtn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;">' + LoopIcons.svg('clock', { size: 15 }) + ' Збереження...</span>';
             }
 
             try {
@@ -3500,7 +3501,7 @@ async function loadAnnouncementsList() {
             const prevBtnText = submitBtn ? submitBtn.innerHTML : null;
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '⏳ Публікація...';
+                submitBtn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;">' + LoopIcons.svg('clock', { size: 15 }) + ' Публікація...</span>';
             }
 
             try {
@@ -3579,25 +3580,25 @@ async function loadAnnouncementsList() {
                 const isActive = a.isActive && !isExpired;
 
                 const typeBadge = a.type === 'danger' 
-                    ? '<span class="status-badge banned">🚫 Критичне</span>' 
+                    ? '<span class="status-badge banned">' + LoopIcons.svg('ban', { size: 12, color: '#ef4444' }) + ' Критичне</span>' 
                     : (a.type === 'promo' 
-                        ? '<span class="status-badge" style="background: rgba(16,185,129,0.15); color: #059669; font-weight: 800;">🏷️ Реклама</span>' 
+                        ? '<span class="status-badge" style="background: rgba(16,185,129,0.15); color: #059669; font-weight: 800;">' + LoopIcons.svg('tag', { size: 12, color: '#059669' }) + ' Реклама</span>' 
                         : (a.type === 'info' 
-                            ? '<span class="status-badge" style="background: rgba(37,99,235,0.12); color: #2563eb; font-weight: 800;">ℹ️ Інфо</span>' 
-                            : '<span class="status-badge warning">⚠️ Попередження</span>'));
+                            ? '<span class="status-badge" style="background: rgba(37,99,235,0.12); color: #2563eb; font-weight: 800;">' + LoopIcons.svg('info', { size: 12, color: '#2563eb' }) + ' Інфо</span>' 
+                            : '<span class="status-badge warning">' + LoopIcons.svg('alertTriangle', { size: 12, color: '#f59e0b' }) + ' Попередження</span>'));
 
                 const statusBadge = isActive 
-                    ? '<span class="status-badge active">🟢 Активне на сайті</span>' 
+                    ? '<span class="status-badge active">' + LoopIcons.svg('checkCircle', { size: 12, color: '#10b981' }) + ' Активне на сайті</span>' 
                     : (isExpired 
-                        ? '<span class="status-badge muted">⏳ Термін сплив</span>' 
-                        : '<span class="status-badge" style="background: rgba(100,116,139,0.15); color: #64748b;">⚪ Знято адміном</span>');
+                        ? '<span class="status-badge muted">' + LoopIcons.svg('clock', { size: 12, color: '#94a3b8' }) + ' Термін сплив</span>' 
+                        : '<span class="status-badge" style="background: rgba(100,116,139,0.15); color: #64748b;">' + LoopIcons.svg('ban', { size: 12, color: '#64748b' }) + ' Знято адміном</span>');
 
-                const pageLabel = a.targetPage === 'home' ? '🏠 Каталог / Головна' : (a.targetPage === 'details' ? '📦 Товар' : (a.targetPage === 'services' ? '🛠️ Послуги' : '🌐 Всі сторінки'));
-                const placeLabel = a.placement === 'sidebar_both' ? '↔️ Оба боки (Симетричний Skyscraper)' : (a.placement === 'sidebar_right' ? '➡️ Справа (Skyscraper)' : (a.placement === 'sidebar_left' ? '⬅️ Зліва (Skyscraper)' : (a.placement === 'catalog' ? '📰 У каталозі' : (a.placement === 'modal' ? '🪟 Модальне вікно' : '🔝 Верхній банер'))));
+                const pageLabel = a.targetPage === 'home' ? LoopIcons.svg('home', { size: 13 }) + ' Каталог / Головна' : (a.targetPage === 'details' ? LoopIcons.svg('package', { size: 13 }) + ' Товар' : (a.targetPage === 'services' ? LoopIcons.svg('wrench', { size: 13 }) + ' Послуги' : LoopIcons.svg('globe', { size: 13 }) + ' Всі сторінки'));
+                const placeLabel = a.placement === 'sidebar_both' ? LoopIcons.svg('sliders', { size: 13 }) + ' Оба боки (Симетричний Skyscraper)' : (a.placement === 'sidebar_right' ? LoopIcons.svg('arrowRight', { size: 13 }) + ' Справа (Skyscraper)' : (a.placement === 'sidebar_left' ? '<span style="display:inline-flex;transform:rotate(180deg);">' + LoopIcons.svg('arrowRight', { size: 13 }) + '</span> Зліва (Skyscraper)' : (a.placement === 'catalog' ? LoopIcons.svg('tag', { size: 13 }) + ' У каталозі' : (a.placement === 'modal' ? LoopIcons.svg('sparkles', { size: 13 }) + ' Модальне вікно' : LoopIcons.svg('megaphone', { size: 13 }) + ' Верхній банер'))));
 
                 const expiresLabel = a.expiresAt 
                     ? new Date(a.expiresAt).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-                    : '♾️ Безстроково';
+                    : LoopIcons.svg('clock', { size: 13 }) + ' Безстроково';
 
                 return `
                     <tr style="${!isActive ? 'opacity: 0.65;' : ''}">
@@ -3606,7 +3607,7 @@ async function loadAnnouncementsList() {
                         <td>
                             ${a.title ? `<div style="font-weight: 800; color: var(--text-main); margin-bottom: 2px;">${escapeHtml(a.title)}</div>` : ''}
                             <div style="font-size: 0.85rem; color: var(--text-muted); max-width: 380px; word-break: break-word;">${escapeHtml(a.message)}</div>
-                            ${a.actionUrl ? `<div style="font-size: 0.75rem; margin-top: 4px;"><a href="${escapeHtml(a.actionUrl)}" target="_blank" style="color: #2563eb; font-weight: 700;">🔗 ${escapeHtml(a.actionText || 'Перейти')}</a></div>` : ''}
+                            ${a.actionUrl ? `<div style="font-size: 0.75rem; margin-top: 4px;"><a href="${escapeHtml(a.actionUrl)}" target="_blank" style="color: #2563eb; font-weight: 700; display:inline-flex; align-items:center; gap:4px;">${LoopIcons.svg('link', { size: 12, color: '#2563eb' })} ${escapeHtml(a.actionText || 'Перейти')}</a></div>` : ''}
                         </td>
                         <td><span style="font-weight: 700; font-size: 0.82rem;">${pageLabel}</span></td>
                         <td><span style="font-weight: 700; font-size: 0.82rem;">${placeLabel}</span></td>
@@ -3615,11 +3616,11 @@ async function loadAnnouncementsList() {
                         <td style="text-align: right; white-space: nowrap;">
                             ${isActive ? `
                                 <button type="button" class="btn-action warning" onclick="handleDeactivateAnnouncement(${a.id})" title="Зняти з показу на сайті" style="padding: 4px 10px; font-weight: 700; font-size: 0.78rem;">
-                                    🛑 Зняти
+                                    ${LoopIcons.svg('ban', { size: 13 })} Зняти
                                 </button>
                             ` : ''}
                             <button type="button" class="btn-action danger" onclick="handleDeleteAnnouncementPermanent(${a.id})" title="Видалити назавжди" style="padding: 4px 8px; font-weight: 700; font-size: 0.78rem;">
-                                🗑️
+                                ${LoopIcons.svg('trash', { size: 14 })}
                             </button>
                         </td>
                     </tr>
@@ -3732,11 +3733,11 @@ async function loadAnnouncementsList() {
             }
 
             const audienceText = targetAudience === 'sellers' ? 'тільки продавцям' : (targetAudience === 'buyers' ? 'тільки покупцям' : 'всім користувачам');
-            const confirmed = await LoopDialog.confirm(`Відправити розсилку (${audienceText})?\nКанали: В додатку (${sendInApp ? '✓' : '✗'}), SignalR онлайн (${sendLiveToast ? '✓' : '✗'}), Telegram (${sendTelegram ? '✓' : '✗'})`, "Підтвердження масової розсилки");
+            const confirmed = await LoopDialog.confirm(`Відправити розсилку (${audienceText})?\nКанали: В додатку (${sendInApp ? 'Так' : 'Ні'}), SignalR онлайн (${sendLiveToast ? 'Так' : 'Ні'}), Telegram (${sendTelegram ? 'Так' : 'Ні'})`, "Підтвердження масової розсилки");
             if (!confirmed) return;
 
             const btn = document.getElementById('btnSubmitBroadcast');
-            if (btn) { btn.disabled = true; btn.innerText = '⏳ Відправка розсилки...'; }
+            if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;">' + LoopIcons.svg('clock', { size: 15 }) + ' Відправка розсилки...</span>'; }
 
             try {
                 const res = await adminFetch('/api/admin/broadcast', {
@@ -3753,7 +3754,7 @@ async function loadAnnouncementsList() {
                         statusBox.style.background = 'rgba(16,185,129,0.12)';
                         statusBox.style.color = '#059669';
                         statusBox.style.border = '1px solid rgba(16,185,129,0.3)';
-                        statusBox.innerHTML = `✅ <strong>Масову розсилку надіслано!</strong> Отримали в додатку: <strong>${data.inAppDelivered}</strong>, в Telegram-боті: <strong>${data.telegramDelivered}</strong>${data.liveToastSent ? ', передано онлайн SignalR користувачам' : ''}.`;
+                        statusBox.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;">${LoopIcons.svg('checkCircle', { size: 15, color: '#10b981' })} <span><strong>Масову розсилку надіслано!</strong> Отримали в додатку: <strong>${data.inAppDelivered}</strong>, в Telegram-боті: <strong>${data.telegramDelivered}</strong>${data.liveToastSent ? ', передано онлайн SignalR користувачам' : ''}.</span></span>`;
                     }
                     document.getElementById('broadcastTitleInput').value = '';
                     document.getElementById('broadcastMessageInput').value = '';
@@ -3763,7 +3764,7 @@ async function loadAnnouncementsList() {
             } catch (err) {
                 LoopToast.error("Помилка зв'язку з сервером");
             } finally {
-                if (btn) { btn.disabled = false; btn.innerText = '🚀 Відправити розсилку'; }
+                if (btn) { btn.disabled = false; btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;">' + LoopIcons.svg('rocket', { size: 15 }) + ' Відправити розсилку</span>'; }
             }
         }
 
@@ -3784,10 +3785,10 @@ async function loadAnnouncementsList() {
                 tbody.innerHTML = categories.map(cat => `
                     <tr>
                         <td style="font-weight:700; color:var(--text-muted);">#${cat.id}</td>
-                        <td><b>${escapeHtml(cat.name)}</b></td>
+                        <td><span style="display:inline-flex;align-items:center;gap:6px;">${LoopIcons.fromCategory(cat.icon, cat.name, { size: 16 })}<b>${escapeHtml(LoopIcons.stripEmojis(cat.name))}</b></span></td>
                         <td style="text-align:right;">
-                            <button class="btn-action primary" onclick="editCategoryPrompt(${cat.id}, '${escapeHtml(cat.name)}')">✏️ Змінити</button>
-                            <button class="btn-action danger" onclick="deleteCategoryPrompt(${cat.id}, '${escapeHtml(cat.name)}')">🗑️</button>
+                            <button class="btn-action primary" style="display:inline-flex;align-items:center;gap:5px;" onclick="editCategoryPrompt(${cat.id}, '${escapeHtml(cat.name)}')">${LoopIcons.svg('pencil', { size: 13 })} Змінити</button>
+                            <button class="btn-action danger" style="display:inline-flex;align-items:center;justify-content:center;" onclick="deleteCategoryPrompt(${cat.id}, '${escapeHtml(cat.name)}')">${LoopIcons.svg('trash', { size: 14 })}</button>
                         </td>
                     </tr>
                 `).join('');
@@ -3958,7 +3959,7 @@ async function loadAnnouncementsList() {
 
             const btn = document.getElementById('btnSubmitReply');
             btn.disabled = true;
-            btn.innerText = '⏳ Надсилання...';
+            btn.innerHTML = LoopIcons.svg('clock', { size: 15 }) + ' Надсилання...';
 
             try {
                 const res = await adminFetch(`/api/admin/complaints/${id}/reply`, {
@@ -3991,7 +3992,7 @@ async function loadAnnouncementsList() {
                 if (window.LoopToast) LoopToast.error("Помилка з'єднання з сервером");
             } finally {
                 btn.disabled = false;
-                btn.innerText = '🚀 Надіслати офіційну відповідь';
+                btn.innerHTML = LoopIcons.svg('rocket', { size: 15 }) + ' Надіслати офіційну відповідь';
             }
         }
 
@@ -4279,10 +4280,10 @@ async function loadAnnouncementsList() {
             const statusText = document.getElementById('adminProCurrentStatusText');
             const revokeBtn = document.getElementById('btnAdminRevokePro');
             if (isPro) {
-                statusText.innerHTML = `<span style="color: #10b981; font-weight: 800;">👑 Активний (план: ${plan || 'PRO'})</span>${expiry ? ' до ' + new Date(expiry).toLocaleDateString('uk-UA') : ''}`;
+                statusText.innerHTML = `<span style="color: #10b981; font-weight: 800; display:inline-flex; align-items:center; gap:5px;">${LoopIcons.svg('crown', { size: 14, color: '#10b981' })} Активний (план: ${plan || 'PRO'})</span>${expiry ? ' до ' + new Date(expiry).toLocaleDateString('uk-UA') : ''}`;
                 if (revokeBtn) revokeBtn.style.display = 'block';
             } else {
-                statusText.innerHTML = '<span style="color: var(--text-muted);">❌ Звичайний акаунт (немає PRO)</span>';
+                statusText.innerHTML = '<span style="color: var(--text-muted); display:inline-flex; align-items:center; gap:5px;">' + LoopIcons.svg('x', { size: 14, color: '#94a3b8' }) + ' Звичайний акаунт (немає PRO)</span>';
                 if (revokeBtn) revokeBtn.style.display = 'none';
             }
             const modal = document.getElementById('adminProModal');
@@ -4318,7 +4319,7 @@ async function loadAnnouncementsList() {
 
                 if (res.ok) {
                     closeAdminProModal();
-                    showAdminToast(isGrant ? '👑 Статус PRO успішно надано!' : 'Статус PRO скасовано для користувача');
+                    showAdminToast(isGrant ? 'Статус PRO успішно надано!' : 'Статус PRO скасовано для користувача');
                     loadUsers();
                 } else {
                     const err = await res.json().catch(() => ({}));
@@ -4337,7 +4338,7 @@ async function loadAnnouncementsList() {
         <div style="background: var(--surface); border: 1.5px solid var(--border-color); border-radius: 20px; max-width: 480px; width: 100%; padding: 26px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); position: relative;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">👑</div>
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; display: flex; align-items: center; justify-content: center;"><svg class="loop-svg-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg></div>
                     <div>
                         <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--text-main);">Керування статусом PRO</h3>
                         <p style="margin: 0; font-size: 0.78rem; color: var(--text-muted);" id="adminProUserSub">Користувач ID: ...</p>
@@ -4351,9 +4352,9 @@ async function loadAnnouncementsList() {
             <div style="margin-bottom: 16px;">
                 <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Тарифний план:</label>
                 <select id="adminProPlanSelect" style="width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 10px 12px; color: var(--text-main); font-size: 0.92rem; outline: none;">
-                    <option value="pro_monthly">👑 LoopMarket PRO (Місячний)</option>
-                    <option value="brand_annual">💎 Бренд & Бізнес (Річний)</option>
-                    <option value="vip_lifetime">🌟 VIP Партнер / Безліміт</option>
+                    <option value="pro_monthly">LoopMarket PRO (Місячний)</option>
+                    <option value="brand_annual">Бренд & Бізнес (Річний)</option>
+                    <option value="vip_lifetime">VIP Партнер / Безліміт</option>
                 </select>
             </div>
 
@@ -4374,7 +4375,7 @@ async function loadAnnouncementsList() {
 
             <div style="display: flex; gap: 10px;">
                 <button type="button" onclick="submitAdminSetPro(true)" style="flex: 1; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35); display: flex; align-items: center; justify-content: center; gap: 6px;">
-                    <span>👑 Надати / Подовжити PRO</span>
+                    <span style="display:inline-flex;align-items:center;gap:6px;"><svg class="loop-svg-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg> Надати / Подовжити PRO</span>
                 </button>
                 <button type="button" id="btnAdminRevokePro" onclick="submitAdminSetPro(false)" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
                     Зняти PRO
@@ -4390,7 +4391,7 @@ async function loadAnnouncementsList() {
             <div style="padding: 18px 24px; border-bottom: 1.5px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--surface);">
                 <div>
                     <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-                        <span>📦 Оголошення користувача:</span>
+                        <span style="display:inline-flex;align-items:center;gap:7px;"><svg class="loop-svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/></svg> Оголошення користувача:</span>
                         <span id="userListingsModalUserName" style="color: #2563eb;"></span>
                     </h3>
                     <div id="userListingsModalSub" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;"></div>
@@ -4399,7 +4400,7 @@ async function loadAnnouncementsList() {
             </div>
 
             <div style="padding: 12px 24px; border-bottom: 1px solid var(--border-color); background: var(--bg-color); display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
-                <input type="text" id="userListingsFilterInput" class="admin-form-input" placeholder="🔍 Фільтрувати за назвою чи категорією..." oninput="filterUserListingsTable()" style="max-width: 380px; padding: 7px 12px; font-size: 0.85rem;">
+                <input type="text" id="userListingsFilterInput" class="admin-form-input" placeholder="Фільтрувати за назвою чи категорією..." oninput="filterUserListingsTable()" style="max-width: 380px; padding: 7px 12px; font-size: 0.85rem;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span id="userListingsCountBadge" class="status-badge" style="background: rgba(37,99,235,0.12); color: #2563eb; font-weight: 800; padding: 4px 10px; border-radius: 8px;">Всього: 0</span>
                 </div>
@@ -4415,6 +4416,6 @@ async function loadAnnouncementsList() {
         </div>
     </div>
 
-    <script src="/js/responsive-nav.js?v=3.5" defer></script>
+    <script src="/js/responsive-nav.js?v=3.6" defer></script>
 </body>
 </html>
