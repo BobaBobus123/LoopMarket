@@ -1978,3 +1978,20 @@ h1, h2, h3, .heading-brand, .hero-title, .section-title, .modal-title {
 .btn-drawer-logout:hover {
     background: rgba(239, 68, 68, 0.15);
 }
+
+.badge-count {
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 12px;
+    min-width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
+    border: 1.5px solid var(--surface);
+    line-height: 1;
+}

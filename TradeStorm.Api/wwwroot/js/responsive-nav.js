@@ -108,7 +108,7 @@
     function renderUnifiedDrawerUserCard() {
         const container = document.getElementById('drawerUserCard');
         const logoutBtn = document.getElementById('drawerLogoutBtn');
-        const themeRow = document.querySelector('#mobileNavDrawer .drawer-theme-row');
+        const footer = document.getElementById('drawerFooter') || logoutBtn?.closest('.drawer-footer');
         if (!container) return;
 
         const acc = resolveLoopAccount();
@@ -134,7 +134,7 @@
                 </div>
             `;
             if (logoutBtn) logoutBtn.style.display = 'flex';
-            if (themeRow) themeRow.style.marginBottom = '4px';
+            if (footer) footer.style.display = 'flex';
         } else {
             container.innerHTML = `
                 <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Вхід у ваш профіль:</div>
@@ -144,8 +144,131 @@
                 </div>
             `;
             if (logoutBtn) logoutBtn.style.display = 'none';
-            if (themeRow) themeRow.style.marginBottom = '0';
+            if (footer) footer.style.display = 'none';
         }
+    }
+
+    function updateDrawerActiveState(drawer) {
+        if (!drawer) return;
+        const currentPath = window.location.pathname.toLowerCase();
+        const navServActive = document.getElementById('navServices')?.classList.contains('active');
+        const isServiceNav = Boolean(navServActive || window.location.hash === '#services' || window.location.search.includes('type=service'));
+        const isHomeRoute = currentPath === '/index.html' || currentPath === '/' || currentPath === '';
+
+        const activeMap = {
+            home: isHomeRoute && !isServiceNav,
+            create: currentPath.includes('create'),
+            messages: currentPath.includes('messages'),
+            services: isHomeRoute && isServiceNav,
+            safety: currentPath.includes('safety'),
+            about: currentPath.includes('about'),
+            profile: currentPath.includes('profile'),
+            admin: currentPath.includes('admin')
+        };
+
+        drawer.querySelectorAll('.drawer-link[data-drawer-nav]').forEach(link => {
+            const key = link.getAttribute('data-drawer-nav');
+            link.classList.toggle('active', Boolean(activeMap[key]));
+        });
+    }
+
+    function syncUnifiedDrawer(drawer, account) {
+        if (!drawer) return;
+        const existingBadge = drawer.querySelector('#drawerChatBadge');
+        const prevBadgeText = existingBadge ? existingBadge.textContent : '0';
+        const prevBadgeDisplay = existingBadge ? existingBadge.style.display : 'none';
+
+        drawer.innerHTML = `
+            <div class="drawer-header">
+                <a href="/index.html" class="logo" style="font-size: 1.2rem; text-decoration: none;">
+                    <div class="logo-circle" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; font-size: 1rem;">L</div>
+                    <span style="color: var(--text-main);">Loop<span style="color: #10b981;">Market</span></span>
+                </a>
+                <button type="button" class="btn-drawer-close" id="mobileDrawerCloseBtn" aria-label="Закрити">✕</button>
+            </div>
+
+            <div class="drawer-user-card" id="drawerUserCard"></div>
+
+            <nav class="drawer-links">
+                <a href="/index.html" class="drawer-link" data-drawer-nav="home">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                    <span>Головна</span>
+                </a>
+                <a href="/create.html" class="drawer-link drawer-sell-link" data-drawer-nav="create">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>Подати оголошення</span>
+                </a>
+                <a href="/messages.html" class="drawer-link" id="drawerChatLink" data-drawer-nav="messages">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Повідомлення (Чат)</span>
+                    <span class="badge-count" id="drawerChatBadge" style="display: none; margin-left: auto;">0</span>
+                </a>
+                <a href="/index.html#services" class="drawer-link" data-drawer-nav="services">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    <span>Послуги та сервіси</span>
+                </a>
+                <a href="/safety.html" class="drawer-link" data-drawer-nav="safety">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>Правила безпеки</span>
+                </a>
+                <a href="/about.html" class="drawer-link" data-drawer-nav="about">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>
+                    <span>Про маркетплейс</span>
+                </a>
+                <a href="/profile.html" class="drawer-link" id="drawerProfileLink" data-drawer-nav="profile">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>Особистий кабінет</span>
+                </a>
+                ${account.isAdmin ? `
+                <a href="/admin.html" class="drawer-link drawer-admin-link" data-drawer-nav="admin">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>🛡️ Панель оператора</span>
+                </a>
+                ` : ''}
+            </nav>
+
+            <div class="drawer-footer" id="drawerFooter">
+                <button type="button" class="btn-drawer-logout" id="drawerLogoutBtn" style="display: none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    <span>Вийти з акаунта</span>
+                </button>
+            </div>
+        `;
+
+        const newBadge = drawer.querySelector('#drawerChatBadge');
+        if (newBadge && existingBadge) {
+            newBadge.textContent = prevBadgeText;
+            newBadge.style.display = prevBadgeDisplay || 'none';
+        }
+
+        drawer.querySelector('#mobileDrawerCloseBtn')?.addEventListener('click', closeMobileDrawer);
+        drawer.querySelector('#drawerLogoutBtn')?.addEventListener('click', async () => {
+            closeMobileDrawer();
+            if (typeof window.showLogoutModal === 'function') {
+                window.showLogoutModal();
+            } else {
+                await window.performLoopLogout('/login.html');
+            }
+        });
+
+        drawer.querySelectorAll('.drawer-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const nav = link.getAttribute('data-drawer-nav');
+                const pathNow = window.location.pathname.toLowerCase();
+                if (typeof window.setCatalogMode === 'function' && (pathNow === '/index.html' || pathNow === '/' || pathNow === '')) {
+                    if (nav === 'services') {
+                        window.setCatalogMode('services', e);
+                    } else if (nav === 'home') {
+                        window.setCatalogMode('all', e);
+                    }
+                }
+                closeMobileDrawer();
+            });
+        });
+
+        window.renderDrawerUserInfo = renderUnifiedDrawerUserCard;
+        renderUnifiedDrawerUserCard();
+        updateDrawerActiveState(drawer);
     }
 
     function initResponsiveNav() {
@@ -193,94 +316,21 @@
             navActions.appendChild(menuBtn);
         }
 
-        // 2. Build Slide-out Mobile Navigation Drawer & Overlay
-        if (!document.getElementById('mobileNavDrawer')) {
+        // 2. Build or unify Slide-out Mobile Navigation Drawer & Overlay across all pages
+        let drawer = document.getElementById('mobileNavDrawer');
+        if (!drawer) {
             const overlay = document.createElement('div');
             overlay.id = 'mobileNavOverlay';
             overlay.className = 'mobile-nav-overlay';
             overlay.addEventListener('click', closeMobileDrawer);
             document.body.appendChild(overlay);
 
-            const drawer = document.createElement('aside');
+            drawer = document.createElement('aside');
             drawer.id = 'mobileNavDrawer';
             drawer.className = 'mobile-nav-drawer';
-
-            const isServiceNav = window.location.search.includes('type=service');
-            const isHomeNav = (currentPath === '/index.html' || currentPath === '/' || currentPath === '') && !isServiceNav;
-
-            drawer.innerHTML = `
-                <div class="drawer-header">
-                    <a href="/index.html" class="logo" style="text-decoration: none;">
-                        <div class="logo-circle" style="width: 34px; height: 34px; min-width: 34px; min-height: 34px; font-size: 1rem;">L</div>
-                        <span style="font-size: 1.2rem; font-weight: 800; color: var(--text-main);">Loop<span style="color: #10b981;">Market</span></span>
-                    </a>
-                    <button type="button" class="btn-drawer-close" id="mobileDrawerCloseBtn" aria-label="Закрити меню">✕</button>
-                </div>
-
-                <div class="drawer-user-card" id="drawerUserCard"></div>
-
-                <div class="drawer-links">
-                    <a href="/index.html" class="drawer-link ${isHomeNav ? 'active' : ''}">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-                        <span>Головна / Каталог</span>
-                    </a>
-                    <a href="/index.html?type=service" class="drawer-link ${isServiceNav ? 'active' : ''}">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                        <span>Послуги та сервіси</span>
-                    </a>
-                    <a href="/messages.html" class="drawer-link ${currentPath.includes('messages') ? 'active' : ''}">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        <span>Повідомлення та чат</span>
-                    </a>
-                    <a href="/profile.html" class="drawer-link ${currentPath.includes('profile') ? 'active' : ''}">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        <span>Особистий кабінет</span>
-                    </a>
-                    <a href="/create.html" class="drawer-link drawer-sell-link ${currentPath.includes('create') ? 'active' : ''}">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        <span>Подати оголошення</span>
-                    </a>
-                    <div style="height: 1px; background: var(--border-color); margin: 4px 4px;"></div>
-                    ${isAdmin ? `
-                    <a href="/admin.html" class="drawer-link drawer-admin-link ${currentPath.includes('admin') ? 'active' : ''}">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        <span>🛡️ Панель оператора</span>
-                    </a>
-                    ` : ''}
-                    <a href="/safety.html" class="drawer-link ${currentPath.includes('safety') ? 'active' : ''}">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        <span>Безпека угод</span>
-                    </a>
-                    <a href="/about.html" class="drawer-link ${currentPath.includes('about') ? 'active' : ''}">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>
-                        <span>Про платформу</span>
-                    </a>
-                </div>
-
-                <div class="drawer-footer">
-                    <div class="drawer-theme-row">
-                        <span style="font-size: 0.88rem; font-weight: 600; color: var(--text-muted);">Тема оформлення</span>
-                        <button type="button" class="btn-drawer-theme" onclick="window.toggleTheme ? window.toggleTheme() : null">
-                            <span>🌓 Змінити</span>
-                        </button>
-                    </div>
-                    <button type="button" class="btn-drawer-logout" id="drawerLogoutBtn" style="display: none;" onclick="window.performLoopLogout('/login.html')">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-                        <span>Вийти з акаунта</span>
-                    </button>
-                </div>
-            `;
             document.body.appendChild(drawer);
-
-            document.getElementById('mobileDrawerCloseBtn')?.addEventListener('click', closeMobileDrawer);
-            drawer.querySelectorAll('.drawer-link').forEach(link => {
-                link.addEventListener('click', closeMobileDrawer);
-            });
-            if (typeof window.renderDrawerUserInfo !== 'function') {
-                window.renderDrawerUserInfo = renderUnifiedDrawerUserCard;
-            }
-            renderUnifiedDrawerUserCard();
         }
+        syncUnifiedDrawer(drawer, account);
 
         // 3. Inject App-like Mobile Bottom Navigation Bar (< 768px)
         // НА СТОРІНЦІ ЧАТУ (MESSAGES) НІКОЛИ НЕ СТВОРЮЄМО НИЖНЮ ПАНЕЛЬ, ЩОБ ВОНА НЕ ПЕРЕКРИВАЛА ВВЕДЕННЯ ТЕКСТУ
@@ -315,7 +365,7 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
                         <span>Каталог</span>
                     </a>
-                    <a href="/index.html?type=service" class="bottom-bar-item ${isServices ? 'active' : ''}">
+                    <a href="/index.html#services" class="bottom-bar-item ${isServices ? 'active' : ''}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
                         <span>Послуги</span>
                     </a>
@@ -429,6 +479,7 @@
         }
         if (!drawer) return;
 
+        updateDrawerActiveState(drawer);
         if (typeof window.renderDrawerUserInfo === 'function') {
             try { window.renderDrawerUserInfo(); } catch(err) {}
         }
