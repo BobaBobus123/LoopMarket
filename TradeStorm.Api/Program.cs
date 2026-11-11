@@ -21,29 +21,27 @@ try
     var candidatePaths = new[]
     {
         Path.Combine(Directory.GetCurrentDirectory(), ".env"),
+        Path.Combine(Directory.GetCurrentDirectory(), "TradeStorm.Api", ".env"),
         Path.Combine(AppContext.BaseDirectory, ".env"),
         Path.Combine(Directory.GetCurrentDirectory(), "..", ".env")
     };
-    foreach (var path in candidatePaths)
+    foreach (var path in candidatePaths.Distinct(StringComparer.OrdinalIgnoreCase))
     {
-        if (File.Exists(path))
+        if (!File.Exists(path)) continue;
+        foreach (var line in File.ReadAllLines(path))
         {
-            foreach (var line in File.ReadAllLines(path))
+            var trimmed = line.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith("#")) continue;
+            var eqIdx = trimmed.IndexOf('=');
+            if (eqIdx > 0)
             {
-                var trimmed = line.Trim();
-                if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith("#")) continue;
-                var eqIdx = trimmed.IndexOf('=');
-                if (eqIdx > 0)
+                var k = trimmed.Substring(0, eqIdx).Trim();
+                var v = trimmed.Substring(eqIdx + 1).Trim().Trim('"', '\'');
+                if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(k)) && !string.IsNullOrWhiteSpace(v))
                 {
-                    var k = trimmed.Substring(0, eqIdx).Trim();
-                    var v = trimmed.Substring(eqIdx + 1).Trim();
-                    if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(k)))
-                    {
-                        Environment.SetEnvironmentVariable(k, v);
-                    }
+                    Environment.SetEnvironmentVariable(k, v);
                 }
             }
-            break;
         }
     }
 }
@@ -580,7 +578,7 @@ app.MapGet("/api/system/security-status", (IConfiguration config, HttpContext co
 
     var hasJwtKey = !string.IsNullOrEmpty(config["Jwt:Key"]);
     var hasGoogleClient = !string.IsNullOrEmpty(config["Authentication:Google:ClientId"]);
-    var hasTelegram = !string.IsNullOrEmpty(config["Telegram:BotToken"]);
+    var hasTelegram = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN")) || !string.IsNullOrWhiteSpace(config["Telegram:BotToken"]);
 
     return Results.Ok(new
     {

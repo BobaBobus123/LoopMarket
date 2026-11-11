@@ -59,7 +59,7 @@ public class TelegramWebhookController : ControllerBase
 
         if (update != null)
         {
-            await _botService.ProcessUpdateAsync(update, cancellationToken);
+            await _botService.ProcessUpdateAsync(update, CancellationToken.None);
         }
 
         return Ok();

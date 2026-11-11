@@ -269,6 +269,47 @@ public class BotWebhookAndHardeningTests : IClassFixture<CustomWebApplicationFac
         controller.HttpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes("{\"update_id\":2}"));
         var okRes = await controller.ReceiveWebhook(CancellationToken.None);
         Assert.IsType<OkResult>(okRes);
+
+        // 3. Real Telegram snake_case Update JSON deserializes cleanly via JsonBotAPI.Options and triggers /start
+        const string realWebhookJson = """
+        {
+          "update_id": 987654321,
+          "message": {
+            "message_id": 42,
+            "from": { "id": 77112233, "is_bot": false, "first_name": "Іван", "username": "ivan_test" },
+            "chat": { "id": 77112233, "first_name": "Іван", "type": "private" },
+            "date": 1700000000,
+            "text": "/start"
+          }
+        }
+        """;
+        var parsedUpdate = JsonSerializer.Deserialize<Update>(realWebhookJson, JsonBotAPI.Options);
+        Assert.NotNull(parsedUpdate);
+        Assert.NotNull(parsedUpdate!.Message);
+        Assert.Equal("/start", parsedUpdate.Message!.Text);
+        Assert.Equal(77112233L, parsedUpdate.Message.Chat.Id);
+
+        var stubClient = DispatchProxy.Create<ITelegramBotClient, RecordingTelegramClientProxy>();
+        var stubProxy = (RecordingTelegramClientProxy)(object)stubClient;
+        await configuredBotService.ProcessUpdateWithClientAsync(stubClient, parsedUpdate, CancellationToken.None);
+        Assert.NotEmpty(stubProxy.SentMessages);
+        Assert.Contains("Loop Market", stubProxy.SentMessages[0].Text ?? string.Empty);
+
+        // 4. Empty "Telegram:BotToken": "" does NOT shadow fallback token keys + status endpoint works
+        IConfiguration fallbackConfig = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Telegram:BotToken"] = "",
+                ["TelegramBot:Token"] = "  \"987654:FALLBACK_TOKEN_VALUE\"  "
+            })
+            .Build();
+        var fallbackBot = ActivatorUtilities.CreateInstance<TelegramBotService>(scope.ServiceProvider, fallbackConfig);
+        Assert.True(fallbackBot.HasBotToken);
+
+        var statusRes = await client.GetAsync("/api/auth/telegram/status");
+        Assert.Equal(HttpStatusCode.OK, statusRes.StatusCode);
+        using var statusDoc = JsonDocument.Parse(await statusRes.Content.ReadAsStringAsync());
+        Assert.Equal("LoopMarket_Verify_bot", statusDoc.RootElement.GetProperty("botUsername").GetString());
     }
 
     [Fact]

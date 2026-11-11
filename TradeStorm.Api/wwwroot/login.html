@@ -2029,6 +2029,10 @@
             try {
                 const res = await fetch('/api/auth/telegram/start');
                 const data = await res.json();
+                if (data && data.botConfigured === false) {
+                    alert("Telegram-бот тимчасово вимкнений на сервері (адміністратору потрібно додати TELEGRAM_BOT_TOKEN у налаштуваннях хостингу). Скористайтеся входом через Email.");
+                    return;
+                }
                 if (data && data.deepLink) {
                     const linkElem = document.getElementById('btnOpenTgDeepLink');
                     if (linkElem) linkElem.href = data.deepLink;

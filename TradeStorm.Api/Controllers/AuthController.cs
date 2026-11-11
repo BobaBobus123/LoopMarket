@@ -254,8 +254,22 @@ public class AuthController : ControllerBase
     /// <summary>
     /// Ініціалізація сесії авторизації через Telegram-бота (Етап 6 & 7)
     /// </summary>
+    [HttpGet("telegram/status")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    [EnableRateLimiting("PollingLimit")]
+    public IActionResult GetTelegramStatus([FromServices] TelegramBotService botService)
+    {
+        return Ok(new
+        {
+            configured = botService.HasBotToken,
+            webhookMode = botService.IsWebhookMode,
+            mode = !botService.HasBotToken ? "disabled" : (botService.IsWebhookMode ? "webhook" : "polling"),
+            botUsername = "LoopMarket_Verify_bot"
+        });
+    }
+
     [HttpGet("telegram/start")]
-    public IActionResult StartTelegramLogin()
+    public IActionResult StartTelegramLogin([FromServices] TelegramBotService botService)
     {
         var code = "login_" + Guid.NewGuid().ToString("N").Substring(0, 8);
         var session = new TelegramLoginSession { Code = code };
@@ -264,6 +278,7 @@ public class AuthController : ControllerBase
         return Ok(new
         {
             code = code,
+            botConfigured = botService.HasBotToken,
             botUsername = "LoopMarket_Verify_bot",
             deepLink = $"https://t.me/LoopMarket_Verify_bot?start={code}"
         });

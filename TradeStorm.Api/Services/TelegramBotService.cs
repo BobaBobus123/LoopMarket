@@ -41,13 +41,41 @@ public class TelegramBotService : BackgroundService
     public bool IsWebhookMode => _botClient != null && !string.IsNullOrWhiteSpace(_webhookUrl);
     public string WebhookSecretToken => _webhookSecretToken;
 
+    private static string? ResolveBotToken(IConfiguration config)
+    {
+        var candidates = new[]
+        {
+            Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN"),
+            config["TELEGRAM_BOT_TOKEN"],
+            config["Telegram:BotToken"],
+            config["TelegramBot:Token"],
+            Environment.GetEnvironmentVariable("TELEGRAM_TOKEN"),
+            config["TELEGRAM_TOKEN"],
+            Environment.GetEnvironmentVariable("BOT_TOKEN"),
+            config["BOT_TOKEN"],
+            Environment.GetEnvironmentVariable("TG_BOT_TOKEN"),
+            config["TG_BOT_TOKEN"]
+        };
+
+        foreach (var raw in candidates)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) continue;
+            var cleaned = raw.Trim().Trim('"', '\'');
+            if (!string.IsNullOrWhiteSpace(cleaned) &&
+                !cleaned.StartsWith("YOUR_", StringComparison.OrdinalIgnoreCase))
+            {
+                return cleaned;
+            }
+        }
+
+        return null;
+    }
+
     public TelegramBotService(IConfiguration config, IServiceScopeFactory scopeFactory, IBackgroundTaskQueue? taskQueue = null)
     {
         _scopeFactory = scopeFactory;
         _taskQueue = taskQueue;
-        var token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN")
-            ?? config["Telegram:BotToken"]
-            ?? config["TelegramBot:Token"];
+        var token = ResolveBotToken(config);
 
         var renderUrl = Environment.GetEnvironmentVariable("RENDER_EXTERNAL_URL");
         if (!string.IsNullOrWhiteSpace(renderUrl) && renderUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
@@ -86,6 +114,10 @@ public class TelegramBotService : BackgroundService
                     _webhookSecretToken = Convert.ToHexString(hashBytes).ToLowerInvariant()[..48];
                 }
                 Console.WriteLine($"[Telegram Info] TelegramBotClient успішно ініціалізовано (Режим: {(string.IsNullOrWhiteSpace(_webhookUrl) ? "Polling" : "Webhook")}).");
+            }
+            else
+            {
+                Console.WriteLine("[Telegram Warning] Токен Telegram-бота відсутній! Задайте TELEGRAM_BOT_TOKEN або Telegram__BotToken у змінних середовища.");
             }
         }
         catch (Exception ex)
