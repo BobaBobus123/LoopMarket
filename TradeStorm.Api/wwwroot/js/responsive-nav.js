@@ -627,13 +627,13 @@
                 position: fixed;
                 top: var(--loop-ad-top, 80px);
                 bottom: 14px;
-                width: var(--loop-ad-width, 150px);
+                width: var(--loop-ad-width, 220px);
                 height: auto;
                 max-height: calc(100vh - var(--loop-ad-top, 80px) - 14px);
                 z-index: 990;
                 background: var(--surface, #1e293b);
                 border: 1.5px solid var(--border-color, #334155);
-                border-radius: 14px;
+                border-radius: 16px;
                 box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
                 overflow: hidden;
                 transition: transform 0.25s ease, opacity 0.25s ease, top 0.15s ease;
@@ -646,10 +646,10 @@
                 to { opacity: 1; transform: translateY(0); }
             }
             .loop-olx-skyscraper.pos-right {
-                right: var(--loop-ad-edge, 16px);
+                right: var(--loop-ad-edge, 14px);
             }
             .loop-olx-skyscraper.pos-left {
-                left: var(--loop-ad-edge, 16px);
+                left: var(--loop-ad-edge, 14px);
             }
             .loop-olx-skyscraper.closing {
                 opacity: 0;
@@ -659,8 +659,8 @@
                 height: 100%;
                 display: flex;
                 flex-direction: column;
-                padding: 10px;
-                gap: 8px;
+                padding: 12px;
+                gap: 10px;
                 box-sizing: border-box;
             }
             .skyscraper-top-bar {
@@ -672,29 +672,29 @@
                 flex-shrink: 0;
             }
             .skyscraper-ad-tag {
-                font-size: 0.62rem;
+                font-size: 0.68rem;
                 font-weight: 800;
                 text-transform: uppercase;
                 color: var(--text-muted, #94a3b8);
                 display: inline-flex;
                 align-items: center;
-                gap: 4px;
+                gap: 5px;
             }
             .skyscraper-ad-tag .ad-badge {
                 background: rgba(16, 185, 129, 0.15);
                 color: #10b981;
-                padding: 1px 4px;
+                padding: 1px 5px;
                 border-radius: 4px;
-                font-size: 0.56rem;
+                font-size: 0.6rem;
             }
             .skyscraper-close-btn {
                 background: none;
                 border: none;
                 color: var(--text-muted, #94a3b8);
-                font-size: 1.15rem;
+                font-size: 1.2rem;
                 line-height: 1;
                 cursor: pointer;
-                padding: 1px 5px;
+                padding: 2px 6px;
                 border-radius: 6px;
                 transition: all 0.15s;
             }
@@ -707,14 +707,14 @@
                 min-height: 0;
                 display: flex;
                 flex-direction: column;
-                gap: 8px;
+                gap: 10px;
                 overflow: hidden;
             }
             .skyscraper-media {
                 flex: 1 1 auto;
-                min-height: 160px;
+                min-height: 200px;
                 width: 100%;
-                border-radius: 10px;
+                border-radius: 12px;
                 overflow: hidden;
                 background: linear-gradient(180deg, rgba(16, 185, 129, 0.06) 0%, #020617 50%, rgba(37, 99, 235, 0.06) 100%);
                 border: 1px solid var(--border-color, #334155);
@@ -730,11 +730,11 @@
             }
             .skyscraper-brand-box {
                 flex: 1 1 auto;
-                min-height: 140px;
+                min-height: 170px;
                 background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(37, 99, 235, 0.12) 100%);
                 border: 1px dashed rgba(16, 185, 129, 0.35);
-                border-radius: 10px;
-                padding: 14px 8px;
+                border-radius: 12px;
+                padding: 18px 10px;
                 text-align: center;
                 display: flex;
                 flex-direction: column;
@@ -742,31 +742,31 @@
                 justify-content: center;
             }
             .skyscraper-brand-logo {
-                width: 36px;
-                height: 36px;
-                margin: 0 auto 6px;
+                width: 48px;
+                height: 48px;
+                margin: 0 auto 8px;
                 background: linear-gradient(135deg, #10b981 0%, #2563eb 100%);
-                border-radius: 10px;
+                border-radius: 12px;
                 color: white;
                 font-weight: 900;
-                font-size: 1.15rem;
+                font-size: 1.4rem;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
             }
             .skyscraper-title {
-                font-size: 0.78rem;
+                font-size: 0.92rem;
                 font-weight: 800;
                 color: var(--text-main, #f8fafc);
-                line-height: 1.28;
+                line-height: 1.3;
                 overflow-wrap: anywhere;
                 flex-shrink: 0;
             }
             .skyscraper-desc {
-                font-size: 0.69rem;
+                font-size: 0.78rem;
                 color: var(--text-muted, #94a3b8);
-                line-height: 1.35;
+                line-height: 1.4;
                 overflow: hidden;
                 display: -webkit-box;
                 -webkit-line-clamp: 5;
@@ -782,30 +782,23 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 5px;
+                gap: 6px;
                 width: 100%;
-                padding: 8px 9px;
+                padding: 10px 12px;
                 background: linear-gradient(135deg, #10b981 0%, #059669 100%);
                 color: white !important;
                 text-decoration: none;
                 font-weight: 800;
-                font-size: 0.72rem;
-                line-height: 1.2;
+                font-size: 0.8rem;
+                line-height: 1.25;
                 text-align: center;
-                border-radius: 9px;
+                border-radius: 10px;
                 box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
                 transition: transform 0.2s, box-shadow 0.2s;
             }
             .skyscraper-action-btn:hover {
                 transform: translateY(-1px);
                 box-shadow: 0 6px 16px rgba(16, 185, 129, 0.45);
-            }
-            @media (min-width: 1200px) and (max-width: 1399px) {
-                .loop-olx-skyscraper {
-                    width: 136px;
-                }
-                .loop-olx-skyscraper.pos-left { left: 12px; }
-                .loop-olx-skyscraper.pos-right { right: 12px; }
             }
             @media (max-width: 1199px) {
                 .loop-olx-skyscraper {
@@ -877,8 +870,8 @@
             return;
         }
 
-        // Exclude index.html from side skyscraper rails per platform layout design
-        if (isHomeRoutePath()) {
+        // Show side skyscraper banners on all storefront pages (including index.html), skip admin/auth utility pages
+        if (isNonStorefrontRoute()) {
             return;
         }
 

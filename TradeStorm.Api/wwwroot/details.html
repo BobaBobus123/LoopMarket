@@ -426,8 +426,8 @@
 
         .product-top-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(400px, 520px);
-            gap: 28px;
+            grid-template-columns: minmax(0, 1.2fr) minmax(330px, 500px);
+            gap: 24px;
             align-items: start;
             width: 100%;
         }
@@ -435,14 +435,14 @@
         .details-extra-column {
             grid-column: 1 / -1;
             display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(400px, 520px);
-            gap: 28px;
+            grid-template-columns: minmax(0, 1.2fr) minmax(330px, 500px);
+            gap: 24px;
             align-items: start;
             width: 100%;
             min-width: 0;
         }
 
-        @media (min-width: 1500px) {
+        @media (min-width: 1720px) {
             .product-top-grid.portrait-media-grid {
                 grid-template-columns: minmax(360px, 410px) minmax(400px, 1fr) minmax(320px, 420px);
                 gap: 24px;
@@ -456,15 +456,15 @@
             }
         }
 
-        @media (min-width: 993px) and (max-width: 1499px) {
+        @media (min-width: 993px) and (max-width: 1719px) {
             .product-top-grid.portrait-media-grid {
-                grid-template-columns: minmax(340px, 400px) minmax(0, 1fr);
+                grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
             }
 
             .product-top-grid.portrait-media-grid .details-extra-column {
                 grid-column: 1 / -1;
                 display: grid;
-                grid-template-columns: minmax(0, 1.15fr) minmax(340px, 440px);
+                grid-template-columns: minmax(0, 1.15fr) minmax(320px, 430px);
                 gap: 24px;
             }
         }
@@ -2357,7 +2357,7 @@
         }
 
 </style>
-    <link rel="stylesheet" href="/css/global.css?v=5.6">
+    <link rel="stylesheet" href="/css/global.css?v=5.7">
     <link rel="stylesheet" href="/css/loop-dialogs.css">
     <script src="/js/loop-dialogs.js"></script>
 </head>
@@ -5704,7 +5704,7 @@
     </script>
     <!-- Realtime In-App Push Notifications -->
     <script src="/js/push-notifications.js"></script>
-    <script src="/js/responsive-nav.js?v=3.4" defer></script>
+    <script src="/js/responsive-nav.js?v=3.5" defer></script>
     <script src="/js/loop-dialogs.js"></script>
     <script src="/js/cookie-consent.js"></script>
     <script>

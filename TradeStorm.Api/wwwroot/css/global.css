@@ -1962,14 +1962,14 @@ h1, h2, h3, .heading-brand, .hero-title, .section-title, .modal-title {
 }
 
 /* ==========================================================================
-   RESERVED SYMMETRICAL SIDE AD-BANNER GUTTERS (ALL PAGES EXCEPT INDEX.HTML)
+   RESERVED SYMMETRICAL SIDE AD-BANNER GUTTERS (ALL STOREFRONT PAGES)
    ========================================================================== */
 @media (min-width: 1200px) {
     :root {
         --loop-ad-edge: 12px;
-        --loop-ad-width: 136px;
-        --loop-ad-gap: 16px;
-        --loop-ad-gutter: 164px;
+        --loop-ad-width: 184px;
+        --loop-ad-gap: 14px;
+        --loop-ad-gutter: 210px;
         --loop-content-max: 1548px;
         --loop-shell-max: calc(1548px + 2 * var(--loop-ad-gutter));
     }
@@ -1977,19 +1977,28 @@ h1, h2, h3, .heading-brand, .hero-title, .section-title, .modal-title {
 
 @media (min-width: 1400px) {
     :root {
-        --loop-ad-edge: 16px;
-        --loop-ad-width: 150px;
+        --loop-ad-edge: 14px;
+        --loop-ad-width: 220px;
+        --loop-ad-gap: 16px;
+        --loop-ad-gutter: 250px;
+    }
+}
+
+@media (min-width: 1680px) {
+    :root {
+        --loop-ad-edge: 18px;
+        --loop-ad-width: 240px;
         --loop-ad-gap: 20px;
-        --loop-ad-gutter: 186px;
+        --loop-ad-gutter: 278px;
     }
 }
 
 @media (min-width: 1200px) {
-    body:not(.loop-home-page) > main,
-    body:not(.loop-home-page) > .container,
-    body:not(.loop-home-page) > main.container,
-    body:not(.loop-home-page) > main.admin-main,
-    body:not(.loop-home-page) > main.main-container {
+    body > main:not(.admin-main),
+    body > .container,
+    body > .main-layout,
+    body > main.container,
+    body > main.main-container {
         max-width: var(--loop-shell-max) !important;
         width: 100% !important;
         margin-left: auto !important;
@@ -1999,25 +2008,47 @@ h1, h2, h3, .heading-brand, .hero-title, .section-title, .modal-title {
         box-sizing: border-box !important;
     }
 
-    body:not(.loop-home-page) > header .header-content {
-        max-width: var(--loop-content-max) !important;
-        width: 100% !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
-    }
-
-    body:not(.loop-home-page) > footer {
+    body > .trust-banner {
         padding-left: var(--loop-ad-gutter) !important;
         padding-right: var(--loop-ad-gutter) !important;
         box-sizing: border-box !important;
     }
 
-    body:not(.loop-home-page) > footer .footer-content,
-    body:not(.loop-home-page) > footer .footer-grid {
+    body > header .header-content {
+        max-width: var(--loop-content-max) !important;
+        width: 100% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    body > footer {
+        padding-left: var(--loop-ad-gutter) !important;
+        padding-right: var(--loop-ad-gutter) !important;
+        box-sizing: border-box !important;
+    }
+
+    body > footer .footer-content,
+    body > footer .footer-grid {
         max-width: var(--loop-content-max) !important;
         width: 100% !important;
         margin-left: auto !important;
         margin-right: auto !important;
         box-sizing: border-box !important;
+    }
+}
+
+@media (min-width: 1200px) and (max-width: 1520px) {
+    body.loop-home-page > .main-layout {
+        grid-template-columns: 245px minmax(0, 1fr) !important;
+        gap: 20px !important;
+    }
+
+    body.loop-home-page > .main-layout .sidebar {
+        padding: 20px !important;
+    }
+
+    body.loop-home-page > .main-layout .listings-grid {
+        grid-template-columns: repeat(auto-fill, minmax(205px, 1fr)) !important;
+        gap: 16px !important;
     }
 }
